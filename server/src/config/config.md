@@ -1,0 +1,1 @@
+# This folder should have the global config files (Env vars, DB Connection)

@@ -1,0 +1,1 @@
+# This directory is to include the code will be shared across all modules (Ex. Middlewares, Utils, ...)

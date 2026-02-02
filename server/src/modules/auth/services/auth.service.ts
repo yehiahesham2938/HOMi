@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { User, Profile, sequelize } from '../../../shared/infrastructure/models/index.js';
 import { generateTokenPair, type TokenPair } from '../../../shared/utils/jwt.util.js';
 import { generateSecureToken, hashToken } from '../../../shared/utils/encryption.util.js';
@@ -7,6 +8,8 @@ import type {
     ForgotPasswordRequest,
     ResetPasswordRequest,
     CompleteVerificationRequest,
+    GoogleLoginRequest,
+    GoogleUserInfo,
     LoginResponse,
     AuthSuccessResponse,
     ProfileResponse,
@@ -297,6 +300,125 @@ export class AuthService {
         return {
             success: true,
             message: 'Password reset successful. You can now login with your new password.',
+        };
+    }
+
+    /**
+     * Login with Google OAuth
+     * Verifies Google access token, auto-registers new users, and returns HOMi tokens
+     */
+    async loginWithGoogle(googleAccessToken: string): Promise<LoginResponse> {
+        // 1. Verify the token with Google UserInfo API
+        let googleUser: GoogleUserInfo;
+        try {
+            const response = await axios.get<GoogleUserInfo>(
+                'https://www.googleapis.com/oauth2/v3/userinfo',
+                {
+                    headers: { Authorization: `Bearer ${googleAccessToken}` },
+                }
+            );
+            googleUser = response.data;
+        } catch (error) {
+            console.error('Google token verification failed:', error);
+            throw new AuthError('Invalid Google access token', 401, 'INVALID_GOOGLE_TOKEN');
+        }
+
+        const { email, given_name, family_name, picture } = googleUser;
+
+        if (!email) {
+            throw new AuthError('Email not provided by Google', 400, 'GOOGLE_EMAIL_MISSING');
+        }
+
+        // 2. Check if user exists in database
+        let user = await User.findOne({
+            where: { email: email.toLowerCase() },
+            include: [{ model: Profile, as: 'profile' }],
+        });
+
+        // 3. If user doesn't exist, auto-register them
+        if (!user) {
+            const transaction = await sequelize.transaction();
+
+            try {
+                // Create user with Google OAuth placeholder password
+                user = await User.create(
+                    {
+                        email: email.toLowerCase(),
+                        password_hash: 'GOOGLE_OAUTH_USER', // Placeholder - they won't use password login
+                        role: 'TENANT', // Default role for Google OAuth users
+                        is_verified: true, // Google verified their email
+                    },
+                    { transaction }
+                );
+
+                // Create profile with Google data
+                await Profile.create(
+                    {
+                        user_id: user.id,
+                        first_name: given_name || 'User',
+                        last_name: family_name || '',
+                        phone_number: '', // Must be collected later
+                        national_id: null, // Must be collected later
+                        gender: null, // Must be collected later
+                        birthdate: null, // Must be collected later
+                        avatar_url: picture || null,
+                    },
+                    { transaction }
+                );
+
+                await transaction.commit();
+
+                // Reload user with profile
+                await user.reload({
+                    include: [{ model: Profile, as: 'profile' }],
+                });
+
+                console.log('✅ New user auto-registered via Google OAuth:', email);
+            } catch (error) {
+                await transaction.rollback();
+                console.error('Google OAuth registration error:', error);
+                throw new AuthError('Failed to create user account', 500, 'REGISTRATION_FAILED');
+            }
+        }
+
+        // 4. Generate HOMi JWT tokens
+        const tokens: TokenPair = generateTokenPair(user.id, user.email, user.role);
+
+        // 5. Build sanitized response
+        const userResponse: UserResponse = {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+            isVerified: user.is_verified,
+            createdAt: user.created_at,
+        };
+
+        const profile = user.profile;
+        if (!profile) {
+            throw new AuthError('User profile not found', 500, 'PROFILE_NOT_FOUND');
+        }
+
+        const profileResponse: ProfileResponse = {
+            id: profile.id,
+            userId: profile.user_id,
+            firstName: profile.first_name,
+            lastName: profile.last_name,
+            phoneNumber: profile.phone_number,
+            bio: profile.bio ?? null,
+            avatarUrl: profile.avatar_url ?? null,
+            gender: profile.gender ?? null,
+            birthdate: profile.birthdate ? profile.birthdate.toISOString().split('T')[0] ?? null : null,
+            gamificationPoints: profile.gamification_points,
+            preferredBudgetMin: profile.preferred_budget_min ?? null,
+            preferredBudgetMax: profile.preferred_budget_max ?? null,
+            isVerificationComplete: profile.isVerificationComplete(),
+        };
+
+        return {
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+            user: userResponse,
+            profile: profileResponse,
         };
     }
 }

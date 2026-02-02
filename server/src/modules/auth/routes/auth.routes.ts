@@ -8,6 +8,7 @@ import {
     ForgotPasswordSchema,
     ResetPasswordSchema,
     CompleteVerificationSchema,
+    GoogleLoginSchema,
 } from '../schemas/auth.schemas.js';
 
 const router = Router();
@@ -214,6 +215,77 @@ router.post(
     '/reset-password',
     validate(ResetPasswordSchema),
     authController.resetPassword.bind(authController)
+);
+
+/**
+ * @swagger
+ * /auth/google:
+ *   post:
+ *     summary: Authenticate with Google OAuth
+ *     description: |
+ *       Login or register using Google OAuth 2.0. 
+ *       
+ *       **How it works:**
+ *       1. Frontend obtains Google access token via Google Sign-In
+ *       2. Frontend sends the token to this endpoint
+ *       3. Backend verifies token with Google's UserInfo API
+ *       4. If user exists: login and return HOMi tokens
+ *       5. If new user: auto-register with TENANT role and return HOMi tokens
+ *       
+ *       **Auto-Registration Details:**
+ *       - New users are created with `is_verified: true` (Google verified email)
+ *       - Default role: TENANT
+ *       - Profile populated with Google's first name, last name, and avatar
+ *       - Phone number and national ID are left empty (must be collected later)
+ *       - Password is set to placeholder "GOOGLE_OAUTH_USER" (they can't use password login)
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - googleAccessToken
+ *             properties:
+ *               googleAccessToken:
+ *                 type: string
+ *                 description: Google access token obtained from Google Sign-In on frontend
+ *                 example: "ya29.a0AfH6SMBx..."
+ *     responses:
+ *       200:
+ *         description: Login/registration successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LoginResponse'
+ *       400:
+ *         description: Validation error or missing email from Google
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Invalid Google access token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               message: "Invalid Google access token"
+ *               code: "INVALID_GOOGLE_TOKEN"
+ *       500:
+ *         description: Server error during registration
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post(
+    '/google',
+    validate(GoogleLoginSchema),
+    authController.googleLogin.bind(authController)
 );
 
 export default router;

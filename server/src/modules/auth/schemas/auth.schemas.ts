@@ -131,6 +131,18 @@ export const RefreshTokenSchema = z.object({
 
 export type RefreshTokenInput = z.infer<typeof RefreshTokenSchema>;
 
+/**
+ * Google OAuth Login Schema
+ * Validates Google access token from frontend
+ */
+export const GoogleLoginSchema = z.object({
+    googleAccessToken: z
+        .string()
+        .min(1, 'Google access token is required'),
+});
+
+export type GoogleLoginInput = z.infer<typeof GoogleLoginSchema>;
+
 export default {
     RegisterSchema,
     CompleteVerificationSchema,
@@ -138,4 +150,5 @@ export default {
     ForgotPasswordSchema,
     ResetPasswordSchema,
     RefreshTokenSchema,
+    GoogleLoginSchema,
 };

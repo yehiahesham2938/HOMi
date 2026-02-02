@@ -48,6 +48,28 @@ export interface ResetPasswordRequest {
 }
 
 /**
+ * Google OAuth Login Request DTO
+ */
+export interface GoogleLoginRequest {
+    googleAccessToken: string;
+}
+
+/**
+ * Google UserInfo API Response
+ * Data returned from https://www.googleapis.com/oauth2/v3/userinfo
+ */
+export interface GoogleUserInfo {
+    sub: string;           // Google user ID
+    email: string;
+    email_verified: boolean;
+    name: string;
+    given_name: string;
+    family_name: string;
+    picture: string;       // Avatar URL
+    locale?: string;
+}
+
+/**
  * Sanitized Profile Response
  */
 export interface ProfileResponse {

@@ -6,6 +6,7 @@ import type {
     ForgotPasswordRequest,
     ResetPasswordRequest,
     CompleteVerificationRequest,
+    GoogleLoginRequest,
 } from '../interfaces/auth.interfaces.js';
 
 /**
@@ -89,6 +90,22 @@ export class AuthController {
         try {
             const input = req.body as ResetPasswordRequest;
             const result = await authService.resetPassword(input);
+
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * POST /auth/google
+     * Authenticate user with Google OAuth
+     * Auto-registers new users and returns HOMi JWT tokens
+     */
+    async googleLogin(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { googleAccessToken } = req.body as GoogleLoginRequest;
+            const result = await authService.loginWithGoogle(googleAccessToken);
 
             res.status(200).json(result);
         } catch (error) {

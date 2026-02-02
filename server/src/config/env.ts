@@ -86,6 +86,7 @@ export const env: EnvConfig = {
 
     // Encryption (32 bytes = 64 hex characters for AES-256)
     ENCRYPTION_KEY: getEnvString('ENCRYPTION_KEY', '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'),
+ 
 };
 
 export default env;

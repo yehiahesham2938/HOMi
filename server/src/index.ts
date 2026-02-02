@@ -28,7 +28,7 @@ if (env.NODE_ENV === 'production') {
 app.use(cors({
     origin: env.NODE_ENV === 'production'
         ? ['https://homi.app'] // Update with actual domain
-        : ['http://localhost:3000', 'http://localhost:5173'],
+        : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174'],
     credentials: true,
 }));
 
@@ -98,7 +98,7 @@ app.get('/health', (_req: Request, res: Response) => {
 // ======================
 // API Routes
 // ======================
-app.use('/auth', authRoutes);
+app.use('/api/auth', authRoutes);
 
 // ======================
 // 404 Handler

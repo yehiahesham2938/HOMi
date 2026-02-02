@@ -1,1 +1,0 @@
-Layouts (Navbar.tsx, Sidebar.tsx, Footer.tsx)

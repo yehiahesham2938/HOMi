@@ -1,0 +1,247 @@
+import swaggerJsdoc, { type Options } from 'swagger-jsdoc';
+
+const options: Options = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'HOMi API Documentation',
+            version: '1.0.0',
+            description: 'REST API documentation for the HOMi rental management platform',
+            contact: {
+                name: 'HOMi Support',
+                email: 'support@homi.com',
+            },
+        },
+        servers: [
+            {
+                url: 'http://localhost:3000',
+                description: 'Development server',
+            },
+        ],
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT',
+                    description: 'Enter your JWT access token',
+                },
+            },
+            schemas: {
+                // User & Profile
+                UserRole: {
+                    type: 'string',
+                    enum: ['LANDLORD', 'TENANT', 'MAINTENANCE_PROVIDER', 'ADMIN'],
+                    description: 'User role in the system',
+                },
+                Gender: {
+                    type: 'string',
+                    enum: ['MALE', 'FEMALE'],
+                    description: 'User gender',
+                },
+                User: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string', format: 'uuid' },
+                        email: { type: 'string', format: 'email' },
+                        role: { $ref: '#/components/schemas/UserRole' },
+                        isVerified: { type: 'boolean' },
+                        createdAt: { type: 'string', format: 'date-time' },
+                    },
+                },
+                Profile: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'string', format: 'uuid' },
+                        userId: { type: 'string', format: 'uuid' },
+                        firstName: { type: 'string' },
+                        lastName: { type: 'string' },
+                        phoneNumber: { type: 'string' },
+                        bio: { type: 'string', nullable: true },
+                        avatarUrl: { type: 'string', nullable: true },
+                        gender: { $ref: '#/components/schemas/Gender', nullable: true },
+                        birthdate: { type: 'string', format: 'date', nullable: true },
+                        gamificationPoints: { type: 'integer' },
+                        preferredBudgetMin: { type: 'number', nullable: true },
+                        preferredBudgetMax: { type: 'number', nullable: true },
+                        isVerificationComplete: { type: 'boolean' },
+                    },
+                },
+
+                // Auth Requests
+                RegisterRequest: {
+                    type: 'object',
+                    required: ['email', 'password', 'firstName', 'lastName', 'phone', 'role'],
+                    properties: {
+                        email: {
+                            type: 'string',
+                            format: 'email',
+                            maxLength: 255,
+                            example: 'user@example.com',
+                        },
+                        password: {
+                            type: 'string',
+                            minLength: 8,
+                            maxLength: 100,
+                            description: 'Must contain uppercase, lowercase, and digit',
+                            example: 'SecurePass123',
+                        },
+                        firstName: {
+                            type: 'string',
+                            minLength: 1,
+                            maxLength: 100,
+                            example: 'John',
+                        },
+                        lastName: {
+                            type: 'string',
+                            minLength: 1,
+                            maxLength: 100,
+                            example: 'Doe',
+                        },
+                        phone: {
+                            type: 'string',
+                            minLength: 1,
+                            maxLength: 20,
+                            example: '+201234567890',
+                        },
+                        role: {
+                            type: 'string',
+                            enum: ['LANDLORD', 'TENANT'],
+                            description: 'Only LANDLORD or TENANT can self-register',
+                            example: 'TENANT',
+                        },
+                    },
+                },
+                LoginRequest: {
+                    type: 'object',
+                    required: ['email', 'password'],
+                    properties: {
+                        email: {
+                            type: 'string',
+                            format: 'email',
+                            example: 'user@example.com',
+                        },
+                        password: {
+                            type: 'string',
+                            example: 'SecurePass123',
+                        },
+                    },
+                },
+                CompleteVerificationRequest: {
+                    type: 'object',
+                    description: 'Request body for completing account verification. Note: User ID is extracted from the JWT token in the Authorization header, not from this request body.',
+                    required: ['nationalId', 'gender', 'birthdate'],
+                    properties: {
+                        nationalId: {
+                            type: 'string',
+                            minLength: 1,
+                            maxLength: 50,
+                            description: 'National ID number (will be encrypted before storage)',
+                            example: '29901011234567',
+                        },
+                        gender: {
+                            type: 'string',
+                            enum: ['MALE', 'FEMALE'],
+                            description: 'User gender',
+                            example: 'MALE',
+                        },
+                        birthdate: {
+                            type: 'string',
+                            format: 'date',
+                            description: 'Date of birth in YYYY-MM-DD format',
+                            example: '1999-01-01',
+                        },
+                    },
+                },
+                ForgotPasswordRequest: {
+                    type: 'object',
+                    required: ['email'],
+                    properties: {
+                        email: {
+                            type: 'string',
+                            format: 'email',
+                            example: 'user@example.com',
+                        },
+                    },
+                },
+                ResetPasswordRequest: {
+                    type: 'object',
+                    required: ['token', 'newPassword'],
+                    properties: {
+                        token: {
+                            type: 'string',
+                            minLength: 64,
+                            maxLength: 64,
+                            description: 'Reset token from email',
+                        },
+                        newPassword: {
+                            type: 'string',
+                            minLength: 8,
+                            maxLength: 100,
+                            description: 'Must contain uppercase, lowercase, and digit',
+                            example: 'NewSecurePass456',
+                        },
+                    },
+                },
+
+                // Auth Responses
+                AuthSuccessResponse: {
+                    type: 'object',
+                    properties: {
+                        success: { type: 'boolean', example: true },
+                        message: { type: 'string' },
+                    },
+                },
+                LoginResponse: {
+                    type: 'object',
+                    properties: {
+                        accessToken: { type: 'string', description: 'JWT access token (15m expiry)' },
+                        refreshToken: { type: 'string', description: 'JWT refresh token (7d expiry)' },
+                        user: { $ref: '#/components/schemas/User' },
+                        profile: { $ref: '#/components/schemas/Profile' },
+                    },
+                },
+                ValidationError: {
+                    type: 'object',
+                    properties: {
+                        success: { type: 'boolean', example: false },
+                        message: { type: 'string', example: 'Validation failed' },
+                        code: { type: 'string', example: 'VALIDATION_ERROR' },
+                        errors: {
+                            type: 'array',
+                            items: {
+                                type: 'object',
+                                properties: {
+                                    field: { type: 'string' },
+                                    message: { type: 'string' },
+                                },
+                            },
+                        },
+                    },
+                },
+                ErrorResponse: {
+                    type: 'object',
+                    properties: {
+                        success: { type: 'boolean', example: false },
+                        message: { type: 'string' },
+                        code: { type: 'string' },
+                    },
+                },
+            },
+        },
+        tags: [
+            {
+                name: 'Health',
+                description: 'Server health check endpoints',
+            },
+            {
+                name: 'Authentication',
+                description: 'User authentication and registration endpoints',
+            },
+        ],
+    },
+    apis: ['./src/modules/**/routes/*.ts', './src/index.ts'],
+};
+
+export const swaggerSpec = swaggerJsdoc(options);
+export default swaggerSpec;

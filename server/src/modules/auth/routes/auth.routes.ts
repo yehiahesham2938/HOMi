@@ -89,35 +89,65 @@ router.post(
  * /auth/complete-verification:
  *   post:
  *     summary: Complete account verification
- *     description: Submit required profile fields (national ID, gender, birthdate) to complete account verification. Sets is_verified to true.
+ *     description: |
+ *       Complete account verification by submitting required profile fields.
+ *       
+ *       **IMPORTANT**: This endpoint requires BOTH:
+ *       1. **JWT Authentication**: Include your access token in the Authorization header (Bearer token)
+ *       2. **Request Body**: Provide nationalId, gender, and birthdate in the JSON body
+ *       
+ *       The user ID is extracted from the JWT token, so you don't need to send it in the body.
+ *       After successful verification, the user's is_verified status will be set to true.
+ *       
+ *       **Flow**:
+ *       - User registers → receives JWT tokens (is_verified = false)
+ *       - User logs in → can login even if unverified
+ *       - User fills verification form → calls this endpoint with JWT + verification data
+ *       - Account becomes verified → is_verified = true
  *     tags: [Authentication]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
+ *       description: Verification fields to complete the user profile
  *       content:
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/CompleteVerificationRequest'
+ *           example:
+ *             nationalId: "29901011234567"
+ *             gender: "MALE"
+ *             birthdate: "1999-01-01"
  *     responses:
  *       200:
- *         description: Verification completed
+ *         description: Verification completed successfully
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/AuthSuccessResponse'
+ *             example:
+ *               success: true
+ *               message: "Verification completed successfully. Your account is now fully verified."
  *       400:
  *         description: Validation error or already verified
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               message: "Account is already verified"
+ *               code: "ALREADY_VERIFIED"
  *       401:
- *         description: Not authenticated
+ *         description: Not authenticated - JWT token missing or invalid
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               message: "User not authenticated"
+ *               code: "NOT_AUTHENTICATED"
  */
 router.post(
     '/complete-verification',

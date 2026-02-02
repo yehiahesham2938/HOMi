@@ -129,23 +129,26 @@ const options: Options = {
                 },
                 CompleteVerificationRequest: {
                     type: 'object',
+                    description: 'Request body for completing account verification. Note: User ID is extracted from the JWT token in the Authorization header, not from this request body.',
                     required: ['nationalId', 'gender', 'birthdate'],
                     properties: {
                         nationalId: {
                             type: 'string',
                             minLength: 1,
                             maxLength: 50,
-                            description: 'National ID (will be encrypted)',
+                            description: 'National ID number (will be encrypted before storage)',
                             example: '29901011234567',
                         },
                         gender: {
                             type: 'string',
                             enum: ['MALE', 'FEMALE'],
+                            description: 'User gender',
                             example: 'MALE',
                         },
                         birthdate: {
                             type: 'string',
                             format: 'date',
+                            description: 'Date of birth in YYYY-MM-DD format',
                             example: '1999-01-01',
                         },
                     },

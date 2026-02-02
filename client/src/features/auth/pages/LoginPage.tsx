@@ -61,8 +61,10 @@ export const LoginPage = () => {
                     <div className="mb-10">
                         <h2 className="text-[28px] font-bold text-white mb-4">Login</h2>
                         <p className="text-gray-400 text-[15px]">
-                            Measure the performance of cryptos,get big profits!
+                            ala allah insha'allah 
+            
                         </p>
+                        <br></br>
                     </div>
 
                     {/* Google Sign In Button - FUNCTIONAL */}

@@ -186,22 +186,42 @@ export class AuthService {
     /**
      * Authenticate user and return tokens
      * Note: Unverified users CAN login, but is_verified flag is included in response
+     * Identifier can be either email or phone number - auto-detected
      */
     async login(input: LoginRequest): Promise<LoginResponse> {
-        // Find user with profile
-        const user = await User.findOne({
-            where: { email: input.email.toLowerCase() },
-            include: [{ model: Profile, as: 'profile' }],
-        });
+        // Auto-detect if identifier is email or phone
+        // Email contains '@', phone number doesn't
+        const isEmail = input.identifier.includes('@');
+        let user;
+
+        if (isEmail) {
+            // Search by email
+            user = await User.findOne({
+                where: { email: input.identifier.toLowerCase() },
+                include: [{ model: Profile, as: 'profile' }],
+            });
+        } else {
+            // Search by phone number in profile
+            const profile = await Profile.findOne({
+                where: { phone_number: input.identifier },
+            });
+
+            if (profile) {
+                user = await User.findOne({
+                    where: { id: profile.user_id },
+                    include: [{ model: Profile, as: 'profile' }],
+                });
+            }
+        }
 
         if (!user) {
-            throw new AuthError('Invalid email or password', 401, 'INVALID_CREDENTIALS');
+            throw new AuthError('Invalid credentials', 401, 'INVALID_CREDENTIALS');
         }
 
         // Verify password
         const isPasswordValid = await user.comparePassword(input.password);
         if (!isPasswordValid) {
-            throw new AuthError('Invalid email or password', 401, 'INVALID_CREDENTIALS');
+            throw new AuthError('Invalid credentials', 401, 'INVALID_CREDENTIALS');
         }
 
         // Generate tokens

@@ -58,7 +58,10 @@ router.post(
  * /auth/login:
  *   post:
  *     summary: Authenticate user
- *     description: Login with email and password to receive JWT tokens. Unverified users can login but should complete verification.
+ *     description: |
+ *       Login with email or phone number and password to receive JWT tokens.
+ *       The system automatically detects whether you're using an email or phone number.
+ *       Unverified users can login but should complete verification.
  *     tags: [Authentication]
  *     requestBody:
  *       required: true
@@ -66,6 +69,17 @@ router.post(
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/LoginRequest'
+ *           examples:
+ *             loginWithEmail:
+ *               summary: Login with email
+ *               value:
+ *                 identifier: "user@example.com"
+ *                 password: "Password123"
+ *             loginWithPhone:
+ *               summary: Login with phone number
+ *               value:
+ *                 identifier: "+201234567890"
+ *                 password: "Password123"
  *     responses:
  *       200:
  *         description: Login successful

@@ -115,11 +115,12 @@ const options: Options = {
                 },
                 LoginRequest: {
                     type: 'object',
-                    required: ['email', 'password'],
+                    required: ['identifier', 'password'],
+                    description: 'Login with email or phone number. The system auto-detects which one you provided.',
                     properties: {
-                        email: {
+                        identifier: {
                             type: 'string',
-                            format: 'email',
+                            description: 'Email address or phone number',
                             example: 'user@example.com',
                         },
                         password: {

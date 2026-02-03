@@ -73,12 +73,12 @@ export type CompleteVerificationInput = z.infer<typeof CompleteVerificationSchem
 
 /**
  * Login Schema
- * Validates user login input
+ * Validates user login input - identifier can be email or phone number
  */
 export const LoginSchema = z.object({
-    email: z
+    identifier: z
         .string()
-        .email('Invalid email address'),
+        .min(1, 'Email or phone number is required'),
     password: z
         .string()
         .min(1, 'Password is required'),

@@ -26,9 +26,10 @@ export interface CompleteVerificationRequest {
 
 /**
  * Login Request DTO
+ * User can login with either email OR phone number in the identifier field
  */
 export interface LoginRequest {
-    email: string;
+    identifier: string; // Can be email or phone number
     password: string;
 }
 

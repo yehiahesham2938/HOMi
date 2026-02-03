@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Op } from 'sequelize';
 import { User, Profile, sequelize } from '../../../shared/infrastructure/models/index.js';
 import { generateTokenPair, type TokenPair } from '../../../shared/utils/jwt.util.js';
 import { generateSecureToken, hashToken } from '../../../shared/utils/encryption.util.js';
@@ -201,10 +202,59 @@ export class AuthService {
                 include: [{ model: Profile, as: 'profile' }],
             });
         } else {
-            // Search by phone number in profile
-            const profile = await Profile.findOne({
-                where: { phone_number: input.identifier },
-            });
+            // Search by phone number - handle both local and international formats for any country
+            const phoneInput = input.identifier.trim();
+
+            let profile;
+
+            if (phoneInput.startsWith('+')) {
+                // International format provided (e.g., +201234567890)
+                // Search for both:
+                // 1. Exact match: +201234567890
+                // 2. Local format: extract digits after country code and prefix with 0
+
+                // Extract country code and local number
+                const digitsOnly = phoneInput.slice(1); // Remove the '+'
+
+                // Try to intelligently split country code from local number
+                // Most country codes are 1-3 digits, mobile numbers typically start after that
+                const possibleVariants: string[] = [phoneInput];
+
+                // Generate local variants by trying different country code lengths (1-4 digits)
+                for (let i = 1; i <= Math.min(4, digitsOnly.length - 1); i++) {
+                    const localPart = digitsOnly.slice(i);
+                    if (localPart.length >= 9) { // Ensure reasonable phone number length
+                        possibleVariants.push('0' + localPart);
+                    }
+                }
+
+                profile = await Profile.findOne({
+                    where: {
+                        phone_number: { [Op.in]: possibleVariants }
+                    },
+                });
+            } else if (phoneInput.startsWith('0')) {
+                // Local format provided (e.g., 01234567890)
+                // Search for both:
+                // 1. Exact match: 01234567890
+                // 2. International format: +{any country code}1234567890 (using LIKE pattern)
+
+                const digitsAfterZero = phoneInput.slice(1); // Remove leading 0
+
+                profile = await Profile.findOne({
+                    where: {
+                        [Op.or]: [
+                            { phone_number: phoneInput }, // Exact local match
+                            { phone_number: { [Op.like]: `+%${digitsAfterZero}` } } // International with any country code
+                        ]
+                    },
+                });
+            } else {
+                // No recognized prefix, search as-is
+                profile = await Profile.findOne({
+                    where: { phone_number: phoneInput },
+                });
+            }
 
             if (profile) {
                 user = await User.findOne({

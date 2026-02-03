@@ -73,12 +73,12 @@ export type CompleteVerificationInput = z.infer<typeof CompleteVerificationSchem
 
 /**
  * Login Schema
- * Validates user login input
+ * Validates user login input - identifier can be email or phone number
  */
 export const LoginSchema = z.object({
-    email: z
+    identifier: z
         .string()
-        .email('Invalid email address'),
+        .min(1, 'Email or phone number is required'),
     password: z
         .string()
         .min(1, 'Password is required'),
@@ -143,6 +143,75 @@ export const GoogleLoginSchema = z.object({
 
 export type GoogleLoginInput = z.infer<typeof GoogleLoginSchema>;
 
+/**
+ * Update Profile Schema
+ * All fields are optional - only provided fields will be updated
+ */
+export const UpdateProfileSchema = z.object({
+    firstName: z
+        .string()
+        .min(1, 'First name cannot be empty')
+        .max(100, 'First name must be at most 100 characters')
+        .trim()
+        .optional(),
+    lastName: z
+        .string()
+        .min(1, 'Last name cannot be empty')
+        .max(100, 'Last name must be at most 100 characters')
+        .trim()
+        .optional(),
+    phone: z
+        .string()
+        .min(1, 'Phone number cannot be empty')
+        .max(20, 'Phone number must be at most 20 characters')
+        .optional(),
+    bio: z
+        .string()
+        .max(500, 'Bio must be at most 500 characters')
+        .optional()
+        .nullable(),
+    avatarUrl: z
+        .string()
+        .url('Avatar URL must be a valid URL')
+        .max(500, 'Avatar URL must be at most 500 characters')
+        .optional()
+        .nullable(),
+    preferredBudgetMin: z
+        .number()
+        .positive('Minimum budget must be positive')
+        .optional()
+        .nullable(),
+    preferredBudgetMax: z
+        .number()
+        .positive('Maximum budget must be positive')
+        .optional()
+        .nullable(),
+}).refine(
+    (data) => {
+        if (data.preferredBudgetMin && data.preferredBudgetMax) {
+            return data.preferredBudgetMin <= data.preferredBudgetMax;
+        }
+        return true;
+    },
+    {
+        message: 'Minimum budget must be less than or equal to maximum budget',
+        path: ['preferredBudgetMin'],
+    }
+);
+
+export type UpdateProfileInput = z.infer<typeof UpdateProfileSchema>;
+
+/**
+ * Verify Email Token Schema
+ */
+export const VerifyEmailSchema = z.object({
+    token: z
+        .string()
+        .length(64, 'Invalid verification token format'),
+});
+
+export type VerifyEmailInput = z.infer<typeof VerifyEmailSchema>;
+
 export default {
     RegisterSchema,
     CompleteVerificationSchema,
@@ -151,4 +220,6 @@ export default {
     ResetPasswordSchema,
     RefreshTokenSchema,
     GoogleLoginSchema,
+    UpdateProfileSchema,
+    VerifyEmailSchema,
 };

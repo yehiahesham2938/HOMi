@@ -9,6 +9,7 @@ import {
     ResetPasswordSchema,
     CompleteVerificationSchema,
     GoogleLoginSchema,
+    UpdateProfileSchema,
 } from '../schemas/auth.schemas.js';
 
 const router = Router();
@@ -57,7 +58,10 @@ router.post(
  * /auth/login:
  *   post:
  *     summary: Authenticate user
- *     description: Login with email and password to receive JWT tokens. Unverified users can login but should complete verification.
+ *     description: |
+ *       Login with email or phone number and password to receive JWT tokens.
+ *       The system automatically detects whether you're using an email or phone number.
+ *       Unverified users can login but should complete verification.
  *     tags: [Authentication]
  *     requestBody:
  *       required: true
@@ -65,6 +69,17 @@ router.post(
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/LoginRequest'
+ *           examples:
+ *             loginWithEmail:
+ *               summary: Login with email
+ *               value:
+ *                 identifier: "user@example.com"
+ *                 password: "Password123"
+ *             loginWithPhone:
+ *               summary: Login with phone number
+ *               value:
+ *                 identifier: "+201234567890"
+ *                 password: "Password123"
  *     responses:
  *       200:
  *         description: Login successful
@@ -162,7 +177,11 @@ router.post(
  * /auth/forgot-password:
  *   post:
  *     summary: Request password reset
- *     description: Send a password reset email to the user. Always returns success to prevent email enumeration.
+ *     description: |
+ *       Send a password reset email to the user.
+ *       The email contains a link to reset the password.
+ *       
+ *       **Note**: The reset link expires in 1 hour.
  *     tags: [Authentication]
  *     requestBody:
  *       required: true
@@ -172,11 +191,24 @@ router.post(
  *             $ref: '#/components/schemas/ForgotPasswordRequest'
  *     responses:
  *       200:
- *         description: Reset email sent (if account exists)
+ *         description: Reset email sent successfully
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/AuthSuccessResponse'
+ *             example:
+ *               success: true
+ *               message: "Password reset email sent. Please check your inbox."
+ *       404:
+ *         description: Email not found in the system
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               message: "No account found with this email address"
+ *               code: "EMAIL_NOT_FOUND"
  */
 router.post(
     '/forgot-password',
@@ -363,6 +395,167 @@ router.get(
     '/me',
     protect,
     authController.getCurrentUser.bind(authController)
+);
+
+/**
+ * @swagger
+ * /auth/profile:
+ *   put:
+ *     summary: Update user profile
+ *     description: |
+ *       Update the authenticated user's profile details.
+ *       All fields are optional - only provided fields will be updated.
+ *       
+ *       **Authentication Required**: This endpoint requires a valid JWT access token.
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateProfileRequest'
+ *           example:
+ *             firstName: "John"
+ *             lastName: "Doe"
+ *             bio: "Software developer passionate about real estate"
+ *             preferredBudgetMin: 5000
+ *             preferredBudgetMax: 10000
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserProfileResponse'
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ValidationError'
+ *       401:
+ *         description: Not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.put(
+    '/profile',
+    protect,
+    validate(UpdateProfileSchema),
+    authController.updateProfile.bind(authController)
+);
+
+/**
+ * @swagger
+ * /auth/send-verification-email:
+ *   post:
+ *     summary: Send email verification link
+ *     description: |
+ *       Send a verification email to the authenticated user's email address.
+ *       The email contains a link that, when clicked, verifies the user's email.
+ *       
+ *       **Authentication Required**: This endpoint requires a valid JWT access token.
+ *       
+ *       **Note**: If email is already verified, returns success with a message indicating so.
+ *       The verification link expires in 24 hours.
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Verification email sent successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/EmailVerificationResponse'
+ *             examples:
+ *               emailSent:
+ *                 summary: Email sent
+ *                 value:
+ *                   success: true
+ *                   message: "Verification email sent. Please check your inbox."
+ *                   emailVerified: false
+ *               alreadyVerified:
+ *                 summary: Already verified
+ *                 value:
+ *                   success: true
+ *                   message: "Email is already verified."
+ *                   emailVerified: true
+ *       401:
+ *         description: Not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post(
+    '/send-verification-email',
+    protect,
+    authController.sendVerificationEmail.bind(authController)
+);
+
+/**
+ * @swagger
+ * /auth/verify-email:
+ *   get:
+ *     summary: Verify email address
+ *     description: |
+ *       Verify user's email address using the token from the verification email.
+ *       This endpoint is called when the user clicks the verification link in their email.
+ *       
+ *       **No Authentication Required**: The token serves as authentication.
+ *       
+ *       On success, returns an HTML page confirming the verification.
+ *     tags: [Authentication]
+ *     parameters:
+ *       - in: query
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Verification token from email (64 characters)
+ *         example: "abc123..."
+ *     responses:
+ *       200:
+ *         description: Email verified successfully (returns HTML page)
+ *         content:
+ *           text/html:
+ *             schema:
+ *               type: string
+ *               description: HTML confirmation page
+ *       400:
+ *         description: Invalid or expired token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               invalidToken:
+ *                 summary: Invalid token
+ *                 value:
+ *                   success: false
+ *                   message: "Invalid or expired verification token"
+ *                   code: "INVALID_VERIFICATION_TOKEN"
+ *               expiredToken:
+ *                 summary: Expired token
+ *                 value:
+ *                   success: false
+ *                   message: "Verification token has expired. Please request a new one."
+ *                   code: "VERIFICATION_TOKEN_EXPIRED"
+ */
+router.get(
+    '/verify-email',
+    authController.verifyEmail.bind(authController)
 );
 
 export default router;

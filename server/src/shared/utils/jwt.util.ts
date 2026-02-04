@@ -1,6 +1,6 @@
 import jwt, { type JwtPayload, type Secret, type SignOptions } from 'jsonwebtoken';
 import env from '../../config/env.js';
-import type { UserRoleType } from '../infrastructure/models/User.js';
+import type { UserRoleType } from '../../modules/auth/models/User.js';
 
 /**
  * JWT Payload Interface

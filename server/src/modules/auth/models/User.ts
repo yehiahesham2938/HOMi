@@ -23,7 +23,6 @@ export type UserRoleType = (typeof UserRole)[keyof typeof UserRole];
 
 // Forward declaration for Profile import
 import type { Profile } from './Profile.js';
-
 export class User extends Model<
     InferAttributes<User>,
     InferCreationAttributes<User>

@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { UserRole } from '../../../shared/infrastructure/models/User.js';
-import { Gender } from '../../../shared/infrastructure/models/Profile.js';
+import { UserRole } from '../models/User.js';
+import { Gender } from '../models/Profile.js';
 
 /**
  * Password validation regex:

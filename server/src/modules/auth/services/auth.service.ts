@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Op } from 'sequelize';
-import { User, Profile, sequelize } from '../../../shared/infrastructure/models/index.js';
+import { User, Profile, sequelize } from '../models/index.js';
 import { generateTokenPair, type TokenPair } from '../../../shared/utils/jwt.util.js';
 import { generateSecureToken, hashToken } from '../../../shared/utils/encryption.util.js';
 import { emailService } from '../../../shared/services/email.service.js';

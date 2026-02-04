@@ -1,5 +1,5 @@
-import type { UserRoleType } from '../../../shared/infrastructure/models/User.js';
-import type { GenderType } from '../../../shared/infrastructure/models/Profile.js';
+import type { UserRoleType } from '../models/User.js';
+import type { GenderType } from '../models/Profile.js';
 
 /**
  * Registration Request DTO

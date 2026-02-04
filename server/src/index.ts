@@ -11,7 +11,7 @@ import { AuthError } from './modules/auth/services/auth.service.js';
 import authRoutes from './modules/auth/routes/auth.routes.js';
 
 // Import models to register them
-import './shared/infrastructure/models/index.js';
+import './modules/auth/models/index.js';
 
 // Create Express app
 const app = express();

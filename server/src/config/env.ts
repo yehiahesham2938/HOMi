@@ -30,6 +30,17 @@ interface EnvConfig {
 
     // Encryption
     ENCRYPTION_KEY: string;
+
+    // Email Service (SMTP)
+    SMTP_HOST: string;
+    SMTP_PORT: number;
+    SMTP_USER: string;
+    SMTP_PASS: string;
+    SMTP_FROM_EMAIL: string;
+    SMTP_FROM_NAME: string;
+
+    // Client URL (for verification links)
+    CLIENT_URL: string;
 }
 
 function getEnvString(key: string, defaultValue?: string): string {
@@ -86,7 +97,17 @@ export const env: EnvConfig = {
 
     // Encryption (32 bytes = 64 hex characters for AES-256)
     ENCRYPTION_KEY: getEnvString('ENCRYPTION_KEY', '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'),
- 
+
+    // Email Service (SMTP - Gmail defaults)
+    SMTP_HOST: getEnvString('SMTP_HOST', 'smtp.gmail.com'),
+    SMTP_PORT: getEnvNumber('SMTP_PORT', 587),
+    SMTP_USER: getEnvString('SMTP_USER', ''),
+    SMTP_PASS: getEnvString('SMTP_PASS', ''),
+    SMTP_FROM_EMAIL: getEnvString('SMTP_FROM_EMAIL', 'noreply@homi.com'),
+    SMTP_FROM_NAME: getEnvString('SMTP_FROM_NAME', 'HOMi'),
+
+    // Client URL (for verification links)
+    CLIENT_URL: getEnvString('CLIENT_URL', 'http://localhost:5173'),
 };
 
 export default env;

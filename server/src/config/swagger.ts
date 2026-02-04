@@ -45,7 +45,8 @@ const options: Options = {
                         id: { type: 'string', format: 'uuid' },
                         email: { type: 'string', format: 'email' },
                         role: { $ref: '#/components/schemas/UserRole' },
-                        isVerified: { type: 'boolean' },
+                        isVerified: { type: 'boolean', description: 'Whether user has completed full verification (profile + email)' },
+                        emailVerified: { type: 'boolean', description: 'Whether user email address is verified' },
                         createdAt: { type: 'string', format: 'date-time' },
                     },
                 },
@@ -114,11 +115,12 @@ const options: Options = {
                 },
                 LoginRequest: {
                     type: 'object',
-                    required: ['email', 'password'],
+                    required: ['identifier', 'password'],
+                    description: 'Login with email or phone number. The system auto-detects which one you provided.',
                     properties: {
-                        email: {
+                        identifier: {
                             type: 'string',
-                            format: 'email',
+                            description: 'Email address or phone number',
                             example: 'user@example.com',
                         },
                         password: {
@@ -233,6 +235,77 @@ const options: Options = {
                         success: { type: 'boolean', example: false },
                         message: { type: 'string' },
                         code: { type: 'string' },
+                    },
+                },
+
+                // Update Profile
+                UpdateProfileRequest: {
+                    type: 'object',
+                    description: 'Request body for updating user profile. All fields are optional.',
+                    properties: {
+                        firstName: {
+                            type: 'string',
+                            minLength: 1,
+                            maxLength: 100,
+                            description: 'Updated first name',
+                            example: 'John',
+                        },
+                        lastName: {
+                            type: 'string',
+                            minLength: 1,
+                            maxLength: 100,
+                            description: 'Updated last name',
+                            example: 'Doe',
+                        },
+                        phone: {
+                            type: 'string',
+                            minLength: 1,
+                            maxLength: 20,
+                            description: 'Updated phone number',
+                            example: '+201234567890',
+                        },
+                        bio: {
+                            type: 'string',
+                            maxLength: 500,
+                            nullable: true,
+                            description: 'User bio or description',
+                            example: 'Software developer passionate about real estate',
+                        },
+                        avatarUrl: {
+                            type: 'string',
+                            format: 'uri',
+                            maxLength: 500,
+                            nullable: true,
+                            description: 'URL to user avatar image',
+                            example: 'https://example.com/avatar.jpg',
+                        },
+                        preferredBudgetMin: {
+                            type: 'number',
+                            nullable: true,
+                            description: 'Minimum preferred budget for property search',
+                            example: 5000,
+                        },
+                        preferredBudgetMax: {
+                            type: 'number',
+                            nullable: true,
+                            description: 'Maximum preferred budget for property search',
+                            example: 10000,
+                        },
+                    },
+                },
+
+                // Email Verification
+                EmailVerificationResponse: {
+                    type: 'object',
+                    description: 'Response for email verification endpoints',
+                    properties: {
+                        success: { type: 'boolean', example: true },
+                        message: { type: 'string', example: 'Verification email sent. Please check your inbox.' },
+                        emailVerified: {
+                            type: 'boolean',
+                            description: 'Whether the email is now verified',
+                            example: false,
+                        },
                     },
                 },
             },

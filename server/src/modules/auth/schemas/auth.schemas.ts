@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { UserRole } from '../../../shared/infrastructure/models/User.js';
-import { Gender } from '../../../shared/infrastructure/models/Profile.js';
+import { UserRole } from '../models/User.js';
+import { Gender } from '../models/Profile.js';
 
 /**
  * Password validation regex:
@@ -8,8 +8,9 @@ import { Gender } from '../../../shared/infrastructure/models/Profile.js';
  * - At least one uppercase letter
  * - At least one lowercase letter
  * - At least one digit
+ * - At least one special character
  */
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_+\-=\[\]{};':"\\|,.<>\/]).{8,}$/;
 
 /**
  * Registration Schema
@@ -28,7 +29,7 @@ export const RegisterSchema = z.object({
         .max(100, 'Password must be at most 100 characters')
         .regex(
             passwordRegex,
-            'Password must contain at least one uppercase letter, one lowercase letter, and one digit'
+            'Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character'
         ),
     role: z.enum([UserRole.LANDLORD, UserRole.TENANT], {
         message: 'Role must be LANDLORD or TENANT',
@@ -73,12 +74,12 @@ export type CompleteVerificationInput = z.infer<typeof CompleteVerificationSchem
 
 /**
  * Login Schema
- * Validates user login input
+ * Validates user login input - identifier can be email or phone number
  */
 export const LoginSchema = z.object({
-    email: z
+    identifier: z
         .string()
-        .email('Invalid email address'),
+        .min(1, 'Email or phone number is required'),
     password: z
         .string()
         .min(1, 'Password is required'),
@@ -113,7 +114,7 @@ export const ResetPasswordSchema = z.object({
         .max(100, 'Password must be at most 100 characters')
         .regex(
             passwordRegex,
-            'Password must contain at least one uppercase letter, one lowercase letter, and one digit'
+            'Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character'
         ),
 });
 
@@ -143,6 +144,101 @@ export const GoogleLoginSchema = z.object({
 
 export type GoogleLoginInput = z.infer<typeof GoogleLoginSchema>;
 
+/**
+ * Update Profile Schema
+ * All fields are optional - only provided fields will be updated
+ */
+export const UpdateProfileSchema = z.object({
+    firstName: z
+        .string()
+        .min(1, 'First name cannot be empty')
+        .max(100, 'First name must be at most 100 characters')
+        .trim()
+        .optional(),
+    lastName: z
+        .string()
+        .min(1, 'Last name cannot be empty')
+        .max(100, 'Last name must be at most 100 characters')
+        .trim()
+        .optional(),
+    phone: z
+        .string()
+        .min(1, 'Phone number cannot be empty')
+        .max(20, 'Phone number must be at most 20 characters')
+        .optional(),
+    bio: z
+        .string()
+        .max(500, 'Bio must be at most 500 characters')
+        .optional()
+        .nullable(),
+    avatarUrl: z
+        .string()
+        .url('Avatar URL must be a valid URL')
+        .max(500, 'Avatar URL must be at most 500 characters')
+        .optional()
+        .nullable(),
+    preferredBudgetMin: z
+        .number()
+        .positive('Minimum budget must be positive')
+        .optional()
+        .nullable(),
+    preferredBudgetMax: z
+        .number()
+        .positive('Maximum budget must be positive')
+        .optional()
+        .nullable(),
+}).refine(
+    (data) => {
+        if (data.preferredBudgetMin && data.preferredBudgetMax) {
+            return data.preferredBudgetMin <= data.preferredBudgetMax;
+        }
+        return true;
+    },
+    {
+        message: 'Minimum budget must be less than or equal to maximum budget',
+        path: ['preferredBudgetMin'],
+    }
+);
+
+export type UpdateProfileInput = z.infer<typeof UpdateProfileSchema>;
+
+/**
+ * Verify Email Token Schema
+ */
+export const VerifyEmailSchema = z.object({
+    token: z
+        .string()
+        .length(64, 'Invalid verification token format'),
+});
+
+export type VerifyEmailInput = z.infer<typeof VerifyEmailSchema>;
+
+/**
+ * Change Password Schema
+ * Validates password change request
+ */
+export const ChangePasswordSchema = z.object({
+    currentPassword: z
+        .string()
+        .min(1, 'Current password is required'),
+    newPassword: z
+        .string()
+        .min(8, 'Password must be at least 8 characters')
+        .max(100, 'Password must be at most 100 characters')
+        .regex(
+            passwordRegex,
+            'Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character'
+        ),
+}).refine(
+    (data) => data.currentPassword !== data.newPassword,
+    {
+        message: 'New password must be different from current password',
+        path: ['newPassword'],
+    }
+);
+
+export type ChangePasswordInput = z.infer<typeof ChangePasswordSchema>;
+
 export default {
     RegisterSchema,
     CompleteVerificationSchema,
@@ -151,4 +247,7 @@ export default {
     ResetPasswordSchema,
     RefreshTokenSchema,
     GoogleLoginSchema,
+    UpdateProfileSchema,
+    VerifyEmailSchema,
+    ChangePasswordSchema,
 };

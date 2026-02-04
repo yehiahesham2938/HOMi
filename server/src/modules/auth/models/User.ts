@@ -23,7 +23,6 @@ export type UserRoleType = (typeof UserRole)[keyof typeof UserRole];
 
 // Forward declaration for Profile import
 import type { Profile } from './Profile.js';
-
 export class User extends Model<
     InferAttributes<User>,
     InferCreationAttributes<User>
@@ -40,6 +39,11 @@ export class User extends Model<
     // Password reset fields
     declare reset_token_hash: CreationOptional<string | null>;
     declare reset_token_expires: CreationOptional<Date | null>;
+
+    // Email verification fields
+    declare email_verified: CreationOptional<boolean>;
+    declare email_verification_token_hash: CreationOptional<string | null>;
+    declare email_verification_token_expires: CreationOptional<Date | null>;
 
     // Timestamps
     declare created_at: CreationOptional<Date>;
@@ -97,6 +101,19 @@ User.init(
             allowNull: true,
         },
         reset_token_expires: {
+            type: DataTypes.DATE,
+            allowNull: true,
+        },
+        email_verified: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+            allowNull: false,
+        },
+        email_verification_token_hash: {
+            type: DataTypes.STRING(255),
+            allowNull: true,
+        },
+        email_verification_token_expires: {
             type: DataTypes.DATE,
             allowNull: true,
         },

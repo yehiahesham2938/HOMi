@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import { verifyAccessToken, extractBearerToken, type JWTPayload } from '../utils/jwt.util.js';
-import type { UserRoleType } from '../infrastructure/models/User.js';
+import type { UserRoleType } from '../../modules/auth/models/User.js';
 
 /**
  * Extend Express Request type to include user

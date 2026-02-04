@@ -9,7 +9,7 @@ import {
     type ForeignKey,
 } from 'sequelize';
 import sequelize from '../../../config/database.js';
-import { encrypt, decrypt } from '../../utils/encryption.util.js';
+import { encrypt, decrypt } from '../../../shared/utils/encryption.util.js';
 import type { User } from './User.js';
 
 // Enums

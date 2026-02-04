@@ -19,6 +19,7 @@ import type {
     UserProfileResponse,
     UpdateProfileRequest,
     EmailVerificationResponse,
+    ChangePasswordRequest,
 } from '../interfaces/auth.interfaces.js';
 
 /**
@@ -745,6 +746,46 @@ export class AuthService {
             success: true,
             message: 'Email verified successfully! You can now complete your profile verification.',
             emailVerified: true,
+        };
+    }
+
+    /**
+     * Change user password
+     * Validates current password and updates to new password
+     */
+    async changePassword(
+        userId: string,
+        input: ChangePasswordRequest
+    ): Promise<AuthSuccessResponse> {
+        // Find user
+        const user = await User.findByPk(userId);
+
+        if (!user) {
+            throw new AuthError('User not found', 404, 'USER_NOT_FOUND');
+        }
+
+        // Verify current password
+        const isPasswordValid = await user.comparePassword(input.currentPassword);
+        if (!isPasswordValid) {
+            throw new AuthError('Current password is incorrect', 401, 'INVALID_CURRENT_PASSWORD');
+        }
+
+        // Verify new password is different from current password
+        const isSamePassword = await user.comparePassword(input.newPassword);
+        if (isSamePassword) {
+            throw new AuthError('New password must be different from current password', 400, 'SAME_PASSWORD');
+        }
+
+        // Update password (will be hashed by beforeUpdate hook)
+        await user.update({
+            password_hash: input.newPassword,
+        });
+
+        console.log('✅ Password changed successfully for user:', user.email);
+
+        return {
+            success: true,
+            message: 'Password changed successfully.',
         };
     }
 }

@@ -177,3 +177,11 @@ export interface EmailVerificationResponse {
     message: string;
     emailVerified?: boolean;
 }
+
+/**
+ * Change Password Request DTO
+ */
+export interface ChangePasswordRequest {
+    currentPassword: string;
+    newPassword: string;
+}

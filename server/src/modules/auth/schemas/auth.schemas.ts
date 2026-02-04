@@ -8,8 +8,9 @@ import { Gender } from '../../../shared/infrastructure/models/Profile.js';
  * - At least one uppercase letter
  * - At least one lowercase letter
  * - At least one digit
+ * - At least one special character
  */
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_+\-=\[\]{};':"\\|,.<>\/]).{8,}$/;
 
 /**
  * Registration Schema
@@ -28,7 +29,7 @@ export const RegisterSchema = z.object({
         .max(100, 'Password must be at most 100 characters')
         .regex(
             passwordRegex,
-            'Password must contain at least one uppercase letter, one lowercase letter, and one digit'
+            'Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character'
         ),
     role: z.enum([UserRole.LANDLORD, UserRole.TENANT], {
         message: 'Role must be LANDLORD or TENANT',
@@ -113,7 +114,7 @@ export const ResetPasswordSchema = z.object({
         .max(100, 'Password must be at most 100 characters')
         .regex(
             passwordRegex,
-            'Password must contain at least one uppercase letter, one lowercase letter, and one digit'
+            'Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character'
         ),
 });
 
@@ -212,6 +213,32 @@ export const VerifyEmailSchema = z.object({
 
 export type VerifyEmailInput = z.infer<typeof VerifyEmailSchema>;
 
+/**
+ * Change Password Schema
+ * Validates password change request
+ */
+export const ChangePasswordSchema = z.object({
+    currentPassword: z
+        .string()
+        .min(1, 'Current password is required'),
+    newPassword: z
+        .string()
+        .min(8, 'Password must be at least 8 characters')
+        .max(100, 'Password must be at most 100 characters')
+        .regex(
+            passwordRegex,
+            'Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character'
+        ),
+}).refine(
+    (data) => data.currentPassword !== data.newPassword,
+    {
+        message: 'New password must be different from current password',
+        path: ['newPassword'],
+    }
+);
+
+export type ChangePasswordInput = z.infer<typeof ChangePasswordSchema>;
+
 export default {
     RegisterSchema,
     CompleteVerificationSchema,
@@ -222,4 +249,5 @@ export default {
     GoogleLoginSchema,
     UpdateProfileSchema,
     VerifyEmailSchema,
+    ChangePasswordSchema,
 };

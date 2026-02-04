@@ -10,6 +10,7 @@ import {
     CompleteVerificationSchema,
     GoogleLoginSchema,
     UpdateProfileSchema,
+    ChangePasswordSchema,
 } from '../schemas/auth.schemas.js';
 
 const router = Router();
@@ -556,6 +557,103 @@ router.post(
 router.get(
     '/verify-email',
     authController.verifyEmail.bind(authController)
+);
+
+/**
+ * @swagger
+ * /auth/change-password:
+ *   put:
+ *     summary: Change user password
+ *     description: |
+ *       Change the authenticated user's password.
+ *       
+ *       **Authentication Required**: This endpoint requires a valid JWT access token.
+ *       
+ *       **Validation Requirements**:
+ *       - Current password must be correct
+ *       - New password must be different from current password
+ *       - New password must be at least 8 characters
+ *       - New password must contain at least one uppercase letter
+ *       - New password must contain at least one lowercase letter
+ *       - New password must contain at least one digit
+ *       - New password must contain at least one special character (@$!%*?&#^()_+-=[]{};\:'"|,.<>/)
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - currentPassword
+ *               - newPassword
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *                 description: User's current password
+ *                 example: "OldPassword123!"
+ *               newPassword:
+ *                 type: string
+ *                 description: New password (must meet complexity requirements)
+ *                 minLength: 8
+ *                 maxLength: 100
+ *                 example: "NewPassword456!"
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthSuccessResponse'
+ *             example:
+ *               success: true
+ *               message: "Password changed successfully."
+ *       400:
+ *         description: Validation error or new password same as current
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               samePassword:
+ *                 summary: New password same as current
+ *                 value:
+ *                   success: false
+ *                   message: "New password must be different from current password"
+ *                   code: "SAME_PASSWORD"
+ *               validationError:
+ *                 summary: Password validation failed
+ *                 value:
+ *                   success: false
+ *                   message: "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character"
+ *                   code: "VALIDATION_ERROR"
+ *       401:
+ *         description: Not authenticated or incorrect current password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             examples:
+ *               notAuthenticated:
+ *                 summary: Not authenticated
+ *                 value:
+ *                   success: false
+ *                   message: "User not authenticated"
+ *                   code: "NOT_AUTHENTICATED"
+ *               invalidPassword:
+ *                 summary: Current password incorrect
+ *                 value:
+ *                   success: false
+ *                   message: "Current password is incorrect"
+ *                   code: "INVALID_CURRENT_PASSWORD"
+ */
+router.put(
+    '/change-password',
+    protect,
+    validate(ChangePasswordSchema),
+    authController.changePassword.bind(authController)
 );
 
 export default router;

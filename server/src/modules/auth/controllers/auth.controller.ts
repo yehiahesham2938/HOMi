@@ -8,6 +8,7 @@ import type {
     CompleteVerificationRequest,
     GoogleLoginRequest,
     UpdateProfileRequest,
+    ChangePasswordRequest,
 } from '../interfaces/auth.interfaces.js';
 
 /**
@@ -258,6 +259,27 @@ export class AuthController {
 </body>
 </html>
             `);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * PUT /auth/change-password
+     * Change user's password
+     * Requires authentication
+     */
+    async changePassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const userId = req.user?.userId;
+            if (!userId) {
+                throw new AuthError('User not authenticated', 401, 'NOT_AUTHENTICATED');
+            }
+
+            const input = req.body as ChangePasswordRequest;
+            const result = await authService.changePassword(userId, input);
+
+            res.status(200).json(result);
         } catch (error) {
             next(error);
         }

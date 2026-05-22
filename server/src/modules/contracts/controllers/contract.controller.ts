@@ -448,6 +448,50 @@ class ContractController {
             next(error);
         }
     }
+
+    /**
+     * POST /api/contracts/:id/report-tenant
+     */
+    async reportTenant(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { id } = req.params;
+            const landlordId = (req as any).user?.userId as string;
+            const { reason, details } = req.body;
+
+            const report = await contractService.reportTenant(id as string, landlordId, { reason, details });
+
+            res.status(200).json({
+                success: true,
+                message: 'Tenant reported successfully. The administration has been notified.',
+                data: report,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+
+
+    /**
+     * POST /api/contracts/:id/terminate
+     */
+    async terminateLease(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { id } = req.params;
+            const landlordId = (req as any).user?.userId as string;
+            const { reason } = req.body;
+            
+            const request = await contractService.requestLeaseTermination(id as string, landlordId, { reason });
+
+            res.status(200).json({
+                success: true,
+                message: 'Lease termination request submitted successfully.',
+                data: request,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 // Export singleton instance

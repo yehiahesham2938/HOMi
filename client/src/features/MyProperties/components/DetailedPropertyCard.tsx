@@ -7,6 +7,8 @@ import {
   FaUserCircle, FaCalendarAlt, FaTools, FaEllipsisH
 } from 'react-icons/fa';
 import ManagePropertyModal from './ManagePropertyModal'; // Import the new modal
+import OccupiedModal from './OccupiedModal';
+import type { LandlordContract } from '../../../services/contract.service';
 import './DetailedPropertyCard.css';
 
 export type LandlordPropertyRow = {
@@ -18,19 +20,21 @@ export type LandlordPropertyRow = {
   beds: number;
   baths: number;
   sqft: number;
-  tenantName: null;
-  leaseEnd: null;
+  tenantName: string | null;
+  leaseEnd: string | null;
   yield: string;
   occupancyRate: number;
   images: Array<{ image_url?: string; imageUrl?: string }>;
   amenities: string[];
   houseRules: string[];
+  activeContract?: LandlordContract | null;
   onUpdate: () => void;
 };
 
 const DetailedPropertyCard = ({ property }: { property: LandlordPropertyRow }) => {
   const { t } = useTranslation();
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const [isOccupiedModalOpen, setIsOccupiedModalOpen] = useState(false);
   const status = String(property?.status || '').toLowerCase();
   const isManageLocked = status === 'pending_approval' || status === 'rejected';
 
@@ -117,6 +121,11 @@ const DetailedPropertyCard = ({ property }: { property: LandlordPropertyRow }) =
               <span className="period">/mo</span>
             </div>
           </div>
+          {property.activeContract && (
+            <div style={{ marginTop: '12px', fontSize: '0.9rem', color: '#10b981', fontWeight: 600 }}>
+              Upcoming Payment Due: ${property.activeContract.rentAmount}
+            </div>
+          )}
           <div className="action-buttons">
             {/* TRIGGER MODAL HERE */}
             <button
@@ -127,7 +136,13 @@ const DetailedPropertyCard = ({ property }: { property: LandlordPropertyRow }) =
             >
               {t('myProperties.manageProperty')}
             </button>
-            <button className="history-btn">{t('tenantHomeComponents.history')}</button>
+            {property.activeContract ? (
+              <button className="history-btn" onClick={() => setIsOccupiedModalOpen(true)}>
+                View Occupied
+              </button>
+            ) : (
+              <button className="history-btn">{t('tenantHomeComponents.history')}</button>
+            )}
           </div>
         </div>
       </div>
@@ -141,6 +156,14 @@ const DetailedPropertyCard = ({ property }: { property: LandlordPropertyRow }) =
           />,
           document.body
         )
+      )}
+
+      {/* OCCUPIED MODAL */}
+      {isOccupiedModalOpen && property.activeContract && (
+        <OccupiedModal
+          contract={property.activeContract}
+          onClose={() => setIsOccupiedModalOpen(false)}
+        />
       )}
     </>
   );

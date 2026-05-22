@@ -495,6 +495,27 @@ class ContractService {
         );
         return response.data;
     }
+
+    async reportTenant(contractId: string, payload: {
+        reason: string;
+        details: string;
+    }): Promise<{ success: boolean; message: string; data: any }> {
+        const response = await apiClient.post<{ success: boolean; message: string; data: any }>(
+            `/contracts/${contractId}/report-tenant`,
+            payload
+        );
+        return response.data;
+    }
+
+    async terminateLease(contractId: string, payload: {
+        reason: string;
+    }): Promise<{ success: boolean; message: string; data: any }> {
+        const response = await apiClient.post<{ success: boolean; message: string; data: any }>(
+            `/contracts/${contractId}/terminate`,
+            payload
+        );
+        return response.data;
+    }
 }
 
 export const contractService = new ContractService();

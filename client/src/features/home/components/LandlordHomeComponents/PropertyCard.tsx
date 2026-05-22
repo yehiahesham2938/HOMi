@@ -6,6 +6,7 @@ import {
   FiArrowUpRight, FiCheckCircle, FiClock 
 } from 'react-icons/fi';
 import ManagePropertyModal from '../../../MyProperties/components/ManagePropertyModal';
+import OccupiedModal from '../../../MyProperties/components/OccupiedModal';
 import './PropertyCard.css';
 
 interface PropertyCardProps {
@@ -20,6 +21,7 @@ interface PropertyCardProps {
   sqft?: string | number;
   imageUrl?: string;
   id: string | number;
+  activeContract?: any;
 }
 
 const PropertyCard = ({
@@ -33,10 +35,12 @@ const PropertyCard = ({
   baths = 2,
   sqft = "1,200",
   imageUrl = "/rentblue.jpg",
-  id
+  id,
+  activeContract
 }: PropertyCardProps) => {
   const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isOccupiedModalOpen, setIsOccupiedModalOpen] = useState(false);
 
   const displayTenantName = tenantName || t('landlordHomeComponents.noCurrentTenant');
   const propertyData = { id, name, address, status, price, beds, baths, sqft, tenantName: displayTenantName };
@@ -104,8 +108,18 @@ const PropertyCard = ({
                 <span className="price-period">/mo</span>
               </div>
             </div>
-            <div className="prop-action-icon">
-                <FiMaximize />
+            <div style={{ display: 'flex', gap: '8px' }}>
+                {activeContract && (
+                    <button 
+                        onClick={(e) => { e.stopPropagation(); setIsOccupiedModalOpen(true); }}
+                        style={{ background: '#eff6ff', color: '#3b82f6', border: 'none', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
+                    >
+                        View Occupied
+                    </button>
+                )}
+                <div className="prop-action-icon">
+                    <FiMaximize />
+                </div>
             </div>
           </div>
         </div>
@@ -119,6 +133,13 @@ const PropertyCard = ({
           />,
           document.body
         )
+      )}
+
+      {isOccupiedModalOpen && activeContract && (
+        <OccupiedModal
+            contract={activeContract}
+            onClose={() => setIsOccupiedModalOpen(false)}
+        />
       )}
     </>
   );

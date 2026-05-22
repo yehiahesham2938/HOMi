@@ -10,6 +10,7 @@ import propertyService from '../../../services/property.service';
 import authService from '../../../services/auth.service';
 import './MyProperties.css';
 import type { LandlordPropertyRow } from '../components/DetailedPropertyCard';
+import type { LandlordContract } from '../../../services/contract.service';
 
 const MyProperties = () => {
   const { t } = useTranslation();
@@ -29,29 +30,47 @@ const MyProperties = () => {
           return;
         }
         
-        const response = await propertyService.getAllProperties({
-           landlordId: currentUser.user.id
-        });
+        const [propRes, contractRes] = await Promise.all([
+          propertyService.getAllProperties({
+             landlordId: currentUser.user.id
+          }),
+          import('../../../services/contract.service').then(m => 
+            m.default.getLandlordContracts({ page: 1, limit: 100 })
+          )
+        ]);
         
-        if (response.success && response.data) {
-           const mappedProperties = response.data.map(prop => ({
-              id: prop.id,
-              name: prop.title,
-              address: prop.address,
-              status: prop.status.toLowerCase(),
-              price: `$${prop.monthlyPrice}`,
-              beds: prop.specifications?.bedrooms || 0,
-              baths: prop.specifications?.bathrooms || 0,
-              sqft: prop.specifications?.areaSqft || 0,
-              tenantName: null,
-              leaseEnd: null,
-              yield: "5.0", // Placeholder for now
-              occupancyRate: prop.status === 'Rented' ? 100 : 0,
-              images: prop.images || [],
+        if (propRes.success && propRes.data) {
+           const contracts = contractRes?.data || [];
+           const mappedProperties = propRes.data.map(prop => {
+              const activeContract = contracts.find(c => c.property?.id === prop.id && c.status === 'ACTIVE');
+              const isOccupied = !!activeContract;
+              const computedStatus = isOccupied ? 'rented' : prop.status.toLowerCase();
+              
+              let tenantName = null;
+              if (activeContract?.tenant) {
+                tenantName = `${activeContract.tenant.firstName} ${activeContract.tenant.lastName}`.trim();
+              }
+
+              return {
+                id: prop.id,
+                name: prop.title,
+                address: prop.address,
+                status: computedStatus,
+                price: `$${prop.monthlyPrice}`,
+                beds: prop.specifications?.bedrooms || 0,
+                baths: prop.specifications?.bathrooms || 0,
+                sqft: prop.specifications?.areaSqft || 0,
+                tenantName: tenantName,
+                leaseEnd: null,
+                yield: "5.0", // Placeholder for now
+                occupancyRate: isOccupied ? 100 : 0,
+                activeContract: activeContract || null,
+                images: prop.images || [],
                 amenities: (prop.amenities || []).map((amenity) => amenity.name),
                 houseRules: (prop.houseRules || []).map((rule) => rule.name),
-              onUpdate: () => setRefreshKey(prev => prev + 1)
-           }));
+                onUpdate: () => setRefreshKey(prev => prev + 1)
+              };
+           });
            setProperties(mappedProperties);
         }
       } catch (error) {

@@ -40,7 +40,7 @@ export class RoommateMatchingService {
         }
 
         // 2. At least 3 habits
-        if (!user.habits || user.habits.length < 3) {
+        if (!(user as any).habits || (user as any).habits.length < 3) {
             reasons.push('INSUFFICIENT_HABITS');
         }
 
@@ -211,7 +211,7 @@ export class RoommateMatchingService {
             await Promise.all([
                 notificationService.create({
                     userId: match.requester_id,
-                    type: NotificationType.INFO,
+                    type: NotificationType.SYSTEM,
                     title: '🎉 It\'s a Match!',
                     body: 'You and your potential roommate have both accepted the match. Start chatting now!',
                     relatedEntityType: 'RoommateMatch',
@@ -219,7 +219,7 @@ export class RoommateMatchingService {
                 }),
                 notificationService.create({
                     userId: match.matched_user_id,
-                    type: NotificationType.INFO,
+                    type: NotificationType.SYSTEM,
                     title: '🎉 It\'s a Match!',
                     body: 'You and your potential roommate have both accepted the match. Start chatting now!',
                     relatedEntityType: 'RoommateMatch',
@@ -239,7 +239,7 @@ export class RoommateMatchingService {
             
             await notificationService.create({
                 userId: notifierId,
-                type: NotificationType.INFO,
+                type: NotificationType.SYSTEM,
                 title: '✅ Match accepted',
                 body: `${actorName} accepted your roommate match! Accept back to start chatting.`,
                 relatedEntityType: 'RoommateMatch',
@@ -304,9 +304,9 @@ export class RoommateMatchingService {
         let searchCity = myRequest.preferred_city;
         let searchArea = myRequest.preferred_area;
 
-        if (myRequest.type === RoommateRequestType.SEARCH_ROOMMATE && myRequest.contract?.detailedLocation) {
-            searchCity = myRequest.contract.detailedLocation.city;
-            searchArea = myRequest.contract.detailedLocation.area;
+        if (myRequest.type === RoommateRequestType.SEARCH_ROOMMATE && (myRequest.contract as any)?.detailedLocation) {
+            searchCity = (myRequest.contract as any).detailedLocation.city;
+            searchArea = (myRequest.contract as any).detailedLocation.area;
         }
 
         const candidates = await RoommateRequest.findAll({
@@ -363,7 +363,7 @@ export class RoommateMatchingService {
             if (aiResult.compatibility_score >= 80) {
                 await notificationService.create({
                     userId: candidate.user_id,
-                    type: NotificationType.INFO,
+                    type: NotificationType.SYSTEM,
                     title: '🎯 Great match found!',
                     body: `You have a ${aiResult.compatibility_score}% compatibility score with ${myRequest.user?.profile?.first_name}! Check your matches.`,
                     relatedEntityType: 'RoommateMatch',
@@ -378,7 +378,7 @@ export class RoommateMatchingService {
     private static prepareUserDataForAI(request: RoommateRequest) {
         const user = request.user!;
         const profile = user.profile!;
-        const habits = (user.habits || []).map(h => h.name);
+        const habits = ((user as any).habits || []).map((h: any) => h.name);
         
         let city = request.preferred_city;
         let area = request.preferred_area;
@@ -386,8 +386,8 @@ export class RoommateMatchingService {
         let budgetMax = request.budget_max;
 
         if (request.type === RoommateRequestType.SEARCH_ROOMMATE && request.contract) {
-            city = request.contract.detailedLocation?.city || null;
-            area = request.contract.detailedLocation?.area || null;
+            city = (request.contract as any).detailedLocation?.city || null;
+            area = (request.contract as any).detailedLocation?.area || null;
             budgetMin = Number(request.contract.rent_amount) || null;
             budgetMax = budgetMin;
         }

@@ -10,6 +10,9 @@ import {
     RentalRequest,
     PropertySpecifications,
     sequelize,
+    TenantReport,
+    TenantReportReason,
+    LeaseTerminationRequest,
 } from '../models/index.js';
 import { paymobService } from '../../../shared/services/paymob.service.js';
 import { env } from '../../../config/env.js';
@@ -246,7 +249,7 @@ class ContractService {
             ],
         });
 
-        testingClockService.saveSnapshot({
+        (testingClockService as any).saveSnapshot({
             takenAt,
             contracts: contracts.map((c) => ({
                 id: c.id,
@@ -310,7 +313,7 @@ class ContractService {
                         tenant_signed_at: cs.tenant_signed_at,
                         tenant_agreed_terms: cs.tenant_agreed_terms,
                         autopay_enabled: cs.autopay_enabled,
-                    },
+                    } as any,
                     { where: { id: cs.id }, transaction: t }
                 );
             }
@@ -323,7 +326,7 @@ class ContractService {
                         wallet_pending_order_id: ps.wallet_pending_order_id,
                         wallet_pending_amount_cents: ps.wallet_pending_amount_cents,
                         wallet_pending_save_card: ps.wallet_pending_save_card,
-                    },
+                    } as any,
                     { where: { user_id: ps.user_id }, transaction: t }
                 );
             }
@@ -331,7 +334,7 @@ class ContractService {
             // Restore properties
             for (const ps of snap.properties) {
                 await Property.update(
-                    { status: ps.status },
+                    { status: ps.status as any },
                     { where: { id: ps.id }, transaction: t }
                 );
             }
@@ -339,7 +342,7 @@ class ContractService {
             // Restore rental requests
             for (const rs of snap.rentalRequests) {
                 await RentalRequest.update(
-                    { status: rs.status },
+                    { status: rs.status as any },
                     { where: { id: rs.id }, transaction: t }
                 );
             }
@@ -356,7 +359,7 @@ class ContractService {
             for (const mc of snap.maintenanceCharges) {
                 await LandlordMaintenanceCharge.update(
                     {
-                        status: mc.status,
+                        status: mc.status as any,
                         applied_at: mc.applied_at,
                     },
                     { where: { id: mc.id }, transaction: t }
@@ -367,7 +370,7 @@ class ContractService {
             for (const mr of snap.maintenanceRequests) {
                 await MaintenanceRequest.update(
                     {
-                        status: mr.status,
+                        status: mr.status as any,
                         en_route_started_at: mr.en_route_started_at,
                         in_progress_started_at: mr.in_progress_started_at,
                         provider_completed_at: mr.provider_completed_at,
@@ -2031,6 +2034,63 @@ class ContractService {
                 ],
             },
         ];
+    }
+
+    /**
+     * Report a tenant
+     */
+    async reportTenant(contractId: string, landlordId: string, data: { reason: string, details: string }) {
+        const contract = await this.findAndValidateLandlordContract(contractId, landlordId);
+
+        // Map reason string to enum
+        let mappedReason = TenantReportReason.OTHER;
+        const validReasons = Object.values(TenantReportReason);
+        if (validReasons.includes(data.reason as TenantReportReason)) {
+            mappedReason = data.reason as TenantReportReason;
+        }
+
+        const report = await TenantReport.create({
+            contract_id: contract.id,
+            reporter_id: landlordId,
+            tenant_id: contract.tenant_id,
+            reason: mappedReason,
+            details: data.details,
+        });
+
+        await activityLogService.log({
+            actor: { userId: landlordId, role: 'LANDLORD' },
+            action: 'TENANT_REPORTED',
+            entityType: 'CONTRACT',
+            entityId: contract.id,
+            description: 'Landlord reported a tenant.',
+            metadata: { reportId: report.id, tenantId: contract.tenant_id },
+        });
+
+        return report;
+    }
+
+    /**
+     * Request lease termination
+     */
+    async requestLeaseTermination(contractId: string, landlordId: string, data: { reason: string }) {
+        const contract = await this.findAndValidateLandlordContract(contractId, landlordId);
+
+        const request = await LeaseTerminationRequest.create({
+            contract_id: contract.id,
+            requester_id: landlordId,
+            reason: data.reason,
+        });
+
+        await activityLogService.log({
+            actor: { userId: landlordId, role: 'LANDLORD' },
+            action: 'LEASE_TERMINATION_REQUESTED',
+            entityType: 'CONTRACT',
+            entityId: contract.id,
+            description: 'Landlord requested an early lease termination.',
+            metadata: { requestId: request.id },
+        });
+
+        return request;
     }
 
     /**

@@ -36,7 +36,7 @@ export class RoommateMatchingController {
         try {
             const userId = (req as any).user.userId;
             const { id } = req.params;
-            const request = await RoommateMatchingService.updateRequest(userId, id, req.body);
+            const request = await RoommateMatchingService.updateRequest(userId, id as string, req.body);
             res.status(200).json(request);
         } catch (error) {
             next(error);
@@ -47,7 +47,7 @@ export class RoommateMatchingController {
         try {
             const userId = (req as any).user.userId;
             const { id } = req.params;
-            await RoommateMatchingService.cancelRequest(userId, id);
+            await RoommateMatchingService.cancelRequest(userId, id as string);
             res.status(200).json({ success: true, message: 'Roommate request cancelled successfully' });
         } catch (error) {
             next(error);
@@ -69,7 +69,7 @@ export class RoommateMatchingController {
             const userId = (req as any).user.userId;
             const { id } = req.params;
             const { action } = req.body;
-            const match = await RoommateMatchingService.respondToMatch(userId, id, action);
+            const match = await RoommateMatchingService.respondToMatch(userId, id as string, action);
             res.status(200).json(match);
         } catch (error) {
             next(error);
@@ -90,7 +90,7 @@ export class RoommateMatchingController {
         try {
             const userId = (req as any).user.userId;
             const { id } = req.params;
-            const result = await RoommateMatchingService.findMatches(userId, id);
+            const result = await RoommateMatchingService.findMatches(userId, id as string);
             res.status(200).json(result);
         } catch (error) {
             next(error);

@@ -22,6 +22,8 @@ import {
     type MaintenanceAreaType,
     type ResponsiblePartyType,
 } from './ContractMaintenanceResponsibility.js';
+import { TenantReport, TenantReportReason, TenantReportStatus } from './TenantReport.js';
+import { LeaseTerminationRequest, LeaseTerminationStatus } from './LeaseTerminationRequest.js';
 
 // ─── Associations ─────────────────────────────────────────────────────────────
 
@@ -67,7 +69,6 @@ Contract.belongsTo(User, {
     as: 'tenant',
 });
 
-// Contract has many MaintenanceResponsibilities
 Contract.hasMany(ContractMaintenanceResponsibility, {
     foreignKey: 'contract_id',
     as: 'maintenanceResponsibilities',
@@ -78,6 +79,17 @@ ContractMaintenanceResponsibility.belongsTo(Contract, {
     foreignKey: 'contract_id',
     as: 'contract',
 });
+
+// TenantReport Associations
+TenantReport.belongsTo(Contract, { foreignKey: 'contract_id', as: 'contract' });
+TenantReport.belongsTo(User, { foreignKey: 'reporter_id', as: 'reporter' });
+TenantReport.belongsTo(User, { foreignKey: 'tenant_id', as: 'reportedTenant' });
+Contract.hasMany(TenantReport, { foreignKey: 'contract_id', as: 'tenantReports' });
+
+// LeaseTerminationRequest Associations
+LeaseTerminationRequest.belongsTo(Contract, { foreignKey: 'contract_id', as: 'contract' });
+LeaseTerminationRequest.belongsTo(User, { foreignKey: 'requester_id', as: 'requester' });
+Contract.hasMany(LeaseTerminationRequest, { foreignKey: 'contract_id', as: 'terminationRequests' });
 
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
@@ -96,6 +108,11 @@ export {
     Property,
     RentalRequest,
     PropertySpecifications,
+    TenantReport,
+    TenantReportReason,
+    TenantReportStatus,
+    LeaseTerminationRequest,
+    LeaseTerminationStatus,
 };
 
 export type {
@@ -111,4 +128,6 @@ export default {
     sequelize,
     Contract,
     ContractMaintenanceResponsibility,
+    TenantReport,
+    LeaseTerminationRequest,
 };

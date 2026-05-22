@@ -73,35 +73,34 @@ const LandlordHome = () => {
   }, [fetchProperties]);
 
   const hasData = properties.length > 0;
-  const mappedProperties = properties.map((prop, index) => ({
-    id: prop.id || String(index),
-    name: prop.title,
-    address: prop.address,
-    status: (prop.status || '').toLowerCase(),
-    price: String(prop.monthlyPrice ?? ''),
-    imageUrl:
-      prop.images?.find((img) => img.isMain)?.imageUrl ||
-      prop.images?.[0]?.imageUrl ||
-      '/rentblue.jpg',
-    beds: prop.specifications?.bedrooms ?? 0,
-    baths: prop.specifications?.bathrooms ?? 0,
-    sqft: prop.specifications?.areaSqft ?? '—',
-    tenantName:
-      (
-        ((prop as unknown as {
-          currentTenant?: { firstName?: string; lastName?: string };
-          activeContract?: { tenant?: { firstName?: string; lastName?: string } };
-          tenant?: { firstName?: string; lastName?: string };
-        }).currentTenant &&
-          `${(prop as unknown as { currentTenant?: { firstName?: string; lastName?: string } }).currentTenant?.firstName || ''} ${(prop as unknown as { currentTenant?: { firstName?: string; lastName?: string } }).currentTenant?.lastName || ''}`.trim()) ||
-        ((prop as unknown as { activeContract?: { tenant?: { firstName?: string; lastName?: string } } }).activeContract?.tenant &&
-          `${(prop as unknown as { activeContract?: { tenant?: { firstName?: string; lastName?: string } } }).activeContract?.tenant?.firstName || ''} ${(prop as unknown as { activeContract?: { tenant?: { firstName?: string; lastName?: string } } }).activeContract?.tenant?.lastName || ''}`.trim()) ||
-        ((prop as unknown as { tenant?: { firstName?: string; lastName?: string } }).tenant &&
-          `${(prop as unknown as { tenant?: { firstName?: string; lastName?: string } }).tenant?.firstName || ''} ${(prop as unknown as { tenant?: { firstName?: string; lastName?: string } }).tenant?.lastName || ''}`.trim())
-      ) ||
-      t('landlordHome.noCurrentTenant'),
-    paymentStatus: prop.status?.toLowerCase() === 'rented' ? 'Paid' : 'Pending',
-  }));
+  const mappedProperties = properties.map((prop, index) => {
+    const activeContract = contracts.find(
+      (c) => c.property?.id === prop.id && c.status === 'ACTIVE'
+    );
+    const computedStatus = activeContract ? 'rented' : (prop.status || '').toLowerCase();
+    
+    let tenantName = t('landlordHome.noCurrentTenant');
+    if (activeContract?.tenant) {
+      tenantName = `${activeContract.tenant.firstName} ${activeContract.tenant.lastName}`.trim();
+    }
+
+    return {
+      id: prop.id || String(index),
+      name: prop.title,
+      address: prop.address,
+      status: computedStatus,
+      price: String(prop.monthlyPrice ?? ''),
+      imageUrl:
+        prop.images?.find((img) => img.isMain)?.imageUrl ||
+        prop.images?.[0]?.imageUrl ||
+        '/rentblue.jpg',
+      beds: prop.specifications?.bedrooms ?? 0,
+      baths: prop.specifications?.bathrooms ?? 0,
+      sqft: prop.specifications?.areaSqft ?? '—',
+      tenantName,
+      paymentStatus: computedStatus === 'rented' ? 'Paid' : 'Pending',
+    };
+  });
 
   return (
     <>

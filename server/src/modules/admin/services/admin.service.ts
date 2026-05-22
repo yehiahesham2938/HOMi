@@ -843,6 +843,9 @@ class AdminService {
                 reviewed_at: new Date(),
             });
             await User.update({ is_verified: true, email_verified: true }, { where: { id: application.user_id } });
+            if (application.selfie_image) {
+                await Profile.update({ avatar_url: application.selfie_image }, { where: { user_id: application.user_id } });
+            }
             return;
         }
 

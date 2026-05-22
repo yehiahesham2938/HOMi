@@ -2,13 +2,14 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
     FaTimes, FaStar, FaWallet, FaCheckCircle, FaUser,
     FaInfoCircle, FaClock, FaShieldAlt, FaBolt, FaChevronDown,
-    FaChevronUp, FaArrowRight,
+    FaChevronUp, FaArrowRight, FaEye,
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import maintenanceService, {
     type MaintenanceJobApplication,
     type MaintenanceRequest,
 } from '../../../../services/maintenance.service';
+import ProviderProfile, { type MinimalProvider } from './ProviderProfile';
 import './ApplicationsModal.css';
 
 interface Props {
@@ -26,6 +27,8 @@ const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccept
     const [acceptingId, setAcceptingId] = useState<string | null>(null);
     const [walletBalance, setWalletBalance] = useState<number | null>(null);
     const [expandedId, setExpandedId] = useState<string | null>(null);
+    const [profileProvider, setProfileProvider] = useState<MinimalProvider | null>(null);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
 
     useEffect(() => {
         if (!isOpen || !request) return;
@@ -80,6 +83,28 @@ const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccept
         } finally {
             setAcceptingId(null);
         }
+    };
+
+    const handleViewProfile = (app: MaintenanceJobApplication) => {
+        const p = app.provider as any;
+        if (!p) return;
+        setProfileProvider({
+            id: p.id ?? app.id,
+            firstName: p.firstName ?? '',
+            lastName: p.lastName ?? '',
+            avatarUrl: p.avatarUrl ?? null,
+            bio: p.bio ?? null,
+            providerType: p.providerType ?? null,
+            businessName: p.businessName ?? null,
+            primaryCategory: p.primaryCategory ?? null,
+            category: p.category ?? null,
+            categories: p.categories ?? null,
+            companyLocation: p.companyLocation ?? null,
+            rating: p.rating ?? 0,
+            ratingsCount: p.ratingsCount ?? 0,
+            completedJobsCount: p.completedJobsCount ?? undefined,
+        });
+        setIsProfileOpen(true);
     };
 
     if (!isOpen || !request) return null;
@@ -171,7 +196,7 @@ const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccept
 
                                     <div className="app-card-main">
                                         {/* Avatar */}
-                                        <div className="app-avatar-wrap">
+                                        <div className="app-avatar-wrap app-clickable" onClick={() => handleViewProfile(app)} title="View Profile">
                                             <div className="app-avatar">
                                                 {app.provider?.avatarUrl
                                                     ? <img src={app.provider.avatarUrl} alt={displayName} />
@@ -184,7 +209,7 @@ const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccept
                                         {/* Info */}
                                         <div className="app-info">
                                             <div className="app-name-row">
-                                                <h4>{displayName}</h4>
+                                                <h4 className="app-clickable-name" onClick={() => handleViewProfile(app)}>{displayName}</h4>
                                                 <span className="app-type-pill">
                                                     {app.provider?.providerType === 'CENTER' ? 'Center' : 'Individual'}
                                                 </span>
@@ -197,6 +222,9 @@ const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccept
                                                 {app.provider?.category && (
                                                     <span className="app-category-chip">{app.provider.category}</span>
                                                 )}
+                                                <button className="app-profile-link-btn" onClick={() => handleViewProfile(app)}>
+                                                    <FaEye /> View Profile
+                                                </button>
                                             </div>
 
                                             {app.coverNote && <p className="app-note">&ldquo;{app.coverNote}&rdquo;</p>}
@@ -260,6 +288,13 @@ const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccept
                         })
                     )}
                 </div>
+
+                {/* Provider Profile Modal */}
+                <ProviderProfile
+                    isOpen={isProfileOpen}
+                    onClose={() => setIsProfileOpen(false)}
+                    provider={profileProvider}
+                />
             </div>
         </div>
     );

@@ -681,6 +681,56 @@
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
+
+/* Clickable Avatar & Name Interactions */
+.app-clickable {
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.app-clickable:hover {
+    transform: scale(1.08);
+    opacity: 0.85;
+}
+
+.app-clickable:hover .app-avatar {
+    border-color: #a5b4fc;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.2);
+}
+
+.app-clickable-name {
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.app-clickable-name:hover {
+    color: #2563eb;
+}
+
+.app-profile-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: none;
+    border: none;
+    color: #2563eb;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0.15rem 0;
+    margin-left: 0.4rem;
+    transition: all 0.2s ease;
+}
+
+.app-profile-link-btn:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+}
+
+.app-profile-link-btn svg {
+    font-size: 0.72rem;
+}
+
 @media (max-width: 640px) {
     .apps-modal {
         border-radius: 20px;

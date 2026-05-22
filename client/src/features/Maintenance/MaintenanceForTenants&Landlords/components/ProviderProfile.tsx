@@ -47,7 +47,7 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ isOpen, onClose, prov
     // Resolve Category Info
     const mainCategory = provider.primaryCategory ?? provider.category ?? 'General Maintenance';
     const categoriesList = provider.categories ?? (provider.category ? [provider.category] : []);
-    
+
     // Type Resolution
     const isCenter = provider.providerType === 'CENTER';
     const typeLabel = isCenter ? 'Center / Agency' : 'Individual Professional';
@@ -59,7 +59,7 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ isOpen, onClose, prov
         <div className="provider-profile-modal-overlay" onClick={onClose}>
             <div className="provider-profile-modal-container" onClick={(e) => e.stopPropagation()}>
                 <div className="profile-scroll-container">
-                    
+
                     {/* Cover Hero Background */}
                     <div className="profile-hero">
                         <div className="profile-hero-overlay" />
@@ -71,7 +71,7 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ isOpen, onClose, prov
 
                     {/* Content Section */}
                     <div className="profile-content-main">
-                        
+
                         {/* Avatar & Header */}
                         <div className="profile-header-section">
                             <div className="profile-avatar-wrapper">
@@ -80,15 +80,15 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ isOpen, onClose, prov
                                     <FaCheckCircle />
                                 </div>
                             </div>
-                            
+
                             <div className="profile-main-meta">
                                 <h1>{displayName}</h1>
-                                
+
                                 <p className="specialty-text">
                                     <FaToolbox className="toolbox-icon" />
                                     {mainCategory}
                                 </p>
-                                
+
                                 <div className="rating-location-row">
                                     <div className="p-rating">
                                         <FaStar />
@@ -151,7 +151,7 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ isOpen, onClose, prov
                                 <div className="escrow-text-wrap">
                                     <h4>Escrow Protected Booking</h4>
                                     <p>
-                                        When you book this professional, your money is safely escrowed from your HOMi wallet. 
+                                        When you book this professional, your money is safely escrowed from your HOMi wallet.
                                         Payment is only released after you confirm the job has been completed to your satisfaction.
                                     </p>
                                 </div>
@@ -177,7 +177,7 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ isOpen, onClose, prov
                     <div className="profile-footer-sticky">
                         <div className="footer-price-info">
                             <span>Provider Quality</span>
-                            <strong>⭐ {(provider.rating ?? 0).toFixed(1)} Excellent</strong>
+                            <strong>⭐ {(provider.rating ?? 0).toFixed(1)} </strong>
                         </div>
                         <button className="request-fix-btn" onClick={onClose}>Close Profile</button>
                     </div>

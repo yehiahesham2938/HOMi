@@ -158,7 +158,7 @@ const LandlordMaintenance: React.FC = () => {
                                                     <span className="value">
                                                         {req.provider
                                                             ? req.provider.businessName ??
-                                                                `${req.provider.firstName} ${req.provider.lastName}`.trim()
+                                                            `${req.provider.firstName} ${req.provider.lastName}`.trim()
                                                             : '—'}
                                                     </span>
                                                 </div>
@@ -193,36 +193,60 @@ const LandlordMaintenance: React.FC = () => {
                 </main>
 
                 {selected && (
-                    <div className="lt-modal-overlay" onClick={() => setSelected(null)}>
-                        <div className="lt-modal" onClick={(e) => e.stopPropagation()}>
-                            <header className="lt-modal-header">
-                                <div>
+                    <div className="req-modal-overlay" onClick={() => setSelected(null)}>
+                        <div className="req-modal" onClick={(e) => e.stopPropagation()}>
+
+                            <header className="req-modal-header">
+                                <div className="req-modal-title-group">
                                     <h2>{selected.title}</h2>
-                                    <p>{selected.description}</p>
+                                    <span className={`badge ${statusBadge(selected.status).cls}`}>
+                                        {statusBadge(selected.status).label}
+                                    </span>
                                 </div>
-                                <button className="lt-close-btn" onClick={() => setSelected(null)}>×</button>
+                                <button className="req-close-btn" onClick={() => setSelected(null)}>×</button>
                             </header>
-                            <div className="lt-modal-body">
-                                <div><strong>Status:</strong> {selected.status}</div>
-                                <div><strong>Charge:</strong> {selected.chargeParty}</div>
-                                <div><strong>Agreed price:</strong> {selected.agreedPrice ? `EGP ${Number(selected.agreedPrice).toFixed(2)}` : '—'}</div>
+
+                            <div className="req-modal-body">
+                                <p className="req-modal-desc">{selected.description}</p>
+
+                                <div className="req-modal-stats">
+                                    <div className="req-stat-box">
+                                        <span className="req-stat-label">Charge Party</span>
+                                        <strong className="req-stat-value">
+                                            {selected.chargeParty === 'LANDLORD' ? 'You (Landlord)' : 'Tenant'}
+                                        </strong>
+                                    </div>
+                                    <div className="req-stat-box">
+                                        <span className="req-stat-label">Agreed Price</span>
+                                        <strong className="req-stat-value">
+                                            {selected.agreedPrice ? `EGP ${Number(selected.agreedPrice).toFixed(2)}` : '—'}
+                                        </strong>
+                                    </div>
+                                </div>
+
                                 {selected.images.length > 0 && (
-                                    <div>
-                                        <strong>Issue photos:</strong>
-                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
-                                            {selected.images.map((u, i) => <img key={i} src={u} alt={`issue ${i + 1}`} style={{ width: 90, height: 90, borderRadius: 8, objectFit: 'cover' }} />)}
+                                    <div className="req-modal-gallery">
+                                        <strong>Issue Photos</strong>
+                                        <div className="gallery-grid">
+                                            {selected.images.map((u, i) => (
+                                                <img key={i} src={u} alt={`issue ${i + 1}`} />
+                                            ))}
                                         </div>
                                     </div>
                                 )}
+
                                 {selected.completionImages.length > 0 && (
-                                    <div>
-                                        <strong>Completion photos:</strong>
-                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
-                                            {selected.completionImages.map((u, i) => <img key={i} src={u} alt={`completion ${i + 1}`} style={{ width: 90, height: 90, borderRadius: 8, objectFit: 'cover' }} />)}
+                                    <div className="req-modal-gallery">
+                                        <strong>Completion Photos</strong>
+                                        <div className="gallery-grid">
+                                            {selected.completionImages.map((u, i) => (
+                                                <img key={i} src={u} alt={`completion ${i + 1}`} />
+                                            ))}
                                         </div>
                                     </div>
                                 )}
                             </div>
+
                         </div>
                     </div>
                 )}

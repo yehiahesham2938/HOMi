@@ -64,7 +64,7 @@ export const UpcomingPayments: React.FC<UpcomingPaymentsProps> = ({ contract, re
             <span>{paymentState}</span>
           </div>
         </header>
-        
+
         <div className="amount-display">
           <div className="amount-main">
             <span className="currency-symbol">$</span>
@@ -80,7 +80,7 @@ export const UpcomingPayments: React.FC<UpcomingPaymentsProps> = ({ contract, re
           <div className="meta-item">
             <span className="meta-label">{t('tenantHomeComponents.method')}</span>
             <div className="meta-value">
-              <FaCreditCard className="card-icon" /> 
+              <FaCreditCard className="card-icon" />
               <span>{hasLinkedMethod ? t('tenantHomeComponents.cardOnFile') : t('tenantHomeComponents.notConnected')}</span>
             </div>
           </div>
@@ -106,7 +106,7 @@ export const UpcomingPayments: React.FC<UpcomingPaymentsProps> = ({ contract, re
           <button
             className="payment-action-inline"
             aria-label="Open maintenance page"
-            onClick={() => navigate('/maintenance-requests')}
+            onClick={() => navigate('/tenant-maintenance')}
           >
             <span>Maintenance</span>
             <FaChevronRight className="arrow-icon" />

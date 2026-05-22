@@ -139,7 +139,19 @@
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.02em;
+  white-space: nowrap;
 }
+
+/* Status variants */
+.status-badge-premium.status-open                  { background: #fef9c3; color: #a16207; }
+.status-badge-premium.status-assigned              { background: #dbeafe; color: #1d4ed8; }
+.status-badge-premium.status-en_route              { background: #e0f2fe; color: #0369a1; }
+.status-badge-premium.status-in_progress           { background: #fef3c7; color: #b45309; }
+.status-badge-premium.status-awaiting_confirmation { background: #ede9fe; color: #7c3aed; }
+.status-badge-premium.status-completed             { background: #dcfce7; color: #15803d; }
+.status-badge-premium.status-disputed              { background: #fee2e2; color: #dc2626; }
+.status-badge-premium.status-cancelled             { background: #f1f5f9; color: #94a3b8; }
+
 
 .new-request-cta {
   margin-top: auto;

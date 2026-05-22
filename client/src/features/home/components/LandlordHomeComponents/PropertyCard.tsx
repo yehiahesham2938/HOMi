@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { 
-  FiMapPin, FiMoreHorizontal, FiMaximize, 
-  FiArrowUpRight, FiCheckCircle, FiClock 
+import {
+  FiMapPin, FiMoreHorizontal, FiMaximize,
+  FiArrowUpRight, FiCheckCircle, FiClock
 } from 'react-icons/fi';
 import ManagePropertyModal from '../../../MyProperties/components/ManagePropertyModal';
 import OccupiedModal from '../../../MyProperties/components/OccupiedModal';
@@ -50,7 +50,7 @@ const PropertyCard = ({
       <div className="prop-card-container" onClick={() => setIsModalOpen(true)}>
         <div className="prop-card-media">
           <img src={imageUrl || "/rentblue.jpg"} alt={name} className="prop-main-img" />
-          
+
           <div className="prop-floating-badges">
             <div className={`status-pill ${status.toLowerCase()}`}>
               <span className="pulse-indicator"></span>
@@ -86,10 +86,7 @@ const PropertyCard = ({
                 <span className="name">{displayTenantName}</span>
               </div>
             </div>
-            <div className={`payment-status ${paymentStatus.toLowerCase()}`}>
-               {paymentStatus === "Paid" ? <FiCheckCircle size={14}/> : <FiClock size={14}/>}
-               {paymentStatus}
-            </div>
+
           </div>
 
           <div className="prop-specs-minimal">
@@ -109,17 +106,17 @@ const PropertyCard = ({
               </div>
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
-                {activeContract && (
-                    <button 
-                        onClick={(e) => { e.stopPropagation(); setIsOccupiedModalOpen(true); }}
-                        style={{ background: '#eff6ff', color: '#3b82f6', border: 'none', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
-                    >
-                        View Occupied
-                    </button>
-                )}
-                <div className="prop-action-icon">
-                    <FiMaximize />
-                </div>
+              {activeContract && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); setIsOccupiedModalOpen(true); }}
+                  style={{ background: '#eff6ff', color: '#3b82f6', border: 'none', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }}
+                >
+                  View Occupied
+                </button>
+              )}
+              <div className="prop-action-icon">
+                <FiMaximize />
+              </div>
             </div>
           </div>
         </div>
@@ -127,9 +124,9 @@ const PropertyCard = ({
 
       {isModalOpen && (
         createPortal(
-          <ManagePropertyModal 
-            property={propertyData} 
-            onClose={() => setIsModalOpen(false)} 
+          <ManagePropertyModal
+            property={propertyData}
+            onClose={() => setIsModalOpen(false)}
           />,
           document.body
         )
@@ -137,8 +134,8 @@ const PropertyCard = ({
 
       {isOccupiedModalOpen && activeContract && (
         <OccupiedModal
-            contract={activeContract}
-            onClose={() => setIsOccupiedModalOpen(false)}
+          contract={activeContract}
+          onClose={() => setIsOccupiedModalOpen(false)}
         />
       )}
     </>

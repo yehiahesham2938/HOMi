@@ -2,12 +2,12 @@
     background: white;
     border-radius: 24px;
     padding: 24px;
-    height: 380px;
+    height: 400px;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
     border: 1px solid #f1f5f9;
-    flex: 1; /* Allow it to grow alongside the Add card */
+    /* Allow it to grow alongside the Add card */
 }
 
 .notif-header {
@@ -17,7 +17,11 @@
     margin-bottom: 20px;
 }
 
-.notif-title-group { display: flex; align-items: center; gap: 12px; }
+.notif-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
 
 .notif-title-group h3 {
     font-size: 1.1rem;
@@ -28,32 +32,46 @@
 
 .bell-ring {
     position: relative;
-    width: 38px; height: 38px;
+    width: 38px;
+    height: 38px;
     background: #f8fafc;
     border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: #64748b;
     font-size: 1.2rem;
 }
 
 .active-dot {
-    position: absolute; top: -2px; right: -2px;
-    width: 10px; height: 10px;
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 10px;
+    height: 10px;
     background: #3b82f6;
     border: 2px solid white;
     border-radius: 50%;
 }
 
 .btn-mark-all {
-    background: transparent; border: none;
-    display: flex; align-items: center; gap: 6px;
-    font-size: 0.75rem; font-weight: 700; color: #94a3b8;
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #94a3b8;
     cursor: pointer;
 }
 
 .notif-scroll-area {
-    display: flex; flex-direction: column; gap: 8px;
-    overflow-y: auto; flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    flex: 1;
 }
 
 .notif-empty-state {
@@ -67,7 +85,9 @@
 }
 
 .notif-item-row {
-    display: flex; gap: 12px; padding: 12px;
+    display: flex;
+    gap: 12px;
+    padding: 12px;
     border-radius: 16px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -78,38 +98,91 @@
     text-align: left;
 }
 
-.notif-item-row:hover { background: #f8fafc; transform: translateX(4px); }
+.notif-item-row:hover {
+    background: #f8fafc;
+    transform: translateX(4px);
+}
 
-.notif-item-row.is-unread { background: #f0f7ff; }
+.notif-item-row.is-unread {
+    background: #f0f7ff;
+}
 
 .icon-box {
-    width: 40px; height: 40px; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1rem; flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
 }
 
-.icon-box.payment { background: #eefdf5; color: #10b981; }
-.icon-box.maintenance { background: #fff7ed; color: #f59e0b; }
-.icon-box.lead { background: #eef2ff; color: #6366f1; }
-
-.notif-info { flex: 1; min-width: 0; }
-.notif-meta-top { display: flex; justify-content: space-between; align-items: center; }
-.subject { font-size: 0.85rem; font-weight: 700; color: #1e293b; }
-.timestamp { font-size: 0.7rem; color: #94a3b8; }
-.description { 
-    font-size: 0.75rem; color: #64748b; margin: 2px 0 0 0; 
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+.icon-box.payment {
+    background: #eefdf5;
+    color: #10b981;
 }
 
-.arrow-hint { color: #cbd5e1; font-size: 0.8rem; }
+.icon-box.maintenance {
+    background: #fff7ed;
+    color: #f59e0b;
+}
+
+.icon-box.lead {
+    background: #eef2ff;
+    color: #6366f1;
+}
+
+.notif-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.notif-meta-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.subject {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.timestamp {
+    font-size: 0.7rem;
+    color: #94a3b8;
+}
+
+.description {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin: 2px 0 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.arrow-hint {
+    color: #cbd5e1;
+    font-size: 0.8rem;
+}
 
 .btn-history-expand {
     margin-top: 16px;
     padding: 12px;
     background: #f1f5f9;
-    border: none; border-radius: 12px;
-    font-size: 0.8rem; font-weight: 700; color: #475569;
-    cursor: pointer; transition: 0.2s;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #475569;
+    cursor: pointer;
+    transition: 0.2s;
 }
 
-.btn-history-expand:hover { background: #e2e8f0; color: #0f172a; }
+.btn-history-expand:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}

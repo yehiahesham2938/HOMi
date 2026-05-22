@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Header from '../../../../components/global/header';
 import Footer from '../../../../components/global/footer';
 import Sidebar from '../../../../components/global/Tenant/sidebar';
@@ -50,7 +51,15 @@ function getCategoryIcon(category: string) {
 }
 
 const TenantMaintenance: React.FC = () => {
-    const [activeTab, setActiveTab] = useState<'post' | 'browse' | 'active'>('post');
+    const [searchParams] = useSearchParams();
+    const initialTab = (searchParams.get('tab') as 'post' | 'browse' | 'active') || 'post';
+    const [activeTab, setActiveTab] = useState<'post' | 'browse' | 'active'>(initialTab);
+
+    // Sync tab when URL param changes (e.g. navigating back with ?tab=active)
+    useEffect(() => {
+        const t = searchParams.get('tab') as 'post' | 'browse' | 'active' | null;
+        if (t && ['post', 'browse', 'active'].includes(t)) setActiveTab(t);
+    }, [searchParams]);
 
     // ── Browse providers state ────────────────────────────────────────────────
     const [providers, setProviders] = useState<BrowseProvider[]>([]);

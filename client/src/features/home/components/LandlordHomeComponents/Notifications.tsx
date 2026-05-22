@@ -105,7 +105,7 @@ const Notifications: React.FC = () => {
 
         const merged = [...requestAlerts, ...contractAlerts, ...propertyAlerts]
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-          .slice(0, 3); // <-- Changed from 12 to 3
+          .slice(0, 1); // <-- Changed from 12 to 3
 
         if (isMounted) {
           setAlerts(merged);

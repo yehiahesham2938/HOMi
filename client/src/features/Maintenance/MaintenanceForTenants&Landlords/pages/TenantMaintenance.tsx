@@ -13,6 +13,7 @@ import {
     FaPlus, FaSearch, FaFilter, FaTools, FaCalendarCheck,
     FaHammer, FaBolt, FaCheckCircle, FaClock, FaTimesCircle,
     FaChevronRight, FaMapMarkerAlt, FaUsers,
+    FaTint, FaSnowflake, FaLeaf, FaPaintRoller, FaWrench, FaTrashAlt
 } from 'react-icons/fa';
 import maintenanceService, {
     type BrowseProvider,
@@ -33,6 +34,18 @@ function statusColor(status: MaintenanceRequest['status']) {
         case 'RESOLVED_BY_ADMIN': return { label: 'Resolved by admin', className: 'completed' };
         case 'CANCELLED': return { label: 'Cancelled', className: 'cancelled' };
         default: return { label: status, className: 'open' };
+    }
+}
+
+function getCategoryIcon(category: string) {
+    switch (category) {
+        case 'Plumbing': return <FaTint className="type-icon-inner color-plumbing" />;
+        case 'Electrical': return <FaBolt className="type-icon-inner color-electrical" />;
+        case 'Painting': return <FaPaintRoller className="type-icon-inner color-painting" />;
+        case 'AC Service': return <FaSnowflake className="type-icon-inner color-ac" />;
+        case 'Gardening': return <FaLeaf className="type-icon-inner color-gardening" />;
+        case 'Flooring': return <FaWrench className="type-icon-inner color-flooring" />;
+        default: return <FaHammer className="type-icon-inner color-other" />;
     }
 }
 
@@ -185,39 +198,57 @@ const TenantMaintenance: React.FC = () => {
                 <div className="marketplace-grid">
                     {activeRequests.map((req) => {
                         const sc = statusColor(req.status);
+                        const urgencyClass = req.urgency ? req.urgency.toLowerCase() : 'medium';
                         return (
-                            <div key={req.id} className="post-card-premium">
-                                <div className="post-card-badge">{sc.label}</div>
+                            <div key={req.id} className={`post-card-premium card-urgency-${urgencyClass}`}>
+                                <div className="card-glass-glow"></div>
+                                <div className="post-card-header">
+                                    <div className="post-card-badge status-pill">
+                                        <span className={`status-dot dot-${sc.className}`}></span>
+                                        <span>{sc.label}</span>
+                                    </div>
+                                    {req.urgency && (
+                                        <div className={`urgency-pill urgency-${urgencyClass}`}>
+                                            {req.urgency}
+                                        </div>
+                                    )}
+                                </div>
                                 <div className="post-card-content">
                                     <div className="post-card-type">
-                                        <FaHammer className="type-icon" />
-                                        {req.category}
+                                        <div className={`type-icon-wrapper bg-${urgencyClass}`}>
+                                            {getCategoryIcon(req.category)}
+                                        </div>
+                                        <span className="category-text">{req.category}</span>
                                     </div>
-                                    <h3 style={{ margin: '4px 0 6px' }}>{req.title}</h3>
+                                    <h3 className="post-title-text">{req.title}</h3>
                                     <p className="post-description">{req.description}</p>
                                     <div className="post-meta">
-                                        <div className="meta-item"><FaClock /> {new Date(req.createdAt).toLocaleDateString()}</div>
-                                        <div className="meta-item"><FaBolt /> {req.applicationsCount ?? 0} applications</div>
-                                        {req.urgency && <div className="meta-item">Urgency: {req.urgency}</div>}
+                                        <div className="meta-item flex-row-center">
+                                            <FaClock className="meta-icon" /> 
+                                            <span>{new Date(req.createdAt).toLocaleDateString()}</span>
+                                        </div>
+                                        <div className="meta-item flex-row-center">
+                                            <FaBolt className="meta-icon animated-pulse" /> 
+                                            <span>{req.applicationsCount ?? 0} applications</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="post-card-footer">
                                     <div className="budget-info">
-                                        <span>{req.agreedPrice != null ? 'Agreed' : 'Budget'}:</span>
-                                        <strong>
+                                        <span className="budget-label">{req.agreedPrice != null ? 'Agreed price' : 'Budget estimation'}</span>
+                                        <strong className="budget-val">
                                             {req.agreedPrice != null
-                                                ? `EGP ${Number(req.agreedPrice).toFixed(2)}`
+                                                ? `EGP ${Number(req.agreedPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                                                 : req.estimatedBudget
-                                                    ? `EGP ${Number(req.estimatedBudget).toFixed(2)}`
+                                                    ? `EGP ${Number(req.estimatedBudget).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                                                     : '—'}
                                         </strong>
                                     </div>
-                                    <div style={{ display: 'flex', gap: 8 }}>
-                                        <button className="view-bids-btn" onClick={() => openViewIssueModal(req)}>View</button>
+                                    <div className="post-action-buttons">
+                                        <button className="view-bids-btn btn-view" onClick={() => openViewIssueModal(req)}>Details</button>
                                         {req.status === 'OPEN' && (
                                             <button
-                                                className="view-bids-btn"
-                                                style={{ background: '#6366f1', color: '#fff', border: 'none' }}
+                                                className="view-bids-btn btn-bids"
                                                 onClick={() => openApplicationsModal(req)}
                                             >
                                                 Bids ({req.applicationsCount ?? 0})
@@ -225,8 +256,7 @@ const TenantMaintenance: React.FC = () => {
                                         )}
                                         {(req.status === 'EN_ROUTE' || req.status === 'IN_PROGRESS') && (
                                             <button
-                                                className="view-bids-btn"
-                                                style={{ background: '#10b981', color: '#fff', border: 'none' }}
+                                                className="view-bids-btn btn-track"
                                                 onClick={() => openTrackingModal(req)}
                                             >
                                                 Track
@@ -234,8 +264,7 @@ const TenantMaintenance: React.FC = () => {
                                         )}
                                         {req.status === 'AWAITING_CONFIRMATION' && (
                                             <button
-                                                className="view-bids-btn"
-                                                style={{ background: '#f59e0b', color: '#fff', border: 'none' }}
+                                                className="view-bids-btn btn-confirm"
                                                 onClick={() => setConfirmRequest(req)}
                                             >
                                                 Confirm
@@ -243,11 +272,11 @@ const TenantMaintenance: React.FC = () => {
                                         )}
                                         {req.status === 'OPEN' && (
                                             <button
-                                                className="view-bids-btn"
-                                                style={{ background: '#fee2e2', color: '#b91c1c', border: 'none' }}
+                                                className="view-bids-btn btn-cancel-trash"
                                                 onClick={() => handleCancel(req)}
+                                                title="Cancel Request"
                                             >
-                                                <FaTimesCircle />
+                                                <FaTrashAlt />
                                             </button>
                                         )}
                                     </div>

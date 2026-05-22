@@ -222,7 +222,7 @@ const MaintenanceProviderOnboarding = () => {
     const [selectedCenterCategories, setSelectedCenterCategories] = useState<string[]>([]);
     const [customCenterCategory, setCustomCenterCategory] = useState('');
     const [customIndividualCategory, setCustomIndividualCategory] = useState('');
-    const [documentationFiles, setDocumentationFiles] = useState<string[]>([]);                                                                             
+    const [documentationFiles, setDocumentationFiles] = useState<string[]>([]);
     const [criminalRecordFile, setCriminalRecordFile] = useState<string>('');
     const [selfieImage, setSelfieImage] = useState<string>('');
     const [nationalIdFront, setNationalIdFront] = useState<string>('');

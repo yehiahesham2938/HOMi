@@ -79,7 +79,7 @@ const LandlordPublicProfile = () => {
         propertyService.getPublicLandlordProfile(landlordId),
         propertyService.getAllProperties({
           landlordId,
-          status: 'AVAILABLE',
+          status: 'AVAILABLE,RENTED',
           page: 1,
           limit: 100,
         }),
@@ -143,7 +143,7 @@ const LandlordPublicProfile = () => {
                       <FiHome size={20} />
                     </div>
                     <h2>Listings on HOMi</h2>
-                    <span className="lpp-count-badge">{listings.length} available</span>
+                    <span className="lpp-count-badge">{listings.filter(l => l.status?.toUpperCase() === 'AVAILABLE').length} available</span>
                   </div>
                 </div>
 

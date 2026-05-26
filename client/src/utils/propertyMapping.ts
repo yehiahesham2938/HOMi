@@ -36,6 +36,7 @@ export interface PropertyUI {
     availabilityDateISO: string | null;
     listedAtISO: string;
     type?: string;
+    status: string;
 }
 
 const mapTargetTenant = (targetTenant: string) => {
@@ -107,5 +108,6 @@ export const mapPropertyToUI = (property: PropertyResponse): PropertyUI => {
             )}&background=0f172a&color=ffffff&size=128`,
         ownerVerified: Boolean(property.landlord?.isVerified),
         maintenanceResponsibilities: property.maintenanceResponsibilities ?? [],
+        status: property.status,
     };
 };

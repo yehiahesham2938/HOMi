@@ -79,6 +79,7 @@ export interface PropertyDetailModalProperty {
     tags?: string[];
     rating?: number;
     rentalRequest?: PropertyDetailRentalRequest;
+    status?: string;
 }
 
 function availabilityRibbon(property: PropertyDetailModalProperty): { label: string; dateLine: string; tag: string } {
@@ -163,6 +164,8 @@ const PropertyDetailModal = ({
     );
 
     const ribbon = useMemo(() => availabilityRibbon(property), [property]);
+
+    const isRented = property.status?.toUpperCase() === 'RENTED';
 
     useEffect(() => {
         if (!shareMenuOpen) return undefined;
@@ -647,10 +650,18 @@ const PropertyDetailModal = ({
                                 </div>
                             ) : (
                                 <>
-                                    <button className="primary-cta-btn" onClick={handleApplyClick}>
-                                        {isGuest ? 'Register to Apply' : 'Start Application'} <FaArrowRight />
-                                    </button>
-                                    <p className="cta-subtext">Verified secure application process</p>
+                                    {isRented ? (
+                                        <button className="primary-cta-btn" style={{ backgroundColor: '#64748b', cursor: 'default' }} disabled>
+                                            Already Rented
+                                        </button>
+                                    ) : (
+                                        <button className="primary-cta-btn" onClick={handleApplyClick}>
+                                            {isGuest ? 'Register to Apply' : 'Start Application'} <FaArrowRight />
+                                        </button>
+                                    )}
+                                    <p className="cta-subtext">
+                                        {isRented ? 'This property has been successfully rented' : 'Verified secure application process'}
+                                    </p>
                                 </>
                             )}
 

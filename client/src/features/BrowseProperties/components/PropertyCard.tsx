@@ -18,6 +18,7 @@ interface PropertyCardProps {
         ownerName?: string;
         ownerImage?: string;
         ownerVerified?: boolean;
+        status?: string;
     };
     onOpenDetails: () => void;
     isSaved?: boolean;
@@ -31,8 +32,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     onToggleSave 
 }) => {
     const isFeatured = property.tags && property.tags.some(t => t.toLowerCase() === 'featured' || t.toLowerCase() === '⭐ featured');
-    const badge = isFeatured ? '⭐ Featured' : '✓ Available';
-    const badgeClass = isFeatured ? 'featured' : 'available';
+    const isRented = property.status?.toUpperCase() === 'RENTED';
+    const badge = isRented ? '✓ Rented' : isFeatured ? '⭐ Featured' : '✓ Available';
+    const badgeClass = isRented ? 'rented' : isFeatured ? 'featured' : 'available';
 
     const handleWishlistToggle = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -93,8 +95,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                             e.stopPropagation();
                             onOpenDetails();
                         }}
+                        style={isRented ? { backgroundColor: '#e2e8f0', color: '#64748b', borderColor: '#cbd5e1', cursor: 'default' } : undefined}
+                        disabled={isRented}
                     >
-                        Apply Now
+                        {isRented ? 'Rented' : 'Apply Now'}
                     </button>
                 </div>
             </div>

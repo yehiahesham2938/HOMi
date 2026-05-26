@@ -278,7 +278,15 @@ export type UpdatePropertyInput = z.infer<typeof UpdatePropertySchema>;
  */
 export const PropertyQuerySchema = z.object({
     status: z
-        .enum([PropertyStatus.DRAFT, PropertyStatus.PENDING_APPROVAL, PropertyStatus.AVAILABLE, PropertyStatus.REJECTED, PropertyStatus.RENTED])
+        .preprocess((val) => {
+            if (typeof val === 'string' && val.includes(',')) {
+                return val.split(',');
+            }
+            return val;
+        }, z.union([
+            z.enum([PropertyStatus.DRAFT, PropertyStatus.PENDING_APPROVAL, PropertyStatus.AVAILABLE, PropertyStatus.REJECTED, PropertyStatus.RENTED]),
+            z.array(z.enum([PropertyStatus.DRAFT, PropertyStatus.PENDING_APPROVAL, PropertyStatus.AVAILABLE, PropertyStatus.REJECTED, PropertyStatus.RENTED]))
+        ]))
         .optional(),
     type: z
         .enum([PropertyType.APARTMENT, PropertyType.VILLA, PropertyType.STUDIO, PropertyType.CHALET])

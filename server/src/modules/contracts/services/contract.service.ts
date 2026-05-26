@@ -19,6 +19,7 @@ import { env } from '../../../config/env.js';
 import { decrypt, encrypt } from '../../../shared/utils/encryption.util.js';
 import { testingClockService } from '../../../shared/services/testing-clock.service.js';
 import { PaymentMethod, PaymentProvider } from '../../payment-methods/models/PaymentMethod.js';
+import { PropertyStatus } from '../../properties/models/Property.js';
 import type {
     ContractResponse,
     ContractBalancePaymentResponse,
@@ -975,6 +976,11 @@ class ContractService {
             status: ContractStatus.ACTIVE,
         });
 
+        await Property.update(
+            { status: PropertyStatus.RENTED },
+            { where: { id: contract.property_id } }
+        );
+
         return this.formatContractResponse(contract);
     }
 
@@ -1039,6 +1045,11 @@ class ContractService {
                     paymob_transaction_id: null,
                 },
                 { transaction }
+            );
+
+            await Property.update(
+                { status: PropertyStatus.RENTED },
+                { where: { id: contract.property_id }, transaction }
             );
 
             await activityLogService.log({
@@ -1863,7 +1874,7 @@ class ContractService {
         const now = testingClockService.getNow();
         const activeContracts = await Contract.findAll({
             where: { status: ContractStatus.ACTIVE },
-            attributes: ['id', 'move_in_date', 'lease_duration_months'],
+            attributes: ['id', 'move_in_date', 'lease_duration_months', 'property_id'],
         });
 
         for (const contract of activeContracts) {
@@ -1873,9 +1884,57 @@ class ContractService {
             leaseEnd.setMonth(leaseEnd.getMonth() + Number(contract.lease_duration_months ?? 0));
             if (now >= leaseEnd) {
                 await contract.update({ status: ContractStatus.EXPIRED });
+                await Property.update(
+                    { status: PropertyStatus.AVAILABLE },
+                    { where: { id: contract.property_id } }
+                );
             }
         }
     }
+
+    async syncPropertyStatuses(): Promise<void> {
+        // Find all active contracts
+        const activeContracts = await Contract.findAll({
+            where: { status: ContractStatus.ACTIVE },
+            attributes: ['property_id'],
+        });
+        const rentedPropertyIds = activeContracts.map(c => c.property_id);
+
+        // Update properties with active contracts to RENTED
+        if (rentedPropertyIds.length > 0) {
+            await Property.update(
+                { status: PropertyStatus.RENTED },
+                {
+                    where: {
+                        id: { [Op.in]: rentedPropertyIds },
+                        status: { [Op.ne]: PropertyStatus.RENTED }
+                    }
+                }
+            );
+
+            // Update properties marked RENTED without active contract to AVAILABLE
+            await Property.update(
+                { status: PropertyStatus.AVAILABLE },
+                {
+                    where: {
+                        status: PropertyStatus.RENTED,
+                        id: { [Op.notIn]: rentedPropertyIds }
+                    }
+                }
+            );
+        } else {
+            // Update all properties marked RENTED to AVAILABLE since there are no active contracts
+            await Property.update(
+                { status: PropertyStatus.AVAILABLE },
+                {
+                    where: {
+                        status: PropertyStatus.RENTED
+                    }
+                }
+            );
+        }
+    }
+
 
     private getCycleDueDate(contract: Contract, referenceDate: Date): Date {
         const year = referenceDate.getFullYear();

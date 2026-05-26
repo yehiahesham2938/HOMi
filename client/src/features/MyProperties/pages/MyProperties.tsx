@@ -10,7 +10,7 @@ import propertyService from '../../../services/property.service';
 import authService from '../../../services/auth.service';
 import './MyProperties.css';
 import type { LandlordPropertyRow } from '../components/DetailedPropertyCard';
-import type { LandlordContract } from '../../../services/contract.service';
+
 
 const MyProperties = () => {
   const { t } = useTranslation();
@@ -41,7 +41,7 @@ const MyProperties = () => {
         
         if (propRes.success && propRes.data) {
            const contracts = contractRes?.data || [];
-           const mappedProperties = propRes.data.map(prop => {
+            const mappedProperties = propRes.data.map(prop => {
               const activeContract = contracts.find(c => c.property?.id === prop.id && c.status === 'ACTIVE');
               const isOccupied = !!activeContract;
               const computedStatus = isOccupied ? 'rented' : prop.status.toLowerCase();
@@ -49,6 +49,16 @@ const MyProperties = () => {
               let tenantName = null;
               if (activeContract?.tenant) {
                 tenantName = `${activeContract.tenant.firstName} ${activeContract.tenant.lastName}`.trim();
+              }
+
+              let leaseEnd = null;
+              if (activeContract) {
+                const moveIn = new Date(activeContract.moveInDate);
+                if (!Number.isNaN(moveIn.getTime())) {
+                  const end = new Date(moveIn);
+                  end.setMonth(end.getMonth() + activeContract.leaseDurationMonths);
+                  leaseEnd = end.toLocaleDateString();
+                }
               }
 
               return {
@@ -61,7 +71,7 @@ const MyProperties = () => {
                 baths: prop.specifications?.bathrooms || 0,
                 sqft: prop.specifications?.areaSqft || 0,
                 tenantName: tenantName,
-                leaseEnd: null,
+                leaseEnd: leaseEnd,
                 yield: "5.0", // Placeholder for now
                 occupancyRate: isOccupied ? 100 : 0,
                 activeContract: activeContract || null,

@@ -103,7 +103,7 @@ export function resolveLandlordUserIdForPublicProfile(property: LandlordIdCarrie
 }
 
 export interface PropertyQueryParams {
-    status?: 'DRAFT' | 'PENDING_APPROVAL' | 'AVAILABLE' | 'REJECTED' | 'RENTED';
+    status?: string;
     type?: 'APARTMENT' | 'VILLA' | 'STUDIO' | 'CHALET';
     furnishing?: 'Fully' | 'Semi' | 'Unfurnished';
     target_tenant?: 'ANY' | 'STUDENTS' | 'FAMILIES' | 'TOURISTS';

@@ -53,14 +53,6 @@ const GuestHome: React.FC = () => {
     fetchProperties();
   }, []);
 
-  const getFloorText = (floor: number | null | undefined) => {
-    if (floor === null || floor === undefined) return 'N/A';
-    if (floor === 0) return 'Ground';
-    if (floor === 1) return '1st';
-    if (floor === 2) return '2nd';
-    if (floor === 3) return '3rd';
-    return `${floor}th`;
-  };
 
   const filteredProperties = properties.filter((property) => {
     const q = searchQuery.toLowerCase();

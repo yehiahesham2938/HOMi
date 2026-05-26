@@ -5,6 +5,7 @@ import { seedAmenities } from './seeds/amenities.seed.js';
 import { seedHouseRules } from './seeds/house_rules.seed.js';
 import { seedHabits } from './seeds/habits.seed.js';
 import { seedAdminAccount } from './seeds/admin.seed.js';
+import contractService from './modules/contracts/services/contract.service.js';
 import app from './app.js';
 // Triggering seed re-run
 import { initSocketServer } from './shared/realtime/socket.js';
@@ -35,6 +36,8 @@ try {
     await seedHouseRules();
     await seedHabits();
     await seedAdminAccount();
+    await contractService.syncPropertyStatuses();
+
 
     const httpServer = createServer(app);
     initSocketServer(httpServer);

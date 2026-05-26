@@ -58,6 +58,11 @@
   color: #78350f;
 }
 
+.prop-badge.rented {
+  background: rgba(239, 68, 68, 0.92);
+  color: #fff;
+}
+
 .prop-save {
   position: absolute;
   top: 12px;

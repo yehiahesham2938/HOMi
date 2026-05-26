@@ -401,8 +401,8 @@ class ContractController {
     async getContractInstallments(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const { id } = req.params;
-            const tenantId = (req as any).user.userId;
-            const data = await contractService.getContractInstallments(id as string, tenantId);
+            const callerId = (req as any).user.userId;
+            const data = await contractService.getContractInstallments(id as string, callerId);
             res.status(200).json({
                 success: true,
                 data,

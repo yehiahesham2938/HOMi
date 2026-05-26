@@ -1550,13 +1550,13 @@ class ContractService {
      */
     async getContractInstallments(
         contractId: string,
-        tenantId: string
+        callerId: string
     ): Promise<ContractInstallmentsResponse> {
         const contract = await Contract.findByPk(contractId);
         if (!contract) {
             throw new ContractError('Contract not found', 404, 'CONTRACT_NOT_FOUND');
         }
-        if (contract.tenant_id !== tenantId) {
+        if (contract.tenant_id !== callerId && contract.landlord_id !== callerId) {
             throw new ContractError('You do not have permission to view this contract', 403, 'FORBIDDEN');
         }
         if (
@@ -1570,6 +1570,7 @@ class ContractService {
             );
         }
 
+        const tenantId = contract.tenant_id;
         const profile = await Profile.findOne({ where: { user_id: tenantId } });
         const walletBalance = Number((profile as any)?.wallet_balance ?? 0);
 
@@ -2063,7 +2064,7 @@ class ContractService {
                     {
                         model: Profile,
                         as: 'profile',
-                        attributes: ['first_name', 'last_name', 'e_signature_url', 'national_id'],
+                        attributes: ['first_name', 'last_name', 'e_signature_url', 'national_id', 'avatar_url'],
                     },
                 ],
             },
@@ -2075,7 +2076,7 @@ class ContractService {
                     {
                         model: Profile,
                         as: 'profile',
-                        attributes: ['first_name', 'last_name', 'e_signature_url', 'national_id'],
+                        attributes: ['first_name', 'last_name', 'e_signature_url', 'national_id', 'avatar_url'],
                     },
                 ],
             },
@@ -2107,7 +2108,7 @@ class ContractService {
                     {
                         model: Profile,
                         as: 'profile',
-                        attributes: ['first_name', 'last_name', 'e_signature_url'],
+                        attributes: ['first_name', 'last_name', 'e_signature_url', 'avatar_url'],
                     },
                 ],
             },
@@ -2119,7 +2120,7 @@ class ContractService {
                     {
                         model: Profile,
                         as: 'profile',
-                        attributes: ['first_name', 'last_name', 'e_signature_url'],
+                        attributes: ['first_name', 'last_name', 'e_signature_url', 'avatar_url'],
                     },
                 ],
             },
@@ -2237,6 +2238,7 @@ class ContractService {
                     firstName: landlordProfile?.first_name ?? '',
                     lastName: landlordProfile?.last_name ?? '',
                     email: contract.landlord.email,
+                    avatarUrl: landlordProfile?.avatar_url ?? null,
                     signatureUrl:
                         normalizeSignatureUrl(contract.landlord_signature_url) ??
                         normalizeSignatureUrl(landlordProfile?.e_signature_url ?? null),
@@ -2250,6 +2252,7 @@ class ContractService {
                     firstName: tenantProfile?.first_name ?? '',
                     lastName: tenantProfile?.last_name ?? '',
                     email: contract.tenant.email,
+                    avatarUrl: tenantProfile?.avatar_url ?? null,
                     signatureUrl:
                         normalizeSignatureUrl(contract.tenant_signature_url) ??
                         normalizeSignatureUrl(tenantProfile?.e_signature_url ?? null),

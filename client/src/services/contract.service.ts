@@ -172,6 +172,7 @@ export interface ContractParty {
     firstName: string;
     lastName: string;
     email: string;
+    avatarUrl?: string | null;
     signatureUrl?: string | null;
 }
 

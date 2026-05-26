@@ -149,7 +149,11 @@ const OccupiedModal: React.FC<OccupiedModalProps> = ({ contract, onClose }) => {
                             {/* Tenant Profile */}
                             <div className="occ-tenant-profile">
                                 <div className="occ-tenant-avatar">
-                                    <FaUserCircle />
+                                    {contract.tenant?.avatarUrl ? (
+                                        <img src={contract.tenant.avatarUrl} alt={tenantName} />
+                                    ) : (
+                                        <FaUserCircle />
+                                    )}
                                 </div>
                                 <div className="occ-tenant-info">
                                     <h3>{tenantName}</h3>

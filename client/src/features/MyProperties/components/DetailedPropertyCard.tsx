@@ -8,8 +8,10 @@ import {
 } from 'react-icons/fa';
 import ManagePropertyModal from './ManagePropertyModal'; // Import the new modal
 import OccupiedModal from './OccupiedModal';
-import type { LandlordContract } from '../../../services/contract.service';
+import DisablePropertyModal from './DisablePropertyModal';
+import propertyService from '../../../services/property.service';
 import './DetailedPropertyCard.css';
+import type { LandlordContract } from '../../../services/contract.service';
 
 export type LandlordPropertyRow = {
   id: string;
@@ -35,6 +37,23 @@ const DetailedPropertyCard = ({ property }: { property: LandlordPropertyRow }) =
   const { t } = useTranslation();
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [isOccupiedModalOpen, setIsOccupiedModalOpen] = useState(false);
+  const [isDisableModalOpen, setIsDisableModalOpen] = useState(false);
+  const [enabling, setEnabling] = useState(false);
+
+  const handleEnable = async () => {
+    setEnabling(true);
+    try {
+      const res = await propertyService.updateProperty(property.id, { status: 'AVAILABLE' });
+      if (res.success) {
+        property.onUpdate();
+      }
+    } catch (err) {
+      console.error("Failed to enable property", err);
+    } finally {
+      setEnabling(false);
+    }
+  };
+
   const status = String(property?.status || '').toLowerCase();
   const isManageLocked = status === 'pending_approval' || status === 'rejected';
 
@@ -140,8 +159,14 @@ const DetailedPropertyCard = ({ property }: { property: LandlordPropertyRow }) =
               <button className="history-btn" onClick={() => setIsOccupiedModalOpen(true)}>
                 View Occupied
               </button>
+            ) : status === 'unavailable' ? (
+              <button className="history-btn" onClick={handleEnable} disabled={enabling}>
+                {enabling ? 'Enabling...' : 'Enable'}
+              </button>
             ) : (
-              <button className="history-btn">{t('tenantHomeComponents.history')}</button>
+              <button className="history-btn" onClick={() => setIsDisableModalOpen(true)}>
+                Disable Property
+              </button>
             )}
           </div>
         </div>
@@ -163,6 +188,15 @@ const DetailedPropertyCard = ({ property }: { property: LandlordPropertyRow }) =
         <OccupiedModal
           contract={property.activeContract}
           onClose={() => setIsOccupiedModalOpen(false)}
+        />
+      )}
+
+      {/* DISABLE MODAL */}
+      {isDisableModalOpen && (
+        <DisablePropertyModal
+          propertyId={property.id}
+          onClose={() => setIsDisableModalOpen(false)}
+          onSuccess={() => property.onUpdate()}
         />
       )}
     </>

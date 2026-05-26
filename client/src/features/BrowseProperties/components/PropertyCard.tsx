@@ -33,8 +33,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 }) => {
     const isFeatured = property.tags && property.tags.some(t => t.toLowerCase() === 'featured' || t.toLowerCase() === '⭐ featured');
     const isRented = property.status?.toUpperCase() === 'RENTED';
-    const badge = isRented ? '✓ Rented' : isFeatured ? '⭐ Featured' : '✓ Available';
-    const badgeClass = isRented ? 'rented' : isFeatured ? 'featured' : 'available';
+    const isUnavailable = property.status?.toUpperCase() === 'UNAVAILABLE';
+    const badge = isUnavailable ? '✓ Unavailable' : isRented ? '✓ Rented' : isFeatured ? '⭐ Featured' : '✓ Available';
+    const badgeClass = isUnavailable ? 'unavailable' : isRented ? 'rented' : isFeatured ? 'featured' : 'available';
 
     const handleWishlistToggle = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -54,7 +55,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                 <button
                     className={`prop-save ${isSaved ? 'saved' : ''}`}
                     onClick={handleWishlistToggle}
-                    title={isSaved ? "Saved" : "Save"}
+                    title={isSaved ? "Save" : "Save"}
                 >
                     {isSaved ? '❤️' : '🤍'}
                 </button>
@@ -95,10 +96,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                             e.stopPropagation();
                             onOpenDetails();
                         }}
-                        style={isRented ? { backgroundColor: '#e2e8f0', color: '#64748b', borderColor: '#cbd5e1', cursor: 'default' } : undefined}
-                        disabled={isRented}
+                        style={(isRented || isUnavailable) ? { backgroundColor: '#e2e8f0', color: '#64748b', borderColor: '#cbd5e1', cursor: 'default' } : undefined}
+                        disabled={isRented || isUnavailable}
                     >
-                        {isRented ? 'Rented' : 'Apply Now'}
+                        {isUnavailable ? 'Unavailable' : isRented ? 'Rented' : 'Apply Now'}
                     </button>
                 </div>
             </div>

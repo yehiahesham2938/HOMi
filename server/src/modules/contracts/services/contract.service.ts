@@ -1872,6 +1872,21 @@ class ContractService {
 
     private async expireCompletedLeases(): Promise<void> {
         const now = testingClockService.getNow();
+
+        // Automatically enable properties that were disabled until a chosen date which has now passed
+        await Property.update(
+            { status: PropertyStatus.AVAILABLE },
+            {
+                where: {
+                    status: PropertyStatus.UNAVAILABLE,
+                    availability_date: {
+                        [Op.ne]: null,
+                        [Op.lte]: now
+                    }
+                }
+            }
+        );
+
         const activeContracts = await Contract.findAll({
             where: { status: ContractStatus.ACTIVE },
             attributes: ['id', 'move_in_date', 'lease_duration_months', 'property_id'],
@@ -1893,6 +1908,22 @@ class ContractService {
     }
 
     async syncPropertyStatuses(): Promise<void> {
+        const now = testingClockService.getNow();
+
+        // Automatically enable properties that were disabled until a chosen date which has now passed
+        await Property.update(
+            { status: PropertyStatus.AVAILABLE },
+            {
+                where: {
+                    status: PropertyStatus.UNAVAILABLE,
+                    availability_date: {
+                        [Op.ne]: null,
+                        [Op.lte]: now
+                    }
+                }
+            }
+        );
+
         // Find all active contracts
         const activeContracts = await Contract.findAll({
             where: { status: ContractStatus.ACTIVE },

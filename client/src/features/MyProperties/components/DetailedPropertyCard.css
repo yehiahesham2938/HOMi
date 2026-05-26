@@ -66,6 +66,12 @@
   color: white;
 }
 
+.detailed-badge.unavailable {
+  background: rgba(100, 116, 139, 0.9);
+  color: white;
+}
+
+
 .detailed-badge.pending {
   background: rgba(245, 158, 11, 0.9);
   color: white;

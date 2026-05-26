@@ -15,6 +15,8 @@ import {
 } from '../models/index.js';
 import { User, UserRole } from '../../auth/models/User.js';
 import { Profile } from '../../auth/models/Profile.js';
+import { testingClockService } from '../../../shared/services/testing-clock.service.js';
+
 import type {
     CreatePropertyRequest,
     UpdatePropertyRequest,
@@ -274,6 +276,21 @@ class PropertyService {
      * Get all properties with optional filters, pagination, and amenities
      */
     async getAllProperties(filters: PropertyQuery): Promise<PropertyListResponse> {
+        // Automatically enable properties that were disabled until a chosen date which has now passed
+        const now = testingClockService.getNow();
+        await Property.update(
+            { status: PropertyStatus.AVAILABLE },
+            {
+                where: {
+                    status: PropertyStatus.UNAVAILABLE,
+                    availability_date: {
+                        [Op.ne]: null,
+                        [Op.lte]: now
+                    }
+                }
+            }
+        );
+
         const {
             status,
             type,
@@ -512,9 +529,9 @@ class PropertyService {
             if (input.type !== undefined) updateData.type = input.type;
             if (input.furnishing !== undefined) updateData.furnishing = input.furnishing;
             if (input.status !== undefined) {
-                if (input.status !== PropertyStatus.DRAFT && input.status !== PropertyStatus.AVAILABLE) {
+                if (input.status !== PropertyStatus.DRAFT && input.status !== PropertyStatus.AVAILABLE && input.status !== PropertyStatus.UNAVAILABLE) {
                     throw new PropertyError(
-                        'Landlords can only set status to DRAFT or AVAILABLE.',
+                        'Landlords can only set status to DRAFT, AVAILABLE, or UNAVAILABLE.',
                         400,
                         'INVALID_STATUS_TRANSITION'
                     );
@@ -523,7 +540,7 @@ class PropertyService {
             }
             if (input.target_tenant !== undefined) updateData.target_tenant = input.target_tenant;
             if (input.availability_date !== undefined)
-                updateData.availability_date = new Date(input.availability_date);
+                updateData.availability_date = input.availability_date ? new Date(input.availability_date) : null;
             if (input.maintenance_responsibilities !== undefined)
                 updateData.maintenance_responsibilities = input.maintenance_responsibilities;
 

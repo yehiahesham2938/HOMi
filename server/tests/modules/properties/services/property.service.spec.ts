@@ -19,7 +19,7 @@ import type {
 
 vi.mock('../../../../src/modules/properties/models/index.js', () => ({
     sequelize: { transaction: vi.fn() },
-    Property: { create: vi.fn(), findByPk: vi.fn(), findAndCountAll: vi.fn() },
+    Property: { create: vi.fn(), findByPk: vi.fn(), findAndCountAll: vi.fn(), update: vi.fn() },
     PropertyImage: { bulkCreate: vi.fn(), destroy: vi.fn(), findAll: vi.fn() },
     Amenity: { findAll: vi.fn() },
     PropertySpecifications: { create: vi.fn(), findOrCreate: vi.fn(), findOne: vi.fn() },

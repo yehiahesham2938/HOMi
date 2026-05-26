@@ -79,7 +79,7 @@ const LandlordPublicProfile = () => {
         propertyService.getPublicLandlordProfile(landlordId),
         propertyService.getAllProperties({
           landlordId,
-          status: 'AVAILABLE,RENTED',
+          status: 'AVAILABLE,RENTED,UNAVAILABLE',
           page: 1,
           limit: 100,
         }),

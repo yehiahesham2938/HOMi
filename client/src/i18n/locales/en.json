@@ -483,7 +483,8 @@
       "draft": "Draft",
       "available": "Available",
       "pending_approval": "Pending Approval",
-      "rejected": "Rejected"
+      "rejected": "Rejected",
+      "unavailable": "Unavailable"
     },
     "beds": "Beds",
     "baths": "Baths",

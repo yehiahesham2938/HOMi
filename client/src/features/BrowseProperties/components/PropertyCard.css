@@ -63,6 +63,12 @@
   color: #fff;
 }
 
+.prop-badge.unavailable {
+  background: rgba(100, 116, 139, 0.92);
+  color: #fff;
+}
+
+
 .prop-save {
   position: absolute;
   top: 12px;

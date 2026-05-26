@@ -166,6 +166,7 @@ const PropertyDetailModal = ({
     const ribbon = useMemo(() => availabilityRibbon(property), [property]);
 
     const isRented = property.status?.toUpperCase() === 'RENTED';
+    const isUnavailable = property.status?.toUpperCase() === 'UNAVAILABLE';
 
     useEffect(() => {
         if (!shareMenuOpen) return undefined;
@@ -654,13 +655,17 @@ const PropertyDetailModal = ({
                                         <button className="primary-cta-btn" style={{ backgroundColor: '#64748b', cursor: 'default' }} disabled>
                                             Already Rented
                                         </button>
+                                    ) : isUnavailable ? (
+                                        <button className="primary-cta-btn" style={{ backgroundColor: '#64748b', cursor: 'default' }} disabled>
+                                            Unavailable
+                                        </button>
                                     ) : (
                                         <button className="primary-cta-btn" onClick={handleApplyClick}>
                                             {isGuest ? 'Register to Apply' : 'Start Application'} <FaArrowRight />
                                         </button>
                                     )}
                                     <p className="cta-subtext">
-                                        {isRented ? 'This property has been successfully rented' : 'Verified secure application process'}
+                                        {isRented ? 'This property has been successfully rented' : isUnavailable ? 'This property is temporarily unavailable' : 'Verified secure application process'}
                                     </p>
                                 </>
                             )}

@@ -483,7 +483,8 @@
       "draft": "مسودة",
       "available": "متاح",
       "pending_approval": "في انتظار الموافقة",
-      "rejected": "مرفوض"
+      "rejected": "مرفوض",
+      "unavailable": "غير متاح"
     },
     "beds": "غرف",
     "baths": "حمامات",

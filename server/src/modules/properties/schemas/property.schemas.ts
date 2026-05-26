@@ -220,7 +220,7 @@ export const UpdatePropertySchema = z.object({
         { message: 'Furnishing must be Fully, Semi, or Unfurnished' }
     ).optional(),
     status: z.enum(
-        [PropertyStatus.DRAFT, PropertyStatus.PENDING_APPROVAL, PropertyStatus.AVAILABLE, PropertyStatus.REJECTED, PropertyStatus.RENTED],
+        [PropertyStatus.DRAFT, PropertyStatus.PENDING_APPROVAL, PropertyStatus.AVAILABLE, PropertyStatus.REJECTED, PropertyStatus.RENTED, PropertyStatus.UNAVAILABLE],
         { message: 'Status is invalid' }
     ).optional(),
     target_tenant: z.enum(
@@ -230,6 +230,7 @@ export const UpdatePropertySchema = z.object({
     availability_date: z
         .string()
         .regex(/^\d{4}-\d{2}-\d{2}$/, 'Availability date must be in YYYY-MM-DD format')
+        .or(z.null())
         .optional(),
     images: z
         .array(PropertyImageSchema)
@@ -284,8 +285,8 @@ export const PropertyQuerySchema = z.object({
             }
             return val;
         }, z.union([
-            z.enum([PropertyStatus.DRAFT, PropertyStatus.PENDING_APPROVAL, PropertyStatus.AVAILABLE, PropertyStatus.REJECTED, PropertyStatus.RENTED]),
-            z.array(z.enum([PropertyStatus.DRAFT, PropertyStatus.PENDING_APPROVAL, PropertyStatus.AVAILABLE, PropertyStatus.REJECTED, PropertyStatus.RENTED]))
+            z.enum([PropertyStatus.DRAFT, PropertyStatus.PENDING_APPROVAL, PropertyStatus.AVAILABLE, PropertyStatus.REJECTED, PropertyStatus.RENTED, PropertyStatus.UNAVAILABLE]),
+            z.array(z.enum([PropertyStatus.DRAFT, PropertyStatus.PENDING_APPROVAL, PropertyStatus.AVAILABLE, PropertyStatus.REJECTED, PropertyStatus.RENTED, PropertyStatus.UNAVAILABLE]))
         ]))
         .optional(),
     type: z

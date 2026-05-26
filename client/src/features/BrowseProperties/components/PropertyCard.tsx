@@ -1,11 +1,5 @@
 // client\src\features\BrowseProperties\components\PropertyCard.tsx
-import React, { useState } from 'react';
-import { 
-    FaHeart, 
-    FaMapMarkerAlt, 
-    FaStar, 
-    FaChevronRight 
-} from 'react-icons/fa';
+import React from 'react';
 import './PropertyCard.css';
 
 interface PropertyCardProps {
@@ -20,95 +14,87 @@ interface PropertyCardProps {
         image: string;
         tags: string[];
         rating: number;
+        type?: string;
+        ownerName?: string;
+        ownerImage?: string;
+        ownerVerified?: boolean;
     };
     onOpenDetails: () => void;
     isSaved?: boolean;
     onToggleSave?: (propertyId: string | number) => void;
 }
 
-const PropertyCard: React.FC<PropertyCardProps> = ({ property, onOpenDetails, isSaved: controlledSaved, onToggleSave }) => {
-    // Local state to handle the heart toggle
-    const [isSaved, setIsSaved] = useState(false);
-    const currentSaved = typeof controlledSaved === 'boolean' ? controlledSaved : isSaved;
+const PropertyCard: React.FC<PropertyCardProps> = ({ 
+    property, 
+    onOpenDetails, 
+    isSaved = false, 
+    onToggleSave 
+}) => {
+    const isFeatured = property.tags && property.tags.some(t => t.toLowerCase() === 'featured' || t.toLowerCase() === '⭐ featured');
+    const badge = isFeatured ? '⭐ Featured' : '✓ Available';
+    const badgeClass = isFeatured ? 'featured' : 'available';
 
     const handleWishlistToggle = (e: React.MouseEvent) => {
-        e.stopPropagation(); // Prevents the card's onClick from firing
+        e.stopPropagation();
         if (onToggleSave) {
             onToggleSave(property.id);
-            return;
         }
-
-        setIsSaved(!isSaved);
     };
 
     return (
-        <div className="tenant-card-premium">
-            {/* Top Media Section */}
-            <div className="card-media">
+        <div
+            className="prop-card"
+            onClick={onOpenDetails}
+        >
+            <div className="prop-img">
                 <img src={property.image} alt={property.title} loading="lazy" />
-                
-                {/* Visual Overlays */}
-                <div className="card-overlay-gradient" />
-
-                <div className="card-badges">
-                    {property.tags.map((tag) => (
-                        <span key={`${property.id}-${tag}`} className="badge-luxury">{tag}</span>
-                    ))}
-                </div>
-
-                <button 
-                    className={`wishlist-btn ${currentSaved ? 'active' : ''}`} 
-                    aria-label="Add to favorites"
+                <span className={`prop-badge ${badgeClass}`}>{badge}</span>
+                <button
+                    className={`prop-save ${isSaved ? 'saved' : ''}`}
                     onClick={handleWishlistToggle}
+                    title={isSaved ? "Saved" : "Save"}
                 >
-                    <FaHeart />
+                    {isSaved ? '❤️' : '🤍'}
                 </button>
-
-                <div className="rating-tag">
-                    <FaStar className="star-icon" /> 
-                    <span>{property.rating}</span>
-                </div>
+                <span className="prop-type-tag">{property.type || 'Apartment'}</span>
             </div>
-
-            {/* Bottom Content Section */}
-            <div className="card-body">
-                {/* Simplified Inline Price Presentation */}
-                <div className="simple-price-tag">
-                    <span className="currency">$</span>
-                    <span className="amount">{property.price.toLocaleString()}</span>
-                    <span className="term">/ month</span>
+            <div className="prop-body">
+                <div className="prop-price">
+                    {property.price.toLocaleString()} <em>EGP / month</em>
                 </div>
-
-                <div className="location-row">
-                    <div className="loc-icon-bg">
-                        <FaMapMarkerAlt />
+                <div className="prop-title">{property.title}</div>
+                <div className="prop-location">
+                    <div className="prop-location-dot"></div>
+                    {property.address}
+                </div>
+                <div className="prop-specs">
+                    <div className="prop-spec">
+                        <strong>{property.beds}</strong>Beds
                     </div>
-                    <span>{property.address}</span>
+                    <div className="prop-spec">
+                        <strong>{property.baths}</strong>Baths
+                    </div>
+                    <div className="prop-spec">
+                        <strong>{property.sqft}</strong>m²
+                    </div>
                 </div>
-                
-                <h3 className="card-title">{property.title}</h3>
-                
-
-
-                <div className="card-actions">
-                    <button 
-                        className="btn-details-minimal"
+                <div className="prop-landlord">
+                    <img
+                        className="prop-avatar"
+                        src={property.ownerImage || 'https://i.pravatar.cc/150'}
+                        alt="Landlord"
+                    />
+                    <div className="prop-landlord-name">
+                        <strong>{property.ownerName || 'Verified Landlord'}</strong>Verified Landlord
+                    </div>
+                    <button
+                        className="prop-apply-btn"
                         onClick={(e) => {
                             e.stopPropagation();
-                            onOpenDetails(); // Opens the modal
+                            onOpenDetails();
                         }}
                     >
-                        View Details
-                    </button>
-                    
-                    <button 
-                        className="btn-apply-glow" 
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onOpenDetails(); // <--- This ensures the modal opens here too!
-                        }}
-                    >
-                        Apply Now <FaChevronRight className="arrow-icon" />
+                        Apply Now
                     </button>
                 </div>
             </div>

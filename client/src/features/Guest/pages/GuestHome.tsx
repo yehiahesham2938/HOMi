@@ -5,6 +5,10 @@ import { Globe, Menu, X } from 'lucide-react';
 import './GuestHome.css';
 import AuthModal from '../../../components/global/AuthModal';
 import Footer from '../../../components/global/footer';
+import { propertyService } from '../../../services/property.service';
+import { mapPropertyToUI } from '../../../utils/propertyMapping';
+import type { PropertyUI as Property } from '../../../utils/propertyMapping';
+import PropertyDetailedModal from '../../BrowseProperties/components/PropertyDetailedModal';
 
 const GuestHome: React.FC = () => {
   const navigate = useNavigate();
@@ -17,6 +21,94 @@ const GuestHome: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'tenant' | 'landlord'>('tenant');
   const [activeStepsTab, setActiveStepsTab] = useState<'tenant-steps' | 'landlord-steps'>('tenant-steps');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+
+  // Property and search/filter states
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedType, setSelectedType] = useState('');
+  const [selectedBeds, setSelectedBeds] = useState('');
+  const [selectedPrice, setSelectedPrice] = useState('');
+  const [activeChip, setActiveChip] = useState('');
+  const [sortBy, setSortBy] = useState('featured');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 6;
+
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const response = await propertyService.getAllProperties({
+          status: 'AVAILABLE',
+          page: 1,
+          limit: 100
+        });
+        setProperties(response.data.map(mapPropertyToUI));
+      } catch (err) {
+        console.error('Failed to fetch properties for GuestHome:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProperties();
+  }, []);
+
+  const getFloorText = (floor: number | null | undefined) => {
+    if (floor === null || floor === undefined) return 'N/A';
+    if (floor === 0) return 'Ground';
+    if (floor === 1) return '1st';
+    if (floor === 2) return '2nd';
+    if (floor === 3) return '3rd';
+    return `${floor}th`;
+  };
+
+  const filteredProperties = properties.filter((property) => {
+    const q = searchQuery.toLowerCase();
+    const matchesQuery =
+      !q ||
+      (property.title || '').toLowerCase().includes(q) ||
+      (property.address || '').toLowerCase().includes(q);
+
+    const matchesType = !selectedType || (property.type || '').toUpperCase() === selectedType.toUpperCase();
+
+    const matchesBeds =
+      !selectedBeds ||
+      (selectedBeds === '4' ? property.beds >= 4 : property.beds === parseInt(selectedBeds));
+
+    const matchesPrice = !selectedPrice || property.price <= parseInt(selectedPrice);
+
+    const matchesChip =
+      !activeChip ||
+      (property.tags &&
+        property.tags.some((tag) => tag.toLowerCase() === activeChip.toLowerCase())) ||
+      (property.furnishing &&
+        property.furnishing.toLowerCase().includes(activeChip.toLowerCase()));
+
+    return matchesQuery && matchesType && matchesBeds && matchesPrice && matchesChip;
+  });
+
+  const sortedProperties = [...filteredProperties].sort((a, b) => {
+    if (sortBy === 'price-asc') {
+      return a.price - b.price;
+    }
+    if (sortBy === 'price-desc') {
+      return b.price - a.price;
+    }
+    if (sortBy === 'newest') {
+      return b.id.localeCompare(a.id);
+    }
+    const aFeatured = a.tags && a.tags.some(t => t.toLowerCase() === 'featured' || t.toLowerCase() === '⭐ featured');
+    const bFeatured = b.tags && b.tags.some(t => t.toLowerCase() === 'featured' || t.toLowerCase() === '⭐ featured');
+    if (aFeatured && !bFeatured) return -1;
+    if (!aFeatured && bFeatured) return 1;
+    return 0;
+  });
+
+  const totalFilteredCount = sortedProperties.length;
+  const totalPages = Math.ceil(totalFilteredCount / pageSize) || 1;
+  const activePage = currentPage > totalPages ? totalPages : currentPage;
+  const startIndex = (activePage - 1) * pageSize;
+  const paginatedProperties = sortedProperties.slice(startIndex, startIndex + pageSize);
 
   const toggleLanguage = () => {
     const newLang = i18n.language === 'en' ? 'ar' : 'en';
@@ -137,7 +229,7 @@ const GuestHome: React.FC = () => {
       <div className="stats-strip reveal">
         <div className="stat">
           <div className="stat-num">100%</div>
-          <div className="stat-label">{t('guestHome.verified')} Process</div>
+          <div className="stat-label">Digital Process</div>
         </div>
         <div className="stat">
           <div className="stat-num">2 Roles</div>
@@ -156,6 +248,271 @@ const GuestHome: React.FC = () => {
           <div className="stat-label">Encrypted Wallet</div>
         </div>
       </div>
+
+      {/* 3.5 Properties Browse Section with Live Data */}
+      <section id="properties" className="props-section">
+        <div className="props-inner">
+          {/* Header */}
+          <div className="section-header reveal" style={{ padding: '0 0 0', textAlign: 'left' }}>
+            <div className="section-tag">Browse & Discover</div>
+            <h2 className="section-title" style={{ maxWidth: '560px' }}>Find Your Next Home</h2>
+
+          </div>
+
+          {/* Search Bar */}
+          <div className="props-search-wrap reveal">
+            <div className="props-search-row">
+              <div className="search-field" style={{ gridColumn: '1/-1', display: 'block' }}>
+                <label>Search Location or Property Name</label>
+              </div>
+              <div className="search-field" style={{ gridColumn: '1/-1' }}>
+                <div className="search-input-wrap">
+                  <span className="si-icon">🔍</span>
+                  <input
+                    type="text"
+                    className="props-input"
+                    placeholder="e.g. Cairo, Maadi, Zamalek, New Cairo…"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="search-field">
+                <label>Type</label>
+                <select
+                  className="props-select"
+                  value={selectedType}
+                  onChange={(e) => {
+                    setSelectedType(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                >
+                  <option value="">All Types</option>
+                  <option value="APARTMENT">Apartment</option>
+                  <option value="STUDIO">Studio</option>
+                  <option value="VILLA">Villa</option>
+                  <option value="DUPLEX">Duplex</option>
+                </select>
+              </div>
+
+              <div className="search-field">
+                <label>Bedrooms</label>
+                <select
+                  className="props-select"
+                  value={selectedBeds}
+                  onChange={(e) => {
+                    setSelectedBeds(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                >
+                  <option value="">Any</option>
+                  <option value="1">1 Bed</option>
+                  <option value="2">2 Beds</option>
+                  <option value="3">3 Beds</option>
+                  <option value="4">4+ Beds</option>
+                </select>
+              </div>
+
+              <div className="search-field">
+                <label>Max Price / mo</label>
+                <select
+                  className="props-select"
+                  value={selectedPrice}
+                  onChange={(e) => {
+                    setSelectedPrice(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                >
+                  <option value="">Any Price</option>
+                  <option value="5000">Up to 5,000</option>
+                  <option value="8000">Up to 8,000</option>
+                  <option value="12000">Up to 12,000</option>
+                  <option value="20000">Up to 20,000</option>
+                </select>
+              </div>
+
+              <div className="search-field" style={{ justifyContent: 'flex-end' }}>
+                <label style={{ visibility: 'hidden' }}>Search</label>
+                <button className="search-btn">
+                  <span>🔍</span> Search
+                </button>
+              </div>
+            </div>
+
+            {/* Filter Chips */}
+            <div className="props-filter-chips">
+              <span style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-muted)', alignSelf: 'center', marginRight: '4px' }}>
+                Quick:
+              </span>
+              {[
+                { label: 'All', value: '' },
+                { label: 'Furnished', value: 'furnished' },
+                { label: 'Parking', value: 'parking' },
+                { label: 'Gym', value: 'gym' },
+                { label: 'Pool', value: 'pool' },
+                { label: 'Pet-Friendly', value: 'pets' },
+                { label: 'Balcony', value: 'balcony' },
+                { label: 'Security', value: 'security' },
+              ].map((chip) => (
+                <button
+                  key={chip.label}
+                  className={`filter-chip ${activeChip === chip.value ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveChip(chip.value);
+                    setCurrentPage(1);
+                  }}
+                >
+                  {chip.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Results Header */}
+          <div className="props-results-header">
+            <div className="props-count">
+              <strong>{totalFilteredCount}</strong> properties found
+            </div>
+            <div className="props-sort-wrap">
+              <label>Sort by:</label>
+              <select
+                className="sort-select"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="featured">Featured</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="newest">Newest</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Loading / Grid / No Results */}
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '4rem 0' }}>
+              <div className="loading-spinner" style={{ margin: '0 auto 1rem' }}></div>
+              <p>Loading properties...</p>
+            </div>
+          ) : paginatedProperties.length === 0 ? (
+            <div id="no-results" style={{ textAlign: 'center', padding: '4rem 0' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔍</div>
+              <div style={{ fontFamily: '"Clash Display", sans-serif', fontSize: '1.3rem', fontWeight: '700', color: 'var(--gray-900)', marginBottom: '0.5rem' }}>
+                No properties found
+              </div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+                Try adjusting your filters or search term.
+              </div>
+            </div>
+          ) : (
+            <div className="props-grid">
+              {paginatedProperties.map((property) => {
+                const isFeatured = property.tags && property.tags.some(t => t.toLowerCase() === 'featured' || t.toLowerCase() === '⭐ featured');
+                const badge = isFeatured ? '⭐ Featured' : '✓ Available';
+                const badgeClass = isFeatured ? 'featured' : 'available';
+
+                return (
+                  <div
+                    key={property.id}
+                    className="prop-card reveal visible"
+                    onClick={() => setSelectedProperty(property)}
+                  >
+                    <div className="prop-img">
+                      <img src={property.image} alt={property.title} />
+                      <span className={`prop-badge ${badgeClass}`}>{badge}</span>
+                      <button
+                        className="prop-save"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate('/auth');
+                        }}
+                        title="Save"
+                      >
+                        🤍
+                      </button>
+                      <span className="prop-type-tag">{property.type || 'Apartment'}</span>
+                    </div>
+                    <div className="prop-body">
+                      <div className="prop-price">
+                        {property.price.toLocaleString()} <em>EGP / month</em>
+                      </div>
+                      <div className="prop-title">{property.title}</div>
+                      <div className="prop-location">
+                        <div className="prop-location-dot"></div>
+                        {property.address}
+                      </div>
+                      <div className="prop-specs">
+                        <div className="prop-spec">
+                          <strong>{property.beds}</strong>Beds
+                        </div>
+                        <div className="prop-spec">
+                          <strong>{property.baths}</strong>Baths
+                        </div>
+                        <div className="prop-spec">
+                          <strong>{property.sqft}</strong>m²
+                        </div>
+
+                      </div>
+                      <div className="prop-landlord">
+                        <img
+                          className="prop-avatar"
+                          src={property.ownerImage || 'https://i.pravatar.cc/150'}
+                          alt="Landlord"
+                        />
+                        <div className="prop-landlord-name">
+                          <strong>{property.ownerName}</strong>Verified Landlord
+                        </div>
+                        <button
+                          className="prop-apply-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate('/auth');
+                          }}
+                        >
+                          Apply Now
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {!loading && totalPages > 1 && (
+            <div className="props-pagination">
+              <button
+                className="page-btn arrow"
+                disabled={activePage === 1}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              >
+                ‹
+              </button>
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <button
+                  key={i}
+                  className={`page-btn ${activePage === i + 1 ? 'active' : ''}`}
+                  onClick={() => setCurrentPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                className="page-btn arrow"
+                disabled={activePage === totalPages}
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              >
+                ›
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* 4. Platform Overview */}
       <section id="how">
@@ -207,11 +564,7 @@ const GuestHome: React.FC = () => {
                 <div className="feature-title">Roommate Matching</div>
                 <div className="feature-desc">Post a profile, set your preferences, and connect with compatible co-tenants based on lifestyle, budget, and preferred area.</div>
               </div>
-              <div className="feature-card reveal">
-                <div className="feature-icon">📄</div>
-                <div className="feature-title">Digital Lease Signing</div>
-                <div className="feature-desc">Review every clause of your contract and sign digitally — legally binding, no printing or scanning required.</div>
-              </div>
+
               <div className="feature-card reveal">
                 <div className="feature-icon">💳</div>
                 <div className="feature-title">Pay Rent via Wallet</div>
@@ -271,11 +624,6 @@ const GuestHome: React.FC = () => {
                 <div className="feature-icon">🔩</div>
                 <div className="feature-title">Maintenance Oversight</div>
                 <div className="feature-desc">Monitor all tenant-reported issues across your properties. Assign providers, track status, and resolve efficiently.</div>
-              </div>
-              <div className="feature-card reveal">
-                <div className="feature-icon">📊</div>
-                <div className="feature-title">Property Analytics</div>
-                <div className="feature-desc">Occupancy rates, income reports, and portfolio performance at a glance — make data-driven decisions.</div>
               </div>
             </div>
           </div>
@@ -862,6 +1210,13 @@ const GuestHome: React.FC = () => {
           </div>
         </div>
       </section>
+      {selectedProperty && (
+        <PropertyDetailedModal
+          property={selectedProperty}
+          onClose={() => setSelectedProperty(null)}
+          isGuest={true}
+        />
+      )}
 
       {/* 10. Footer (Footer stays same) */}
       <Footer />

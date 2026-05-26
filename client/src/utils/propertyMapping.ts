@@ -1,8 +1,8 @@
-import { 
-    resolveLandlordUserIdFromPropertyResponse 
+import {
+    resolveLandlordUserIdFromPropertyResponse
 } from '../services/property.service';
-import type { 
-    PropertyResponse 
+import type {
+    PropertyResponse
 } from '../services/property.service';
 
 export interface PropertyUI {
@@ -35,6 +35,7 @@ export interface PropertyUI {
     locationLng: number | null;
     availabilityDateISO: string | null;
     listedAtISO: string;
+    type?: string;
 }
 
 const mapTargetTenant = (targetTenant: string) => {
@@ -83,6 +84,7 @@ export const mapPropertyToUI = (property: PropertyResponse): PropertyUI => {
         availableDate: property.availabilityDate ? new Date(property.availabilityDate).toLocaleDateString() : 'Not specified',
         availabilityDateISO: property.availabilityDate ?? null,
         listedAtISO: property.createdAt,
+        type: property.type || 'Apartment',
         locationLat:
             property.detailedLocation != null && Number.isFinite(property.detailedLocation.locationLat)
                 ? property.detailedLocation.locationLat

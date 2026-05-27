@@ -12,6 +12,7 @@ import {
     FaChevronLeft, FaChevronRight, FaCheckCircle
 } from 'react-icons/fa';
 import ApplicationModal, { type PrefillData } from './ApplicationModal';
+import BookVisitModal from './BookVisitModal';
 import AuthModal from '../../../components/global/AuthModal';
 import { messageService } from '../../../services/message.service';
 import {
@@ -144,6 +145,7 @@ const PropertyDetailModal = ({
 }: PropertyDetailModalProps) => {
     const navigate = useNavigate();
     const [showApplication, setShowApplication] = useState(false);
+    const [showBookVisit, setShowBookVisit] = useState(false);
     const [showGallery, setShowGallery] = useState(false);
     const [currentImgIdx, setCurrentImgIdx] = useState(0);
     const [showAuthModal, setShowAuthModal] = useState(false);
@@ -211,6 +213,14 @@ const PropertyDetailModal = ({
             setShowAuthModal(true);
         } else {
             setShowApplication(true);
+        }
+    };
+
+    const handleBookVisitClick = () => {
+        if (isGuest) {
+            setShowAuthModal(true);
+        } else {
+            setShowBookVisit(true);
         }
     };
 
@@ -726,7 +736,7 @@ const PropertyDetailModal = ({
                             </div>
 
                             <div className="secondary-actions">
-                                <button className="sec-btn"><FaCalendarAlt /> Book Viewing</button>
+                                <button className="sec-btn" onClick={handleBookVisitClick}><FaCalendarAlt /> Book Viewing</button>
                                 <button className="sec-btn" onClick={handleOpenReport}><FaRegCompass /> Report Listing</button>
                             </div>
                         </div>
@@ -810,6 +820,25 @@ const PropertyDetailModal = ({
                         </div>
                     </div>
                 </div>
+            )}
+
+            {showBookVisit && (
+                <BookVisitModal
+                    property={{
+                        id: String(property.id),
+                        title: String(property.title ?? ''),
+                        price: Number(property.price ?? 0),
+                        address: property.address,
+                        image: String(
+                            property.allImages && property.allImages.length > 0
+                                ? property.allImages[0]
+                                : property.image || ''
+                        ),
+                        ownerName: property.ownerName,
+                        landlordId: landlordProfileUserId ?? '',
+                    }}
+                    onClose={() => setShowBookVisit(false)}
+                />
             )}
         </div>
     );

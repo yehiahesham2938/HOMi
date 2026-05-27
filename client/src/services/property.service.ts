@@ -238,6 +238,26 @@ class PropertyService {
         const response = await apiClient.get(`/properties/landlords/${landlordId}/public-profile`);
         return response.data;
     }
+
+    async bookVisit(propertyId: string, visitDate: string): Promise<{ success: boolean; data: any }> {
+        const response = await apiClient.post(`/properties/${propertyId}/visits`, { visitDate });
+        return response.data;
+    }
+
+    async getMyVisit(propertyId: string): Promise<{ success: boolean; data: any }> {
+        const response = await apiClient.get(`/properties/${propertyId}/my-visit`);
+        return response.data;
+    }
+
+    async getPropertyVisits(propertyId: string): Promise<{ success: boolean; data: any[] }> {
+        const response = await apiClient.get(`/properties/${propertyId}/visits`);
+        return response.data;
+    }
+
+    async updateVisitStatus(propertyId: string, visitId: string, status: 'ACCEPTED' | 'DECLINED'): Promise<{ success: boolean; data: any }> {
+        const response = await apiClient.patch(`/properties/${propertyId}/visits/${visitId}`, { status });
+        return response.data;
+    }
 }
 
 export const propertyService = new PropertyService();

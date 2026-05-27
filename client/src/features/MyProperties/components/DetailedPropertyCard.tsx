@@ -1,5 +1,5 @@
 // client\src\features\MyProperties\components\DetailedPropertyCard.tsx
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -9,6 +9,7 @@ import {
 import ManagePropertyModal from './ManagePropertyModal'; // Import the new modal
 import OccupiedModal from './OccupiedModal';
 import DisablePropertyModal from './DisablePropertyModal';
+import LandlordVisitsModal from './LandlordVisitsModal';
 import propertyService from '../../../services/property.service';
 import './DetailedPropertyCard.css';
 import type { LandlordContract } from '../../../services/contract.service';
@@ -38,7 +39,25 @@ const DetailedPropertyCard = ({ property }: { property: LandlordPropertyRow }) =
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [isOccupiedModalOpen, setIsOccupiedModalOpen] = useState(false);
   const [isDisableModalOpen, setIsDisableModalOpen] = useState(false);
+  const [isVisitsModalOpen, setIsVisitsModalOpen] = useState(false);
   const [enabling, setEnabling] = useState(false);
+  const [pendingVisitsCount, setPendingVisitsCount] = useState(0);
+
+  const fetchPendingCount = useCallback(async () => {
+    try {
+      const res = await propertyService.getPropertyVisits(property.id);
+      if (res.success && res.data) {
+        const count = res.data.filter((v: any) => v.status === 'PENDING').length;
+        setPendingVisitsCount(count);
+      }
+    } catch (err) {
+      console.error("Failed to fetch visits count for property", property.id, err);
+    }
+  }, [property.id]);
+
+  useEffect(() => {
+    void fetchPendingCount();
+  }, [fetchPendingCount]);
 
   const handleEnable = async () => {
     setEnabling(true);
@@ -168,6 +187,12 @@ const DetailedPropertyCard = ({ property }: { property: LandlordPropertyRow }) =
                 Disable Property
               </button>
             )}
+            <button className="history-btn" onClick={() => setIsVisitsModalOpen(true)} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              Booked Visits
+              {pendingVisitsCount > 0 && (
+                <span className="visit-badge-count">{pendingVisitsCount}</span>
+              )}
+            </button>
           </div>
         </div>
       </div>
@@ -178,6 +203,19 @@ const DetailedPropertyCard = ({ property }: { property: LandlordPropertyRow }) =
           <ManagePropertyModal
             property={property}
             onClose={() => setIsManageModalOpen(false)}
+          />,
+          document.body
+        )
+      )}
+
+      {isVisitsModalOpen && (
+        createPortal(
+          <LandlordVisitsModal
+            property={{ id: property.id, name: property.name }}
+            onClose={() => {
+              setIsVisitsModalOpen(false);
+              void fetchPendingCount();
+            }}
           />,
           document.body
         )

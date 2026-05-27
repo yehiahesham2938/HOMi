@@ -12,10 +12,13 @@ import {
     PropertyReportReason,
     PropertyReportStatus,
     sequelize,
+    VisitBooking,
+    VisitBookingStatus,
 } from '../models/index.js';
 import { User, UserRole } from '../../auth/models/User.js';
 import { Profile } from '../../auth/models/Profile.js';
 import { testingClockService } from '../../../shared/services/testing-clock.service.js';
+import { notificationService, NotificationType } from '../../notifications/services/notification.service.js';
 
 import type {
     CreatePropertyRequest,
@@ -816,6 +819,191 @@ class PropertyService {
                 documentUrl: d.document_url,
             })),
         };
+    }
+
+    /**
+     * Book a visit viewing for a property (tenant only)
+     */
+    async bookVisit(propertyId: string, tenantId: string, visitDateStr: string): Promise<any> {
+        const property = await Property.findByPk(propertyId, {
+            include: [
+                {
+                    model: User,
+                    as: 'landlord',
+                    include: [{ model: Profile, as: 'profile' }],
+                }
+            ]
+        });
+
+        if (!property) {
+            throw new PropertyError('Property not found', 404, 'PROPERTY_NOT_FOUND');
+        }
+
+        // Verify tenant exists
+        const tenant = await User.findByPk(tenantId, {
+            include: [{ model: Profile, as: 'profile' }],
+        });
+        if (!tenant) {
+            throw new PropertyError('Tenant not found', 404, 'TENANT_NOT_FOUND');
+        }
+
+        // Check for existing pending/accepted visit request
+        const existing = await VisitBooking.findOne({
+            where: {
+                property_id: propertyId,
+                tenant_id: tenantId,
+                status: {
+                    [Op.in]: ['PENDING', 'ACCEPTED'],
+                },
+            },
+        });
+
+        if (existing) {
+            throw new PropertyError('You already have an active or scheduled visit booking for this property', 400, 'DUPLICATE_ACTIVE_BOOKING');
+        }
+
+        const visitDate = new Date(visitDateStr);
+        if (Number.isNaN(visitDate.getTime())) {
+            throw new PropertyError('Invalid visit date', 400, 'INVALID_VISIT_DATE');
+        }
+
+        // Create visit booking
+        const booking = await VisitBooking.create({
+            property_id: propertyId,
+            tenant_id: tenantId,
+            visit_date: visitDate,
+            status: 'PENDING',
+        });
+
+        // Send notification to the landlord
+        const tenantName = tenant.profile
+            ? `${tenant.profile.first_name} ${tenant.profile.last_name}`.trim()
+            : 'A tenant';
+
+        await notificationService.create({
+            userId: property.landlord_id,
+            type: NotificationType.VISIT_REQUEST_RECEIVED,
+            title: 'New Visit Request',
+            body: `${tenantName} requested to visit "${property.title}" on ${visitDate.toLocaleString('en-US')}.`,
+            relatedEntityType: 'Property',
+            relatedEntityId: propertyId,
+            data: {
+                visitId: booking.id,
+                visitDate: booking.visit_date,
+            },
+        });
+
+        return booking;
+    }
+
+    /**
+     * Get active visit booking (PENDING/ACCEPTED) for a tenant on a property
+     */
+    async getMyVisit(propertyId: string, tenantId: string): Promise<any> {
+        const booking = await VisitBooking.findOne({
+            where: {
+                property_id: propertyId,
+                tenant_id: tenantId,
+                status: {
+                    [Op.in]: ['PENDING', 'ACCEPTED'],
+                },
+            },
+        });
+        return booking;
+    }
+
+    /**
+     * Get all visit requests for a property (landlord only)
+     */
+    async getPropertyVisits(propertyId: string, landlordId: string): Promise<any[]> {
+        const property = await Property.findByPk(propertyId);
+        if (!property) {
+            throw new PropertyError('Property not found', 404, 'PROPERTY_NOT_FOUND');
+        }
+
+        if (property.landlord_id !== landlordId) {
+            throw new PropertyError('You do not have permission to view visits for this property', 403, 'FORBIDDEN');
+        }
+
+        const bookings = await VisitBooking.findAll({
+            where: { property_id: propertyId },
+            include: [
+                {
+                    model: User,
+                    as: 'tenant',
+                    attributes: ['id', 'email'],
+                    include: [
+                        {
+                            model: Profile,
+                            as: 'profile',
+                            attributes: ['first_name', 'last_name', 'avatar_url'],
+                        },
+                    ],
+                },
+            ],
+            order: [['visit_date', 'ASC']],
+        });
+
+        return bookings;
+    }
+
+    /**
+     * Update status of a visit request (landlord only: ACCEPTED/DECLINED)
+     */
+    async updateVisitStatus(
+        propertyId: string,
+        visitId: string,
+        landlordId: string,
+        status: 'ACCEPTED' | 'DECLINED'
+    ): Promise<any> {
+        const property = await Property.findByPk(propertyId);
+        if (!property) {
+            throw new PropertyError('Property not found', 404, 'PROPERTY_NOT_FOUND');
+        }
+
+        if (property.landlord_id !== landlordId) {
+            throw new PropertyError('You do not have permission to manage visits for this property', 403, 'FORBIDDEN');
+        }
+
+        const booking = await VisitBooking.findOne({
+            where: { id: visitId, property_id: propertyId },
+        });
+
+        if (!booking) {
+            throw new PropertyError('Visit booking not found', 404, 'VISIT_NOT_FOUND');
+        }
+
+        if (booking.status !== 'PENDING') {
+            throw new PropertyError('You can only update pending visit requests', 400, 'INVALID_VISIT_STATUS');
+        }
+
+        // Update booking status
+        await booking.update({ status });
+
+        // Notify tenant
+        const notificationType = status === 'ACCEPTED'
+            ? NotificationType.VISIT_REQUEST_ACCEPTED
+            : NotificationType.VISIT_REQUEST_DECLINED;
+
+        const title = status === 'ACCEPTED' ? 'Visit Request Accepted!' : 'Visit Request Declined';
+        const body = status === 'ACCEPTED'
+            ? `Your request to visit "${property.title}" has been accepted! Scheduled for ${booking.visit_date.toLocaleString('en-US')}.`
+            : `Your request to visit "${property.title}" was declined by the landlord.`;
+
+        await notificationService.create({
+            userId: booking.tenant_id,
+            type: notificationType,
+            title,
+            body,
+            relatedEntityType: 'Property',
+            relatedEntityId: propertyId,
+            data: {
+                visitId: booking.id,
+                status: booking.status,
+            },
+        });
+
+        return booking;
     }
 }
 

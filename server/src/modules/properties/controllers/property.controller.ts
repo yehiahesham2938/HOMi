@@ -163,6 +163,99 @@ class PropertyController {
             next(error);
         }
     }
+
+    /**
+     * POST /api/properties/:id/visits
+     * Book a visit (tenant only)
+     */
+    async bookVisit(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { id } = req.params;
+            const tenantId = (req as any).user.userId;
+            const { visitDate } = req.body;
+
+            const booking = await propertyService.bookVisit(id as string, tenantId as string, visitDate as string);
+
+            res.status(201).json({
+                success: true,
+                message: 'Visit requested successfully',
+                data: booking,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * GET /api/properties/:id/my-visit
+     * Get active visit booking for a tenant on a property
+     */
+    async getMyVisit(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { id } = req.params;
+            const tenantId = (req as any).user.userId;
+
+            const booking = await propertyService.getMyVisit(id as string, tenantId as string);
+
+            res.status(200).json({
+                success: true,
+                data: booking,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * GET /api/properties/:id/visits
+     * Get all visit requests for a property (landlord only)
+     */
+    async getPropertyVisits(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { id } = req.params;
+            const landlordId = (req as any).user.userId;
+
+            const bookings = await propertyService.getPropertyVisits(id as string, landlordId as string);
+
+            res.status(200).json({
+                success: true,
+                data: bookings,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * PATCH /api/properties/:id/visits/:visitId
+     * Update visit request status (landlord only)
+     */
+    async updateVisitStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { id, visitId } = req.params;
+            const landlordId = (req as any).user.userId;
+            const { status } = req.body;
+
+            if (status !== 'ACCEPTED' && status !== 'DECLINED') {
+                throw new PropertyError('Status must be ACCEPTED or DECLINED', 400, 'INVALID_STATUS');
+            }
+
+            const booking = await propertyService.updateVisitStatus(
+                id as string,
+                visitId as string,
+                landlordId as string,
+                status as 'ACCEPTED' | 'DECLINED'
+            );
+
+            res.status(200).json({
+                success: true,
+                message: `Visit request ${status.toLowerCase()} successfully`,
+                data: booking,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 // Export singleton instance

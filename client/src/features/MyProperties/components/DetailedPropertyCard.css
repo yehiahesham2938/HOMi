@@ -457,3 +457,33 @@
   font-style: italic;
   font-weight: 500;
 }
+
+/* Pending Visits Badge styling */
+.visit-badge-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ef4444;
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 800;
+  border-radius: 50px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  margin-left: 2px;
+  line-height: 1;
+  box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4);
+  animation: badgeScaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes badgeScaleIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

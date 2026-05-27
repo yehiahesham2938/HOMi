@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FiBell, FiDollarSign, FiTool, FiUserPlus, FiChevronRight } from 'react-icons/fi';
 import './Notifications.css';
@@ -7,6 +7,8 @@ import authService from '../../../../services/auth.service';
 import propertyService from '../../../../services/property.service';
 import rentalRequestService from '../../../../services/rental-request.service';
 import contractService from '../../../../services/contract.service';
+import notificationService from '../../../../services/notification.service';
+import socketService from '../../../../services/socket.service';
 
 interface LandlordAlert {
   id: string;
@@ -24,7 +26,7 @@ const Notifications: React.FC = () => {
   const [alerts, setAlerts] = useState<LandlordAlert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const relativeTime = (value: string): string => {
+  const relativeTime = useCallback((value: string): string => {
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return t('landlordHomeComponents.justNow');
 
@@ -41,92 +43,113 @@ const Notifications: React.FC = () => {
     if (diffDays < 7) return t('landlordHomeComponents.daysAgo', { count: diffDays });
 
     return date.toLocaleDateString();
-  };
+  }, [t]);
 
-  useEffect(() => {
-    let isMounted = true;
+  const loadAlerts = useCallback(async () => {
+    const currentUser = authService.getCurrentUser();
+    if (!currentUser?.user?.id) {
+      setAlerts([]);
+      setIsLoading(false);
+      return;
+    }
 
-    const loadAlerts = async () => {
-      const currentUser = authService.getCurrentUser();
-      if (!currentUser?.user?.id) {
-        if (isMounted) {
-          setAlerts([]);
-          setIsLoading(false);
-        }
-        return;
-      }
+    setIsLoading(true);
+    try {
+      const [requestsResponse, contractsResponse, propertiesResponse, notificationsResponse] = await Promise.all([
+        rentalRequestService.getLandlordRequests({ page: 1, limit: 8 }),
+        contractService.getLandlordContracts({ page: 1, limit: 8 }),
+        propertyService.getAllProperties({ landlordId: currentUser.user.id, page: 1, limit: 8 }),
+        notificationService.list({ limit: 15 }),
+      ]);
 
-      setIsLoading(true);
-      try {
-        const [requestsResponse, contractsResponse, propertiesResponse] = await Promise.all([
-          rentalRequestService.getLandlordRequests({ page: 1, limit: 8 }),
-          contractService.getLandlordContracts({ page: 1, limit: 8 }),
-          propertyService.getAllProperties({ landlordId: currentUser.user.id, page: 1, limit: 8 }),
-        ]);
+      const requestAlerts: LandlordAlert[] = (requestsResponse.data ?? []).map((request) => {
+        let requestTitle = t('landlordHomeComponents.newRentalRequest');
+        if (request.status === 'APPROVED') requestTitle = t('landlordHomeComponents.requestApproved');
+        if (request.status === 'DECLINED') requestTitle = t('landlordHomeComponents.requestDeclined');
 
-        const requestAlerts: LandlordAlert[] = (requestsResponse.data ?? []).map((request) => {
-          let requestTitle = t('landlordHomeComponents.newRentalRequest');
-          if (request.status === 'APPROVED') requestTitle = t('landlordHomeComponents.requestApproved');
-          if (request.status === 'DECLINED') requestTitle = t('landlordHomeComponents.requestDeclined');
+        return {
+          id: `req-${request.id}`,
+          type: 'lead',
+          title: requestTitle,
+          desc: `${request.tenant.firstName} ${request.tenant.lastName} for ${request.property.title}`,
+          time: relativeTime(request.createdAt),
+          unread: request.status === 'PENDING',
+          createdAt: request.createdAt,
+        };
+      });
 
-          return {
-            id: `req-${request.id}`,
-            type: 'lead',
-            title: requestTitle,
-            desc: `${request.tenant.firstName} ${request.tenant.lastName} for ${request.property.title}`,
-            time: relativeTime(request.createdAt),
-            unread: request.status === 'PENDING',
-            createdAt: request.createdAt,
-          };
-        });
+      const contractAlerts: LandlordAlert[] = (contractsResponse.data ?? []).map((contract) => {
+        const propertyTitle = contract.property?.title || 'Property';
+        return {
+          id: `contract-${contract.id}`,
+          type: 'payment',
+          title: contract.status === 'ACTIVE' ? t('landlordHomeComponents.leaseActive') : `Contract ${contract.status}`,
+          desc: `${propertyTitle} • ${contract.status === 'PENDING_PAYMENT' ? t('landlordHomeComponents.paymentPending') : `Contract ${contract.status.replace(/_/g, ' ')}`}`,
+          time: relativeTime(contract.createdAt),
+          unread: contract.status === 'PENDING_LANDLORD' || contract.status === 'PENDING_TENANT',
+          createdAt: contract.createdAt,
+        };
+      });
 
-        const contractAlerts: LandlordAlert[] = (contractsResponse.data ?? []).map((contract) => {
-          const propertyTitle = contract.property?.title || 'Property';
-          return {
-            id: `contract-${contract.id}`,
-            type: 'payment',
-            title: contract.status === 'ACTIVE' ? t('landlordHomeComponents.leaseActive') : `Contract ${contract.status}`,
-            desc: `${propertyTitle} • ${contract.status === 'PENDING_PAYMENT' ? t('landlordHomeComponents.paymentPending') : `Contract ${contract.status.replace(/_/g, ' ')}`}`,
-            time: relativeTime(contract.createdAt),
-            unread: contract.status === 'PENDING_LANDLORD' || contract.status === 'PENDING_TENANT',
-            createdAt: contract.createdAt,
-          };
-        });
+      const propertyAlerts: LandlordAlert[] = (propertiesResponse.data ?? []).map((property) => ({
+        id: `property-${property.id}`,
+        type: 'maintenance',
+        title: property.status === 'Published' ? t('landlordHomeComponents.listingPublished') : `Listing ${property.status}`,
+        desc: `${property.title} listed at $${property.monthlyPrice}/month`,
+        time: relativeTime(property.createdAt),
+        unread: property.status === 'Draft',
+        createdAt: property.createdAt,
+      }));
 
-        const propertyAlerts: LandlordAlert[] = (propertiesResponse.data ?? []).map((property) => ({
-          id: `property-${property.id}`,
-          type: 'maintenance',
-          title: property.status === 'Published' ? t('landlordHomeComponents.listingPublished') : `Listing ${property.status}`,
-          desc: `${property.title} listed at $${property.monthlyPrice}/month`,
-          time: relativeTime(property.createdAt),
-          unread: property.status === 'Draft',
-          createdAt: property.createdAt,
+      const dbAlerts: LandlordAlert[] = (notificationsResponse.notifications ?? [])
+        .filter((n) => n.type.startsWith('VISIT_'))
+        .map((n) => ({
+          id: `notif-${n.id}`,
+          type: 'lead',
+          title: n.title,
+          desc: n.body,
+          time: relativeTime(n.createdAt),
+          unread: !n.isRead,
+          createdAt: n.createdAt,
         }));
 
-        const merged = [...requestAlerts, ...contractAlerts, ...propertyAlerts]
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-          .slice(0, 1); // <-- Changed from 12 to 3
+      const merged = [...requestAlerts, ...contractAlerts, ...propertyAlerts, ...dbAlerts]
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-        if (isMounted) {
-          setAlerts(merged);
-        }
-      } catch {
-        if (isMounted) {
-          setAlerts([]);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
+      setAlerts(merged);
+    } catch {
+      setAlerts([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [t, relativeTime]);
 
+  useEffect(() => {
     void loadAlerts();
+  }, [loadAlerts]);
 
-    return () => {
-      isMounted = false;
+  useEffect(() => {
+    const sock = socketService.connect();
+    if (!sock) return;
+
+    const handleNewNotification = () => {
+      void loadAlerts();
     };
-  }, [t]);
+
+    socketService.onNotificationNew(handleNewNotification);
+    return () => {
+      socketService.offNotificationNew(handleNewNotification);
+    };
+  }, [loadAlerts]);
+
+  const handleMarkAllRead = async () => {
+    try {
+      await notificationService.markAllRead();
+      void loadAlerts();
+    } catch (err) {
+      console.error('Failed to mark all notifications as read:', err);
+    }
+  };
 
   const hasUnread = useMemo(() => alerts.some((a) => a.unread), [alerts]);
   const emptyStateMessage = isLoading ? t('landlordHomeComponents.loadingActivity') : t('landlordHomeComponents.noRecentActivity');
@@ -151,7 +174,7 @@ const Notifications: React.FC = () => {
             </div>
             <h3>{t('landlordHomeComponents.activityFeed')}</h3>
           </div>
-          <button className="btn-mark-all">
+          <button className="btn-mark-all" onClick={handleMarkAllRead}>
             <span>{t('landlordHomeComponents.clear')}</span>
           </button>
         </header>
@@ -160,7 +183,7 @@ const Notifications: React.FC = () => {
           {alerts.length === 0 ? (
             <div className="notif-empty-state">{emptyStateMessage}</div>
           ) : (
-            alerts.map((alert) => (
+            alerts.slice(0, 3).map((alert) => (
               <button
                 key={alert.id}
                 type="button"

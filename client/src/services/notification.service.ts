@@ -13,6 +13,9 @@ export type NotificationType =
     | 'MAINTENANCE_CONFLICT_RESOLVED'
     | 'MAINTENANCE_LANDLORD_CHARGE'
     | 'MAINTENANCE_RATED'
+    | 'VISIT_REQUEST_RECEIVED'
+    | 'VISIT_REQUEST_ACCEPTED'
+    | 'VISIT_REQUEST_DECLINED'
     | 'SYSTEM';
 
 export interface NotificationItem {

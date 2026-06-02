@@ -1,12 +1,24 @@
 .premium-detailed-card {
     display: flex;
-    background: #ffffff;
-    border-radius: 24px;
-    overflow: hidden;
-    border: 1px solid #f1f5f9;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-    height: 380px; /* Fixed height for consistency */
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 28px;
+    overflow: visible; /* Required for floating rules modal */
+    border: 1px solid rgba(59, 130, 246, 0.12);
+    box-shadow: 
+        0 20px 45px -12px rgba(15, 23, 42, 0.06), 
+        0 4px 12px rgba(15, 23, 42, 0.02);
+    height: 380px;
     margin-bottom: 2rem;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.premium-detailed-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 30px 60px -15px rgba(15, 23, 42, 0.1), 
+        0 10px 20px rgba(59, 130, 246, 0.03);
+    border-color: rgba(59, 130, 246, 0.25);
 }
 
 /* Image Side */
@@ -14,153 +26,258 @@
     width: 40%;
     position: relative;
     overflow: hidden;
+    border-top-left-radius: 28px;
+    border-bottom-left-radius: 28px;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05);
 }
 
 .hero-rental-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.6s ease;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.premium-detailed-card:hover .hero-rental-img {
+    transform: scale(1.06);
 }
 
 .placeholder-rental-img {
     background: linear-gradient(145deg, #e2e8f0, #cbd5e1);
-    color: #334155;
+    color: #475569;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 12px;
     font-weight: 700;
     text-align: center;
     padding: 16px;
 }
 
 .placeholder-rental-img svg {
-    font-size: 1.5rem;
-}
-
-.placeholder-rental-img span {
-    font-size: 0.82rem;
-    max-width: 180px;
-}
-
-.premium-detailed-card:hover .hero-rental-img {
-    transform: scale(1.05);
+    font-size: 2rem;
+    color: #64748b;
 }
 
 .glass-status-tag {
     position: absolute;
     top: 20px;
     left: 20px;
-    background: rgba(16, 185, 129, 0.9);
-    backdrop-filter: blur(8px);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
     color: white;
-    padding: 6px 16px;
-    border-radius: 100px;
-    font-size: 0.75rem;
-    font-weight: 700;
+    padding: 6px 18px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.08em;
+    border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 /* Content Side */
 .card-content-side {
     width: 60%;
-    padding: 2.5rem;
+    padding: 2rem 2.5rem;
     display: flex;
     flex-direction: column;
 }
 
 .rental-header {
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.75rem;
 }
 
 .location-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: #eff6ff;
-    color: #3b82f6;
-    padding: 4px 12px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    margin-bottom: 0.75rem;
+    background: rgba(59, 130, 246, 0.07);
+    color: #2563eb;
+    border: 1px solid rgba(59, 130, 246, 0.12);
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-weight: 750;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
 }
 
 .rental-header h2 {
-    font-size: 1.75rem;
+    font-size: 1.65rem;
     color: #0f172a;
     margin: 0;
     font-weight: 800;
+    letter-spacing: -0.02em;
 }
 
 .full-address {
     color: #64748b;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     margin-top: 4px;
+    line-height: 1.35;
 }
 
-/* Info Grid */
+/* Property Specs Chips */
+.property-specs-chips {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1rem;
+}
+
+.spec-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(241, 245, 249, 0.85);
+    border: 1px solid #e2e8f0;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #475569;
+}
+
+.spec-chip svg {
+    color: #64748b;
+}
+
+/* Info Grid Layout */
 .info-grid-modern {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.25rem;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
     margin-bottom: auto;
 }
 
-.info-tile {
+/* Landlord Profile Widget */
+.landlord-profile-card {
     display: flex;
     align-items: center;
     gap: 12px;
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    padding: 10px 14px;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
 }
 
-.info-tile.full-width {
-    grid-column: span 2;
-    padding-top: 10px;
-    border-top: 1px solid #f1f5f9;
-}
-
-.tile-icon {
-    font-size: 1.25rem;
-    color: #94a3b8;
-    background: #f8fafc;
-    width: 44px;
-    height: 44px;
+.landlord-avatar-placeholder {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    font-weight: 800;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 12px;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
 }
 
-.tile-data {
+.landlord-details {
     display: flex;
     flex-direction: column;
+    gap: 1px;
+    flex: 1;
+    min-width: 0;
 }
 
-.tile-label {
-    font-size: 0.7rem;
+.landlord-label {
+    font-size: 0.65rem;
     color: #94a3b8;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.landlord-name {
+    font-size: 0.85rem;
+    color: #1e293b;
+    font-weight: 750;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.landlord-contact-badge {
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: #2563eb;
+    background: rgba(37, 99, 235, 0.06);
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(37, 99, 235, 0.1);
+}
+
+/* Lease Progress Timeline */
+.lease-progress-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    padding: 12px 14px;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
+}
+
+.lease-progress-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+}
+
+.lease-progress-header span {
+    color: #94a3b8;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.lease-progress-header strong {
+    color: #1e293b;
+    font-weight: 750;
+}
+
+.lease-progress-bar-outer {
+    width: 100%;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.lease-progress-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+    border-radius: 99px;
+    transition: width 0.5s ease-out;
+}
+
+.lease-progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    color: #64748b;
     font-weight: 600;
 }
 
-.tile-value {
-    font-size: 0.95rem;
-    color: #1e293b;
-    font-weight: 700;
-}
-
-.tile-value small {
-    color: #94a3b8;
-    font-weight: 400;
-}
-
-/* Actions */
+/* Actions Row */
 .card-actions-row {
-    margin-top: 1.5rem;
+    margin-top: 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+}
+
+.pdf-buttons-group {
+    display: flex;
+    gap: 8px;
 }
 
 .download-contract-btn {
@@ -170,44 +287,26 @@
     background: #ffffff;
     border: 1.5px solid #e2e8f0;
     color: #475569;
-    padding: 10px 20px;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 0.9rem;
+    padding: 10px 16px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 0.85rem;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .download-contract-btn:hover {
-    border-color: #3b82f6;
-    color: #3b82f6;
-    background: #f0f7ff;
-}
-
-/* Mobile Responsiveness */
-@media (max-width: 900px) {
-    .premium-detailed-card {
-        flex-direction: column;
-        height: auto;
-    }
-    .card-visual-side, .card-content-side {
-        width: 100%;
-    }
-    .card-visual-side {
-        height: 200px;
-    }
-}
-
-/* ... Previous CSS remains ... */
-
-.card-actions-row {
-    margin-top: 1.5rem;
-    display: flex;
-    gap: 12px;
-    position: relative; /* Context for the absolute modal */
+    border-color: #2563eb;
+    color: #2563eb;
+    background: rgba(37, 99, 235, 0.04);
+    box-shadow: 0 6px 14px rgba(37, 99, 235, 0.08);
 }
 
 /* Rules Button */
+.rules-wrapper {
+    position: relative;
+}
+
 .rules-trigger-btn {
     display: flex;
     align-items: center;
@@ -215,38 +314,49 @@
     background: #f8fafc;
     border: 1.5px solid #e2e8f0;
     color: #64748b;
-    padding: 10px 18px;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 0.9rem;
+    padding: 10px 16px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 0.85rem;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.rules-trigger-btn:hover, .rules-trigger-btn.active {
-    background: #1e293b;
+.rules-trigger-btn:hover, 
+.rules-trigger-btn.active {
+    background: #0f172a;
     color: #ffffff;
-    border-color: #1e293b;
+    border-color: #0f172a;
+    box-shadow: 0 8px 16px rgba(15, 23, 42, 0.15);
 }
 
-/* Floating Mini Modal */
+/* Floating Glass Rules Modal */
 .mini-rules-modal {
     position: absolute;
-    bottom: calc(100% + 12px); /* Floats above the button */
-    left: 0;
-    width: 260px;
-    background: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    border: 1px solid #e2e8f0;
-    padding: 16px;
+    bottom: calc(100% + 12px);
+    right: 0;
+    width: 280px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(16px);
+    border-radius: 20px;
+    box-shadow: 
+        0 20px 40px rgba(15, 23, 42, 0.18),
+        0 0 0 1px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    padding: 18px;
     z-index: 100;
-    animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes slideUpFade {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { 
+        opacity: 0; 
+        transform: translateY(12px) scale(0.97); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+    }
 }
 
 .rules-header {
@@ -255,30 +365,34 @@
     align-items: center;
     margin-bottom: 12px;
     padding-bottom: 8px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .rules-header span {
-    font-size: 0.85rem;
+    font-size: 0.78rem;
     font-weight: 800;
     color: #0f172a;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.06em;
 }
 
 .close-rules {
     cursor: pointer;
     font-size: 0.9rem;
     color: #94a3b8;
-    transition: 0.2s;
+    transition: all 0.2s ease;
 }
 
-.close-rules:hover { color: #ef4444; }
+.close-rules:hover { 
+    color: #ef4444; 
+}
 
 .rules-list {
     list-style: none;
     padding: 0;
     margin: 0;
+    max-height: 180px;
+    overflow-y: auto;
 }
 
 .rules-list li {
@@ -287,22 +401,44 @@
     padding: 6px 0;
     display: flex;
     align-items: flex-start;
+    line-height: 1.35;
 }
 
 .rules-list li::before {
     content: "•";
-    color: #3b82f6;
+    color: #8b5cf6;
     font-weight: bold;
     margin-right: 8px;
 }
 
-/* Ensure this doesn't get clipped by the main card's overflow hidden */
-.premium-detailed-card {
-    overflow: visible; /* Changed from hidden to allow the floating modal */
-}
-
-.card-visual-side {
-    border-top-left-radius: 24px;
-    border-bottom-left-radius: 24px;
-    overflow: hidden; /* Keep the image clipped */
+/* Mobile Responsiveness */
+@media (max-width: 900px) {
+    .premium-detailed-card {
+        flex-direction: column;
+        height: auto;
+    }
+    .card-visual-side {
+        width: 100%;
+        height: 220px;
+        border-top-left-radius: 28px;
+        border-top-right-radius: 28px;
+        border-bottom-left-radius: 0;
+    }
+    .card-content-side {
+        width: 100%;
+        padding: 1.5rem;
+    }
+    .card-actions-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    .pdf-buttons-group {
+        flex-direction: column;
+    }
+    .mini-rules-modal {
+        left: 0;
+        right: 0;
+        width: auto;
+    }
 }

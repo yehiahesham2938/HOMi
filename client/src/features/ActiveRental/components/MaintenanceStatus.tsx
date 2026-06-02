@@ -18,8 +18,16 @@ const STATUS_CONFIG: Record<string, { label: string; className: string; icon: Re
 };
 
 const getProviderName = (req: MaintenanceRequest): string => {
-    if (!req.provider) return 'Awaiting bids';
+    if (!req.provider) return 'Awaiting vendor matching';
     return req.provider.businessName || `${req.provider.firstName} ${req.provider.lastName}`.trim();
+};
+
+const getActiveStep = (status: string): number => {
+    if (['OPEN'].includes(status)) return 1;
+    if (['ASSIGNED', 'EN_ROUTE'].includes(status)) return 2;
+    if (['IN_PROGRESS', 'AWAITING_CONFIRMATION', 'DISPUTED'].includes(status)) return 3;
+    if (['COMPLETED', 'RESOLVED_BY_ADMIN'].includes(status)) return 4;
+    return 1;
 };
 
 const MaintenanceStatus = ({ contract }: { contract: LandlordContract | null }) => {
@@ -44,7 +52,9 @@ const MaintenanceStatus = ({ contract }: { contract: LandlordContract | null }) 
     const activeRequests = requests.filter(
         r => !['COMPLETED', 'CANCELLED', 'RESOLVED_BY_ADMIN'].includes(r.status)
     );
-    const recentRequests = requests.slice(0, 3);
+    const recentRequests = requests.slice(0, 2); // limit to 2 for cleaner layout with timeline spacing
+
+    const steps = ["Posted", "Scheduled", "In Progress", "Completed"];
 
     return (
         <div className="mstatus-card">
@@ -54,14 +64,14 @@ const MaintenanceStatus = ({ contract }: { contract: LandlordContract | null }) 
                         <FaTools />
                     </div>
                     <div>
-                        <h3>Maintenance</h3>
+                        <h3>Maintenance Issues</h3>
                         <span className="mstatus-subtitle">
                             {loading ? 'Loading...' : `${activeRequests.length} active issue${activeRequests.length !== 1 ? 's' : ''}`}
                         </span>
                     </div>
                 </div>
                 <button className="mstatus-view-all-btn" onClick={() => navigate('/tenant-maintenance?tab=active')}>
-                    View all <FaChevronRight />
+                    View All <FaChevronRight />
                 </button>
             </div>
 
@@ -74,32 +84,53 @@ const MaintenanceStatus = ({ contract }: { contract: LandlordContract | null }) 
                 ) : recentRequests.length === 0 ? (
                     <div className="mstatus-empty">
                         <div className="mstatus-empty-icon"><FaTools /></div>
-                        <p>No maintenance requests yet.</p>
-                        <div className="mstatus-post-btn-wrap" onClick={() => navigate('/tenant-maintenance?tab=post')}>
-                            Post an Issue
-                        </div>
+                        <p>Your property maintenance feed is clear.</p>
+                        <button className="mstatus-post-btn-wrap" onClick={() => navigate('/tenant-maintenance?tab=post')}>
+                            Report Repair
+                        </button>
                     </div>
                 ) : (
                     <div className="mstatus-list">
                         {recentRequests.map(req => {
                             const sc = STATUS_CONFIG[req.status] ?? { label: req.status, className: 'open', icon: <FaClock /> };
+                            const activeStep = getActiveStep(req.status);
                             return (
                                 <div
                                     key={req.id}
-                                    className="mstatus-row"
+                                    className="maintenance-timeline-box"
                                     onClick={() => navigate('/tenant-maintenance?tab=active')}
                                 >
-                                    <div className={`mstatus-dot-col ${sc.className}`}>
-                                        {sc.icon}
-                                    </div>
-                                    <div className="mstatus-info">
-                                        <span className="mstatus-issue-title">{req.title}</span>
-                                        <span className="mstatus-provider">
-                                            {getProviderName(req)} &bull; {req.category}
+                                    <div className="timeline-header">
+                                        <div className="timeline-title-group">
+                                            <span className={`timeline-category-badge category-${req.category.toLowerCase().replace(/\s+/g, '-')}`}>
+                                                {req.category}
+                                            </span>
+                                            <h4>{req.title}</h4>
+                                        </div>
+                                        <span className={`mstatus-badge ${sc.className}`}>
+                                            {sc.icon} {sc.label}
                                         </span>
                                     </div>
-                                    <div className={`mstatus-badge ${sc.className}`}>
-                                        {sc.label}
+
+                                    <p className="timeline-provider-text">
+                                        Vendor: <strong>{getProviderName(req)}</strong>
+                                    </p>
+
+                                    <div className="timeline-progress-track">
+                                        {steps.map((step, idx) => {
+                                            const stepNum = idx + 1;
+                                            const isCompleted = stepNum < activeStep || (activeStep === 4);
+                                            const isActive = stepNum === activeStep && activeStep !== 4;
+                                            return (
+                                                <div
+                                                    className={`track-step ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}
+                                                    key={step}
+                                                >
+                                                    <div className="step-dot" />
+                                                    <span className="step-label">{step}</span>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             );

@@ -105,17 +105,12 @@ const UpcomingPayment = ({
                 </div>
             )}
 
-            {cardState === 'arrears' && (
-                <div className="payment-total-line">
-                    <span>Total now due:</span>
-                    <strong>${totalDue.toLocaleString()}</strong>
-                </div>
-            )}
+
 
             {cardState === 'arrears' ? (
                 <button className="pay-now-btn arrears-btn" onClick={onPayNow} disabled={isPaying}>
                     <FaExclamationTriangle aria-hidden="true" />
-                    {isPaying ? 'Processing...' : 'Settle Arrears'}
+                    {isPaying ? 'Processing...' : 'Pay Now'}
                 </button>
             ) : (
                 <button className="pay-now-btn" onClick={onPayNow} disabled={isPaying || isCurrentCyclePaid}>

@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaTimes, FaCheckCircle, FaClock, FaExclamationTriangle, FaCalendarAlt } from 'react-icons/fa';
 import contractService, {
     type ContractInstallments,
@@ -23,19 +24,17 @@ const formatDateLabel = (iso: string): string => {
     return parsed.toLocaleDateString(undefined, { month: 'short', day: '2-digit', year: 'numeric' });
 };
 
-const isWithinNextDays = (from: Date, target: Date, days: number): boolean => {
-    const msPerDay = 1000 * 60 * 60 * 24;
-    const deltaDays = Math.ceil((target.getTime() - from.getTime()) / msPerDay);
-    return deltaDays >= 0 && deltaDays <= days;
-};
-
 const getDisplayStatus = (item: RentInstallmentItem, nowIso: string): RentInstallmentStatus => {
     if (item.isPaid || item.status === 'PAID') return 'PAID';
     const now = new Date(nowIso);
     const due = new Date(item.dueDate);
     if (Number.isNaN(now.getTime()) || Number.isNaN(due.getTime())) return item.status;
-    if (due < now) return 'OVERDUE';
-    if (isWithinNextDays(now, due, 30)) return 'DUE';
+    
+    const periodStart = new Date(due.getFullYear(), due.getMonth() - 1, due.getDate());
+    if (now >= periodStart) {
+        if (now >= due) return 'OVERDUE';
+        return 'DUE';
+    }
     return 'UPCOMING';
 };
 
@@ -47,9 +46,9 @@ const statusBadge = (status: RentInstallmentStatus) => {
 };
 
 const InstallmentsModal: React.FC<InstallmentsModalProps> = ({ contractId, contractTitle, onClose, onPaid }) => {
+    const navigate = useNavigate();
     const [data, setData] = useState<ContractInstallments | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [isPaying, setIsPaying] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [autopayBusy, setAutopayBusy] = useState(false);
 
@@ -91,37 +90,38 @@ const InstallmentsModal: React.FC<InstallmentsModalProps> = ({ contractId, contr
         };
     }, [data]);
 
-    const handlePayAll = async () => {
-        if (!data || isPaying) return;
+    const handlePayAll = () => {
+        if (!data) return;
         const payableCount = data.items.filter((item) => {
             const status = getDisplayStatus(item, data.now);
             return status === 'DUE' || status === 'OVERDUE';
         }).length;
+        
         if (payableCount <= 0) {
             setErrorMessage('All due installments are already paid.');
             return;
         }
-        if (data.walletBalance < data.nextPayableTotal) {
-            setErrorMessage('Insufficient wallet balance. Please top up to settle outstanding installments.');
-            return;
-        }
 
-        const confirmed = globalThis.confirm(
-            `Settle ${payableCount} installment(s) for ${formatMoney(data.nextPayableTotal)} from wallet?\n\nThis is processed atomically — if anything fails, no changes are saved.`
-        );
-        if (!confirmed) return;
+        const statusList = data.items.map((item) => getDisplayStatus(item, data.now));
+        const overdueCount = statusList.filter((status) => status === 'OVERDUE').length;
+        const totalRentDue = payableCount * data.rentAmount;
+        const lateFee = overdueCount * data.lateFeeAmount;
 
-        setIsPaying(true);
-        setErrorMessage(null);
-        try {
-            await contractService.payMonthlyRentFromBalance(contractId);
-            await load();
-            onPaid();
-        } catch (err: any) {
-            setErrorMessage(err?.response?.data?.message ?? 'Could not complete payment. No charges were made.');
-        } finally {
-            setIsPaying(false);
-        }
+        const review = {
+            contractId,
+            propertyTitle: contractTitle,
+            rent: totalRentDue,
+            deposit: 0,
+            serviceFee: 0,
+            total: data.nextPayableTotal,
+            isMonthlyInstallment: true,
+            lateFee,
+            credit: data.pendingLandlordCredit,
+            payableCount,
+        };
+
+        onClose();
+        navigate('/tenant-payment', { state: { paymentReviewData: review } });
     };
 
     const handleAutopayToggle = async () => {
@@ -154,7 +154,10 @@ const InstallmentsModal: React.FC<InstallmentsModalProps> = ({ contractId, contr
                 </header>
 
                 {isLoading && (
-                    <div className="installments-state">Loading installments...</div>
+                    <div className="installments-state-loading">
+                        <div className="installments-spinner" />
+                        <span>Fetching rent ledger records...</span>
+                    </div>
                 )}
 
                 {!isLoading && data && (
@@ -166,7 +169,7 @@ const InstallmentsModal: React.FC<InstallmentsModalProps> = ({ contractId, contr
                                     <strong>{formatMoney(data.walletBalance)}</strong>
                                 </div>
                                 <div className="summary-pill">
-                                    <span>Paid</span>
+                                    <span>Paid Months</span>
                                     <strong>{data.paidInstallments} / {data.leaseDurationMonths}</strong>
                                 </div>
                                 <div className="summary-pill">
@@ -181,24 +184,25 @@ const InstallmentsModal: React.FC<InstallmentsModalProps> = ({ contractId, contr
                                 </div>
                             </div>
 
-                            <label className="autopay-row">
-                                <input
-                                    type="checkbox"
-                                    checked={data.autopayEnabled}
-                                    onChange={handleAutopayToggle}
-                                    disabled={autopayBusy}
-                                />
-                                <span>
-                                    <strong>Autopay</strong>
+                            <div
+                                className={`autopay-row ${data.autopayEnabled ? 'enabled' : ''} ${autopayBusy ? 'busy' : ''}`}
+                                onClick={handleAutopayToggle}
+                            >
+                                <div className="autopay-label-group">
+                                    <strong>Autopay Setting</strong>
                                     <small>
-                                        When enabled, the wallet automatically pays each due installment as it falls due.
+                                        When enabled, your HOMi wallet automatically settles due installments instantly.
                                     </small>
-                                </span>
-                            </label>
+                                </div>
+                                <div className={`custom-switch ${data.autopayEnabled ? 'checked' : ''} ${autopayBusy ? 'disabled' : ''}`}>
+                                    <div className="custom-switch-handle" />
+                                </div>
+                            </div>
                         </section>
 
                         <div className="installments-table-wrapper">
                             <table className="installments-table">
+                                theme-dark
                                 <thead>
                                     <tr>
                                         <th>#</th>
@@ -215,7 +219,7 @@ const InstallmentsModal: React.FC<InstallmentsModalProps> = ({ contractId, contr
                                         const badge = statusBadge(getDisplayStatus(item, data.now));
                                         return (
                                             <tr key={item.index} className={`row-${badge.className}`}>
-                                                <td>{item.index + 1}</td>
+                                                <td>{(item.index + 1).toString().padStart(2, '0')}</td>
                                                 <td>{item.label}</td>
                                                 <td>{formatDateLabel(item.dueDate)}</td>
                                                 <td>{formatMoney(item.rentAmount)}</td>
@@ -236,7 +240,7 @@ const InstallmentsModal: React.FC<InstallmentsModalProps> = ({ contractId, contr
                         {summary && summary.payableCount > 0 && (
                             <section className="installments-totals">
                                 <div className="installments-totals-row">
-                                    <span>Outstanding rent ({summary.payableCount} months)</span>
+                                    <span>Outstanding rent ({summary.payableCount} month{summary.payableCount === 1 ? '' : 's'})</span>
                                     <strong>{formatMoney(summary.totalRentDue)}</strong>
                                 </div>
                                 {summary.lateFee > 0 && (
@@ -263,20 +267,18 @@ const InstallmentsModal: React.FC<InstallmentsModalProps> = ({ contractId, contr
                         )}
 
                         <footer className="installments-footer">
-                            <button type="button" className="installments-btn ghost" onClick={onClose} disabled={isPaying}>
+                            <button type="button" className="installments-btn ghost" onClick={onClose}>
                                 Close
                             </button>
                             <button
                                 type="button"
                                 className="installments-btn primary"
                                 onClick={handlePayAll}
-                                disabled={isPaying || !summary || summary.payableCount <= 0}
+                                disabled={!summary || summary.payableCount <= 0}
                             >
-                                {isPaying
-                                    ? 'Processing...'
-                                    : !summary || summary.payableCount <= 0
-                                        ? 'No Outstanding Dues'
-                                        : `Pay ${formatMoney(data.nextPayableTotal)} From Wallet`}
+                                {!summary || summary.payableCount <= 0
+                                    ? 'No Outstanding Dues'
+                                    : `Pay ${formatMoney(data.nextPayableTotal)} From Wallet`}
                             </button>
                         </footer>
                     </>

@@ -6,6 +6,8 @@ export interface RentCycleSummary {
     nextDueDate: Date;
     daysUntilDue: number;
     isPaidForCurrentCycle: boolean;
+    periodStart: Date;
+    periodEnd: Date;
 }
 
 export interface RentInstallmentStats {
@@ -40,24 +42,58 @@ const getNow = (nowInput?: Date): Date => {
 
 export const getRentCycleSummary = (contract: LandlordContract, nowInput?: Date): RentCycleSummary => {
     const now = getNow(nowInput);
-    const baseCycleDue = getCycleDueDate(contract, now);
-    const currentCycleDue = baseCycleDue < now
-        ? getCycleDueDate(contract, new Date(now.getFullYear(), now.getMonth() + 1, 1))
-        : baseCycleDue;
-    const previousCycleDue = getCycleDueDate(contract, new Date(currentCycleDue.getFullYear(), currentCycleDue.getMonth() - 1, 1));
-    const nextCycleDue = getCycleDueDate(contract, new Date(currentCycleDue.getFullYear(), currentCycleDue.getMonth() + 1, 1));
-    const paidAt = contract.paymentVerifiedAt ? startOfDay(new Date(contract.paymentVerifiedAt)) : null;
-    const isPaidForCurrentCycle = Boolean(paidAt && paidAt >= previousCycleDue && paidAt < nextCycleDue);
+    const moveIn = startOfDay(new Date(contract.moveInDate));
+    if (Number.isNaN(moveIn.getTime())) {
+        return {
+            dueDate: now,
+            nextDueDate: now,
+            daysUntilDue: 0,
+            isPaidForCurrentCycle: false,
+            periodStart: now,
+            periodEnd: now,
+        };
+    }
 
-    const dueDate = isPaidForCurrentCycle ? nextCycleDue : currentCycleDue;
-    const followingDueDate = getCycleDueDate(contract, new Date(dueDate.getFullYear(), dueDate.getMonth() + 1, 1));
+    const leaseMonths = Math.max(Number(contract.leaseDurationMonths ?? 0), 0);
+    const dueDates: Date[] = [];
+    for (let i = 0; i < leaseMonths; i += 1) {
+        dueDates.push(new Date(moveIn.getFullYear(), moveIn.getMonth() + i + 1, moveIn.getDate()));
+    }
+
+    const paidAt = contract.paymentVerifiedAt ? startOfDay(new Date(contract.paymentVerifiedAt)) : null;
+    let paidInstallments = 0;
+    if (paidAt) {
+        paidInstallments = dueDates.filter((d) => d <= paidAt).length + 1;
+    }
+    if (contract.status === 'ACTIVE' || contract.status === 'EXPIRED') {
+        paidInstallments = Math.max(paidInstallments, 1);
+    }
+
+    const nextUnpaidIdx = Math.min(paidInstallments, dueDates.length - 1);
+    const dueDate = dueDates[nextUnpaidIdx] ?? moveIn;
+    const periodStart = nextUnpaidIdx === 0 ? moveIn : dueDates[nextUnpaidIdx - 1];
+    const isPaidForCurrentCycle = now < periodStart;
+
+    const followingDueDate = dueDates[nextUnpaidIdx + 1] ?? new Date(dueDate.getFullYear(), dueDate.getMonth() + 1, dueDate.getDate());
     const daysUntilDue = Math.max(0, Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+
+    const periodStartForUnpaid = nextUnpaidIdx === 0 ? moveIn : dueDates[nextUnpaidIdx - 1];
+    const periodEndForUnpaid = dueDate;
+
+    const activePeriodStart = isPaidForCurrentCycle
+        ? (nextUnpaidIdx <= 1 ? moveIn : dueDates[nextUnpaidIdx - 2])
+        : periodStartForUnpaid;
+    const activePeriodEnd = isPaidForCurrentCycle
+        ? periodStartForUnpaid
+        : periodEndForUnpaid;
 
     return {
         dueDate,
         nextDueDate: followingDueDate,
         daysUntilDue,
         isPaidForCurrentCycle,
+        periodStart: activePeriodStart,
+        periodEnd: activePeriodEnd,
     };
 };
 
@@ -85,21 +121,21 @@ export const getRentInstallmentStats = (contract: LandlordContract, nowInput?: D
     const leaseMonths = Math.max(Number(contract.leaseDurationMonths ?? 0), 0);
     if (leaseMonths <= 0) return { dueCount: 0, overdueCount: 0 };
 
-    let firstRef = new Date(moveIn.getFullYear(), moveIn.getMonth(), 1);
-    let firstDue = getCycleDueDate(contract, firstRef);
-    if (firstDue < moveIn) {
-        firstRef = new Date(firstRef.getFullYear(), firstRef.getMonth() + 1, 1);
-        firstDue = getCycleDueDate(contract, firstRef);
+    const dueDates: Date[] = [];
+    for (let i = 0; i < leaseMonths; i += 1) {
+        dueDates.push(new Date(moveIn.getFullYear(), moveIn.getMonth() + i + 1, moveIn.getDate()));
     }
 
     let dueCount = 0;
     let overdueCount = 0;
     for (let i = 0; i < leaseMonths; i += 1) {
-        const ref = new Date(firstRef.getFullYear(), firstRef.getMonth() + i, 1);
-        const dueDate = getCycleDueDate(contract, ref);
-        if (dueDate <= now || isWithinNextDays(now, dueDate, 30)) {
+        const periodStart = i === 0 ? moveIn : dueDates[i - 1];
+        const periodEnd = dueDates[i];
+        if (now >= periodStart) {
             dueCount += 1;
-            if (dueDate < now) overdueCount += 1;
+            if (now >= periodEnd) {
+                overdueCount += 1;
+            }
         }
     }
     return { dueCount, overdueCount };

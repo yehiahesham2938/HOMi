@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import './DetailedRentCard.css';
 import {
     FaCalendarAlt, FaUserCircle,
-    FaFileDownload, FaMapMarkerAlt, FaGavel, FaTimes, FaHome
+    FaFileDownload, FaMapMarkerAlt, FaGavel, FaTimes, FaHome,
+    FaBed, FaBath, FaRulerCombined
 } from 'react-icons/fa';
 import pdfService from '../../../services/pdf.service';
 import { normalizeSignatureUrl } from '../../../shared/utils/signatureUrl';
@@ -49,10 +50,10 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
             propertyType: rental.propertyType || 'Apartment',
             landlord: rental.landlord,
             landlordNationalId: contract.landlordNationalId,
-            landlordAddress: contract.landlordAddress || 'Cairo, Egypt', // Placeholder if not in DB
+            landlordAddress: contract.landlordAddress || 'Cairo, Egypt',
             tenant: `${contract.tenant?.firstName || ''} ${contract.tenant?.lastName || ''}`.trim() || 'Tenant',
             tenantNationalId: contract.tenantNationalId,
-            tenantAddress: contract.tenantAddress || rental.address, // Usually the rented property address
+            tenantAddress: contract.tenantAddress || rental.address,
             startDate: rental.leaseStart,
             duration: `${contract.leaseDurationMonths || 12} Months`,
             amount: rental.monthlyRent,
@@ -71,6 +72,15 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
 
     const houseRules = rental.houseRules;
     const locationBadge = rental.address.split(',')[1]?.trim() || rental.address;
+
+    // Derived values for progress calculation
+    const leaseDuration = contract?.leaseDurationMonths ?? 12;
+    const paidMonths = contract?.paidInstallments ?? 1;
+    const progressPercent = Math.min(100, Math.max(0, (paidMonths / leaseDuration) * 100));
+
+    const bedrooms = contract?.propertySpecifications?.bedrooms ?? 0;
+    const bathrooms = contract?.propertySpecifications?.bathrooms ?? 0;
+    const areaSqft = contract?.propertySpecifications?.areaSqft ?? rental.sqft ?? 0;
 
     return (
         <div className="premium-detailed-card animate-fade-in" dir="ltr">
@@ -95,34 +105,53 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
                     <p className="full-address">{rental.address}</p>
                 </header>
 
+                <div className="property-specs-chips">
+                    {bedrooms > 0 && (
+                        <span className="spec-chip">
+                            <FaBed /> {bedrooms} Bed
+                        </span>
+                    )}
+                    {bathrooms > 0 && (
+                        <span className="spec-chip">
+                            <FaBath /> {bathrooms} Bath
+                        </span>
+                    )}
+                    {areaSqft > 0 && (
+                        <span className="spec-chip">
+                            <FaRulerCombined /> {areaSqft} sqft
+                        </span>
+                    )}
+                </div>
+
                 <div className="info-grid-modern">
-                    <div className="info-tile">
-                        <div className="tile-icon"><FaUserCircle /></div>
-                        <div className="tile-data">
-                            <span className="tile-label">{t('activeLease.landlord')}</span>
-                            <span className="tile-value">{rental.landlord}</span>
+                    <div className="landlord-profile-card">
+                        <div className="landlord-avatar-placeholder">
+                            {rental.landlord.charAt(0).toUpperCase()}
                         </div>
+                        <div className="landlord-details">
+                            <span className="landlord-label">{t('activeLease.landlord')}</span>
+                            <span className="landlord-name">{rental.landlord}</span>
+                        </div>
+                        <div className="landlord-contact-badge">Owner</div>
                     </div>
 
-                    <div className="info-tile">
-                        <div className="tile-icon"><FaHome /></div>
-                        <div className="tile-data">
-                            <span className="tile-label">{t('activeLease.usage')}</span>
-                            <span className="tile-value">{rental.propertyType || 'Apartment'}</span>
+                    <div className="lease-progress-container">
+                        <div className="lease-progress-header">
+                            <span>Lease Progress</span>
+                            <strong>{paidMonths} / {leaseDuration} mo</strong>
                         </div>
-                    </div>
-
-                    <div className="info-tile full-width">
-                        <div className="tile-icon"><FaCalendarAlt /></div>
-                        <div className="tile-data">
-                            <span className="tile-label">{t('activeLease.leaseTerms')}</span>
-                            <span className="tile-value">{rental.leaseStart} — {rental.leaseEnd}</span>
+                        <div className="lease-progress-bar-outer">
+                            <div className="lease-progress-bar-inner" style={{ width: `${progressPercent}%` }} />
+                        </div>
+                        <div className="lease-progress-labels">
+                            <span>Start ({rental.leaseStart})</span>
+                            <span>End ({rental.leaseEnd})</span>
                         </div>
                     </div>
                 </div>
 
                 <div className="card-actions-row">
-                    <div className="pdf-buttons-group" style={{ display: 'flex', gap: '8px' }}>
+                    <div className="pdf-buttons-group">
                         <button className="download-contract-btn" onClick={() => handleDownloadPDF('en')}>
                             <FaFileDownload />
                             <span>{t('activeLease.downloadPDF')} (EN)</span>

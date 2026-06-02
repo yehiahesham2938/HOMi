@@ -331,13 +331,7 @@ const GuestHome: React.FC = () => {
             </div>
 
             {/* No Fees / Trust Badges directly under Search */}
-            <div className="gh-search-trust-line gh-animate-slide-up-delayed-more">
-              <span>🔒 Escrow Protected Rent</span>
-              <span className="dot-divider"></span>
-              <span>⚡ Zero Hidden Commissions</span>
-              <span className="dot-divider"></span>
-              <span>✓ Verified Backgrounds</span>
-            </div>
+
 
             <div className="hero-btns-row gh-animate-slide-up-delayed-more" style={{ marginTop: '0.5rem' }}>
               <a href="#steps" className="btn-hero-secondary">{t('guestHome.howItWorks')} ›</a>

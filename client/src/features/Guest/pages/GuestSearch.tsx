@@ -545,12 +545,7 @@ const GuestSearch: React.FC = () => {
                         >
                             🔍 All Listings ({sortedProperties.length})
                         </button>
-                        <button
-                            className={`tab-toggle ${activeTab === 'curated' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('curated')}
-                        >
-                            ✨ Curated Collections
-                        </button>
+
                     </div>
 
                     <div className="results-sort">

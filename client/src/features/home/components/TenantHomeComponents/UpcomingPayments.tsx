@@ -36,9 +36,9 @@ export const UpcomingPayments: React.FC<UpcomingPaymentsProps> = ({ contract, re
   };
 
   const getPeriodLabel = (): string => {
-    const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), 1);
-    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    if (!cycle) return '';
+    const start = cycle.periodStart;
+    const end = cycle.periodEnd;
 
     return `${start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
   };
@@ -49,7 +49,7 @@ export const UpcomingPayments: React.FC<UpcomingPaymentsProps> = ({ contract, re
     ? `Due ${formatDateLabel(cycle.dueDate)}`
     : getDueInLabel(contract?.rentDueDate ?? null);
   const paymentState = cycle
-    ? (cycle.isPaidForCurrentCycle ? 'Paid for current cycle' : `Due in ${cycle.daysUntilDue} day${cycle.daysUntilDue === 1 ? '' : 's'}`)
+    ? (cycle.isPaidForCurrentCycle ? 'No outstanding dues' : `Due in ${cycle.daysUntilDue} day${cycle.daysUntilDue === 1 ? '' : 's'}`)
     : 'No active lease';
   const isAutopay = false;
   const hasLinkedMethod = false;
@@ -98,10 +98,11 @@ export const UpcomingPayments: React.FC<UpcomingPaymentsProps> = ({ contract, re
             className="payment-action-inline"
             aria-label="Open payments page"
             onClick={() => navigate('/tenant-payment')}
+            disabled={cycle?.isPaidForCurrentCycle}
           >
             <FaCreditCard className="pay-icon" />
-            <span>{t('tenantHomeComponents.payNow')}</span>
-            <FaChevronRight className="arrow-icon" />
+            <span>{cycle?.isPaidForCurrentCycle ? 'No Outstanding Dues' : t('tenantHomeComponents.payNow')}</span>
+            {!cycle?.isPaidForCurrentCycle && <FaChevronRight className="arrow-icon" />}
           </button>
           <button
             className="payment-action-inline"

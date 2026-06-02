@@ -20,6 +20,8 @@ import { decrypt, encrypt } from '../../../shared/utils/encryption.util.js';
 import { testingClockService } from '../../../shared/services/testing-clock.service.js';
 import { PaymentMethod, PaymentProvider } from '../../payment-methods/models/PaymentMethod.js';
 import { PropertyStatus } from '../../properties/models/Property.js';
+import { Notification } from '../../notifications/models/Notification.js';
+import { notificationService } from '../../notifications/services/notification.service.js';
 import type {
     ContractResponse,
     ContractBalancePaymentResponse,
@@ -180,7 +182,14 @@ class ContractService {
         if (!testingClockService.hasSnapshot()) {
             await this.captureDbSnapshot();
         }
-        return testingClockService.advanceDays(days);
+        
+        const daysToAdvance = Math.max(0, Math.floor(days));
+        for (let d = 1; d <= daysToAdvance; d++) {
+            testingClockService.advanceDays(1);
+            const currentSimulatedDate = testingClockService.getNow();
+            await this.runDailyLeaseCycleCheck(currentSimulatedDate);
+        }
+        return testingClockService.getState();
     }
 
     // Kept for backward-compat (non-async path the controller used to call directly).
@@ -250,6 +259,15 @@ class ContractService {
             ],
         });
 
+        // Notifications
+        const notifications = await Notification.findAll({
+            attributes: [
+                'id', 'user_id', 'type', 'title', 'body',
+                'related_entity_type', 'related_entity_id', 'data',
+                'is_read', 'read_at', 'created_at', 'updated_at'
+            ],
+        });
+
         (testingClockService as any).saveSnapshot({
             takenAt,
             contracts: contracts.map((c) => ({
@@ -294,6 +312,20 @@ class ContractService {
                 tenant_confirmed_at: mr.tenant_confirmed_at ?? null,
                 disputed_at: mr.disputed_at ?? null,
                 resolved_at: mr.resolved_at ?? null,
+            })),
+            notifications: notifications.map((n) => ({
+                id: n.id,
+                user_id: n.user_id,
+                type: n.type,
+                title: n.title,
+                body: n.body,
+                related_entity_type: n.related_entity_type ?? null,
+                related_entity_id: n.related_entity_id ?? null,
+                data: n.data ?? {},
+                is_read: n.is_read,
+                read_at: n.read_at ?? null,
+                created_at: n.created_at,
+                updated_at: n.updated_at,
             })),
         });
     }
@@ -355,6 +387,12 @@ class ContractService {
                 },
                 transaction: t,
             });
+
+            // Restore notifications
+            await Notification.destroy({ where: {}, transaction: t });
+            if (snap.notifications && snap.notifications.length > 0) {
+                await Notification.bulkCreate(snap.notifications as any, { transaction: t });
+            }
 
             // Restore maintenance charges
             for (const mc of snap.maintenanceCharges) {
@@ -1628,11 +1666,13 @@ class ContractService {
 
         const rentAmount = Number(contract.rent_amount ?? 0);
         const lateFeeAmount = Math.max(Number(contract.late_fee_amount ?? 0), 0);
+        const moveIn = new Date(contract.move_in_date as any);
 
         const items: RentInstallmentItem[] = dueDates.map((dueDate, idx) => {
             const isPaidIdx = idx < paidInstallments;
-            const isDue = dueDate <= now || isWithinNextDays(now, dueDate, 30);
-            const isOverdue = this.hasLateFeeStarted(dueDate, now) && !isPaidIdx;
+            const periodStart = idx === 0 ? moveIn : dueDates[idx - 1]!;
+            const isDue = now >= periodStart;
+            const isOverdue = now >= dueDate && !isPaidIdx;
             let status: RentInstallmentStatus = 'UPCOMING';
             if (isPaidIdx) status = 'PAID';
             else if (isOverdue) status = 'OVERDUE';
@@ -1990,26 +2030,21 @@ class ContractService {
         const leaseMonths = Math.max(Number(contract.lease_duration_months ?? 0), 0);
         if (leaseMonths <= 0) return [];
 
-        // First installment must fall on/after move-in (e.g., move-in Apr 15 +
-        // 1ST_OF_MONTH ⇒ first due is May 1, not Apr 1).
-        let firstRef = new Date(moveIn.getFullYear(), moveIn.getMonth(), 1);
-        let firstDue = this.getCycleDueDate(contract, firstRef);
-        if (firstDue < moveIn) {
-            firstRef = new Date(firstRef.getFullYear(), firstRef.getMonth() + 1, 1);
-            firstDue = this.getCycleDueDate(contract, firstRef);
-        }
-
         const dueDates: Date[] = [];
         for (let i = 0; i < leaseMonths; i += 1) {
-            const ref = new Date(firstRef.getFullYear(), firstRef.getMonth() + i, 1);
-            dueDates.push(this.getCycleDueDate(contract, ref));
+            const dueDate = new Date(moveIn.getFullYear(), moveIn.getMonth() + i + 1, moveIn.getDate());
+            dueDates.push(dueDate);
         }
         return dueDates;
     }
 
     private getPayableInstallmentDates(contract: Contract, now: Date): Date[] {
         const dueDates = this.getContractDueDates(contract);
-        return dueDates.filter((d) => d <= now || isWithinNextDays(now, d, 30));
+        const moveIn = new Date(contract.move_in_date as any);
+        return dueDates.filter((dueDate, idx) => {
+            const periodStart = idx === 0 ? moveIn : dueDates[idx - 1]!;
+            return now >= periodStart;
+        });
     }
 
     /**
@@ -2182,6 +2217,115 @@ class ContractService {
         });
 
         return request;
+    }
+
+    async runDailyLeaseCycleCheck(now: Date): Promise<void> {
+        const activeContracts = await Contract.findAll({
+            where: { status: ContractStatus.ACTIVE },
+            include: [
+                {
+                    model: Property,
+                    as: 'property',
+                }
+            ]
+        });
+
+        for (const contract of activeContracts) {
+            const dueDates = this.getContractDueDates(contract);
+            const moveIn = new Date(contract.move_in_date as any);
+            const dueDatesUpToNow = dueDates.filter((d, idx) => {
+                const periodStart = idx === 0 ? moveIn : dueDates[idx - 1]!;
+                return now >= periodStart;
+            });
+            const N = dueDatesUpToNow.length;
+
+            const prepaidInstallments = this.getPrepaidInstallmentsCount(contract);
+            const paidRows = await ActivityLog.findAll({
+                where: {
+                    actor_user_id: contract.tenant_id,
+                    action: 'MONTHLY_RENT_PAID_FROM_BALANCE',
+                    entity_type: 'CONTRACT',
+                    entity_id: contract.id,
+                },
+            });
+
+            const paidInstallments = paidRows.reduce((sum, row) => {
+                const meta = (row.metadata ?? {}) as Record<string, any>;
+                const byInstallments = Number(meta.installmentsPaid ?? 0);
+                if (Number.isFinite(byInstallments) && byInstallments > 0) return sum + byInstallments;
+                return sum + 1;
+            }, prepaidInstallments);
+
+            if (paidInstallments < N) {
+                const unpaidPeriodStart = paidInstallments === 0 ? moveIn : dueDates[paidInstallments - 1]!;
+                const unpaidPeriodEnd = dueDates[paidInstallments]!;
+
+                if (now >= unpaidPeriodEnd) {
+                    await contract.update({ status: ContractStatus.TERMINATED });
+                    
+                    if (contract.property_id) {
+                        await Property.update(
+                            { status: PropertyStatus.AVAILABLE },
+                            { where: { id: contract.property_id } }
+                        );
+                    }
+
+                    await activityLogService.log({
+                        actor: { userId: 'SYSTEM', role: 'ADMIN' },
+                        action: 'CONTRACT_TERMINATED_NON_PAYMENT',
+                        entityType: 'CONTRACT',
+                        entityId: contract.id,
+                        description: `Contract ${contract.contract_id} terminated automatically due to non-payment of rent for the cycle starting ${unpaidPeriodStart.toLocaleDateString('en-US')}.`,
+                        metadata: {
+                            contractId: contract.id,
+                            unpaidInstallmentMonth: unpaidPeriodEnd.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+                            depositForfeited: true,
+                        },
+                    });
+
+                    await notificationService.create({
+                        userId: contract.tenant_id,
+                        type: 'SYSTEM',
+                        title: 'Lease Terminated - Non-Payment',
+                        body: `Your lease for property ${contract.property?.title || 'Property'} has been terminated because rent for the cycle starting ${unpaidPeriodStart.toLocaleDateString('en-US')} was not paid. Your deposit has been forfeited.`,
+                        relatedEntityType: 'CONTRACT',
+                        relatedEntityId: contract.id,
+                    });
+
+                    await notificationService.create({
+                        userId: contract.landlord_id,
+                        type: 'SYSTEM',
+                        title: 'Lease Terminated - Tenant Non-Payment',
+                        body: `The lease agreement for ${contract.property?.title || 'Property'} has been terminated because the tenant failed to pay rent for the cycle starting ${unpaidPeriodStart.toLocaleDateString('en-US')}.`,
+                        relatedEntityType: 'CONTRACT',
+                        relatedEntityId: contract.id,
+                    });
+                } else {
+                    const daysElapsed = Math.floor((now.getTime() - unpaidPeriodStart.getTime()) / (1000 * 60 * 60 * 24));
+                    const rentAmt = contract.rent_amount ?? 0;
+
+                    if (daysElapsed === 0 || daysElapsed === 4 || daysElapsed === 14 || daysElapsed === 19) {
+                        await notificationService.create({
+                            userId: contract.tenant_id,
+                            type: 'SYSTEM',
+                            title: 'Rent Payment Reminder',
+                            body: `Friendly reminder: your rent of $${rentAmt} for the cycle starting ${unpaidPeriodStart.toLocaleDateString('en-US')} is due.`,
+                            relatedEntityType: 'CONTRACT',
+                            relatedEntityId: contract.id,
+                        });
+                    } else if (daysElapsed >= 24) {
+                        await notificationService.create({
+                            userId: contract.tenant_id,
+                            type: 'SYSTEM',
+                            title: 'URGENT: Rent Warning',
+                            body: `URGENT: your rent of $${rentAmt} for the cycle starting ${unpaidPeriodStart.toLocaleDateString('en-US')} is unpaid. You must pay before ${unpaidPeriodEnd.toLocaleDateString('en-US')} to avoid lease termination.`,
+                            relatedEntityType: 'CONTRACT',
+                            relatedEntityId: contract.id,
+                        });
+                    }
+                }
+            }
+        }
     }
 
     /**

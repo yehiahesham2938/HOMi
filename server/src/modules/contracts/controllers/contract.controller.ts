@@ -30,8 +30,21 @@ class ContractController {
     async advanceTestingClock(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const days = Number((req.body as any)?.days ?? 5);
-            // Capture a DB snapshot before the first advance, then move the clock.
-            const state = await contractService.advanceTestingClockWithSnapshot(days);
+            let state;
+            if (days < 0) {
+                const currentState = contractService.getTestingClockState();
+                const currentOffset = currentState.offsetDays;
+                const targetOffset = Math.max(0, currentOffset + days);
+                
+                await contractService.resetTestingClockWithRestore();
+                if (targetOffset > 0) {
+                    state = await contractService.advanceTestingClockWithSnapshot(targetOffset);
+                } else {
+                    state = contractService.getTestingClockState();
+                }
+            } else {
+                state = await contractService.advanceTestingClockWithSnapshot(days);
+            }
 
             // After clock advances, autopay-eligible contracts for the calling
             // tenant settle automatically so the simulated time-jump reflects
@@ -49,7 +62,9 @@ class ContractController {
 
             res.status(200).json({
                 success: true,
-                message: `Testing clock advanced by ${Math.max(0, Math.floor(days))} day(s).`,
+                message: days < 0
+                    ? `Testing clock set back by ${Math.abs(days)} day(s).`
+                    : `Testing clock advanced by ${Math.floor(days)} day(s).`,
                 data: { ...state, autopay },
             });
         } catch (error) {

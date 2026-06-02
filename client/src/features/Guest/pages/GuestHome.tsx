@@ -27,6 +27,7 @@ const GuestHome: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [heroSearchQuery, setHeroSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('');
   const [selectedBeds, setSelectedBeds] = useState('');
   const [selectedPrice, setSelectedPrice] = useState('');
@@ -34,6 +35,23 @@ const GuestHome: React.FC = () => {
   const [sortBy, setSortBy] = useState('featured');
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 6;
+
+  // Cycling headline state
+  const cyclingWords = ["Perfect Home", "Dream Apartment", "Modern Studio", "North Coast Villa"];
+  const [cyclingIndex, setCyclingIndex] = useState(0);
+  const [fadeWord, setFadeWord] = useState(true);
+
+  useEffect(() => {
+    const cycleInterval = setInterval(() => {
+      setFadeWord(false);
+      setTimeout(() => {
+        setCyclingIndex((prev) => (prev + 1) % cyclingWords.length);
+        setFadeWord(true);
+      }, 400);
+    }, 4000);
+
+    return () => clearInterval(cycleInterval);
+  }, []);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -109,6 +127,34 @@ const GuestHome: React.FC = () => {
     document.documentElement.lang = newLang;
   };
 
+  const handleHeroSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSearchQuery(heroSearchQuery);
+    setCurrentPage(1);
+    const propsSection = document.getElementById('properties');
+    if (propsSection) {
+      propsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleSuggestionClick = (type: string, value: string) => {
+    if (type === 'type') {
+      setSelectedType(value);
+    } else if (type === 'chip') {
+      setActiveChip(value);
+    } else if (type === 'price') {
+      setSelectedPrice(value);
+    } else if (type === 'query') {
+      setHeroSearchQuery(value);
+      setSearchQuery(value);
+    }
+    setCurrentPage(1);
+    const propsSection = document.getElementById('properties');
+    if (propsSection) {
+      propsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const getHelpFromGuest = {
     pathname: '/get-help',
     state: { fromGuestHome: true },
@@ -146,6 +192,7 @@ const GuestHome: React.FC = () => {
         <div className="nav-container">
           <Link to="/guest-home" className="brand-logo">
             <img src="/logo.png" alt="HOMi Logo" className="logo-image" />
+
           </Link>
 
           <div className="nav-links desktop-only">
@@ -189,30 +236,188 @@ const GuestHome: React.FC = () => {
         )}
       </nav>
 
-      {/* 2. Hero Section (Hero heading paragraph stays same, but buttons are outline class) */}
+      {/* 2. Hero Section - Premium Asymmetrical Collage & Glassmorphic Search Bar */}
       <section className="hero">
-        <div className="hero-badge">
-          <div className="badge-dot"></div>
-          {t('guestHome.ratedPlatformEgypt')}
-        </div>
-        <h1 className="hero-title animate-slide-up">
-          <span className="accent">{t('guestHome.findPerfectHome')}</span> <br />
-          <span className="outline">{t('guestHome.withoutHassle')}</span>
-        </h1>
-        <p className="hero-sub animate-slide-up-delayed">
-          {t('guestHome.heroSubtitle')}
-        </p>
-        <div className="hero-btns animate-slide-up-delayed-more">
-          <a href="#steps" className="btn-outline">{t('guestHome.howItWorks')} ›</a>
-          <button onClick={() => navigate('/auth')} className="btn-outline">{t('guestHome.getStartedNow')}</button>
-        </div>
-        <div className="hero-img reveal animate-slide-up-delayed-more">
-          <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=80&fit=crop" alt="Modern apartment building" />
-          <div className="hero-img-overlay">
-            <div className="hero-chip">🏠 {t('guestHome.browseHomes')}</div>
-            <div className="hero-chip">📄 {t('guestHome.sign')}</div>
-            <div className="hero-chip">💳 {t('guestHome.payMoveIn')}</div>
-            <div className="hero-chip">🔧 {t('tenantHomeComponents.maintenance')}</div>
+        <div className="hero-grid-bg"></div>
+        <div className="hero-blob blob-1"></div>
+        <div className="hero-blob blob-2"></div>
+
+        <div className="hero-container">
+          <div className="hero-content-left">
+            <div className="hero-badge gh-animate-slide-up">
+              <span>{t('guestHome.ratedPlatformEgypt')}</span>
+            </div>
+
+            <h1 className="hero-title gh-animate-slide-up">
+              <span className="accent">Find Your <span className={`gh-cycling-word ${fadeWord ? 'fade-in' : 'fade-out'}`}>{cyclingWords[cyclingIndex]}</span></span> <br />
+              <span className="outline">{t('guestHome.withoutHassle')}</span>
+            </h1>
+
+            <p className="hero-sub gh-animate-slide-up-delayed">
+              {t('guestHome.heroSubtitle')}
+            </p>
+
+            {/* V3 Premium Glassmorphic Search Bar */}
+            <form onSubmit={handleHeroSubmit} className="gh-hero-search-bar gh-animate-slide-up-delayed-more">
+              <div className="search-col">
+                <label>{t('guestHome.location')}</label>
+                <div className="search-input-wrapper">
+                  <span className="col-icon">📍</span>
+                  <input
+                    type="text"
+                    placeholder="Cairo, Zamalek..."
+                    value={heroSearchQuery}
+                    onChange={(e) => setHeroSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="search-divider"></div>
+              <div className="search-col">
+                <label>{t('guestHome.propertyType')}</label>
+                <div className="search-pills-wrapper">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedType(selectedType === 'APARTMENT' ? '' : 'APARTMENT')}
+                    className={`search-pill-btn ${selectedType === 'APARTMENT' ? 'active' : ''}`}
+                  >
+                    🏠 Apt
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedType(selectedType === 'VILLA' ? '' : 'VILLA')}
+                    className={`search-pill-btn ${selectedType === 'VILLA' ? 'active' : ''}`}
+                  >
+                    🏡 Villa
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedType(selectedType === 'STUDIO' ? '' : 'STUDIO')}
+                    className={`search-pill-btn ${selectedType === 'STUDIO' ? 'active' : ''}`}
+                  >
+                    🛋️ Studio
+                  </button>
+                </div>
+              </div>
+              <div className="search-divider"></div>
+              <div className="search-col">
+                <label>{t('guestHome.maxPrice')}</label>
+                <div className="search-input-wrapper">
+                  <span className="col-icon">💰</span>
+                  <select
+                    value={selectedPrice}
+                    onChange={(e) => setSelectedPrice(e.target.value)}
+                  >
+                    <option value="">{t('guestHome.anyPrice')}</option>
+                    <option value="5000">Up to 5k EGP</option>
+                    <option value="12000">Up to 12k EGP</option>
+                    <option value="20000">Up to 20k EGP</option>
+                    <option value="50000">Up to 50k EGP</option>
+                  </select>
+                </div>
+              </div>
+              <button type="submit" className="search-submit-btn">
+                <span className="btn-icon">🔍</span>
+                <span>{t('guestHome.search')}</span>
+              </button>
+            </form>
+
+            {/* Popular suggestions chips */}
+            <div className="gh-hero-suggestions gh-animate-slide-up-delayed-more">
+              <span className="suggestion-label">Suggestions:</span>
+              <button type="button" onClick={() => handleSuggestionClick('type', 'APARTMENT')} className="suggestion-chip">Apartment</button>
+              <button type="button" onClick={() => handleSuggestionClick('type', 'VILLA')} className="suggestion-chip">Villa</button>
+              <button type="button" onClick={() => handleSuggestionClick('query', 'Zamalek')} className="suggestion-chip">Zamalek</button>
+              <button type="button" onClick={() => handleSuggestionClick('chip', 'furnished')} className="suggestion-chip">Furnished</button>
+            </div>
+
+            {/* No Fees / Trust Badges directly under Search */}
+            <div className="gh-search-trust-line gh-animate-slide-up-delayed-more">
+              <span>🔒 Escrow Protected Rent</span>
+              <span className="dot-divider"></span>
+              <span>⚡ Zero Hidden Commissions</span>
+              <span className="dot-divider"></span>
+              <span>✓ Verified Backgrounds</span>
+            </div>
+
+            <div className="hero-btns-row gh-animate-slide-up-delayed-more" style={{ marginTop: '0.5rem' }}>
+              <a href="#steps" className="btn-hero-secondary">{t('guestHome.howItWorks')} ›</a>
+              <button onClick={() => navigate('/auth')} className="btn-hero-primary">{t('guestHome.getStartedNow')}</button>
+            </div>
+          </div>
+
+          <div className="hero-showcase-right gh-animate-fade-in-delayed">
+            <div className="gh-collage-container">
+              {/* Main Collage Frame - Capsule Shape with Premium Villa Photo */}
+              <div className="gh-collage-main-frame">
+                <img
+                  src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1000&q=80&fit=crop"
+                  alt="Modern Egyptian Villa"
+                />
+
+                {/* Circular Verified Stamp Layered on main photo */}
+                <div className="gh-verified-stamp">
+                  <svg viewBox="0 0 100 100">
+                    <path
+                      id="stampPath"
+                      d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0"
+                      fill="none"
+                    />
+                    <text>
+                      <textPath href="#stampPath">VERIFIED BY HOMI • SAFETY GUARANTEED •</textPath>
+                    </text>
+                  </svg>
+                  <div className="stamp-center">✓</div>
+                </div>
+              </div>
+
+              {/* Offset Collage Frame - Secondary Interior Photo */}
+              <div className="gh-collage-secondary-frame">
+                <img
+                  src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=600&q=80&fit=crop"
+                  alt="Modern Villa Interior"
+                />
+              </div>
+
+              {/* Rotating Circular Video Badge (Micro-Interaction) */}
+              <div className="gh-video-badge-wrap" onClick={() => navigate('/auth')}>
+                <svg className="rotating-text-svg" viewBox="0 0 100 100">
+                  <path
+                    id="circlePath"
+                    d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0"
+                    fill="none"
+                  />
+                  <text>
+                    <textPath href="#circlePath">WATCH VIDEO • TOUR HOMES •</textPath>
+                  </text>
+                </svg>
+                <div className="play-icon">▶</div>
+              </div>
+
+              {/* Dotted Connections lines */}
+              <svg className="gh-collage-lines">
+                <path d="M 50 150 C 0 180, 0 250, 20 280" />
+                <path d="M 280 220 C 330 250, 310 320, 290 350" />
+                <path d="M 120 80 C 150 40, 220 30, 260 50" />
+              </svg>
+
+              {/* Floating Dashboard Widgets */}
+              <div className="gh-floating-widget widget-lease-badge float-1">
+                <span className="status-indicator-dot green pulsing"></span>
+                <span>Lease Signed by Karim A.</span>
+              </div>
+
+              <div className="gh-floating-widget widget-wallet-badge float-3">
+                <span className="payment-icon">💳</span>
+                <div className="widget-text">
+                  <h5>Rent Paid</h5>
+                  <p>18,500 EGP to Owner</p>
+                </div>
+              </div>
+
+
+
+
+            </div>
           </div>
         </div>
       </section>
@@ -519,13 +724,13 @@ const GuestHome: React.FC = () => {
               className={`tab-btn ${activeTab === 'tenant' ? 'active' : ''}`}
               onClick={() => setActiveTab('tenant')}
             >
-              🏠 I'm a Tenant
+              I'm a Tenant
             </button>
             <button
               className={`tab-btn ${activeTab === 'landlord' ? 'active' : ''}`}
               onClick={() => setActiveTab('landlord')}
             >
-              🏗️ I'm a Landlord
+              I'm a Landlord
             </button>
           </div>
 
@@ -634,13 +839,13 @@ const GuestHome: React.FC = () => {
             className={`steps-tab ${activeStepsTab === 'tenant-steps' ? 'active' : ''}`}
             onClick={() => setActiveStepsTab('tenant-steps')}
           >
-            🏠 Tenant Journey
+            Tenant Journey
           </button>
           <button
             className={`steps-tab ${activeStepsTab === 'landlord-steps' ? 'active' : ''}`}
             onClick={() => setActiveStepsTab('landlord-steps')}
           >
-            🏗️ Landlord Journey
+            Landlord Journey
           </button>
         </div>
 

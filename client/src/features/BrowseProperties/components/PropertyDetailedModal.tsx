@@ -14,6 +14,7 @@ import {
 import ApplicationModal, { type PrefillData } from './ApplicationModal';
 import BookVisitModal from './BookVisitModal';
 import AuthModal from '../../../components/global/AuthModal';
+import { authService } from '../../../services/auth.service';
 import { messageService } from '../../../services/message.service';
 import {
     propertyService,
@@ -144,6 +145,7 @@ const PropertyDetailModal = ({
     onToggleSave,
 }: PropertyDetailModalProps) => {
     const navigate = useNavigate();
+    const isUserGuest = isGuest || !authService.isAuthenticated();
     const [showApplication, setShowApplication] = useState(false);
     const [showBookVisit, setShowBookVisit] = useState(false);
     const [showGallery, setShowGallery] = useState(false);
@@ -209,7 +211,7 @@ const PropertyDetailModal = ({
     const prevImg = () => setCurrentImgIdx((prev) => (prev - 1 + images.length) % images.length);
 
     const handleApplyClick = () => {
-        if (isGuest) {
+        if (isUserGuest) {
             setShowAuthModal(true);
         } else {
             setShowApplication(true);
@@ -217,7 +219,7 @@ const PropertyDetailModal = ({
     };
 
     const handleBookVisitClick = () => {
-        if (isGuest) {
+        if (isUserGuest) {
             setShowAuthModal(true);
         } else {
             setShowBookVisit(true);
@@ -249,7 +251,7 @@ const PropertyDetailModal = ({
     };
 
     const handleMessageOwner = async () => {
-        if (isGuest) {
+        if (isUserGuest) {
             setShowAuthModal(true);
             return;
         }
@@ -291,7 +293,7 @@ const PropertyDetailModal = ({
     };
 
     const handleOpenReport = () => {
-        if (isGuest) {
+        if (isUserGuest) {
             setShowAuthModal(true);
             return;
         }
@@ -302,7 +304,7 @@ const PropertyDetailModal = ({
 
     const handleSaveClick = (event: React.MouseEvent) => {
         event.stopPropagation();
-        if (isGuest) {
+        if (isUserGuest) {
             setShowAuthModal(true);
             return;
         }
@@ -671,7 +673,7 @@ const PropertyDetailModal = ({
                                         </button>
                                     ) : (
                                         <button className="primary-cta-btn" onClick={handleApplyClick}>
-                                            {isGuest ? 'Register to Apply' : 'Start Application'} <FaArrowRight />
+                                            {isUserGuest ? 'Register to Apply' : 'Start Application'} <FaArrowRight />
                                         </button>
                                     )}
                                     <p className="cta-subtext">
@@ -688,6 +690,10 @@ const PropertyDetailModal = ({
                                     className="owner-profile-main"
                                     onClick={(e) => {
                                         e.stopPropagation();
+                                        if (isUserGuest) {
+                                            setShowAuthModal(true);
+                                            return;
+                                        }
                                         if (!landlordProfileUserId) return;
                                         // Do not call onClose here: it runs setSearchParams on /browse-properties and can
                                         // race with this navigate, leaving the user on browse instead of the profile.

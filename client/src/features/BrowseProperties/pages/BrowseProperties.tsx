@@ -318,7 +318,7 @@ const BrowseProperties: React.FC = () => {
                 <PropertyDetailModal
                     property={selectedProperty}
                     onClose={closePropertyDetails}
-                    isGuest={!authService.getCurrentUser()}
+                    isGuest={!authService.isAuthenticated()}
                     isSaved={isPropertySaved(selectedProperty.id)}
                     onToggleSave={handleToggleSave}
                 />

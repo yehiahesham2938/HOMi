@@ -35,7 +35,7 @@ const LandlordPublicProfile = () => {
 
   useEffect(() => {
     const loadSaved = async () => {
-      if (!authService.getCurrentUser()) {
+      if (!authService.isAuthenticated()) {
         setSavedIds([]);
         return;
       }
@@ -171,9 +171,9 @@ const LandlordPublicProfile = () => {
         <PropertyDetailModal
           property={selectedProperty}
           onClose={() => setSelectedProperty(null)}
-          isGuest={!authService.getCurrentUser()}
+          isGuest={!authService.isAuthenticated()}
           isSaved={savedIds.includes(String(selectedProperty.id))}
-          onToggleSave={authService.getCurrentUser() ? handleToggleSave : undefined}
+          onToggleSave={authService.isAuthenticated() ? handleToggleSave : undefined}
         />
       )}
     </div>

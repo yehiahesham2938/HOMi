@@ -207,9 +207,7 @@ const Notifications: React.FC = () => {
           )}
         </div>
 
-        <button className="btn-history-expand" onClick={() => setIsBarOpen(true)}>
-          {t('landlordHomeComponents.seeAllActivity')}
-        </button>
+
       </div>
 
       <NotificationBar isOpen={isBarOpen} onClose={() => setIsBarOpen(false)} alerts={alerts} />

@@ -8,14 +8,14 @@
     position: relative;
     overflow: hidden;
     margin-bottom: 40px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-    margin-top: 140px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+
 }
 
 .hero-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6));
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.6));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -87,7 +87,8 @@
     margin-bottom: 2px;
 }
 
-.input-stack input, .input-stack select {
+.input-stack input,
+.input-stack select {
     background: transparent;
     border: none;
     color: white;
@@ -169,8 +170,8 @@
     position: relative;
     overflow: hidden;
     margin-bottom: 60px;
-    margin-top: 100px;
-    box-shadow: 0 40px 100px rgba(0,0,0,0.2);
+    margin-top: 0;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -184,14 +185,23 @@
     background: url('https://images.unsplash.com/photo-1600585154340-be6191da95b8?auto=format&fit=crop&w=1600&q=80');
     background-size: cover;
     background-position: center;
-    opacity: 0.5; /* Blends with the animated gradient */
+    opacity: 0.5;
+    /* Blends with the animated gradient */
     mix-blend-mode: overlay;
 }
 
 @keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 .hero-overlay {
@@ -206,13 +216,14 @@
 }
 
 .hero-content h1 {
-    font-size: 4.5rem; /* Larger, more aggressive typography */
+    font-size: 4.5rem;
+    /* Larger, more aggressive typography */
     font-weight: 900;
     color: white;
     margin-bottom: 15px;
     letter-spacing: -3px;
     line-height: 1;
-    text-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    text-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .text-gradient {
@@ -224,7 +235,9 @@
 }
 
 @keyframes shine {
-    to { background-position: 200% center; }
+    to {
+        background-position: 200% center;
+    }
 }
 
 /* THE MIND-BLOWING GLASS BAR */
@@ -238,9 +251,9 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    box-shadow: 
-        0 20px 50px rgba(0,0,0,0.3),
-        inset 0 0 20px rgba(255,255,255,0.05);
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.3),
+        inset 0 0 20px rgba(255, 255, 255, 0.05);
     transform: translateY(0);
     transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
@@ -248,7 +261,7 @@
 .glass-search-container:focus-within {
     transform: translateY(-10px) scale(1.02);
     border-color: rgba(96, 165, 250, 0.5);
-    box-shadow: 0 30px 70px rgba(0,0,0,0.4);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
 }
 
 .search-input-group {
@@ -272,7 +285,8 @@
 }
 
 .input-stack select option {
-    background: #1e293b; /* Fixes visibility for dropdown items */
+    background: #1e293b;
+    /* Fixes visibility for dropdown items */
     color: white;
 }
 
@@ -292,7 +306,7 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     transform: rotate(45deg);
     transition: 0.5s;
 }
@@ -322,7 +336,7 @@
     width: calc(100% + 80px);
     margin-left: -40px;
     margin-right: -40px;
-    margin-top: 10px;
+    margin-top: 0;
     margin-bottom: 40px;
     border-radius: 0;
     background: linear-gradient(45deg, #0f172a, #1e293b, #0f172a);
@@ -334,6 +348,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .search-hero::before {
@@ -342,13 +357,15 @@
     inset: 0;
     background: url('https://images.unsplash.com/photo-1600585154340-be6191da95b8?auto=format&fit=crop&w=1600&q=80');
     background-size: cover;
-    background-position: center 30%; /* Focus on the top part of the house */
+    background-position: center 30%;
+    /* Focus on the top part of the house */
     opacity: 0.4;
     mix-blend-mode: overlay;
 }
 
 .hero-content h1 {
-    font-size: 3.2rem; /* Adjusted for the shorter height */
+    font-size: 3.2rem;
+    /* Adjusted for the shorter height */
     font-weight: 900;
     color: white;
     margin-bottom: 8px;
@@ -371,7 +388,8 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    max-width: 95%; /* Ensures it doesn't hit edges on smaller screens */
+    max-width: 95%;
+    /* Ensures it doesn't hit edges on smaller screens */
     margin: 0 auto;
 }
 
@@ -384,7 +402,8 @@
     color: #94a3b8;
 }
 
-.input-stack input, .input-stack select {
+.input-stack input,
+.input-stack select {
     font-size: 0.95rem;
 }
 
@@ -397,9 +416,17 @@
 
 /* Animations remain the same as previous version */
 @keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 .text-gradient {
@@ -414,7 +441,8 @@
     background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(25px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.15);
-    padding: 10px 15px; /* Added horizontal padding */
+    padding: 10px 15px;
+    /* Added horizontal padding */
     border-radius: 24px;
     display: flex;
     align-items: center;
@@ -427,11 +455,13 @@
 
 .search-input-group {
     display: flex;
-    align-items: center; /* Crucial: aligns icon and text vertically */
+    align-items: center;
+    /* Crucial: aligns icon and text vertically */
     gap: 12px;
     padding: 10px 15px;
     flex: 1;
-    min-width: 0; /* Prevents overflow issues */
+    min-width: 0;
+    /* Prevents overflow issues */
     border-radius: 16px;
     transition: background 0.3s ease;
 }
@@ -445,7 +475,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 24px; 
+    min-width: 24px;
 }
 
 .input-icon {
@@ -470,7 +500,7 @@
     margin-bottom: 2px;
 }
 
-.input-stack input, 
+.input-stack input,
 .input-stack select {
     background: transparent !important;
     border: none !important;
@@ -574,8 +604,15 @@
 }
 
 @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .adv-filter-grid {
@@ -640,7 +677,7 @@
     gap: 10px;
 }
 
-.adv-map-section > label {
+.adv-map-section>label {
     font-size: 0.8rem;
     font-weight: 800;
     text-transform: uppercase;

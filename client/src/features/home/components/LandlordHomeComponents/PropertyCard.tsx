@@ -56,9 +56,7 @@ const PropertyCard = ({
               <span className="pulse-indicator"></span>
               {status}
             </div>
-            <button className="prop-options-btn" onClick={(e) => e.stopPropagation()}>
-              <FiMoreHorizontal />
-            </button>
+
           </div>
 
           <div className="prop-media-overlay">

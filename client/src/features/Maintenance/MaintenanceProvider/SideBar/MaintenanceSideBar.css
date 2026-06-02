@@ -21,11 +21,10 @@
     border-bottom: 1px solid var(--border-color, #e5e7eb);
 }
 
-.logo-image {
+.sidebar .logo-image {
     height: 140px;
     width: 500px;
     object-fit: contain;
-
 }
 
 .sidebar-nav {

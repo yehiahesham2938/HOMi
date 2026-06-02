@@ -1,8 +1,10 @@
 .browse-properties-page {
     padding: 30px 40px;
+    padding-top: 110px;
+    /* Safe spacing under the fixed header */
     background: #f8fafc;
     min-height: 100vh;
-    
+    margin-top: -20px;
 }
 
 /* Scope layout so global .main-content rules from other pages don't trap modals below the sidebar. */
@@ -11,15 +13,18 @@
     min-height: 100vh;
 }
 
-.layout-wrapper > .main-content {
+.layout-wrapper>.main-content {
     margin-left: var(--sidebar-width, 260px);
     width: calc(100% - var(--sidebar-width, 260px));
     position: relative;
     z-index: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 @media (max-width: 1024px) {
-    .layout-wrapper > .main-content {
+    .layout-wrapper>.main-content {
         margin-left: 0;
         width: 100%;
     }
@@ -28,7 +33,8 @@
 /* Layout Structure */
 .marketplace-container {
     display: grid;
-    grid-template-columns: 300px 1fr; /* Sidebar is 300px, results take rest */
+    grid-template-columns: 300px 1fr;
+    /* Sidebar is 300px, results take rest */
     gap: 40px;
     margin-top: 40px;
     align-items: start;
@@ -36,7 +42,8 @@
 
 .filters-section {
     position: sticky;
-    top: 20px; /* Keeps filters visible while scrolling through properties */
+    top: 20px;
+    /* Keeps filters visible while scrolling through properties */
 }
 
 .results-section {
@@ -53,6 +60,7 @@
     padding: 15px 25px;
     border-radius: 20px;
     border: 1px solid #eef2f6;
+    margin-top: -40px;
 }
 
 .result-count {
@@ -90,7 +98,7 @@
     scroll-behavior: smooth;
 }
 
-.properties-grid > * {
+.properties-grid>* {
     flex: 0 0 calc(33.333% - 20px);
     min-width: calc(33.333% - 20px);
 }
@@ -117,31 +125,20 @@
 /* Responsive Tweak */
 @media (max-width: 1100px) {
     .marketplace-container {
-        grid-template-columns: 1fr; /* Stack filters on top for small screens */
+        grid-template-columns: 1fr;
+        /* Stack filters on top for small screens */
     }
-    
+
     .filters-section {
         position: static;
     }
 }
 
 .browse-properties-page {
-    padding: 30px 40px;
-    background: #f8fafc;
-    min-height: 100vh;
-    margin-top: 50px;
-}
-
-/* client\src\features\BrowseProperties\pages\BrowseProperties.css */
-
-.browse-properties-page {
-    padding: 30px 40px;
-    background: #f8fafc;
-    min-height: 100vh;
-    margin-top: 50px;
     display: flex;
     flex-direction: column;
-    gap: 60px; /* Space between scrollable sections */
+    gap: 60px;
+    /* Space between scrollable sections */
 }
 
 .property-scroll-section {
@@ -156,6 +153,7 @@
     justify-content: space-between;
     align-items: flex-end;
     margin-bottom: 25px;
+    margin-top: -60px;
 }
 
 .title-area {
@@ -171,8 +169,15 @@
     margin: 0;
 }
 
-.icon-popular { color: #f97316; font-size: 1.5rem; }
-.icon-suits { color: #8b5cf6; font-size: 1.5rem; }
+.icon-popular {
+    color: #f97316;
+    font-size: 1.5rem;
+}
+
+.icon-suits {
+    color: #8b5cf6;
+    font-size: 1.5rem;
+}
 
 .view-all-btn {
     background: white;
@@ -195,8 +200,10 @@
     display: flex;
     gap: 32px;
     overflow-x: auto;
-    overflow-y: visible; /* Important to show the card lift-up on hover */
-    padding: 20px 10px 40px 10px; /* Extra bottom padding for card shadow */
+    overflow-y: visible;
+    /* Important to show the card lift-up on hover */
+    padding: 20px 10px 40px 10px;
+    /* Extra bottom padding for card shadow */
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     margin-top: -37px;
@@ -209,8 +216,9 @@
 }
 
 /* Card Width Control */
-.properties-grid > * {
-    flex: 0 0 380px; /* Fixed width for better control */
+.properties-grid>* {
+    flex: 0 0 380px;
+    /* Fixed width for better control */
     min-width: 380px;
 }
 
@@ -237,10 +245,12 @@
     .browse-properties-page {
         padding: 20px;
     }
-    .properties-grid > * {
+
+    .properties-grid>* {
         flex: 0 0 300px;
         min-width: 300px;
     }
+
     .title-area h2 {
         font-size: 1.4rem;
     }

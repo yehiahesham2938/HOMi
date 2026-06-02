@@ -30,6 +30,12 @@
   gap: 12px;
 }
 
+.sidebar .logo-image {
+  height: 140px;
+  width: 500px;
+  object-fit: contain;
+}
+
 .logo-icon {
   width: 35px;
   height: 35px;

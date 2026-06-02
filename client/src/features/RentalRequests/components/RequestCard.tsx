@@ -18,6 +18,10 @@ export interface RequestCardData {
         income: string;
         creditScore: number;
         matchScore: number;
+        email?: string;
+        phoneNumber?: string | null;
+        company?: string;
+        bio?: string | null;
     };
     property: { name: string; unit?: string; address?: string; image?: string; rent?: string; title?: string };
     moveInDate: string;

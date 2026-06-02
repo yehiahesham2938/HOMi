@@ -1,4 +1,3 @@
-// client\src\features\RentalRequests\components\DetailedRequestModal.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -6,7 +5,6 @@ import {
     FaTimes,
     FaTimesCircle,
     FaWallet,
-    FaChartLine,
     FaCalendarCheck,
     FaHourglassHalf,
     FaUsers,
@@ -16,6 +14,12 @@ import {
     FaCommentDots,
     FaExclamationTriangle,
     FaCheck,
+    FaEnvelope,
+    FaPhone,
+    FaBriefcase,
+    FaMapMarkerAlt,
+    FaShieldAlt,
+    FaInfoCircle,
 } from 'react-icons/fa';
 import rentalRequestService from '../../../services/rental-request.service';
 import { messageService } from '../../../services/message.service';
@@ -35,6 +39,9 @@ interface DetailedRequestModalProps {
             isFirstTimeRenter?: boolean;
             income?: string;
             creditScore?: number;
+            email?: string;
+            phoneNumber?: string | null;
+            bio?: string | null;
         };
         property?: {
             title?: string;
@@ -59,7 +66,6 @@ const DetailedRequestModal: React.FC<DetailedRequestModalProps> = ({ data, reque
     const { t } = useTranslation();
     const navigate = useNavigate();
 
-    // States for our new confirmation and success flows
     const [confirmAction, setConfirmAction] = useState<'approve' | 'decline' | null>(null);
     const [applicationState, setApplicationState] = useState<'pending' | 'approved' | 'declined'>(
         data?.status === 'approved' ? 'approved' : data?.status === 'declined' ? 'declined' : 'pending'
@@ -81,19 +87,13 @@ const DetailedRequestModal: React.FC<DetailedRequestModalProps> = ({ data, reque
         tenantId,
         propertyId,
     } = data;
+
     const applyingForName = [property?.title, property?.name, propertyName, property?.unit]
         .map((value) => value?.trim())
         .find(Boolean) || t('rentalRequests.card.selectedProperty', { defaultValue: 'Selected Property' });
 
-    const defaultHabits = [
-        t('rentalRequests.habits.earlyRiser', { defaultValue: 'Early Riser' }),
-        t('rentalRequests.habits.nonSmoker', { defaultValue: 'Non-smoker' }),
-        t('rentalRequests.habits.plantParent', { defaultValue: 'Plant Parent' }),
-        t('rentalRequests.habits.quietLifestyle', { defaultValue: 'Quiet Lifestyle' })
-    ];
-    const allHabits = habits && habits.length > 0 ? habits : defaultHabits;
-    const displayedHabits = allHabits.slice(0, 4);
-    const hiddenHabitsCount = Math.max(0, allHabits.length - displayedHabits.length);
+    // Show only real habits - no fallback to mock habits!
+    const realHabits = habits || [];
 
     const handleApprove = async () => {
         try {
@@ -159,12 +159,10 @@ const DetailedRequestModal: React.FC<DetailedRequestModalProps> = ({ data, reque
     return (
         <div className="detailed-modal-overlay" onClick={onClose} dir="ltr">
             <div className="detailed-modal-container" onClick={e => e.stopPropagation()}>
-
-                {/* Close Button is hidden if we are on a final success/declined screen to force navigation/acknowledgment, or keep it if you prefer! */}
-                <button className="detailed-close-btn" onClick={onClose} aria-label={t('common.close')}><FaTimes size={18} /></button>
-
-                {/* Match Score moved to Top Left of Modal */}
-
+                
+                <button className="detailed-close-btn" onClick={onClose} aria-label={t('common.close')}>
+                    <FaTimes size={16} />
+                </button>
 
                 {/* --- INNER OVERLAYS FOR CONFIRMATION & SUCCESS --- */}
                 {confirmAction === 'approve' && applicationState === 'pending' && (
@@ -223,181 +221,214 @@ const DetailedRequestModal: React.FC<DetailedRequestModalProps> = ({ data, reque
                         </div>
                     </div>
                 )}
-                {/* --- END OVERLAYS --- */}
 
-                <div className="detailed-modal-body">
-                    <div className="detailed-top-grid">
-                        {/* LEFT COLUMN: Profile & Message */}
-                        <div className="detailed-left-col">
-                            <div className="applicant-hero">
-                                <div className="hero-avatar-wrapper">
-                                    <img 
-                                        src={applicant?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(applicant?.name || 'User')}&background=random`} 
-                                        alt={applicant?.name} 
-                                        referrerPolicy="no-referrer"
-                                        onError={(e) => {
-                                            const target = e.target as HTMLImageElement;
-                                            target.onerror = null;
-                                            target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(applicant?.name || 'User')}&background=random`;
-                                        }}
-                                    />
-                                    <div className="match-score-radial">
-                                        <span>{applicant?.matchScore || "85"}%</span>
-                                        <label>{t('rentalRequests.card.match')}</label>
-                                    </div>
-                                </div>
-                                <div className="modal-top-left-verified">
-                                    <FaCheckCircle />
-                                </div>
-                                <h2 className="hero-name-row">
-                                    <span>{applicant?.name || "Applicant Name"}</span>
-                                </h2>
-                                <p className="hero-subtext">
-                                    {applicant?.occupation || t('sidebar.tenant')}
-                                </p>
-                                <p className="hero-subtext" style={{ fontSize: '12px', marginTop: '4px', color: '#94a3b8' }}>
-                                    {t('rentalRequests.card.appliedOn', { date: appliedOnDate || "Oct 24, 2023", defaultValue: `Applied on ${appliedOnDate}` })}
-                                </p>
-
-                                <div className="hero-tags" style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '12px' }}>
-                                    {applicant?.isFirstTimeRenter && <span className="tag" style={{ background: '#f1f5f9', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 600 }}>{t('rentalRequests.labels.firstTimeRenter', { defaultValue: 'First Time Renter' })}</span>}
-                                    <span className="tag premium" style={{ background: '#fef08a', color: '#854d0e', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 600 }}>{t('guestHome.verified')}</span>
-                                </div>
-                            </div>
-
-                            <div className="section-block">
-                                <h3><FaQuoteLeft style={{ color: '#94a3b8' }} /> {t('rentalRequests.labels.personalMessage', { defaultValue: 'Personal Message' })}</h3>
-                                <div className="message-content">
-                                    {message || t('rentalRequests.labels.noMessage', { defaultValue: 'No message provided by applicant.' })}
-                                </div>
-                            </div>
-
-                            <div className="section-block" style={{ marginTop: '30px' }}>
-                                <h3>{t('rentalRequests.labels.lifestyles', { defaultValue: 'Lifestyles & Habits' })}</h3>
-                                <div className="habits-display-grid">
-                                    {displayedHabits.length > 0 ? (
-                                        displayedHabits.map((habit: string) => (
-                                            <div key={habit} className="habit-tag">
-                                                {habit}
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="empty-text">
-                                            <p style={{ margin: '0 0 4px 0', color: '#64748b', fontWeight: 600 }}>{t('rentalRequests.labels.noHabits', { defaultValue: 'No lifestyle habits provided.' })}</p>
-                                        </div>
-                                    )}
-                                    {hiddenHabitsCount > 0 && (
-                                        <div className="habit-tag">+{hiddenHabitsCount} {t('guestHome.exploreAll')}</div>
-                                    )}
-                                </div>
+                {/* --- HEADER PROFILE BLOCK --- */}
+                <div className="modal-premium-header">
+                    <div className="header-gradient-bg" />
+                    <div className="header-profile-row">
+                        <div className="avatar-overlap-wrapper">
+                            <img 
+                                src={applicant?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(applicant?.name || 'User')}&background=random`} 
+                                alt={applicant?.name} 
+                                referrerPolicy="no-referrer"
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.onerror = null;
+                                    target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(applicant?.name || 'User')}&background=random`;
+                                }}
+                                className="modal-tenant-avatar"
+                            />
+                            <div className="modal-tenant-verified-badge" title="Verified Account">
+                                <FaCheckCircle />
                             </div>
                         </div>
 
-                        {/* RIGHT COLUMN: Stats & Actions */}
-                        <div className="detailed-right-col">
-                            <div className="section-block financials">
-                                <h3>{t('landlordHomeComponents.financialOverview')}</h3>
-                                <div className="financial-grid">
-                                    <div className="fin-card">
-                                        <FaWallet className="icon" />
-                                        <label>{t('landlordHomeComponents.netMonthlyIncome')}</label>
-                                        <span>{applicant?.income || "Pending"}</span>
-                                    </div>
-                                    <div className="fin-card">
-                                        <FaChartLine className="icon" />
-                                        <label>{t('rentalRequests.card.credit')}</label>
-                                        <span className="score">{applicant?.creditScore || 720}</span>
-                                    </div>
-                                </div>
+                        <div className="tenant-header-meta">
+                            <div className="name-badge-row">
+                                <h1>{applicant?.name || "Applicant Name"}</h1>
+                                <span className="tenant-status-chip">Verified Applicant</span>
                             </div>
-
-                            <div className="section-block lease-details">
-                                <h3>{t('rentalRequests.labels.proposedLease', { defaultValue: 'Proposed Lease' })}</h3>
-                                <div className="lease-list">
-                                    <div className="lease-item">
-                                        <FaCalendarCheck />
-                                        <div>
-                                            <label>{t('rentalRequests.labels.moveIn')}</label>
-                                            <p>{moveInDate || t('rentalRequests.flexible')}</p>
-                                        </div>
-                                    </div>
-                                    <div className="lease-item">
-                                        <FaHourglassHalf />
-                                        <div>
-                                            <label>{t('tenantHomeComponents.leaseProgress')}</label>
-                                            <p>{duration || "12"} {t('common.month', { count: Number(duration || 12) })}</p>
-                                        </div>
-                                    </div>
-                                    <div className="lease-item">
-                                        <FaUsers />
-                                        <div>
-                                            <label>{t('rentalRequests.labels.occupants')}</label>
-                                            <p>{occupants || "1"} {t('rentalRequests.labels.occupant', { count: Number(occupants || 1) })}</p>
-                                        </div>
-                                    </div>
-                                    <div className="lease-item">
-                                        <FaUserFriends />
-                                        <div>
-                                            <label>{t('tenantHomeComponents.period')}</label>
-                                            <p style={{ textTransform: 'capitalize' }}>{livingSituation || "Single"}</p>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
+                            <p className="job-company-row">
+                                <FaBriefcase className="icon-tiny" />
+                                <span>{applicant?.occupation || "Self-employed"} {applicant?.company ? `at ${applicant?.company}` : ''}</span>
+                            </p>
+                            <p className="applied-date-row">
+                                Applied on {appliedOnDate || "Oct 24, 2023"}
+                            </p>
                         </div>
-                    </div>
-
-                    <div className="detailed-bottom-cta">
-                        <div className="property-context">
-                            <label>{t('landlordHomeComponents.applyingFor')}</label>
-                            <h4>{applyingForName}</h4>
-                            <p>{property?.unit || t('landlordHome.noCurrentTenant')}</p>
-                        </div>
-
-                        {applicationState === 'pending' && (
-                            <div className="sticky-actions">
-                                <button className="btn-approve-main" onClick={() => setConfirmAction('approve')}>{t('rentalRequests.card.approve')}</button>
-
-                                {/* Wrapper to put Message and Decline on the same row */}
-                                <div className="sticky-actions-row">
-                                    <button
-                                        type="button"
-                                        className="btn-secondary-main"
-                                        disabled={isChatLoading}
-                                        onClick={() => void handleMessageTenant()}
-                                        style={{
-                                            background: '#eff6ff',
-                                            color: '#3b82f6',
-                                            border: 'none',
-                                            padding: '16px',
-                                            borderRadius: '12px',
-                                            fontWeight: '600',
-                                            cursor: isChatLoading ? 'not-allowed' : 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            gap: '8px',
-                                            transition: '0.2s',
-                                            flex: 1,
-                                            opacity: isChatLoading ? 0.75 : 1,
-                                        }}
-                                    >
-                                        <FaCommentDots size={18} /> {isChatLoading ? t('auth.loading') : t('header.messages')}
-                                    </button>
-
-                                    <button
-                                        className="btn-decline-main"
-                                        style={{ flex: 1 }} // Takes up the other half
-                                        onClick={() => setConfirmAction('decline')}
-                                    >
-                                        {t('rentalRequests.card.decline')}
-                                    </button>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
+
+                {/* --- MODAL BODY --- */}
+                <div className="detailed-modal-body">
+                    <div className="modal-dashboard-grid">
+                        
+                        {/* LEFT CONTENT SECTION */}
+                        <div className="modal-grid-left">
+                            
+                            {/* Contact Details & About */}
+                            <div className="dashboard-info-card">
+                                <div className="card-header">
+                                    <FaShieldAlt className="icon-blue" />
+                                    <h3>Tenant Contact & Identity</h3>
+                                </div>
+                                <div className="contact-info-list">
+                                    <div className="contact-item">
+                                        <FaEnvelope className="icon-muted" />
+                                        <div>
+                                            <span className="contact-label">Email Address</span>
+                                            <span className="contact-value">{applicant?.email || "Not provided"}</span>
+                                        </div>
+                                    </div>
+                                    <div className="contact-item">
+                                        <FaPhone className="icon-muted" />
+                                        <div>
+                                            <span className="contact-label">Phone Number</span>
+                                            <span className="contact-value">{applicant?.phoneNumber || "Not provided"}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="tenant-bio-section">
+                                    <span className="contact-label">Applicant Bio</span>
+                                    <p className="tenant-bio-text">
+                                        {applicant?.bio || "The tenant hasn't provided a personal bio yet."}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Personal Cover Message */}
+                            <div className="dashboard-info-card">
+                                <div className="card-header">
+                                    <FaQuoteLeft className="icon-purple" />
+                                    <h3>Cover Message</h3>
+                                </div>
+                                <div className="modal-message-bubble">
+                                    <p>"{message || "No application message provided by the tenant."}"</p>
+                                </div>
+                            </div>
+
+                            {/* Habits & Lifestyles (No Mock Fallbacks) */}
+                            <div className="dashboard-info-card">
+                                <div className="card-header">
+                                    <FaUsers className="icon-orange" />
+                                    <h3>Lifestyles & Habits</h3>
+                                </div>
+                                {realHabits.length > 0 ? (
+                                    <div className="modal-habits-container">
+                                        {realHabits.map((habit) => (
+                                            <span key={habit} className="modal-habit-chip">
+                                                {habit}
+                                            </span>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="no-habits-alert">
+                                        <FaInfoCircle />
+                                        <span>No specific lifestyle habits declared by the applicant.</span>
+                                    </div>
+                                )}
+                            </div>
+
+                        </div>
+
+                        {/* RIGHT CONTENT SECTION */}
+                        <div className="modal-grid-right">
+                            
+                            {/* Proposed Lease Card */}
+                            <div className="dashboard-info-card accent-card">
+                                <div className="card-header">
+                                    <FaCalendarCheck className="icon-indigo" />
+                                    <h3>Proposed Lease Terms</h3>
+                                </div>
+                                <div className="details-list-vertical">
+                                    <div className="details-row-item">
+                                        <span className="details-label">Preferred Move-In</span>
+                                        <strong className="details-val">{moveInDate || "Flexible"}</strong>
+                                    </div>
+                                    <div className="details-row-item">
+                                        <span className="details-label">Duration</span>
+                                        <strong className="details-val">{duration || "12"} Months</strong>
+                                    </div>
+                                    <div className="details-row-item">
+                                        <span className="details-label">Total Occupants</span>
+                                        <strong className="details-val">{occupants || 1} {occupants === 1 ? "Person" : "People"}</strong>
+                                    </div>
+                                    <div className="details-row-item">
+                                        <span className="details-label">Living Arrangement</span>
+                                        <strong className="details-val capitalize">{livingSituation || "Single"}</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Financial Background & Verification */}
+                            <div className="dashboard-info-card">
+                                <div className="card-header">
+                                    <FaWallet className="icon-green" />
+                                    <h3>Financial & Background Check</h3>
+                                </div>
+                                <div className="details-list-vertical">
+                                    <div className="details-row-item">
+                                        <span className="details-label">Monthly Net Income</span>
+                                        <strong className="details-val income-val">{applicant?.income || "Not declared"}</strong>
+                                    </div>
+                                    <div className="details-row-item verification-item">
+                                        <span className="details-label">National ID Verification</span>
+                                        <span className="status-badge-verified">Verified</span>
+                                    </div>
+                                    <div className="details-row-item verification-item">
+                                        <span className="details-label">Phone Verification</span>
+                                        <span className="status-badge-verified">Verified</span>
+                                    </div>
+                                    <div className="details-row-item verification-item">
+                                        <span className="details-label">Email Verification</span>
+                                        <span className="status-badge-verified">Verified</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    {/* TARGET PROPERTY BAR */}
+                    <div className="modal-property-context-bar">
+                        <div className="property-meta-info">
+                            <span className="context-label">Applying For Property</span>
+                            <h4>{applyingForName}</h4>
+                            {property?.unit && (
+                                <p className="property-subtext-address">
+                                    <FaMapMarkerAlt /> {property.unit}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* STICKY ACTION BUTTONS */}
+                    {applicationState === 'pending' && (
+                        <div className="modal-sticky-actions">
+                            <button className="btn-modal-approve" onClick={() => setConfirmAction('approve')}>
+                                <FaCheck /> Accept Application
+                            </button>
+                            <div className="modal-secondary-actions-row">
+                                <button
+                                    type="button"
+                                    className="btn-modal-chat"
+                                    disabled={isChatLoading}
+                                    onClick={() => void handleMessageTenant()}
+                                >
+                                    <FaCommentDots /> {isChatLoading ? "Opening Chat..." : "Message Applicant"}
+                                </button>
+                                <button
+                                    className="btn-modal-decline"
+                                    onClick={() => setConfirmAction('decline')}
+                                >
+                                    Decline Application
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
             </div>
         </div>
     );

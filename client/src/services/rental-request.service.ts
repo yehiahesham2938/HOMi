@@ -91,6 +91,10 @@ export interface LandlordRentalRequest {
         bio: string | null;
         income?: string;
         habits?: string[];
+        email?: string;
+        phoneNumber?: string | null;
+        employment?: string | null;
+        workplace?: string | null;
     };
     property: {
         id: string;

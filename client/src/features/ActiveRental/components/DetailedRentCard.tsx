@@ -1,13 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import './DetailedRentCard.css';
 import {
     FaCalendarAlt, FaUserCircle,
     FaFileDownload, FaMapMarkerAlt, FaGavel, FaTimes, FaHome,
-    FaBed, FaBath, FaRulerCombined
+    FaBed, FaBath, FaRulerCombined, FaEye
 } from 'react-icons/fa';
 import pdfService from '../../../services/pdf.service';
 import { normalizeSignatureUrl } from '../../../shared/utils/signatureUrl';
+import { propertyService } from '../../../services/property.service';
+import { mapPropertyToUI } from '../../../utils/propertyMapping';
+import PropertyDetailModal from '../../BrowseProperties/components/PropertyDetailedModal';
+import type { PropertyDetailModalProperty } from '../../BrowseProperties/components/PropertyDetailedModal';
 
 interface RentalProps {
     rental: {
@@ -28,6 +33,8 @@ interface RentalProps {
 const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
     const { t } = useTranslation();
     const [showRules, setShowRules] = useState(false);
+    const [propertyDetailData, setPropertyDetailData] = useState<PropertyDetailModalProperty | null>(null);
+    const [isPropertyLoading, setIsPropertyLoading] = useState(false);
     const modalRef = useRef<HTMLDivElement>(null);
 
     // Close modal when clicking outside
@@ -73,6 +80,26 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
     const houseRules = rental.houseRules;
     const locationBadge = rental.address.split(',')[1]?.trim() || rental.address;
 
+    const handleViewPropertyDetails = async () => {
+        const propertyId = contract?.property?.id || contract?.propertyId;
+        if (!propertyId) return;
+        setIsPropertyLoading(true);
+        try {
+            const res = await propertyService.getPropertyById(propertyId);
+            if (res.data) {
+                const mapped = mapPropertyToUI(res.data);
+                setPropertyDetailData({
+                    ...mapped,
+                    status: 'RENTED',
+                });
+            }
+        } catch (error) {
+            console.error('Failed to fetch property details', error);
+        } finally {
+            setIsPropertyLoading(false);
+        }
+    };
+
     // Derived values for progress calculation
     const leaseDuration = contract?.leaseDurationMonths ?? 12;
     const paidMonths = contract?.paidInstallments ?? 1;
@@ -97,59 +124,6 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
             </div>
 
             <div className="card-content-side">
-                <header className="rental-header">
-                    <div className="location-badge">
-                        <FaMapMarkerAlt /> {locationBadge}
-                    </div>
-                    <h2>{rental.title}</h2>
-                    <p className="full-address">{rental.address}</p>
-                </header>
-
-                <div className="property-specs-chips">
-                    {bedrooms > 0 && (
-                        <span className="spec-chip">
-                            <FaBed /> {bedrooms} Bed
-                        </span>
-                    )}
-                    {bathrooms > 0 && (
-                        <span className="spec-chip">
-                            <FaBath /> {bathrooms} Bath
-                        </span>
-                    )}
-                    {areaSqft > 0 && (
-                        <span className="spec-chip">
-                            <FaRulerCombined /> {areaSqft} sqft
-                        </span>
-                    )}
-                </div>
-
-                <div className="info-grid-modern">
-                    <div className="landlord-profile-card">
-                        <div className="landlord-avatar-placeholder">
-                            {rental.landlord.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="landlord-details">
-                            <span className="landlord-label">{t('activeLease.landlord')}</span>
-                            <span className="landlord-name">{rental.landlord}</span>
-                        </div>
-                        <div className="landlord-contact-badge">Owner</div>
-                    </div>
-
-                    <div className="lease-progress-container">
-                        <div className="lease-progress-header">
-                            <span>Lease Progress</span>
-                            <strong>{paidMonths} / {leaseDuration} mo</strong>
-                        </div>
-                        <div className="lease-progress-bar-outer">
-                            <div className="lease-progress-bar-inner" style={{ width: `${progressPercent}%` }} />
-                        </div>
-                        <div className="lease-progress-labels">
-                            <span>Start ({rental.leaseStart})</span>
-                            <span>End ({rental.leaseEnd})</span>
-                        </div>
-                    </div>
-                </div>
-
                 <div className="card-actions-row">
                     <div className="pdf-buttons-group">
                         <button className="download-contract-btn" onClick={() => handleDownloadPDF('en')}>
@@ -186,7 +160,67 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
                         )}
                     </div>
                 </div>
+
+                <header className="rental-header">
+                    <div className="location-row">
+                        <div className="location-badge">
+                            <FaMapMarkerAlt /> {locationBadge}
+                        </div>
+                        <button
+                            type="button"
+                            className="btn-view-property-details"
+                            disabled={isPropertyLoading}
+                            onClick={() => void handleViewPropertyDetails()}
+                        >
+                            {isPropertyLoading ? (
+                                <span className="spinner-tiny" />
+                            ) : (
+                                <FaEye />
+                            )}
+                            View property details
+                        </button>
+                    </div>
+                    <h2>{rental.title}</h2>
+                    <p className="full-address">{rental.address}</p>
+                </header>
+
+
+
+                <div className="info-grid-modern">
+                    <div className="landlord-profile-card">
+                        <div className="landlord-avatar-placeholder">
+                            {rental.landlord.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="landlord-details">
+                            <span className="landlord-label">{t('activeLease.landlord')}</span>
+                            <span className="landlord-name">{rental.landlord}</span>
+                        </div>
+                        <div className="landlord-contact-badge">Owner</div>
+                    </div>
+
+                    <div className="lease-progress-container">
+                        <div className="lease-progress-header">
+                            <span>Lease Progress</span>
+                            <strong>{paidMonths} / {leaseDuration} mo</strong>
+                        </div>
+                        <div className="lease-progress-bar-outer">
+                            <div className="lease-progress-bar-inner" style={{ width: `${progressPercent}%` }} />
+                        </div>
+                        <div className="lease-progress-labels">
+                            <span>Start ({rental.leaseStart})</span>
+                            <span>End ({rental.leaseEnd})</span>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            {propertyDetailData && createPortal(
+                <PropertyDetailModal
+                    property={propertyDetailData}
+                    onClose={() => setPropertyDetailData(null)}
+                />,
+                document.body
+            )}
         </div>
     );
 };

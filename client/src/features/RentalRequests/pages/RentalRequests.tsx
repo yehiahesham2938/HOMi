@@ -48,13 +48,16 @@ const RentalRequests: React.FC = () => {
                 image: req.tenant.avatarUrl?.trim() 
                     ? req.tenant.avatarUrl 
                     : `https://ui-avatars.com/api/?name=${encodeURIComponent(req.tenant.firstName + ' ' + req.tenant.lastName)}&background=random`,
-                occupation: t('sidebar.tenant'),
-                company: '',
+                occupation: req.tenant.employment || t('sidebar.tenant'),
+                company: req.tenant.workplace || '',
                 income: req.tenant.income 
                     ? req.tenant.income.toString()
                     : t('rentalRequests.card.verified', { defaultValue: 'Verified' }),
                 creditScore: 720,
                 matchScore: 85,
+                email: req.tenant.email,
+                phoneNumber: req.tenant.phoneNumber || null,
+                bio: req.tenant.bio || null,
             },
             property: {
                 name: req.property.title,

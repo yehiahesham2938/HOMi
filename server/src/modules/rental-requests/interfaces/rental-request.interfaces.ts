@@ -31,6 +31,10 @@ export interface TenantSummary {
     bio: string | null;
     income?: string;
     habits?: string[];
+    email?: string;
+    phoneNumber?: string | null;
+    employment?: string | null;
+    workplace?: string | null;
 }
 
 // ─── Rental Request Response ──────────────────────────────────────────────────

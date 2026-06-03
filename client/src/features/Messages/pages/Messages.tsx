@@ -2,7 +2,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '../../../components/global/header';
-import Footer from '../../../components/global/footer';
 import LandlordSidebar from '../../../components/global/Landlord/sidebar';
 import TenantSidebar from '../../../components/global/Tenant/sidebar';
 import MaintenanceSideBar from '../../Maintenance/MaintenanceProvider/SideBar/MaintenanceSideBar';
@@ -338,7 +337,6 @@ const Messages: React.FC = () => {
             isLoading={isMessagesLoading}
           />
         </div>
-        <Footer />
       </div>
     </div>
   );

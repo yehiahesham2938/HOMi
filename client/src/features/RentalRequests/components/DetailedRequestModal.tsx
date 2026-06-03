@@ -392,14 +392,29 @@ const DetailedRequestModal: React.FC<DetailedRequestModalProps> = ({ data, reque
 
                     {/* TARGET PROPERTY BAR */}
                     <div className="modal-property-context-bar">
+                        {property?.image && (
+                            <img 
+                                src={property.image} 
+                                alt={applyingForName} 
+                                className="property-context-img"
+                                style={{ width: '80px', height: '80px', borderRadius: '12px', objectFit: 'cover', marginRight: '16px', flexShrink: 0 }}
+                            />
+                        )}
                         <div className="property-meta-info">
                             <span className="context-label">Applying For Property</span>
                             <h4>{applyingForName}</h4>
-                            {property?.unit && (
-                                <p className="property-subtext-address">
-                                    <FaMapMarkerAlt /> {property.unit}
-                                </p>
-                            )}
+                            <div className="property-details-subrow" style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginTop: '4px', fontSize: '0.85rem', color: '#64748b' }}>
+                                {(property?.address || property?.unit) && (
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                        <FaMapMarkerAlt style={{ color: '#3b82f6' }} /> {property.address || property.unit}
+                                    </span>
+                                )}
+                                {property?.rent && (
+                                    <span style={{ fontWeight: 700, color: '#10b981' }}>
+                                        {property.rent}
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </div>
 

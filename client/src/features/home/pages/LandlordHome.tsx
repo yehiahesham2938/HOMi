@@ -99,6 +99,7 @@ const LandlordHome = () => {
       sqft: prop.specifications?.areaSqft ?? '—',
       tenantName,
       paymentStatus: computedStatus === 'rented' ? 'Paid' : 'Pending',
+      activeContract,
     };
   });
 
@@ -174,6 +175,7 @@ const LandlordHome = () => {
                         sqft={prop.sqft}
                         tenantName={prop.tenantName}
                         paymentStatus={prop.paymentStatus}
+                        activeContract={prop.activeContract}
                       />
                     ))}
                   </div>

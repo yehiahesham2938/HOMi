@@ -26,6 +26,7 @@ import LandlordPayment from "./features/LandlordPayment/pages/LandlordPayment";
 import HowItWorks from "./features/HowItWorks/pages/HowItWorks";
 import HowItWorksChoose from "./features/HowItWorks/pages/HowItWorksChoose";
 import ForTenants from "./features/HowItWorks/pages/ForTenants";
+import ForMaintenance from "./features/HowItWorks/pages/ForMaintenance";
 import ProMain from "./features/HomiPro/pages/ProMain";
 import Rewards from "./features/Rewards/pages/Rewards";
 import AdminLogin from "./features/admin/pages/AdminLogin";
@@ -119,6 +120,7 @@ function App() {
         <Route path="/how-it-works" element={<HowItWorks />} />
         <Route path="/for-landlords" element={<HowItWorks />} />
         <Route path="/for-tenants" element={<ForTenants />} />
+        <Route path="/for-maintenance" element={<ForMaintenance />} />
         <Route path="/homi-pro" element={<ProMain />} />
         <Route path="/terms" element={<Terms />} />
 

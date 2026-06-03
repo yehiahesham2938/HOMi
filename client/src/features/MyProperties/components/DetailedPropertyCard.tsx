@@ -141,7 +141,7 @@ const DetailedPropertyCard = ({ property }: { property: LandlordPropertyRow }) =
               <FaCalendarAlt className="icon" />
               <div>
                 <label>{t('tenantHomeComponents.period')}</label>
-                <p>{property.leaseEnd || '—'}</p>
+                <p>{property.leaseEnd || 'N/A'}</p>
               </div>
             </div>
           </div>

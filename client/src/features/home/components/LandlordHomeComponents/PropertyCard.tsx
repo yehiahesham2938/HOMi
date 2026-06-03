@@ -76,15 +76,34 @@ const PropertyCard = ({
           </div>
 
           {/* New Section: Tenant Snapshot */}
-          <div className="tenant-snapshot">
+          <div 
+            className="tenant-snapshot"
+            onClick={(e) => {
+              if (activeContract) {
+                e.stopPropagation();
+                setIsOccupiedModalOpen(true);
+              }
+            }}
+            style={activeContract ? { cursor: 'pointer' } : undefined}
+          >
             <div className="tenant-info">
-              <div className="tenant-avatar">{displayTenantName.charAt(0)}</div>
+              <div className="tenant-avatar">
+                {activeContract?.tenant?.avatarUrl ? (
+                  <img 
+                    src={activeContract.tenant.avatarUrl} 
+                    alt={displayTenantName} 
+                    className="tenant-avatar-img"
+                    style={{ width: '100%', height: '100%', borderRadius: 'inherit', objectFit: 'cover' }}
+                  />
+                ) : (
+                  displayTenantName.charAt(0)
+                )}
+              </div>
               <div className="tenant-details">
                 <span className="label">{t('landlordHomeComponents.currentTenant')}</span>
                 <span className="name">{displayTenantName}</span>
               </div>
             </div>
-
           </div>
 
           <div className="prop-specs-minimal">

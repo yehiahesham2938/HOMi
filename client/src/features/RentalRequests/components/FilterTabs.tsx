@@ -17,7 +17,6 @@ const FilterTabs: React.FC<Props> = ({ activeTab, setActiveTab, counts }) => {
     const { t } = useTranslation();
     const tabs = [
         { id: 'pending', label: t('rentalRequests.pending'), count: counts.pending },
-        { id: 'review', label: t('rentalRequests.review', { defaultValue: 'Under Review' }), count: counts.review },
         { id: 'approved', label: t('rentalRequests.approved'), count: counts.approved },
         { id: 'declined', label: t('rentalRequests.declined'), count: counts.declined }
     ];

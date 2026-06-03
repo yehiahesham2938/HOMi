@@ -437,7 +437,8 @@
     align-items: center;
     position: relative;
     overflow: hidden;
-    height: 333px;
+    min-height: 100px;
+    box-sizing: border-box;
 }
 
 .modal-property-context-bar::after {
@@ -448,7 +449,7 @@
     font-size: 56px;
     opacity: 0.05;
     transform: rotate(-15deg);
-    height: 200px;
+    height: 400px;
 }
 
 .property-meta-info {

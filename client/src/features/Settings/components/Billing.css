@@ -1,33 +1,45 @@
+/* Billing.css - Premium Billing Dashboard Styles */
+
 .billing-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 2.5rem;
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.billing-error {
-    margin: -12px 0 0 0;
-    color: #b91c1c;
-    font-weight: 600;
-    font-size: 0.9rem;
+.dev-toggle {
+    transition: all 0.2s;
+    border: 1px dashed #fca5a5 !important;
+}
+.dev-toggle:hover {
+    filter: brightness(0.98);
 }
 
 /* ─── Plan Card ────────────────────────────────────────────── */
 .current-plan-card {
-    background: linear-gradient(135deg, #2563eb, #4f46e5);
-    padding: 32px;
-    border-radius: 20px;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    padding: 2.5rem;
+    border-radius: 24px;
     color: white;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 12px 24px rgba(37, 99, 235, 0.15);
-    transition: all 0.3s ease;
+    box-shadow: 0 12px 30px rgba(37, 99, 235, 0.2);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Empty state styling for the plan card */
+.current-plan-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 36px rgba(37, 99, 235, 0.25);
+}
+
 .current-plan-card.free-plan {
-    background: linear-gradient(135deg, #1e293b, #334155);
-    box-shadow: 0 8px 16px rgba(15, 23, 42, 0.1);
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+}
+
+.current-plan-card.free-plan:hover {
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.2);
 }
 
 .plan-info {
@@ -37,51 +49,55 @@
 }
 
 .plan-badge {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.18);
     padding: 6px 14px;
     border-radius: 100px;
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-size: 0.72rem;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.05em;
     margin-bottom: 12px;
     backdrop-filter: blur(4px);
 }
 
 .current-plan-card h2 { 
-    font-size: 2.2rem; 
+    font-size: 2.4rem; 
     margin: 0 0 8px 0;
-    font-weight: 800;
+    font-weight: 900;
+    letter-spacing: -0.025em;
 }
 
 .current-plan-card h2 span { 
-    font-size: 1.2rem; 
-    opacity: 0.8; 
-    font-weight: 500; 
+    font-size: 1.25rem; 
+    opacity: 0.85; 
+    font-weight: 600;
+    margin-left: 12px;
 }
 
 .current-plan-card p {
     margin: 0;
     font-size: 0.95rem;
-    opacity: 0.9;
+    opacity: 0.85;
+    font-weight: 500;
 }
 
 .upgrade-btn {
-    background: white;
+    background: #ffffff;
     color: #2563eb;
     border: none;
-    padding: 14px 28px;
+    padding: 14px 32px;
     border-radius: 12px;
-    font-weight: 700;
+    font-weight: 800;
     font-size: 0.95rem;
     cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .upgrade-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    background: #f8fafc;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
 }
 
 .current-plan-card.free-plan .upgrade-btn {
@@ -91,15 +107,15 @@
 /* ─── Grid Layout ───────────────────────────────────────────── */
 .billing-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 32px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
 }
 
 .billing-section {
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: 20px;
-    padding: 24px;
+    border-radius: 24px;
+    padding: 2rem;
     display: flex;
     flex-direction: column;
 }
@@ -108,151 +124,42 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 1.5rem;
 }
 
 .section-header h3 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.015em;
     color: #0f172a;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .icon-blue {
     color: #2563eb;
 }
 
-/* ─── Payment Methods ───────────────────────────────────────── */
-.add-method-btn {
-    background: #f1f5f9;
-    color: #0f172a;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: 0.2s;
-}
-
-.add-method-btn:hover {
-    background: #e2e8f0;
-}
-
-.method-card {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    padding: 16px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.card-brand {
-    background: #1e293b;
-    color: white;
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-weight: 900;
-    font-style: italic;
-    font-size: 0.9rem;
-    letter-spacing: 1px;
-}
-
-.card-details {
-    flex-grow: 1;
-}
-
-.card-details p {
-    margin: 0 0 4px 0;
-    font-weight: 600;
-    color: #0f172a;
-    font-size: 0.95rem;
-    letter-spacing: 1px;
-}
-
-.card-details span {
-    font-size: 0.8rem;
-    color: #64748b;
-}
-
-.text-btn {
-    background: none;
-    border: none;
-    color: #2563eb;
-    font-weight: 600;
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-
-.text-btn:hover {
-    text-decoration: underline;
-}
-
-/* ─── Invoices ──────────────────────────────────────────────── */
-.invoice-list {
+/* Balance Box */
+.balance-display {
+    padding: 2.5rem 1.5rem !important;
+    background: rgba(248, 250, 252, 0.65) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    border-radius: 20px !important;
     display: flex;
     flex-direction: column;
-}
-
-.invoice-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 0;
-    border-bottom: 1px solid #f1f5f9;
-}
-
-.invoice-item:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-}
-
-.inv-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.inv-meta strong {
-    color: #0f172a;
-    font-size: 0.95rem;
-}
-
-.inv-meta span {
-    color: #64748b;
-    font-size: 0.8rem;
-    font-family: monospace;
-}
-
-.inv-amount {
-    font-weight: 700;
-    color: #0f172a;
-}
-
-.icon-btn {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    color: #64748b;
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    transition: 0.2s;
+    height: 250px !important;
 }
 
-.icon-btn:hover {
-    background: #e2e8f0;
-    color: #0f172a;
+.balance-display p {
+    font-weight: 700;
+    letter-spacing: 0.02em;
 }
 
 /* ─── Empty States ──────────────────────────────────────────── */
@@ -261,26 +168,45 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 40px 20px;
-    background: #f8fafc;
+    padding: 2.5rem 1.5rem;
+    background: rgba(248, 250, 252, 0.65);
     border: 2px dashed #cbd5e1;
-    border-radius: 12px;
+    border-radius: 20px;
     margin-top: 10px;
     text-align: center;
-    flex-grow: 1; /* Makes it fill the card height */
+    flex-grow: 1; 
+    height: 250px;
 }
 
 .empty-icon {
-    font-size: 2rem;
+    font-size: 2.2rem;
     color: #94a3b8;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
 }
 
 .billing-empty-state p {
     margin: 0;
     color: #64748b;
     font-size: 0.95rem;
-    font-weight: 500;
+    font-weight: 600;
+}
+
+.billing-empty-state button {
+    margin-top: 14px;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.2);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.billing-empty-state button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3) !important;
+}
+
+/* Premium active banner state */
+.billing-empty-state.active-premium {
+    background: #ecfdf5;
+    border-color: #10b981;
 }
 
 /* ─── Responsive ────────────────────────────────────────────── */

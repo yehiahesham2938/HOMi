@@ -1,107 +1,181 @@
-/* Security.css */
+/* Security.css - Premium Dashboard Style */
+
 .security-grid-layout {
     display: flex;
     flex-direction: column;
-    gap: 3rem;
+    gap: 2.5rem;
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .security-status-hero {
-    background: linear-gradient(to right, #ffffff, #f0f9ff);
-    border: 1px solid #e0f2fe;
-    padding: 2rem;
+    background: linear-gradient(135deg, rgba(239, 246, 255, 0.3) 0%, rgba(255, 255, 255, 0.9) 100%);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 2rem 2.5rem;
     border-radius: 24px;
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: 2.5rem;
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.03);
+}
+
+@media (max-width: 640px) {
+    .security-status-hero {
+        flex-direction: column;
+        text-align: center;
+        padding: 2rem 1.5rem;
+    }
 }
 
 .safety-meter {
     position: relative;
     width: 100px;
     height: 100px;
+    flex-shrink: 0;
 }
 
-.circular-chart { display: block; margin: 10px auto; max-width: 100%; max-height: 100%; }
-.circle-bg { fill: none; stroke: #e2e8f0; stroke-width: 3.8; }
-.circle { fill: none; stroke: var(--primary-blue); stroke-width: 2.8; stroke-linecap: round; }
-.percentage { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: 800; color: var(--text-dark); font-size: 1.2rem; }
+.circular-chart {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.circle-bg {
+    fill: none;
+    stroke: #f1f5f9;
+    stroke-width: 3.5;
+}
+
+.circle {
+    fill: none;
+    stroke: #2563eb;
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    transition: stroke-dasharray 0.6s ease;
+}
+
+.percentage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 800;
+    color: #0f172a;
+    font-size: 1.3rem;
+    letter-spacing: -0.02em;
+}
+
+.security-hero-text h3 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.02em;
+}
+
+.security-hero-text p {
+    font-size: 0.95rem;
+    color: #475569;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.security-tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+}
 
 .tool-card {
-    background: white;
-    border: 1px solid #f1f5f9;
-    padding: 1.5rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 2rem 1.75rem;
     border-radius: 20px;
     text-align: center;
-    transition: 0.3s;
-    width: 340px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.01);
 }
 
-.tool-card:hover { border-color: var(--primary-blue); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+.tool-card:hover {
+    border-color: #cbd5e1;
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.05);
+}
+
+.tool-card-complete {
+    border-color: #bbf7d0 !important;
+    background: linear-gradient(180deg, rgba(240, 253, 244, 0.5) 0%, #ffffff 100%);
+}
+
+.tool-card-complete:hover {
+    border-color: #86efac !important;
+    box-shadow: 0 12px 24px rgba(34, 197, 94, 0.05);
+}
 
 .tool-icon-box {
-    width: 50px;
-    height: 50px;
+    width: 56px;
+    height: 56px;
     background: #f1f5f9;
-    color: var(--primary-blue);
-    border-radius: 14px;
+    color: #475569;
+    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 1.5rem;
-    font-size: 1.25rem;
+    font-size: 1.4rem;
+    transition: all 0.2s;
+}
+
+.tool-card:hover .tool-icon-box {
+    transform: scale(1.05);
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.tool-card-complete .tool-icon-box {
+    background: #dcfce7 !important;
+    color: #15803d !important;
+}
+
+.tool-card h4 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 0.5rem 0;
+}
+
+.tool-card p {
+    font-size: 0.88rem;
+    color: #64748b;
+    line-height: 1.5;
+    margin: 0 0 1.5rem 0;
+    flex-grow: 1;
 }
 
 .tool-btn {
     width: 100%;
-    margin-top: 1rem;
     background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    padding: 8px;
-    border-radius: 8px;
-    font-weight: 600;
+    color: #0f172a;
+    border: 1px solid #cbd5e1;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.88rem;
     cursor: pointer;
-    transition: 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: inherit;
 }
 
-.tool-btn:hover { background: var(--primary-blue); color: white; border-color: var(--primary-blue); }
-.tool-btn:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
-}
-.tool-btn:disabled:hover {
-    background: #f8fafc;
-    color: inherit;
-    border-color: #e2e8f0;
-}
-
-.security-tools-grid {
-    display: flex;
-    gap: 2rem;
-    flex-wrap: wrap;      /* allow wrapping on small screens */
-    justify-content: flex-start;
-}
-
-/* optional: make cards grow/shrink nicely */
-.tool-card {
-    background: white;
-    border: 1px solid #f1f5f9;
-    padding: 1.5rem;
-    border-radius: 20px;
-    border-color: #afbdcb;
-    text-align: center;
-    transition: 0.3s;
-    width: 340px;
-    flex: 1 1 340px; 
-}
-
-.tool-card-complete {
-    border-color: #22c55e !important;
-    background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
-}
-
-.tool-card-complete .tool-icon-box {
-    background: #dcfce7;
-    color: #15803d;
+.tool-btn:hover:not(:disabled) {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
 }
 
 .tool-card-complete .tool-btn {
@@ -110,20 +184,26 @@
     color: #ffffff;
 }
 
-.tool-card-complete .tool-btn:hover {
+.tool-card-complete .tool-btn:hover:not(:disabled) {
     background: #16a34a;
     border-color: #16a34a;
 }
 
+.tool-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .security-inline-note {
-    margin-top: 10px;
-    font-size: 12px;
+    margin-top: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
     line-height: 1.4;
-    text-align: left;
+    text-align: center;
 }
 
 .security-inline-note.success {
-    color: #166534;
+    color: #15803d;
 }
 
 .security-inline-note.error {

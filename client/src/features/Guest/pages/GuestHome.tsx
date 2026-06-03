@@ -18,8 +18,8 @@ const GuestHome: React.FC = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Redesign tabs and accordion states
-  const [activeTab, setActiveTab] = useState<'tenant' | 'landlord'>('tenant');
-  const [activeStepsTab, setActiveStepsTab] = useState<'tenant-steps' | 'landlord-steps'>('tenant-steps');
+  const [activeTab, setActiveTab] = useState<'tenant' | 'landlord' | 'provider'>('tenant');
+  const [activeStepsTab, setActiveStepsTab] = useState<'tenant-steps' | 'landlord-steps' | 'provider-steps'>('tenant-steps');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   // Property and search/filter states
@@ -262,7 +262,7 @@ const GuestHome: React.FC = () => {
               <div className="search-col">
                 <label>{t('guestHome.location')}</label>
                 <div className="search-input-wrapper">
-                  <span className="col-icon">📍</span>
+                  <span className="col-icon"></span>
                   <input
                     type="text"
                     placeholder="Cairo, Zamalek..."
@@ -280,21 +280,21 @@ const GuestHome: React.FC = () => {
                     onClick={() => setSelectedType(selectedType === 'APARTMENT' ? '' : 'APARTMENT')}
                     className={`search-pill-btn ${selectedType === 'APARTMENT' ? 'active' : ''}`}
                   >
-                    🏠 Apt
+                    Apt
                   </button>
                   <button
                     type="button"
                     onClick={() => setSelectedType(selectedType === 'VILLA' ? '' : 'VILLA')}
                     className={`search-pill-btn ${selectedType === 'VILLA' ? 'active' : ''}`}
                   >
-                    🏡 Villa
+                    Villa
                   </button>
                   <button
                     type="button"
                     onClick={() => setSelectedType(selectedType === 'STUDIO' ? '' : 'STUDIO')}
                     className={`search-pill-btn ${selectedType === 'STUDIO' ? 'active' : ''}`}
                   >
-                    🛋️ Studio
+                    Studio
                   </button>
                 </div>
               </div>
@@ -302,7 +302,7 @@ const GuestHome: React.FC = () => {
               <div className="search-col">
                 <label>{t('guestHome.maxPrice')}</label>
                 <div className="search-input-wrapper">
-                  <span className="col-icon">💰</span>
+                  <span className="col-icon"></span>
                   <select
                     value={selectedPrice}
                     onChange={(e) => setSelectedPrice(e.target.value)}
@@ -316,7 +316,7 @@ const GuestHome: React.FC = () => {
                 </div>
               </div>
               <button type="submit" className="search-submit-btn">
-                <span className="btn-icon">🔍</span>
+                <span className="btn-icon"></span>
                 <span>{t('guestHome.search')}</span>
               </button>
             </form>
@@ -423,8 +423,8 @@ const GuestHome: React.FC = () => {
           <div className="stat-label">Digital Process</div>
         </div>
         <div className="stat">
-          <div className="stat-num">2 Roles</div>
-          <div className="stat-label">Tenant & Landlord</div>
+          <div className="stat-num">3 Roles</div>
+          <div className="stat-label">Tenant, Landlord & Provider</div>
         </div>
         <div className="stat">
           <div className="stat-num">6 Steps</div>
@@ -726,6 +726,12 @@ const GuestHome: React.FC = () => {
             >
               I'm a Landlord
             </button>
+            <button
+              className={`tab-btn ${activeTab === 'provider' ? 'active' : ''}`}
+              onClick={() => setActiveTab('provider')}
+            >
+              I'm a Provider
+            </button>
           </div>
 
           {/* TENANT FEATURE GRID */}
@@ -818,6 +824,51 @@ const GuestHome: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* PROVIDER FEATURE GRID */}
+          <div className={`tab-panel ${activeTab === 'provider' ? 'active' : ''}`} id="tab-provider">
+            <div className="feature-grid">
+              <div className="feature-card wide reveal">
+                <div className="feature-icon">🛠️</div>
+                <div className="feature-title">Grow Your Maintenance Business</div>
+                <div className="feature-desc">Create your provider profile, upload legal credentials, and access a steady stream of verified property maintenance jobs in your service areas.</div>
+                <div className="step-list">
+                  <div className="step-item">
+                    <div className="step-num">1</div>
+                    <div className="step-text"><strong>Create provider account</strong> — register as an individual technician or a company service.</div>
+                  </div>
+                  <div className="step-item">
+                    <div className="step-num">2</div>
+                    <div className="step-text"><strong>Upload legal credentials</strong> — verify your business or skill certificates for safety and assurance.</div>
+                  </div>
+                  <div className="step-item">
+                    <div className="step-num">3</div>
+                    <div className="step-text"><strong>Find & apply for jobs</strong> — browse posted maintenance issues, review descriptions/photos, and apply to take over.</div>
+                  </div>
+                </div>
+              </div>
+              <div className="feature-card reveal">
+                <div className="feature-icon">📄</div>
+                <div className="feature-title">Verify Safety Credentials</div>
+                <div className="feature-desc">Upload registration documents, trade licenses, and IDs. Safe and assured service keeps landlords and tenants confident.</div>
+              </div>
+              <div className="feature-card reveal">
+                <div className="feature-icon">🔍</div>
+                <div className="feature-title">Browse Local Issues</div>
+                <div className="feature-desc">Filter and search for plumbing, electrical, HVAC, and cleaning jobs near you. Review full issue details and photos.</div>
+              </div>
+              <div className="feature-card reveal">
+                <div className="feature-icon">💰</div>
+                <div className="feature-title">Secure Payments & Wallet</div>
+                <div className="feature-desc">Once a job is resolved and the report is submitted, funds are deposited directly into your secure HOMI wallet for easy withdrawal.</div>
+              </div>
+              <div className="feature-card reveal">
+                <div className="feature-icon">📋</div>
+                <div className="feature-title">Submit Reports & Track Balance</div>
+                <div className="feature-desc">Take photos of completed repairs, write details of the fix, submit report directly to the landlord for quick release of funds, and monitor your earnings.</div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -840,6 +891,12 @@ const GuestHome: React.FC = () => {
             onClick={() => setActiveStepsTab('landlord-steps')}
           >
             Landlord Journey
+          </button>
+          <button
+            className={`steps-tab ${activeStepsTab === 'provider-steps' ? 'active' : ''}`}
+            onClick={() => setActiveStepsTab('provider-steps')}
+          >
+            Maintenance Provider Journey
           </button>
         </div>
 
@@ -1226,6 +1283,171 @@ const GuestHome: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* MAINTENANCE PROVIDER STEPS PANEL */}
+        <div className={`steps-panel ${activeStepsTab === 'provider-steps' ? 'active' : ''}`} id="provider-steps">
+          {/* Step 1 */}
+          <div className="step-row reveal">
+            <div className="step-content">
+              <div className="step-number-badge">
+                <div className="snb-circle">1</div>
+                <div className="snb-label">Step One</div>
+              </div>
+              <div className="step-content-title">Create Maintenance Provider Account</div>
+              <div className="step-content-desc">Start your journey by registering as a maintenance provider on HOMI. You can sign up as an individual service or as a company service, specifying your specialties and service areas.</div>
+              <div className="step-bullets">
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Choose individual technician or company service type</div>
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>List your primary maintenance specialties and skills</div>
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Define your geographic service coverage areas</div>
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Set up your professional business profile</div>
+              </div>
+              <div className="step-tags">
+                <span className="step-tag">Registration</span>
+                <span className="step-tag">Specialties</span>
+                <span className="step-tag">Service Areas</span>
+              </div>
+            </div>
+            <div className="step-photo">
+              <img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=800&q=80&fit=crop" alt="Technician setting up profile" />
+              <div className="step-photo-caption"><strong>Account Registration</strong><span>Register specialties and setup business profile</span></div>
+            </div>
+          </div>
+
+          {/* Step 2 */}
+          <div className="step-row reverse reveal">
+            <div className="step-content">
+              <div className="step-number-badge">
+                <div className="snb-circle">2</div>
+                <div className="snb-label">Step Two</div>
+              </div>
+              <div className="step-content-title">Upload Legal Papers for Verification</div>
+              <div className="step-content-desc">Verify your profile by uploading your legal documents. Providing trade licenses, business registrations, or certifications is critical to build trust and ensure maximum safety and assurance.</div>
+              <div className="step-bullets">
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Upload national ID or company tax card documentation</div>
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Provide trade licenses or business registration certificates</div>
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Submit professional certifications or qualifications</div>
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Get verified by the HOMI security & admin team</div>
+              </div>
+              <div className="step-tags">
+                <span className="step-tag">Verification</span>
+                <span className="step-tag">Legal Papers</span>
+                <span className="step-tag">Safety & Trust</span>
+              </div>
+            </div>
+            <div className="step-photo">
+              <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80&fit=crop" alt="Legal papers verification" />
+              <div className="step-photo-caption"><strong>Safety Verification</strong><span>Fast document verification for profile trust badge</span></div>
+            </div>
+          </div>
+
+          {/* Step 3 */}
+          <div className="step-row reveal">
+            <div className="step-content">
+              <div className="step-number-badge">
+                <div className="snb-circle">3</div>
+                <div className="snb-label">Step Three</div>
+              </div>
+              <div className="step-content-title">Search & Review Posted Issues</div>
+              <div className="step-content-desc">Browse through maintenance issues posted by tenants and landlords on our live job board. Filter listings by category, location, and urgency to find the right projects for your business.</div>
+              <div className="step-bullets">
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Browse live maintenance issues in real-time</div>
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Filter issues by category (plumbing, electrical, HVAC, etc.)</div>
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Review comprehensive descriptions and tenant photos</div>
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Check job location details and landlord requirements</div>
+              </div>
+              <div className="step-tags">
+                <span className="step-tag">Job Search</span>
+                <span className="step-tag">Issues Board</span>
+                <span className="step-tag">Filters</span>
+              </div>
+            </div>
+            <div className="step-photo">
+              <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&q=80&fit=crop" alt="Searching posted issues on tablet" />
+              <div className="step-photo-caption"><strong>Browse Live Issues</strong><span>Find open maintenance issues in your area</span></div>
+            </div>
+          </div>
+
+          {/* Step 4 */}
+          <div className="step-row reverse reveal">
+            <div className="step-content">
+              <div className="step-number-badge">
+                <div className="snb-circle">4</div>
+                <div className="snb-label">Step Four</div>
+              </div>
+              <div className="step-content-title">Apply for Issues to Take Over</div>
+              <div className="step-content-desc">Express interest in resolving the issues by submitting your application. Propose cost estimates, list parts required, and suggest scheduling options directly to the property landlord.</div>
+              <div className="step-bullets">
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Submit application to take over the work order</div>
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Include cost estimates and labor fee quotes</div>
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Propose preferred visit times and scheduling</div>
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Chat directly with landlords about job details</div>
+              </div>
+              <div className="step-tags">
+                <span className="step-tag">Job Application</span>
+                <span className="step-tag">Estimates</span>
+                <span className="step-tag">Landlord Chat</span>
+              </div>
+            </div>
+            <div className="step-photo">
+              <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&q=80&fit=crop" alt="Sending proposal on laptop" />
+              <div className="step-photo-caption"><strong>Submit Proposals</strong><span>Offer pricing estimates and schedule visits</span></div>
+            </div>
+          </div>
+
+          {/* Step 5 */}
+          <div className="step-row reveal">
+            <div className="step-content">
+              <div className="step-number-badge">
+                <div className="snb-circle">5</div>
+                <div className="snb-label">Step Five</div>
+              </div>
+              <div className="step-content-title">Start Repairing After Acceptance</div>
+              <div className="step-content-desc">Once the landlord accepts your proposal, you are officially assigned to the issue. Get direct access to coordinate with the tenant, visit the property, and perform the high-quality repair.</div>
+              <div className="step-bullets">
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Receive instant notification upon job assignment</div>
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Get tenant contact info and schedule visit details</div>
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Perform diagnostics and execute the repair work on-site</div>
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Follow strict safety standards and build quality trust</div>
+              </div>
+              <div className="step-tags">
+                <span className="step-tag">Job Execution</span>
+                <span className="step-tag">On-Site Repair</span>
+                <span className="step-tag">Tenant Coordination</span>
+              </div>
+            </div>
+            <div className="step-photo">
+              <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&q=80&fit=crop" alt="Technician performing repair work" />
+              <div className="step-photo-caption"><strong>Job Execution</strong><span>Visit site and complete quality repairs</span></div>
+            </div>
+          </div>
+
+          {/* Step 6 */}
+          <div className="step-row reverse reveal">
+            <div className="step-content">
+              <div className="step-number-badge">
+                <div className="snb-circle">6</div>
+                <div className="snb-label">Step Six</div>
+              </div>
+              <div className="step-content-title">Submit Report & Track Wallet Balance</div>
+              <div className="step-content-desc">Once the issue is fully fixed, take 'after' photos and submit a detailed repair report through the app. Funds are released from escrow directly into your HOMI secure wallet.</div>
+              <div className="step-bullets">
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Document repair results with photos and notes</div>
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Submit the work report for landlord confirmation</div>
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Receive instant payout to your secure HOMI wallet</div>
+                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Track your balance and withdraw earnings to your bank</div>
+              </div>
+              <div className="step-tags">
+                <span className="step-tag">Issue Report</span>
+                <span className="step-tag">Secure Payout</span>
+                <span className="step-tag">Wallet Balance</span>
+              </div>
+            </div>
+            <div className="step-photo">
+              <img src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80&fit=crop" alt="Tracking balance on mobile phone" />
+              <div className="step-photo-caption"><strong>Earnings & Wallet</strong><span>Get paid instantly upon work approval</span></div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* 6. Dual Persona (Roles section - buttons changed to navigate to /auth and class outline) */}
@@ -1237,7 +1459,7 @@ const GuestHome: React.FC = () => {
             <h3 className="role-title">Find Your Happy Place</h3>
             <p className="role-desc">Browse thousands of verified listings with high-quality photos. Apply digitally, match with roommates, sign your lease contract online, pay your monthly rent via credit card, and report repairs instantly.</p>
             <div className="role-features">
-              <div className="role-feat"><span className="check">✓</span> 100% verified listings and landlords</div>
+              <div className="role-feat"><span className="check">✓</span> 100% verified listings and landlords accounts</div>
               <div className="role-feat"><span className="check">✓</span> Zero hidden broker fees or surprise commissions</div>
               <div className="role-feat"><span className="check">✓</span> Legally binding digital lease agreements</div>
               <div className="role-feat"><span className="check">✓</span> Monthly rent payments through credit/debit card</div>
@@ -1257,6 +1479,20 @@ const GuestHome: React.FC = () => {
               <div className="role-feat"><span className="check">✓</span> Full oversight of active maintenance work orders</div>
             </div>
             <button onClick={() => navigate('/auth')} className="btn-outline" style={{ color: '#16a34a', borderColor: '#16a34a' }}>List Your Property ›</button>
+          </div>
+
+          {/* Maintenance Provider Card */}
+          <div className="role-card provider" data-emoji="🛠️">
+            <div className="role-badge-pill">For Providers</div>
+            <h3 className="role-title">Grow Your Business</h3>
+            <p className="role-desc">Access a steady stream of maintenance jobs. Create your profile, upload your credentials, browse posted issues, submit estimates, complete the job, and track your wallet balance.</p>
+            <div className="role-features">
+              <div className="role-feat"><span className="check">✓</span> Register as an individual or company service</div>
+              <div className="role-feat"><span className="check">✓</span> Verified badges to build trust with landlords</div>
+              <div className="role-feat"><span className="check">✓</span> Direct wallet payouts immediately after job reports</div>
+              <div className="role-feat"><span className="check">✓</span> Easy communication with tenants and landlords</div>
+            </div>
+            <button onClick={() => navigate('/maintenance-providers')} className="btn-outline" style={{ color: '#d97706', borderColor: '#d97706' }}>Join as Provider ›</button>
           </div>
         </div>
       </section>
@@ -1398,6 +1634,7 @@ const GuestHome: React.FC = () => {
           <div className="cta-btns">
             <button onClick={() => navigate('/auth')} className="btn-white">Create Tenant Account ›</button>
             <button onClick={() => navigate('/auth')} className="btn-white-outline">List Your Property</button>
+            <button onClick={() => navigate('/maintenance-providers')} className="btn-white-outline" style={{ borderStyle: 'dashed' }}>Join as Provider</button>
           </div>
         </div>
       </section>

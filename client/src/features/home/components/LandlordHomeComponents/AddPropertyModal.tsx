@@ -1,10 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import confetti from 'canvas-confetti';
-import { 
-  FaTimes, FaBed, FaBath, FaParking, FaImage, 
-  FaMapMarkerAlt, FaChevronRight, FaChevronLeft, FaCloudUploadAlt, 
-  FaRocket, FaCalendarAlt, FaShieldAlt, FaChair, 
+import {
+  FaTimes, FaBed, FaBath, FaParking, FaImage,
+  FaMapMarkerAlt, FaChevronRight, FaChevronLeft, FaCloudUploadAlt,
+  FaRocket, FaCalendarAlt, FaShieldAlt, FaChair,
   FaMapMarkedAlt, FaCity, FaBuilding, FaLayerGroup,
   FaTools, FaUserTie, FaUserAlt, FaExclamationTriangle
 } from 'react-icons/fa';
@@ -26,15 +26,15 @@ import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
 const DefaultIcon = L.icon({
-    iconUrl: icon,
-    shadowUrl: iconShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41]
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41]
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
 const EGYPT_BOUNDS = L.latLngBounds(
-  L.latLng(21.9, 24.6), 
+  L.latLng(21.9, 24.6),
   L.latLng(31.7, 36.9)
 );
 
@@ -130,7 +130,7 @@ const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onClose, onProperty
   const [buildingNumber, setBuildingNumber] = useState('');
   const [unitApt, setUnitApt] = useState('');
   const [aboutProperty, setAboutProperty] = useState('');
-  const [position, setPosition] = useState<{lat: number, lng: number} | null>(null);
+  const [position, setPosition] = useState<{ lat: number, lng: number } | null>(null);
   const [isMapActive, setIsMapActive] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
@@ -535,9 +535,9 @@ const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onClose, onProperty
               <div className="header-titles">
                 <h2>{t('landlordHomeComponents.listNewProperty', { defaultValue: 'List New Property' })}</h2>
                 <p>{t('landlordHome.step')} {step} {t('guestHome.of')} 4: {
-                  step === 1 ? t('myProperties.tabs.general') : 
-                  step === 2 ? t('myProperties.tabs.media') : 
-                  step === 3 ? t('myProperties.labels.locationDetails') : t('myProperties.tabs.maintenance')
+                  step === 1 ? t('myProperties.tabs.general') :
+                    step === 2 ? t('myProperties.tabs.media') :
+                      step === 3 ? t('myProperties.labels.locationDetails') : t('myProperties.tabs.maintenance')
                 }</p>
               </div>
               <button className="example-fill-btn" onClick={loadExampleProperty}>
@@ -608,11 +608,11 @@ const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onClose, onProperty
               {step === 2 && (
                 <div className="step-view animate-fade-in">
                   <div className="specs-grid">
-                    <div className="spec-item"><FaBed /><input type="number" placeholder={t('myProperties.beds')} value={beds} onChange={(e) => setBeds(e.target.value)} /></div>
-                    <div className="spec-item"><FaBath /><input type="number" placeholder={t('myProperties.baths')} value={baths} onChange={(e) => setBaths(e.target.value)} /></div>
-                    <div className="spec-item"><FaLayerGroup /><input type="number" placeholder={t('landlordHome.step')} value={floor} onChange={(e) => setFloor(e.target.value)} /></div>
-                    <div className="spec-item"><FaParking /><input type="number" placeholder={t('landlordHomeComponents.amenities')} value={parking} onChange={(e) => setParking(e.target.value)} /></div>
-                    <div className="spec-item"><span className="sqft-label">{t('myProperties.sqft')}</span><input type="number" placeholder={t('guestHome.area')} value={sqft} onChange={(e) => setSqft(e.target.value)} /></div>
+                    <div className="spec-item"><FaBed /><input type="number" placeholder={t('Bedrooms')} value={beds} onChange={(e) => setBeds(e.target.value)} /></div>
+                    <div className="spec-item"><FaBath /><input type="number" placeholder={t('Bathrooms')} value={baths} onChange={(e) => setBaths(e.target.value)} /></div>
+                    <div className="spec-item"><FaLayerGroup /><input type="number" placeholder={t('Floor')} value={floor} onChange={(e) => setFloor(e.target.value)} /></div>
+                    <div className="spec-item"><FaParking /><input type="number" placeholder={t('Parking')} value={parking} onChange={(e) => setParking(e.target.value)} /></div>
+                    <div className="spec-item"><span className="sqft-label">{t('Area (sqft)')}</span><input type="number" placeholder={t('guestHome.area')} value={sqft} onChange={(e) => setSqft(e.target.value)} /></div>
                   </div>
                   <div className="photo-upload-section">
                     <label><FaImage /> {t('myProperties.labels.propertyGallery')}</label>
@@ -654,7 +654,7 @@ const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onClose, onProperty
                   <div className="photo-upload-section" style={{ marginTop: '20px' }}>
                     <label><FaShieldAlt /> {t('landlordHomeComponents.ownershipDocs', { defaultValue: 'Legal Ownership Documents' })}</label>
                     <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '10px' }}>
-                        {t('landlordHomeComponents.docsInstruction', { defaultValue: 'Upload files (PDFs/Images) proving your ownership. These are required for Admin verification.' })}
+                      {t('landlordHomeComponents.docsInstruction', { defaultValue: 'Upload files (PDFs/Images) proving your ownership. These are required for Admin verification.' })}
                     </p>
                     <div className="upload-grid">
                       <input
@@ -720,9 +720,9 @@ const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onClose, onProperty
                       </div>
                     ) : (
                       <div className="leaflet-wrapper" style={{ height: '100%', width: '100%', position: 'relative' }}>
-                        <MapContainer 
-                          center={position ? [position.lat, position.lng] : [26.8206, 30.8025]} 
-                          zoom={6} 
+                        <MapContainer
+                          center={position ? [position.lat, position.lng] : [26.8206, 30.8025]}
+                          zoom={6}
                           maxBounds={EGYPT_BOUNDS}
                           style={{ height: '100%', width: '100%' }}
                         >
@@ -756,18 +756,18 @@ const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onClose, onProperty
                       <input type="text" placeholder="Street 9" className="premium-input" value={streetName} onChange={(e) => setStreetName(e.target.value)} />
                     </div>
                     <div className="form-row-triple">
-                        <div className="field-group">
-                            <label><FaBuilding /> {t('landlordHomeComponents.bldgNumber', { defaultValue: 'Bldg #' })}</label>
-                            <input type="text" placeholder="102" className="premium-input" value={buildingNumber} onChange={(e) => setBuildingNumber(e.target.value)} />
-                        </div>
-                        <div className="field-group">
-                            <label>{t('landlordHome.step')}</label>
-                            <input type="text" placeholder="12" className="premium-input" value={floor} onChange={(e) => setFloor(e.target.value)} />
-                        </div>
-                        <div className="field-group">
-                            <label>{t('rentalRequests.card.unit', { defaultValue: 'Unit/Apt' })}</label>
-                            <input type="text" placeholder="4B" className="premium-input" value={unitApt} onChange={(e) => setUnitApt(e.target.value)} />
-                        </div>
+                      <div className="field-group">
+                        <label><FaBuilding /> {t('landlordHomeComponents.bldgNumber', { defaultValue: 'Bldg #' })}</label>
+                        <input type="text" placeholder="102" className="premium-input" value={buildingNumber} onChange={(e) => setBuildingNumber(e.target.value)} />
+                      </div>
+                      <div className="field-group">
+                        <label>{t('landlordHome.step')}</label>
+                        <input type="text" placeholder="12" className="premium-input" value={floor} onChange={(e) => setFloor(e.target.value)} />
+                      </div>
+                      <div className="field-group">
+                        <label>{t('rentalRequests.card.unit', { defaultValue: 'Unit/Apt' })}</label>
+                        <input type="text" placeholder="4B" className="premium-input" value={unitApt} onChange={(e) => setUnitApt(e.target.value)} />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -784,19 +784,19 @@ const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onClose, onProperty
                         <p className="maintenance-legend">L = {t('tenantHomeComponents.landlord')}, T = {t('tenantHomeComponents.tenant')}</p>
                       </div>
                     </div>
-                    
+
                     <div className="maintenance-grid">
                       {Object.entries(maintenance).map(([type, assigned]) => (
                         <div key={type} className="maintenance-card">
                           <span className="m-title">{t(`myProperties.maintenanceTypes.${type}`)}</span>
                           <div className="m-toggle-group">
-                            <button 
+                            <button
                               className={`m-btn ${assigned === 'landlord' ? 'active landlord' : ''}`}
                               onClick={() => toggleMaintenance(type, 'landlord')}
                             >
                               <FaUserTie /> L
                             </button>
-                            <button 
+                            <button
                               className={`m-btn ${assigned === 'tenant' ? 'active tenant' : ''}`}
                               onClick={() => toggleMaintenance(type, 'tenant')}
                             >
@@ -811,10 +811,10 @@ const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onClose, onProperty
                   <div className="details-box">
                     <div className="field-group">
                       <label>{t('landlordHomeComponents.aboutProperty', { defaultValue: 'About Property' })}</label>
-                      <textarea 
-                        className="premium-textarea" 
-                        placeholder={t('landlordHomeComponents.aboutPlaceholder', { defaultValue: 'Describe what makes your property special...' })} 
-                        value={aboutProperty} 
+                      <textarea
+                        className="premium-textarea"
+                        placeholder={t('landlordHomeComponents.aboutPlaceholder', { defaultValue: 'Describe what makes your property special...' })}
+                        value={aboutProperty}
                         onChange={(e) => setAboutProperty(e.target.value)}
                       />
                     </div>
@@ -823,8 +823,8 @@ const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onClose, onProperty
                       <label>{t('myProperties.labels.coreAmenities')}</label>
                       <div className="chips-grid">
                         {amenitiesList.map(item => (
-                          <button 
-                            key={item} 
+                          <button
+                            key={item}
                             className={`chip ${selectedAmenities.includes(item) ? 'active' : ''}`}
                             onClick={() => toggleChip(item, selectedAmenities, setSelectedAmenities)}
                           >
@@ -838,8 +838,8 @@ const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onClose, onProperty
                       <label>{t('myProperties.labels.houseRules')}</label>
                       <div className="chips-grid">
                         {houseRules.map(item => (
-                          <button 
-                            key={item} 
+                          <button
+                            key={item}
                             className={`chip ${selectedHouseRules.includes(item) ? 'active' : ''}`}
                             onClick={() => toggleChip(item, selectedHouseRules, setSelectedHouseRules)}
                           >
@@ -874,8 +874,8 @@ const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onClose, onProperty
           <div className="success-state animate-fade-in">
             <div className="checkmark-wrapper">
               <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
-                <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none" />
+                <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
               </svg>
             </div>
             <div className="success-text-content">

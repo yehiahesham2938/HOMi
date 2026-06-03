@@ -26,7 +26,7 @@
     display: flex;
     flex-direction: column;
     position: relative;
-    box-shadow: 
+    box-shadow:
         0 25px 50px -12px rgba(15, 23, 42, 0.25),
         0 0 0 1px rgba(15, 23, 42, 0.05);
     overflow: hidden;
@@ -34,13 +34,14 @@
 }
 
 @keyframes modalSlideUp {
-    from { 
-        opacity: 0; 
-        transform: translateY(24px) scale(0.98); 
+    from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.98);
     }
-    to { 
-        opacity: 1; 
-        transform: translateY(0) scale(1); 
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
 
@@ -63,8 +64,8 @@
     color: #ffffff;
 }
 
-.detailed-close-btn:hover { 
-    background: #ef4444; 
+.detailed-close-btn:hover {
+    background: #ef4444;
     color: #ffffff;
     border-color: #ef4444;
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
@@ -84,7 +85,6 @@
     left: 0;
     right: 0;
     height: 120px;
-    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #4f46e5 100%);
     z-index: 1;
 }
 
@@ -94,7 +94,8 @@
     align-items: flex-end;
     gap: 24px;
     z-index: 2;
-    margin-top: 24px; /* Push content down to overlap the banner */
+    margin-top: 24px;
+    /* Push content down to overlap the banner */
 }
 
 .avatar-overlap-wrapper {
@@ -127,7 +128,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .tenant-header-meta {
@@ -238,15 +239,32 @@
     letter-spacing: 0.05em;
 }
 
-.icon-blue { color: #2563eb; }
-.icon-purple { color: #7c3aed; }
-.icon-green { color: #10b981; }
-.icon-orange { color: #f97316; }
-.icon-indigo { color: #4f46e5; }
-.icon-muted { color: #64748b; }
+.icon-blue {
+    color: #2563eb;
+}
+
+.icon-purple {
+    color: #7c3aed;
+}
+
+.icon-green {
+    color: #10b981;
+}
+
+.icon-orange {
+    color: #f97316;
+}
+
+.icon-indigo {
+    color: #4f46e5;
+}
+
+.icon-muted {
+    color: #64748b;
+}
 
 /* Left Section Columns */
-.modal-grid-left, 
+.modal-grid-left,
 .modal-grid-right {
     display: flex;
     flex-direction: column;
@@ -419,6 +437,7 @@
     align-items: center;
     position: relative;
     overflow: hidden;
+    height: 333px;
 }
 
 .modal-property-context-bar::after {
@@ -429,6 +448,7 @@
     font-size: 56px;
     opacity: 0.05;
     transform: rotate(-15deg);
+    height: 200px;
 }
 
 .property-meta-info {
@@ -504,14 +524,16 @@
 .btn-view-property .spinner-tiny {
     width: 14px;
     height: 14px;
-    border: 2px solid rgba(255,255,255,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.3);
     border-top-color: #ffffff;
     border-radius: 50%;
     animation: spinTiny 0.6s linear infinite;
 }
 
 @keyframes spinTiny {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* --- STICKY ACTION BUTTONS --- */
@@ -609,8 +631,13 @@
 }
 
 @keyframes overlayFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .action-card {
@@ -664,7 +691,7 @@
     background: #e2e8f0;
 }
 
-.success-circle, 
+.success-circle,
 .decline-outcome-circle {
     width: 64px;
     height: 64px;
@@ -675,8 +702,13 @@
     margin: 0 auto 20px auto;
 }
 
-.success-circle { background: #d1fae5; }
-.decline-outcome-circle { background: #fee2e2; }
+.success-circle {
+    background: #d1fae5;
+}
+
+.decline-outcome-circle {
+    background: #fee2e2;
+}
 
 .action-overlay.outcome-approved {
     background: rgba(240, 253, 244, 0.98);
@@ -706,15 +738,15 @@
         grid-template-columns: 1fr;
         gap: 24px;
     }
-    
+
     .modal-premium-header {
         padding: 24px 20px 16px 20px;
     }
-    
+
     .header-gradient-bg {
         height: 100px;
     }
-    
+
     .header-profile-row {
         flex-direction: column;
         align-items: center;
@@ -722,21 +754,21 @@
         gap: 16px;
         margin-top: 24px;
     }
-    
+
     .tenant-header-meta {
         display: flex;
         flex-direction: column;
         align-items: center;
     }
-    
+
     .name-badge-row {
         justify-content: center;
     }
-    
+
     .detailed-modal-body {
         padding: 0 20px 24px 20px;
     }
-    
+
     .contact-item {
         flex-direction: column;
         text-align: center;

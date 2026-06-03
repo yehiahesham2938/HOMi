@@ -94,13 +94,13 @@ const RequestCard = ({ data, onStatusChange }: RequestCardProps) => {
             >
                 <div className="rc-header">
                     <div className="rc-avatar-box">
-                        <img 
-                            src={applicant.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(applicant.name)}&background=random`} 
-                            alt={applicant.name} 
+                        <img
+                            src={applicant.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(applicant.name)}&background=random`}
+                            alt={applicant.name}
                             referrerPolicy="no-referrer"
                             onError={(e) => {
                                 const target = e.target as HTMLImageElement;
-                                target.onerror = null; 
+                                target.onerror = null;
                                 target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(applicant.name)}&background=random`;
                             }}
                         />
@@ -123,9 +123,9 @@ const RequestCard = ({ data, onStatusChange }: RequestCardProps) => {
                         <span>{applicant.income}</span>
                     </div>
                     <div className="rc-stat">
-                        <label>{t('rentalRequests.card.credit')}</label>
+                        <label>{t('Account')}</label>
                         <span className={applicant.creditScore >= 700 ? 'text-green' : 'text-orange'}>
-                            {applicant.creditScore}
+                            Verified
                         </span>
                     </div>
                 </div>

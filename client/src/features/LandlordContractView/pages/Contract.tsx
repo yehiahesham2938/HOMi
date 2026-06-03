@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../../../components/global/header';
 import Sidebar from '../../../components/global/Landlord/sidebar';
 import Footer from '../../../components/global/footer';
-import { 
+import {
     Plus, Building2, Clock, ChevronRight, FileText
 } from 'lucide-react';
 import ContractDetailView from '../components/ContractDetailView';
@@ -77,9 +77,9 @@ const LandlordContract: React.FC = () => {
             landlord: `${contract.landlord?.firstName || ''} ${contract.landlord?.lastName || ''}`.trim() || 'Landlord',
             amount: contract.rentAmount || 0,
             deposit: contract.securityDeposit || 0,
-            status: (contract.status === 'TERMINATED' ? 'EXPIRED' : 
-                     contract.status === 'PENDING_PAYMENT' ? 'PENDING_TENANT' : 
-                     contract.status) as LeaseContract['status'],
+            status: (contract.status === 'TERMINATED' ? 'EXPIRED' :
+                contract.status === 'PENDING_PAYMENT' ? 'PENDING_TENANT' :
+                    contract.status) as LeaseContract['status'],
             startDate: formatDate(contract.moveInDate),
             duration: `${contract.leaseDurationMonths} Months`,
             rentDueDate: contract.rentDueDate || '1ST_OF_MONTH',
@@ -146,9 +146,7 @@ const LandlordContract: React.FC = () => {
                             <h1>{t('landlordContract.pageTitle')}</h1>
                             <p>{t('landlordContract.pageSubtitle')}</p>
                         </div>
-                        {hasContracts && (
-                            <button className="btn-primary"><Plus size={18}/> {t('landlordContract.newAgreement')}</button>
-                        )}
+
                     </div>
 
                     {hasContracts ? (
@@ -165,8 +163,8 @@ const LandlordContract: React.FC = () => {
                                         </div>
                                         <h3>{contract.property}</h3>
                                         <div className="card-meta">
-                                            <div className="meta-item"><Building2 size={14}/> {contract.duration}</div>
-                                            <div className="meta-item"><Clock size={14}/> {t('landlordContract.starts')} {contract.startDate}</div>
+                                            <div className="meta-item"><Building2 size={14} /> {contract.duration}</div>
+                                            <div className="meta-item"><Clock size={14} /> {t('landlordContract.starts')} {contract.startDate}</div>
                                         </div>
                                     </div>
                                     <div className="card-footer">
@@ -175,24 +173,24 @@ const LandlordContract: React.FC = () => {
                                             <span className="value">${contract.amount}</span>
                                         </div>
                                         <button className="btn-view-contract" onClick={() => setSelectedContract(contract)}>
-                                            {contract.status === 'PENDING_LANDLORD' ? t('landlordContract.manage') : t('landlordContract.view')} <ChevronRight size={16}/>
+                                            {contract.status === 'PENDING_LANDLORD' ? t('landlordContract.manage') : t('landlordContract.view')} <ChevronRight size={16} />
                                         </button>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <div className="empty-state-container" style={{ 
-                            textAlign: 'center', padding: '80px 20px', 
-                            backgroundColor: 'var(--saas-card-bg)', 
-                            borderRadius: '14px', border: '1px dashed var(--saas-border-hover)' 
+                        <div className="empty-state-container" style={{
+                            textAlign: 'center', padding: '80px 20px',
+                            backgroundColor: 'var(--saas-card-bg)',
+                            borderRadius: '14px', border: '1px dashed var(--saas-border-hover)'
                         }}>
                             <FileText size={48} color="var(--saas-text-muted)" style={{ margin: '0 auto 16px' }} />
                             <h2 style={{ fontSize: '24px', marginBottom: '8px', color: 'var(--saas-text-main)' }}>{t('landlordContract.noActiveAgreements')}</h2>
                             <p style={{ color: 'var(--saas-text-muted)', marginBottom: '24px' }}>{t('landlordContract.noContractsText')}</p>
-                            <button 
-                                className="btn-primary" 
-                                style={{ margin: '0 auto' }} 
+                            <button
+                                className="btn-primary"
+                                style={{ margin: '0 auto' }}
                                 onClick={() => navigate('/rental-requests')}
                             >
                                 {t('landlordContract.viewRentalRequests')}
@@ -204,18 +202,18 @@ const LandlordContract: React.FC = () => {
             </div>
 
             {selectedContract && selectedContract.status !== 'ACTIVE' && (
-                <ContractDetailView 
-                    contract={selectedContract} 
+                <ContractDetailView
+                    contract={selectedContract}
                     isReadOnly={selectedContract.status !== 'PENDING_LANDLORD'}
                     onUpdated={fetchContracts}
-                    onClose={() => setSelectedContract(null)} 
+                    onClose={() => setSelectedContract(null)}
                 />
             )}
 
             {selectedContract?.status === 'ACTIVE' && (
-                <ActiveLeaseContract 
-                    contract={selectedContract} 
-                    onClose={() => setSelectedContract(null)} 
+                <ActiveLeaseContract
+                    contract={selectedContract}
+                    onClose={() => setSelectedContract(null)}
                 />
             )}
         </div>

@@ -6,7 +6,7 @@ import {
   FaMapMarkerAlt, FaChevronRight, FaChevronLeft, FaCloudUploadAlt,
   FaRocket, FaCalendarAlt, FaShieldAlt, FaChair,
   FaMapMarkedAlt, FaCity, FaBuilding, FaLayerGroup,
-  FaTools, FaUserTie, FaUserAlt, FaExclamationTriangle
+  FaTools, FaUserTie, FaUserAlt, FaExclamationTriangle, FaHome
 } from 'react-icons/fa';
 
 // Leaflet Imports
@@ -218,6 +218,10 @@ const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onClose, onProperty
 
       if (!securityDeposit || Number.isNaN(parsedSecurityDeposit) || parsedSecurityDeposit < 0) {
         return t('landlordHomeComponents.depositInvalid', { defaultValue: 'Please enter a valid security deposit.' });
+      }
+
+      if (parsedSecurityDeposit < parsedMonthlyPrice) {
+        return t('landlordHomeComponents.depositTooLow', { defaultValue: 'Security deposit cannot be less than the monthly rent.' });
       }
 
       if (!availabilityDate) {
@@ -441,6 +445,11 @@ const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onClose, onProperty
       return;
     }
 
+    if (parsedSecurityDeposit < parsedMonthlyPrice) {
+      setSubmitError(t('landlordHomeComponents.depositTooLow', { defaultValue: 'Security deposit cannot be less than the monthly rent.' }));
+      return;
+    }
+
     const imagesPayload = uploadedImages.map((image, index) => ({
       image_url: image,
       is_main: index === 0,
@@ -528,47 +537,111 @@ const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onClose, onProperty
 
   return (
     <div className="property-modal-overlay" onClick={onClose} dir="ltr">
-      <div className={`property-modal-container ${isSuccess ? 'success-mode' : ''} ${step === 4 ? 'wide-modal' : ''}`} onClick={(e) => e.stopPropagation()}>
+      <div className={`property-modal-container ${isSuccess ? 'success-mode' : ''}`} onClick={(e) => e.stopPropagation()}>
         {!isSuccess ? (
-          <>
-            <div className="property-modal-header">
-              <div className="header-titles">
-                <h2>{t('landlordHomeComponents.listNewProperty', { defaultValue: 'List New Property' })}</h2>
-                <p>{t('landlordHome.step')} {step} {t('guestHome.of')} 4: {
-                  step === 1 ? t('myProperties.tabs.general') :
-                    step === 2 ? t('myProperties.tabs.media') :
-                      step === 3 ? t('myProperties.labels.locationDetails') : t('myProperties.tabs.maintenance')
-                }</p>
+          <div className="modal-split-layout">
+            <aside className="modal-sidebar-stepper">
+              <div className="sidebar-brand">
+                <FaRocket className="brand-rocket-icon" />
+                <div>
+                  <h3>HOMi</h3>
+                  <p>{t('landlordHomeComponents.listNewProperty', { defaultValue: 'List Property' })}</p>
+                </div>
               </div>
-              <button className="example-fill-btn" onClick={loadExampleProperty}>
-                {t('landlordHomeComponents.loadExample', { defaultValue: 'Load Example Property' })}
-              </button>
-              <button className="close-btn" onClick={onClose}><FaTimes /></button>
-            </div>
 
-            <div className="modal-progress-bar">
-              <div className="progress-fill" style={{ width: `${(step / 4) * 100}%` }}></div>
-            </div>
+              <div className="sidebar-steps-list">
+                <div className={`sidebar-step-item ${step === 1 ? 'active' : ''} ${step > 1 ? 'completed' : ''}`}>
+                  <div className="step-icon-circle">
+                    {step > 1 ? '✓' : <FaHome />}
+                  </div>
+                  <div className="step-label-group">
+                    <span className="step-number-label">Step 1</span>
+                    <span className="step-title-label">{t('myProperties.tabs.general')}</span>
+                  </div>
+                </div>
 
-            {showVerificationWarning && (
-              <div className="verification-warning-banner" role="alert" aria-live="polite">
-                <FaExclamationTriangle className="verification-warning-icon" aria-hidden="true" />
-                <span>{t('landlordHomeComponents.verificationRequired', { defaultValue: 'Your account must be verified before adding a property.' })}</span>
+                <div className={`sidebar-step-item ${step === 2 ? 'active' : ''} ${step > 2 ? 'completed' : ''}`}>
+                  <div className="step-icon-circle">
+                    {step > 2 ? '✓' : <FaImage />}
+                  </div>
+                  <div className="step-label-group">
+                    <span className="step-number-label">Step 2</span>
+                    <span className="step-title-label">{t('myProperties.tabs.media')}</span>
+                  </div>
+                </div>
+
+                <div className={`sidebar-step-item ${step === 3 ? 'active' : ''} ${step > 3 ? 'completed' : ''}`}>
+                  <div className="step-icon-circle">
+                    {step > 3 ? '✓' : <FaMapMarkedAlt />}
+                  </div>
+                  <div className="step-label-group">
+                    <span className="step-number-label">Step 3</span>
+                    <span className="step-title-label">{t('myProperties.labels.locationDetails')}</span>
+                  </div>
+                </div>
+
+                <div className={`sidebar-step-item ${step === 4 ? 'active' : ''}`}>
+                  <div className="step-icon-circle">
+                    <FaTools />
+                  </div>
+                  <div className="step-label-group">
+                    <span className="step-number-label">Step 4</span>
+                    <span className="step-title-label">{t('myProperties.tabs.maintenance')}</span>
+                  </div>
+                </div>
               </div>
-            )}
 
-            {submitError && (
-              <div className="property-modal-error-text property-modal-error-top">
-                {submitError}
+              <div className="sidebar-tip-box">
+                <div className="tip-header">
+                  <FaShieldAlt /> <span>Pro Tip</span>
+                </div>
+                <p className="tip-content">
+                  {step === 1 && "Competitive pricing and setting realistic security deposits attract tenants 40% faster."}
+                  {step === 2 && "Bright, wide-angle photos and official property documents increase credibility and build trust."}
+                  {step === 3 && "An accurate map pin helps verified tenants find and view your listing with confidence."}
+                  {step === 4 && "Clearly defining utility bills and repair responsibilities minimizes landlord-tenant friction."}
+                </p>
               </div>
-            )}
+            </aside>
 
-            <div className="modal-body-content">
+            <div className="modal-main-content">
+              <div className="property-modal-header">
+                <div className="header-titles">
+                  <h2>
+                    {step === 1 && "Let's start with general details"}
+                    {step === 2 && "Upload beautiful photos & verification docs"}
+                    {step === 3 && "Pinpoint property location on map"}
+                    {step === 4 && "Set maintenance responsibilities & rules"}
+                  </h2>
+                </div>
+                <button className="example-fill-btn" onClick={loadExampleProperty}>
+                  {t('landlordHomeComponents.loadExample', { defaultValue: 'Load Example Property' })}
+                </button>
+                <button className="close-btn" onClick={onClose}><FaTimes /></button>
+              </div>
+
+              {showVerificationWarning && (
+                <div className="verification-warning-banner" role="alert" aria-live="polite">
+                  <FaExclamationTriangle className="verification-warning-icon" aria-hidden="true" />
+                  <span>{t('landlordHomeComponents.verificationRequired', { defaultValue: 'Your account must be verified before adding a property.' })}</span>
+                </div>
+              )}
+
+              {submitError && (
+                <div className="property-modal-error-text property-modal-error-top">
+                  {submitError}
+                </div>
+              )}
+
+              <div className="modal-body-content">
               {step === 1 && (
                 <div className="step-view animate-fade-in">
                   <div className="field-group">
                     <label>{t('myProperties.labels.marketingTitle')}</label>
-                    <input type="text" placeholder="e.g. Modern Sunset Loft" className="premium-input" value={title} onChange={(e) => setTitle(e.target.value)} />
+                    <div className="premium-input-wrapper">
+                      <FaHome className="field-icon" />
+                      <input type="text" placeholder="e.g. Modern Sunset Loft" className="premium-input with-icon" value={title} onChange={(e) => setTitle(e.target.value)} />
+                    </div>
                   </div>
                   <div className="form-row">
                     <div className="field-group">
@@ -591,16 +664,25 @@ const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onClose, onProperty
                   <div className="form-row">
                     <div className="field-group">
                       <label>{t('myProperties.labels.monthlyRent')} ($)</label>
-                      <input type="number" placeholder="2400" className="premium-input" value={monthlyPrice} onChange={(e) => setMonthlyPrice(e.target.value)} />
+                      <div className="premium-input-wrapper">
+                        <span className="field-currency">$</span>
+                        <input type="number" placeholder="2400" className="premium-input with-prefix" value={monthlyPrice} onChange={(e) => setMonthlyPrice(e.target.value)} />
+                      </div>
                     </div>
                     <div className="field-group">
                       <label><FaShieldAlt /> {t('myProperties.labels.securityDeposit')} ($)</label>
-                      <input type="number" placeholder="1000" className="premium-input" value={securityDeposit} onChange={(e) => setSecurityDeposit(e.target.value)} />
+                      <div className="premium-input-wrapper">
+                        <span className="field-currency">$</span>
+                        <input type="number" placeholder="1000" className="premium-input with-prefix" value={securityDeposit} onChange={(e) => setSecurityDeposit(e.target.value)} />
+                      </div>
                     </div>
                   </div>
                   <div className="field-group">
                     <label><FaCalendarAlt /> {t('rentalRequests.labels.moveIn')}</label>
-                    <input type="date" className="premium-input" value={availabilityDate} onChange={(e) => setAvailabilityDate(e.target.value)} />
+                    <div className="premium-input-wrapper">
+                      <FaCalendarAlt className="field-icon" />
+                      <input type="date" className="premium-input with-icon" value={availabilityDate} onChange={(e) => setAvailabilityDate(e.target.value)} />
+                    </div>
                   </div>
                 </div>
               )}
@@ -745,28 +827,46 @@ const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onClose, onProperty
                   <div className="address-grid-structured">
                     <div className="field-group">
                       <label><FaCity /> {t('landlordHomeComponents.city', { defaultValue: 'City' })}</label>
-                      <input type="text" value={city} onChange={(e) => setCity(e.target.value)} placeholder="e.g. Cairo" className="premium-input" />
+                      <div className="premium-input-wrapper">
+                        <FaCity className="field-icon" />
+                        <input type="text" value={city} onChange={(e) => setCity(e.target.value)} placeholder="e.g. Cairo" className="premium-input with-icon" />
+                      </div>
                     </div>
                     <div className="field-group">
                       <label><FaMapMarkerAlt /> {t('guestHome.area')}</label>
-                      <input type="text" value={area} onChange={(e) => setArea(e.target.value)} placeholder="e.g. Maadi" className="premium-input" />
+                      <div className="premium-input-wrapper">
+                        <FaMapMarkerAlt className="field-icon" />
+                        <input type="text" value={area} onChange={(e) => setArea(e.target.value)} placeholder="e.g. Maadi" className="premium-input with-icon" />
+                      </div>
                     </div>
                     <div className="field-group">
                       <label>{t('landlordHomeComponents.street', { defaultValue: 'Street Name' })}</label>
-                      <input type="text" placeholder="Street 9" className="premium-input" value={streetName} onChange={(e) => setStreetName(e.target.value)} />
+                      <div className="premium-input-wrapper">
+                        <FaMapMarkerAlt className="field-icon" />
+                        <input type="text" placeholder="Street 9" className="premium-input with-icon" value={streetName} onChange={(e) => setStreetName(e.target.value)} />
+                      </div>
                     </div>
                     <div className="form-row-triple">
                       <div className="field-group">
                         <label><FaBuilding /> {t('landlordHomeComponents.bldgNumber', { defaultValue: 'Bldg #' })}</label>
-                        <input type="text" placeholder="102" className="premium-input" value={buildingNumber} onChange={(e) => setBuildingNumber(e.target.value)} />
+                        <div className="premium-input-wrapper">
+                          <FaBuilding className="field-icon" />
+                          <input type="text" placeholder="102" className="premium-input with-icon" value={buildingNumber} onChange={(e) => setBuildingNumber(e.target.value)} />
+                        </div>
                       </div>
                       <div className="field-group">
                         <label>{t('landlordHome.step')}</label>
-                        <input type="text" placeholder="12" className="premium-input" value={floor} onChange={(e) => setFloor(e.target.value)} />
+                        <div className="premium-input-wrapper">
+                          <FaLayerGroup className="field-icon" />
+                          <input type="text" placeholder="12" className="premium-input with-icon" value={floor} onChange={(e) => setFloor(e.target.value)} />
+                        </div>
                       </div>
                       <div className="field-group">
                         <label>{t('rentalRequests.card.unit', { defaultValue: 'Unit/Apt' })}</label>
-                        <input type="text" placeholder="4B" className="premium-input" value={unitApt} onChange={(e) => setUnitApt(e.target.value)} />
+                        <div className="premium-input-wrapper">
+                          <FaHome className="field-icon" />
+                          <input type="text" placeholder="4B" className="premium-input with-icon" value={unitApt} onChange={(e) => setUnitApt(e.target.value)} />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -869,8 +969,9 @@ const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onClose, onProperty
                 </button>
               )}
             </div>
-          </>
-        ) : (
+          </div>
+        </div>
+      ) : (
           <div className="success-state animate-fade-in">
             <div className="checkmark-wrapper">
               <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">

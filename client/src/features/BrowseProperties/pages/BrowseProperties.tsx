@@ -15,8 +15,8 @@ import {
 import savedPropertiesService from '../../../services/saved-properties.service';
 import { authService } from '../../../services/auth.service';
 
-import { 
-    mapPropertyToUI 
+import {
+    mapPropertyToUI
 } from '../../../utils/propertyMapping';
 import type { PropertyUI as BrowsePropertyUI } from '../../../utils/propertyMapping';
 
@@ -30,7 +30,6 @@ const BrowseProperties: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isSearching, setIsSearching] = useState(false);
-    const [viewingAll, setViewingAll] = useState<string | null>(null);
     const [savedIds, setSavedIds] = useState<string[]>([]);
 
     useEffect(() => {
@@ -70,7 +69,6 @@ const BrowseProperties: React.FC = () => {
         setLoading(true);
         setError(null);
         setIsSearching(false);
-        setViewingAll(null);
         try {
             const response = await propertyService.getAllProperties({
                 status: 'AVAILABLE',
@@ -140,21 +138,6 @@ const BrowseProperties: React.FC = () => {
         setSearchParams({}, { replace: true });
     };
 
-    const newListings = useMemo(() => properties.slice(0, 8), [properties]);
-    const popularProperties = useMemo(() => {
-        const nextBucket = properties.slice(8, 16);
-        return nextBucket.length > 0 ? nextBucket : properties.slice(0, 8);
-    }, [properties]);
-    const recommendedProperties = useMemo(() => {
-        const newestBucket = properties.slice(16, 24);
-        return newestBucket.length > 0 ? newestBucket : properties.slice(0, 8);
-    }, [properties]);
-
-    const handleViewAll = (section: string) => {
-        setViewingAll(section);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
     const renderPropertyCard = (property: BrowsePropertyUI) => (
         <PropertyCard
             key={property.id}
@@ -165,83 +148,22 @@ const BrowseProperties: React.FC = () => {
         />
     );
 
-    const getViewingAllTitle = (section: string | null): string => {
-        if (section === 'newListings') return 'Newly Listed';
-        if (section === 'popular') return 'Popular Properties';
-        return 'Suits Your Lifestyle';
-    };
-
     const renderMainSections = () => {
-        if (isSearching) {
-            return (
-                <section className="property-scroll-section animate-fade-in">
-                    <div className="section-header">
-                        <div className="title-area">
-                            <h2>Search Results</h2>
-                        </div>
-                        <button className="view-all-btn" onClick={fetchDefaultProperties}>Clear Search</button>
-                    </div>
-                    <div className="properties-grid properties-grid-expanded">
-                        {properties.map(renderPropertyCard)}
-                    </div>
-                </section>
-            );
-        }
-
-        if (viewingAll) {
-            return (
-                <section className="property-scroll-section animate-fade-in">
-                    <div className="section-header">
-                        <div className="title-area">
-                            <h2>{getViewingAllTitle(viewingAll)}</h2>
-                        </div>
-                        <button className="view-all-btn" onClick={() => setViewingAll(null)}>Back to Categories</button>
-                    </div>
-                    <div className="properties-grid properties-grid-expanded">
-                        {properties.map(renderPropertyCard)}
-                    </div>
-                </section>
-            );
-        }
-
+        const title = isSearching ? 'Search Results' : 'Available Properties';
         return (
-            <>
-                <section className="property-scroll-section">
-                    <div className="section-header">
-                        <div className="title-area">
-                            <h2>Newly Listed</h2>
-                        </div>
-                        <button className="view-all-btn" onClick={() => handleViewAll('newListings')}>View All ({properties.length})</button>
+            <section className="property-vertical-section animate-fade-in">
+                <div className="section-header">
+                    <div className="properties-title-area">
+                        <h2>{title} ({properties.length})</h2>
                     </div>
-                    <div className="properties-grid">
-                        {newListings.map(renderPropertyCard)}
-                    </div>
-                </section>
-
-                <section className="property-scroll-section">
-                    <div className="section-header">
-                        <div className="title-area">
-                            <h2>Popular Properties</h2>
-                        </div>
-                        <button className="view-all-btn" onClick={() => handleViewAll('popular')}>View All ({properties.length})</button>
-                    </div>
-                    <div className="properties-grid">
-                        {popularProperties.map(renderPropertyCard)}
-                    </div>
-                </section>
-
-                <section className="property-scroll-section">
-                    <div className="section-header">
-                        <div className="title-area">
-                            <h2>Suits Your Lifestyle</h2>
-                        </div>
-                        <button className="view-all-btn" onClick={() => handleViewAll('recommended')}>View All ({properties.length})</button>
-                    </div>
-                    <div className="properties-grid">
-                        {recommendedProperties.map(renderPropertyCard)}
-                    </div>
-                </section>
-            </>
+                    {isSearching && (
+                        <button className="view-all-btn" onClick={fetchDefaultProperties}>Clear Search</button>
+                    )}
+                </div>
+                <div className="properties-vertical-grid">
+                    {properties.map(renderPropertyCard)}
+                </div>
+            </section>
         );
     };
 
@@ -250,68 +172,71 @@ const BrowseProperties: React.FC = () => {
             {!selectedProperty && <Sidebar />}
             <div className="main-content">
                 <Header />
-                <div className="browse-properties-page">
-                    <SearchHero onSearch={(filters) => {
-                        const doSearch = async () => {
-                            setLoading(true);
-                            setError(null);
-                            setIsSearching(true);
-                            setViewingAll(null);
-                            try {
-                                const response = await propertyService.getAllProperties({
-                                    status: 'AVAILABLE',
-                                    page: 1,
-                                    limit: 60,
-                                    ...filters,
-                                } as PropertyQueryParams);
-                
-                                const mapped = response.data.map(mapPropertyToUI);
-                                setProperties(mapped);
-                            } catch (fetchError) {
-                                console.error('Failed to fetch properties:', fetchError);
-                                setError('Failed to load properties. Please try again.');
-                            } finally {
-                                setLoading(false);
-                            }
-                        };
-                        void doSearch();
-                    }} />
-
-                    {loading && (
-                        <section className="property-scroll-section">
-                            <div className="section-header">
-                                <div className="title-area">
-                                    <h2>Loading properties...</h2>
+                <div className="browse-split-container">
+                    <div className="properties-left-pane">
+                        {loading && (
+                            <section className="property-vertical-section">
+                                <div className="section-header">
+                                    <div className="properties-title-area">
+                                        <h2>Loading properties...</h2>
+                                    </div>
                                 </div>
-                            </div>
-                        </section>
-                    )}
+                            </section>
+                        )}
 
-                    {!loading && error && (
-                        <section className="property-scroll-section">
-                            <div className="section-header">
-                                <div className="title-area">
-                                    <h2>{error}</h2>
+                        {!loading && error && (
+                            <section className="property-vertical-section">
+                                <div className="section-header">
+                                    <div className="properties-title-area">
+                                        <h2>{error}</h2>
+                                    </div>
                                 </div>
-                            </div>
-                        </section>
-                    )}
+                            </section>
+                        )}
 
-                    {!loading && !error && properties.length === 0 && (
-                        <section className="property-scroll-section">
-                            <div className="section-header">
-                                <div className="title-area">
-                                    <h2>No properties available right now.</h2>
+                        {!loading && !error && properties.length === 0 && (
+                            <section className="property-vertical-section">
+                                <div className="section-header">
+                                    <div className="properties-title-area">
+                                        <h2>No properties available right now.</h2>
+                                    </div>
                                 </div>
-                            </div>
-                        </section>
-                    )}
+                            </section>
+                        )}
 
-                    {!loading && !error && properties.length > 0 && (
-                        <>{renderMainSections()}</>
-                    )}
+                        {!loading && !error && properties.length > 0 && (
+                            renderMainSections()
+                        )}
+                        <Footer />
+                    </div>
+
+                    <div className="filters-right-pane">
+                        <SearchHero onSearch={(filters) => {
+                            const doSearch = async () => {
+                                setLoading(true);
+                                setError(null);
+                                setIsSearching(true);
+                                try {
+                                    const response = await propertyService.getAllProperties({
+                                        status: 'AVAILABLE',
+                                        page: 1,
+                                        limit: 60,
+                                        ...filters,
+                                    } as PropertyQueryParams);
+
+                                    const mapped = response.data.map(mapPropertyToUI);
+                                    setProperties(mapped);
+                                } catch (fetchError) {
+                                    console.error('Failed to fetch properties:', fetchError);
+                                    setError('Failed to load properties. Please try again.');
+                                } finally {
+                                    setLoading(false);
+                                }
+                            };
+                            void doSearch();
+                        }} />
+                    </div>
                 </div>
-                <Footer />
             </div>
 
             {selectedProperty && (

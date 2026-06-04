@@ -85,6 +85,7 @@ const ManagePropertyModal: React.FC<ManagePropertyModalProps> = ({ property, onC
     beds: property.beds || 0,
     baths: property.baths || 0,
     sqft: property.sqft || 0,
+    securityDeposit: (property.securityDeposit ?? property.security_deposit ?? '').toString().replace(/[^0-9]/g, ''),
     amenities: Array.isArray(property.amenities) ? property.amenities.filter(Boolean) : [],
     houseRules: Array.isArray(property.houseRules) ? property.houseRules.filter(Boolean) : [],
     maintenance: property.maintenance || {
@@ -145,6 +146,9 @@ const ManagePropertyModal: React.FC<ManagePropertyModalProps> = ({ property, onC
     if (!formData.name.trim()) newErrors.name = t('myProperties.errors.nameRequired');
     if (!formData.address.trim()) newErrors.address = t('myProperties.errors.addressRequired');
     if (Number(formData.price) < 100) newErrors.price = t('myProperties.errors.priceMinimum');
+    if (Number(formData.securityDeposit) < Number(formData.price)) {
+      newErrors.securityDeposit = t('myProperties.errors.securityDepositTooLow', { defaultValue: 'Security deposit cannot be less than monthly rent.' });
+    }
     
     setErrors(newErrors);
     return newErrors;
@@ -163,7 +167,7 @@ const ManagePropertyModal: React.FC<ManagePropertyModalProps> = ({ property, onC
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       if (validationErrors.name || validationErrors.address) setActiveTab('general');
-      else if (validationErrors.price) setActiveTab('financials');
+      else if (validationErrors.price || validationErrors.securityDeposit) setActiveTab('financials');
       return;
     }
 
@@ -187,6 +191,7 @@ const ManagePropertyModal: React.FC<ManagePropertyModalProps> = ({ property, onC
         title: formData.name,
         address: formData.address,
         monthly_price: Number(formData.price),
+        security_deposit: Number(formData.securityDeposit),
         status: backendStatus,
         amenity_names: uniqNormalized(formData.amenities || []),
         house_rule_names: uniqNormalized(formData.houseRules || []),
@@ -398,12 +403,18 @@ const ManagePropertyModal: React.FC<ManagePropertyModalProps> = ({ property, onC
                     </div>
                     {errors.price && <span className="error-msg">{errors.price}</span>}
                   </div>
-                  <div className="price-input-wrapper">
+                  <div className={`price-input-wrapper ${errors.securityDeposit ? 'has-error' : ''}`}>
                     <label>{t('myProperties.labels.securityDeposit')}</label>
                     <div className="input-row">
                       <span className="currency-symbol">$</span>
-                      <input type="number" defaultValue={1200} disabled={isLocked} />
+                      <input 
+                        type="number" 
+                        value={formData.securityDeposit} 
+                        onChange={(e) => setFormData({...formData, securityDeposit: e.target.value})}
+                        disabled={isLocked} 
+                      />
                     </div>
+                    {errors.securityDeposit && <span className="error-msg">{errors.securityDeposit}</span>}
                   </div>
                 </div>
               </div>

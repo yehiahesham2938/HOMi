@@ -32,6 +32,7 @@ export type LandlordPropertyRow = {
   houseRules: string[];
   activeContract?: LandlordContract | null;
   onUpdate: () => void;
+  securityDeposit?: number;
 };
 
 const DetailedPropertyCard = ({ property }: { property: LandlordPropertyRow }) => {

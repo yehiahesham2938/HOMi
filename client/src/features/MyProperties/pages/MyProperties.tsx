@@ -78,7 +78,8 @@ const MyProperties = () => {
                 images: prop.images || [],
                 amenities: (prop.amenities || []).map((amenity) => amenity.name),
                 houseRules: (prop.houseRules || []).map((rule) => rule.name),
-                onUpdate: () => setRefreshKey(prev => prev + 1)
+                onUpdate: () => setRefreshKey(prev => prev + 1),
+                securityDeposit: prop.securityDeposit
               };
            });
            setProperties(mappedProperties);

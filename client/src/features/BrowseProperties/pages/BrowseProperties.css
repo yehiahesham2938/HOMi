@@ -1,16 +1,10 @@
-.browse-properties-page {
-    padding: 30px 40px;
-    padding-top: 110px;
-    /* Safe spacing under the fixed header */
-    background: #f8fafc;
-    min-height: 100vh;
-    margin-top: -20px;
-}
+/* client\src\features\BrowseProperties\pages\BrowseProperties.css */
 
 /* Scope layout so global .main-content rules from other pages don't trap modals below the sidebar. */
 .layout-wrapper {
     display: block;
     min-height: 100vh;
+    background: #f8fafc;
 }
 
 .layout-wrapper>.main-content {
@@ -20,165 +14,103 @@
     z-index: auto;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
 }
 
 @media (max-width: 1024px) {
     .layout-wrapper>.main-content {
         margin-left: 0;
         width: 100%;
+        height: auto;
+        overflow: visible;
     }
 }
 
-/* Layout Structure */
-.marketplace-container {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    /* Sidebar is 300px, results take rest */
-    gap: 40px;
-    margin-top: 40px;
-    align-items: start;
+/* Split Layout Container */
+.browse-split-container {
+    display: flex;
+    width: 100%;
+    height: calc(100vh - 90px);
+    /* Subtract header height */
+    margin-top: 90px;
+    /* Safe spacing under fixed header */
+    overflow: hidden;
+    background: #f8fafc;
 }
 
-.filters-section {
-    position: sticky;
-    top: 20px;
-    /* Keeps filters visible while scrolling through properties */
+/* Left Pane: Properties Grid */
+.properties-left-pane {
+    width: 60%;
+    height: 100%;
+    overflow-y: auto;
+    padding: 30px 40px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    scroll-behavior: smooth;
 }
 
-.results-section {
-    flex: 1;
+/* Right Pane: Search and Filters */
+.filters-right-pane {
+    width: 40%;
+    height: 100%;
+    overflow-y: auto;
+    padding: 0;
+    /* Touch all page sides */
+    box-sizing: border-box;
+    border-left: 1px solid #e2e8f0;
+    background: #ffffff;
+    box-shadow: -5px 0 25px rgba(0, 0, 0, 0.02);
+    scroll-behavior: smooth;
 }
 
-/* Header within results */
-.browse-header {
+/* Pane Custom Scrollbars */
+.properties-left-pane::-webkit-scrollbar,
+.filters-right-pane::-webkit-scrollbar {
+    width: 6px;
+}
+
+.properties-left-pane::-webkit-scrollbar-track,
+.filters-right-pane::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.properties-left-pane::-webkit-scrollbar-thumb,
+.filters-right-pane::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.properties-left-pane::-webkit-scrollbar-thumb:hover,
+.filters-right-pane::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Property Section Layout */
+.property-vertical-section {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0;
+}
+
+.property-vertical-section .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
-    background: white;
-    padding: 15px 25px;
-    border-radius: 20px;
-    border: 1px solid #eef2f6;
-    margin-top: -40px;
+    margin-top: 0;
 }
 
-.result-count {
-    color: #64748b;
-    font-size: 0.95rem;
-}
-
-.result-count strong {
-    color: #0f172a;
-}
-
-.sort-dropdown {
-    padding: 10px 16px;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    background: #f8fafc;
-    font-weight: 700;
-    color: #1e293b;
-    cursor: pointer;
-    outline: none;
-    transition: all 0.3s ease;
-}
-
-.sort-dropdown:hover {
-    border-color: #3b82f6;
-}
-
-/* Grid adjustments */
-.properties-grid {
-    display: flex;
-    gap: 30px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 20px 0;
-    scroll-behavior: smooth;
-}
-
-.properties-grid>* {
-    flex: 0 0 calc(33.333% - 20px);
-    min-width: calc(33.333% - 20px);
-}
-
-/* Custom scrollbar */
-.properties-grid::-webkit-scrollbar {
-    height: 8px;
-}
-
-.properties-grid::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 4px;
-}
-
-.properties-grid::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
-}
-
-.properties-grid::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-}
-
-/* Responsive Tweak */
-@media (max-width: 1100px) {
-    .marketplace-container {
-        grid-template-columns: 1fr;
-        /* Stack filters on top for small screens */
-    }
-
-    .filters-section {
-        position: static;
-    }
-}
-
-.browse-properties-page {
-    display: flex;
-    flex-direction: column;
-    gap: 60px;
-    /* Space between scrollable sections */
-}
-
-.property-scroll-section {
-    display: flex;
-    flex-direction: column;
-    margin-top: -62px;
-}
-
-/* Section Titles & Header */
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 25px;
-    margin-top: -60px;
-}
-
-.title-area {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.title-area h2 {
+.property-vertical-section .section-header h2 {
     font-size: 1.8rem;
     font-weight: 900;
     color: #0f172a;
     margin: 0;
 }
 
-.icon-popular {
-    color: #f97316;
-    font-size: 1.5rem;
-}
-
-.icon-suits {
-    color: #8b5cf6;
-    font-size: 1.5rem;
-}
-
+/* View All / Clear Search Button */
 .view-all-btn {
     background: white;
     border: 1px solid #e2e8f0;
@@ -188,6 +120,7 @@
     color: #3b82f6;
     cursor: pointer;
     transition: all 0.3s ease;
+    margin-top: -140px;
 }
 
 .view-all-btn:hover {
@@ -195,63 +128,49 @@
     border-color: #3b82f6;
 }
 
-/* Horizontal Scroll Container */
-.properties-grid {
-    display: flex;
-    gap: 32px;
-    overflow-x: auto;
-    overflow-y: visible;
-    /* Important to show the card lift-up on hover */
-    padding: 20px 10px 40px 10px;
-    /* Extra bottom padding for card shadow */
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    margin-top: -37px;
+/* Vertical Grid for Property Cards */
+.properties-vertical-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 24px;
+    padding: 10px 0 40px 0;
+    margin-top: -100px;
 }
 
-.properties-grid-expanded {
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    overflow-x: visible;
-}
+/* Responsive Styles */
+@media (max-width: 1024px) {
+    .browse-split-container {
+        flex-direction: column;
+        height: auto;
+        overflow: visible;
+        margin-top: 90px;
+    }
 
-/* Card Width Control */
-.properties-grid>* {
-    flex: 0 0 380px;
-    /* Fixed width for better control */
-    min-width: 380px;
-}
-
-/* Hide scrollbar but keep functionality for a cleaner look (Optional) */
-.properties-grid::-webkit-scrollbar {
-    height: 6px;
-}
-
-.properties-grid::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.properties-grid::-webkit-scrollbar-thumb {
-    background: #e2e8f0;
-    border-radius: 10px;
-}
-
-.properties-grid::-webkit-scrollbar-thumb:hover {
-    background: #cbd5e1;
-}
-
-/* Mobile Responsive */
-@media (max-width: 768px) {
-    .browse-properties-page {
+    .properties-left-pane {
+        width: 100%;
+        height: auto;
+        overflow: visible;
         padding: 20px;
     }
 
-    .properties-grid>* {
-        flex: 0 0 300px;
-        min-width: 300px;
+    .filters-right-pane {
+        width: 100%;
+        height: auto;
+        overflow: visible;
+        padding: 20px;
+        border-left: none;
+        border-bottom: 1px solid #e2e8f0;
+        box-shadow: none;
+        order: -1;
+        /* Display filters above properties on mobile */
     }
 
-    .title-area h2 {
-        font-size: 1.4rem;
+    .properties-vertical-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
     }
+}
+
+.properties-title-area {
+    margin-top: -140px;
 }

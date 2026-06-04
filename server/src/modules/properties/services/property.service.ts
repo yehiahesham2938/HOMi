@@ -54,6 +54,8 @@ export class PropertyError extends Error {
  * Handles all property business logic
  */
 class PropertyService {
+    private lastAutoEnableTime = 0;
+
     async reportProperty(
         propertyId: string,
         reporterId: string,
@@ -280,19 +282,23 @@ class PropertyService {
      */
     async getAllProperties(filters: PropertyQuery): Promise<PropertyListResponse> {
         // Automatically enable properties that were disabled until a chosen date which has now passed
-        const now = testingClockService.getNow();
-        await Property.update(
-            { status: PropertyStatus.AVAILABLE },
-            {
-                where: {
-                    status: PropertyStatus.UNAVAILABLE,
-                    availability_date: {
-                        [Op.ne]: null,
-                        [Op.lte]: now
+        const nowTime = Date.now();
+        if (nowTime - this.lastAutoEnableTime > 60000) {
+            this.lastAutoEnableTime = nowTime;
+            const now = testingClockService.getNow();
+            await Property.update(
+                { status: PropertyStatus.AVAILABLE },
+                {
+                    where: {
+                        status: PropertyStatus.UNAVAILABLE,
+                        availability_date: {
+                            [Op.ne]: null,
+                            [Op.lte]: now
+                        }
                     }
                 }
-            }
-        );
+            );
+        }
 
         const {
             status,

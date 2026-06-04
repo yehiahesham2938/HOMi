@@ -3,6 +3,10 @@ import { User } from '../../auth/models/User.js';
 import { Property, PropertyStatus } from '../../properties/models/Property.js';
 import { PropertyOwnershipDoc } from '../../properties/models/PropertyOwnershipDoc.js';
 import { PropertyImage } from '../../properties/models/PropertyImage.js';
+import { PropertySpecifications } from '../../properties/models/PropertySpecifications.js';
+import { PropertyDetailedLocation } from '../../properties/models/PropertyDetailedLocation.js';
+import { Amenity } from '../../properties/models/Amenity.js';
+import { HouseRule } from '../../properties/models/HouseRule.js';
 import { PropertyReport, PropertyReportStatus } from '../../properties/models/PropertyReport.js';
 import { Contract, ContractStatus } from '../../contracts/models/Contract.js';
 import { Profile } from '../../auth/models/Profile.js';
@@ -72,6 +76,7 @@ class AdminService {
             title: string;
             description: string;
             monthlyPrice: number;
+            securityDeposit: number;
             address: string;
             type: string;
             furnishing: string;
@@ -85,6 +90,38 @@ class AdminService {
                 phone: string | null | undefined;
             } | null;
             ownershipDocs: Array<{ id: string; documentUrl: string }>;
+            specifications: {
+                bedrooms: number;
+                bathrooms: number;
+                areaSqft: number;
+            } | null;
+            detailedLocation: {
+                floor: number;
+                city: string;
+                area: string;
+                streetName: string;
+                buildingNumber: string;
+                unitApt: string;
+                locationLat: number;
+                locationLong: number;
+            } | null;
+            images: Array<{
+                id: string;
+                imageUrl: string;
+                isMain: boolean;
+            }>;
+            amenities: Array<{
+                id: string;
+                name: string;
+            }>;
+            houseRules: Array<{
+                id: string;
+                name: string;
+            }>;
+            maintenanceResponsibilities: Array<{
+                area: string;
+                responsible_party: 'LANDLORD' | 'TENANT';
+            }>;
         }>
     > {
         const properties = await Property.findAll({
@@ -112,14 +149,31 @@ class AdminService {
                     as: 'ownershipDocs',
                     attributes: ['id', 'document_url'],
                 },
+                {
+                    model: PropertySpecifications,
+                    as: 'specifications',
+                },
+                {
+                    model: PropertyDetailedLocation,
+                    as: 'detailedLocation',
+                },
+                {
+                    model: Amenity,
+                    as: 'amenities',
+                    attributes: ['id', 'name'],
+                    through: { attributes: [] },
+                },
+                {
+                    model: HouseRule,
+                    as: 'houseRules',
+                    attributes: ['id', 'name'],
+                    through: { attributes: [] },
+                },
             ],
             order: [['created_at', 'ASC']],
         });
 
-        // We can just format and return them directly rather than mapping DTOs,
-        // or we reuse propertyService formatting
         const formatted = properties.map((property) => ({
-            // Prefer the explicit main image, otherwise fallback to first uploaded image.
             thumbnailUrl:
                 (property as any).images?.find((img: any) => img.is_main)?.image_url ||
                 (property as any).images?.[0]?.image_url ||
@@ -128,6 +182,7 @@ class AdminService {
             title: property.title,
             description: property.description,
             monthlyPrice: Number(property.monthly_price ?? 0),
+            securityDeposit: Number(property.security_deposit ?? 0),
             address: property.address,
             type: property.type ?? '',
             furnishing: String(property.furnishing ?? ''),
@@ -149,6 +204,39 @@ class AdminService {
                 id: String(doc.id),
                 documentUrl: doc.document_url,
             })) || [],
+            specifications: (property as any).specifications
+                ? {
+                      bedrooms: (property as any).specifications.bedrooms,
+                      bathrooms: (property as any).specifications.bathrooms,
+                      areaSqft: Number((property as any).specifications.area_sqft),
+                  }
+                : null,
+            detailedLocation: (property as any).detailedLocation
+                ? {
+                      floor: (property as any).detailedLocation.floor,
+                      city: (property as any).detailedLocation.city,
+                      area: (property as any).detailedLocation.area,
+                      streetName: (property as any).detailedLocation.street_name,
+                      buildingNumber: (property as any).detailedLocation.building_number,
+                      unitApt: (property as any).detailedLocation.unit_apt,
+                      locationLat: (property as any).detailedLocation.location_lat,
+                      locationLong: (property as any).detailedLocation.location_long,
+                  }
+                : null,
+            images: (property as any).images?.map((img: any) => ({
+                id: String(img.id),
+                imageUrl: img.image_url,
+                isMain: img.is_main,
+            })) || [],
+            amenities: (property as any).amenities?.map((a: any) => ({
+                id: String(a.id),
+                name: a.name,
+            })) || [],
+            houseRules: (property as any).houseRules?.map((h: any) => ({
+                id: String(h.id),
+                name: h.name,
+            })) || [],
+            maintenanceResponsibilities: property.maintenance_responsibilities || [],
         }));
 
         return formatted;

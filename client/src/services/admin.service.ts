@@ -19,6 +19,7 @@ export interface PendingApprovalProperty {
     title: string;
     description: string;
     monthlyPrice: number;
+    securityDeposit: number;
     address: string;
     type: string | null;
     furnishing: string | null;
@@ -34,6 +35,38 @@ export interface PendingApprovalProperty {
     ownershipDocs: Array<{
         id: string;
         documentUrl: string;
+    }>;
+    specifications: {
+        bedrooms: number;
+        bathrooms: number;
+        areaSqft: number;
+    } | null;
+    detailedLocation: {
+        floor: number;
+        city: string;
+        area: string;
+        streetName: string;
+        buildingNumber: string;
+        unitApt: string;
+        locationLat: number;
+        locationLong: number;
+    } | null;
+    images: Array<{
+        id: string;
+        imageUrl: string;
+        isMain: boolean;
+    }>;
+    amenities: Array<{
+        id: string;
+        name: string;
+    }>;
+    houseRules: Array<{
+        id: string;
+        name: string;
+    }>;
+    maintenanceResponsibilities: Array<{
+        area: string;
+        responsible_party: 'LANDLORD' | 'TENANT';
     }>;
 }
 

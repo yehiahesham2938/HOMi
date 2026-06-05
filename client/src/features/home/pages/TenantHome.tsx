@@ -54,11 +54,28 @@ const TenantHome: React.FC = () => {
         contractService.getTenantContracts({ page: 1, limit: 50 }),
         contractService.getTestingClock(),
       ]);
-      setTenantContracts(contractsRes.data ?? []);
+      const contracts = contractsRes.data ?? [];
+      setTenantContracts(contracts);
       setActiveRentalIndex(0);
-      setSimulatedNow(new Date(clock.now));
+      const simNow = new Date(clock.now);
+      setSimulatedNow(simNow);
+
+      // Pre-fetch active property details if any active contract exists
+      const activeContractsList = contracts.filter((contract) => isContractActiveForReferenceDate(contract, simNow));
+      const firstActiveContract = activeContractsList[0] ?? null;
+      if (firstActiveContract?.property?.id) {
+        try {
+          const response = await propertyService.getPropertyById(firstActiveContract.property.id);
+          setActivePropertyDetails(response.data);
+        } catch {
+          setActivePropertyDetails(null);
+        }
+      } else {
+        setActivePropertyDetails(null);
+      }
     } catch {
       setTenantContracts([]);
+      setActivePropertyDetails(null);
     } finally {
       setIsCheckingContracts(false);
     }
@@ -93,6 +110,11 @@ const TenantHome: React.FC = () => {
       return;
     }
 
+    // Skip fetching if the loaded details already match the desired property ID
+    if (activePropertyDetails?.id === propertyId) {
+      return;
+    }
+
     let cancelled = false;
 
     const loadPropertyDetails = async () => {
@@ -113,7 +135,7 @@ const TenantHome: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [activeContract?.property?.id]);
+  }, [activeContract?.property?.id, activePropertyDetails?.id]);
 
   const openPaymentContractsCount = useMemo(
     () => tenantContracts.filter((contract) => contract.status === 'PENDING_PAYMENT').length,

@@ -386,7 +386,7 @@
   line-height: 1.7;
 }
 
-.section-header {
+.guest-section-header {
   text-align: center;
   padding: 5rem 5% 3rem;
 }
@@ -1309,11 +1309,17 @@
 /* ═══════════════════════════════════
    PLATFORM OVERVIEW — TABS
 ═══════════════════════════════════ */
+#how {
+  background: #f0faff;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
 .tabs-container {
   padding: 0 5% 5rem;
 }
 
-.tab-bar {
+.guest-tab-bar {
   display: flex;
   gap: 0.5rem;
   justify-content: center;
@@ -1328,7 +1334,7 @@
   margin-right: auto;
 }
 
-.tab-btn {
+.guest-tab-btn {
   padding: 0.9rem 2.2rem;
   border-radius: 50px;
   font-size: 0.95rem;
@@ -1349,7 +1355,7 @@
   justify-content: center;
 }
 
-.tab-btn.active {
+.guest-tab-btn.active {
   background: var(--blue);
   color: #fff;
   border-color: var(--blue);
@@ -1357,7 +1363,7 @@
   transform: translateY(-1px);
 }
 
-.tab-btn:hover:not(.active) {
+.guest-tab-btn:hover:not(.active) {
   border-color: var(--blue);
   color: var(--blue);
   background: var(--blue-light);
@@ -1504,7 +1510,7 @@
    STEP-BY-STEP BREAKDOWN
 ═══════════════════════════════════ */
 .steps-section {
-  background: var(--gray-50);
+  background: #ffffff;
   padding: 0 0 6rem;
 }
 
@@ -1893,7 +1899,10 @@
    WALLET
 ═══════════════════════════════════ */
 .wallet-section {
-  padding: 0 5% 6rem;
+  background: var(--gray-50);
+  padding: 0 0 6rem;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
 .wallet-card {

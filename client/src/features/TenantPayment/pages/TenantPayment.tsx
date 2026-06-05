@@ -323,7 +323,7 @@ const TenantPayment: React.FC = () => {
     const annualSpendAmount = paidContracts.reduce((sum, c) => sum + Number(c.rentAmount ?? c.property?.monthlyPrice ?? 0), 0);
     const hasAnnualSpend = paidContracts.length > 0;
 
-        const pendingTotalDue = pendingPaymentContract ? getTotalContractCharge(pendingPaymentContract) : 0;
+    const pendingTotalDue = pendingPaymentContract ? getTotalContractCharge(pendingPaymentContract) : 0;
     const canAffordPendingPayment = walletBalance >= pendingTotalDue;
 
     const hasUpcomingPayments = activeContracts.length > 0 || Boolean(pendingPaymentContract);
@@ -476,7 +476,7 @@ const TenantPayment: React.FC = () => {
     const handlePayFromBalance = async (contractId?: string) => {
         const targetContractId = contractId ?? pendingPaymentContract?.id;
         if (!targetContractId) return;
-        
+
         const isInstallment = paymentReviewData?.isMonthlyInstallment;
         const targetRequiredAmount = paymentReviewData ? paymentReviewData.total : pendingTotalDue;
 
@@ -593,7 +593,7 @@ const TenantPayment: React.FC = () => {
                     <aside className="checkout-order-summary">
                         <div className="summary-sticky-card">
                             <h3 className="summary-title">Payment Summary</h3>
-                            
+
                             <div className="summary-rows">
                                 {isMonthlyInstallment ? (
                                     <>
@@ -630,9 +630,9 @@ const TenantPayment: React.FC = () => {
                                         </div>
                                     </>
                                 )}
-                                
+
                                 <div className="summary-hr"></div>
-                                
+
                                 <div className="summary-total-display">
                                     <div className="total-label-col">
                                         <span className="total-label">Total Amount</span>
@@ -642,7 +642,7 @@ const TenantPayment: React.FC = () => {
                                 </div>
                             </div>
 
-                            <button 
+                            <button
                                 className="btn-execute-payment"
                                 disabled={isProcessingPayment || walletBalance < total}
                                 onClick={() => void handlePayFromBalance(contractId)}
@@ -736,7 +736,7 @@ const TenantPayment: React.FC = () => {
                         <TrendingUp size={16} className={hasNextRent ? 'text-success' : 'text-muted'} />
                     </div>
                     <div className="flex-baseline">
-                            <h3 className={hasNextRent ? '' : 'text-muted'}>{formatMoney(hasNextRent ? nextRentAmount : 0)}</h3>
+                        <h3 className={hasNextRent ? '' : 'text-muted'}>{formatMoney(hasNextRent ? nextRentAmount : 0)}</h3>
                         <span className="sub-label">/mo</span>
                     </div>
                     <div className="due-indicator">
@@ -875,14 +875,14 @@ const TenantPayment: React.FC = () => {
                             <div className="application-card-premium" key={req.id}>
                                 <div className="app-card-top">
                                     <span className={`status-tag ${req.status.toLowerCase()}`}>
-                                        {req.status === 'Accepted' ? <CheckCircle2 size={12}/> : <Clock size={12}/>}
+                                        {req.status === 'Accepted' ? <CheckCircle2 size={12} /> : <Clock size={12} />}
                                         {req.status}
                                     </span>
-                                    <button className="icon-btn"><MoreVertical size={16}/></button>
+                                    <button className="icon-btn"><MoreVertical size={16} /></button>
                                 </div>
                                 <div className="app-card-body">
                                     <h4>{req.property}</h4>
-                                    <p className="location-tag"><MapPin size={12}/> {req.loc}</p>
+                                    <p className="location-tag"><MapPin size={12} /> {req.loc}</p>
                                 </div>
                                 <div className="app-card-footer">
                                     <div className="price-group payment-breakdown">
@@ -990,7 +990,7 @@ const TenantPayment: React.FC = () => {
                 <div className="methods-list-side">
                     {hasSavedMethods ? (
                         <div className="method-entry active">
-                            <div className="method-icon-wrap"><Landmark size={20}/></div>
+                            <div className="method-icon-wrap"><Landmark size={20} /></div>
                             <div className="method-info-text">
                                 <h5>{primaryMethod?.brand?.toUpperCase() ?? 'Card'} •••• {primaryMethod?.last4 ?? '0000'}</h5>
                                 <p>{primaryMethod?.isDefault ? 'Primary payment method' : 'Saved payment method'}</p>
@@ -1095,12 +1095,12 @@ const TenantPayment: React.FC = () => {
                     <div className="tabs-wrapper">
                         <nav className="modern-tabs">
                             {[
-                                { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={16}/> },
-                                { id: 'upcoming', label: 'Upcoming', icon: <CalendarClock size={16}/> },
-                                { id: 'history', label: 'History', icon: <History size={16}/> },
-                                { id: 'topup', label: 'Top Up', icon: <Wallet size={16}/> },
-                                { id: 'methods', label: 'Methods', icon: <CreditCard size={16}/> },
-                                { id: 'pending', label: 'Requests', icon: <FileSearch size={16}/> },
+                                { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={16} /> },
+                                { id: 'upcoming', label: 'Upcoming', icon: <CalendarClock size={16} /> },
+                                { id: 'history', label: 'History', icon: <History size={16} /> },
+                                { id: 'topup', label: 'Top Up', icon: <Wallet size={16} /> },
+                                { id: 'methods', label: 'Methods', icon: <CreditCard size={16} /> },
+                                { id: 'pending', label: 'Requests', icon: <FileSearch size={16} /> },
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
@@ -1113,7 +1113,7 @@ const TenantPayment: React.FC = () => {
                         </nav>
                     </div>
 
-                    <div className="viewport-container">
+                    <div className="tenant-payment-viewport-container">
                         {viewportContent}
                     </div>
                 </main>

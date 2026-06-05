@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { SlidersHorizontal, Search, ArrowRight, ArrowLeft, Globe, Menu, X } from 'lucide-react';
+import { SlidersHorizontal, Search, ArrowRight, ArrowLeft } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap, Circle } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -14,6 +14,7 @@ import { mapPropertyToUI } from '../../../utils/propertyMapping';
 import type { PropertyUI as Property } from '../../../utils/propertyMapping';
 import AuthModal from '../../../components/global/AuthModal';
 import Footer from '../../../components/global/footer';
+import GuestHeader from '../../../components/global/GuestHeader';
 import './GuestSearch.css';
 
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -104,14 +105,12 @@ const MapCenterUpdater = ({ center }: { center: [number, number] }) => {
 
 const GuestSearch: React.FC = () => {
     const navigate = useNavigate();
-    const { t, i18n } = useTranslation();
+    useTranslation();
     const [properties, setProperties] = useState<Property[]>([]);
     const [loading, setLoading] = useState(true);
     const [showAuthModal, setShowAuthModal] = useState(false);
 
     // Nav and Layout States
-    const [isScrolled, setIsScrolled] = useState(false);
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<'curated' | 'all'>('all');
 
     // Filtering & Sorting States
@@ -143,11 +142,6 @@ const GuestSearch: React.FC = () => {
         }
     };
 
-    useEffect(() => {
-        const handleScroll = () => setIsScrolled(window.scrollY > 40);
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
 
     useEffect(() => {
         const fetchProperties = async () => {
@@ -167,12 +161,6 @@ const GuestSearch: React.FC = () => {
         fetchProperties();
     }, []);
 
-    const toggleLanguage = () => {
-        const newLang = i18n.language === 'en' ? 'ar' : 'en';
-        i18n.changeLanguage(newLang);
-        document.documentElement.dir = newLang === 'ar' ? 'rtl' : 'ltr';
-        document.documentElement.lang = newLang;
-    };
 
     // Geodistance helper (Haversine formula in km)
     const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -279,64 +267,13 @@ const GuestSearch: React.FC = () => {
     };
 
     const handleOpenDetails = (property: Property) => {
-        navigate(`/properties/${property.id}`);
+        navigate(`/properties/${property.id}`, { state: { openedFromGuest: true } });
     };
 
     return (
         <div className="search-layout">
             {/* 1. Header Navbar - Identical to GuestHome */}
-            <nav className={`guest-nav ${isScrolled ? 'scrolled' : ''}`}>
-                <div className="nav-container">
-                    <div className="header-left-group">
-                        <Link to="/guest-home" className="back-home-link" title="Back to Homepage">
-                            <ArrowLeft size={16} />
-                            <span>{t('guestHome.backToHome')}</span>
-                        </Link>
-                        <Link to="/guest-home" className="brand-logo">
-                            <img src="/logo.png" alt="HOMi Logo" className="logo-image" />
-                        </Link>
-                    </div>
-
-                    <div className="nav-links desktop-only">
-                        <Link to="/guest-search" className="active">{t('guestHome.browseHomes')}</Link>
-                        <Link to="/how-it-works-choose">{t('guestHome.howItWorks')}</Link>
-                        <Link to={getHelpFromGuest}>{t('guestHome.helpCenter')}</Link>
-                    </div>
-
-                    <div className="nav-actions desktop-only">
-                        <button className="lang-toggle-btn" onClick={toggleLanguage} title={i18n.language === 'en' ? 'Arabic' : 'English'}>
-                            <Globe size={18} />
-                            <span>{i18n.language === 'en' ? 'ع' : 'En'}</span>
-                        </button>
-                        <button className="btn-text" onClick={() => navigate('/auth')}>{t('guestHome.login')}</button>
-                        <button className="btn-primary-pill" onClick={() => navigate('/auth')}>{t('guestHome.signup')}</button>
-                    </div>
-
-                    <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-                        {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
-                    </button>
-                </div>
-
-                {mobileMenuOpen && (
-                    <div className="mobile-nav-panel">
-                        <Link to="/guest-search" onClick={() => setMobileMenuOpen(false)}>{t('guestHome.browseHomes')}</Link>
-                        <Link to="/how-it-works-choose" onClick={() => setMobileMenuOpen(false)}>{t('guestHome.howItWorks')}</Link>
-                        <Link to={getHelpFromGuest} onClick={() => setMobileMenuOpen(false)}>{t('guestHome.helpCenter')}</Link>
-                        <div className="mobile-lang-row">
-                            <button className="lang-toggle-btn" onClick={() => { toggleLanguage(); setMobileMenuOpen(false); }}>
-                                <Globe size={18} />
-                                <span>{i18n.language === 'en' ? 'Arabic' : 'English'}</span>
-                            </button>
-                        </div>
-                        <button className="btn-text mobile-nav-login" onClick={() => { setMobileMenuOpen(false); navigate('/auth'); }}>
-                            {t('guestHome.login')}
-                        </button>
-                        <button className="btn-primary-pill mobile-nav-signup" onClick={() => { setMobileMenuOpen(false); navigate('/auth'); }}>
-                            {t('guestHome.signup')}
-                        </button>
-                    </div>
-                )}
-            </nav>
+            <GuestHeader showBackToHome={true} />
 
             {/* 2. Interactive Filters & Leaflet Map Explorer Banner (Combined) */}
             <div className="search-hero-banner">

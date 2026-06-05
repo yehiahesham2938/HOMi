@@ -15,7 +15,6 @@ import Security from '../components/Security';
 import Preferences from '../components/Preferences';
 import Notifications from '../components/Notifications';
 import Billing from '../components/Billing';
-import Privacy from '../components/Privacy';
 import DeleteAccountSection from '../components/DeleteAccountSection';
 import LifestyleHabits from '../components/LifestyleHabits';
 
@@ -222,7 +221,6 @@ const Settings: React.FC = () => {
         billing: <Billing />,
         notifications: <Notifications role={userRole} />,
         security: <Security role={userRole} />,
-        privacy: <Privacy />,
         preferences: <Preferences />,
         lifestyle: <LifestyleHabits role={userRole} />,
         delete: <DeleteAccountSection onBackToProfile={() => setActiveTab('profile')} />,

@@ -1,4 +1,5 @@
 import React from 'react';
+import { FaSignOutAlt } from 'react-icons/fa';
 import './ConfirmModal.css';
 
 interface ConfirmModalProps {
@@ -13,7 +14,7 @@ interface ConfirmModalProps {
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
   isOpen,
-  title = 'Confirm action',
+  title = 'Confirm Action',
   message,
   confirmText = 'Confirm',
   cancelText = 'Cancel',
@@ -31,6 +32,11 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
         aria-modal="true"
         aria-labelledby="confirm-modal-title"
       >
+        <div className="confirm-modal-header-icon">
+          <div className="icon-pulse-bg"></div>
+          <FaSignOutAlt className="modal-main-icon" />
+        </div>
+
         <h3 id="confirm-modal-title" className="confirm-modal-title">{title}</h3>
         <p className="confirm-modal-message">{message}</p>
 

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Globe, Menu, X } from 'lucide-react';
 import './GuestHome.css';
+import GuestHeader from '../../../components/global/GuestHeader';
 import AuthModal from '../../../components/global/AuthModal';
 import Footer from '../../../components/global/footer';
 import { propertyService } from '../../../services/property.service';
@@ -12,9 +12,7 @@ import type { PropertyUI as Property } from '../../../utils/propertyMapping';
 
 const GuestHome: React.FC = () => {
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { t } = useTranslation();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Redesign tabs and accordion states
@@ -119,12 +117,6 @@ const GuestHome: React.FC = () => {
   const startIndex = (activePage - 1) * pageSize;
   const paginatedProperties = sortedProperties.slice(startIndex, startIndex + pageSize);
 
-  const toggleLanguage = () => {
-    const newLang = i18n.language === 'en' ? 'ar' : 'en';
-    i18n.changeLanguage(newLang);
-    document.documentElement.dir = newLang === 'ar' ? 'rtl' : 'ltr';
-    document.documentElement.lang = newLang;
-  };
 
   const handleHeroSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,11 +151,6 @@ const GuestHome: React.FC = () => {
     state: { fromGuestHome: true },
   };
 
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 40);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // IntersectionObserver for scroll reveal animations
   useEffect(() => {
@@ -187,53 +174,7 @@ const GuestHome: React.FC = () => {
   return (
     <div className="guest-layout">
       {/* 1. Glassmorphic Navbar (Header stays same) */}
-      <nav className={`guest-nav ${isScrolled ? 'scrolled' : ''}`}>
-        <div className="nav-container">
-          <Link to="/guest-home" className="brand-logo">
-            <img src="/logo.png" alt="HOMi Logo" className="logo-image" />
-
-          </Link>
-
-          <div className="nav-links desktop-only">
-            <Link to="/guest-search">{t('guestHome.browseHomes')}</Link>
-            <Link to="/how-it-works-choose">{t('guestHome.howItWorks')}</Link>
-            <Link to={getHelpFromGuest}>{t('guestHome.helpCenter')}</Link>
-          </div>
-
-          <div className="nav-actions desktop-only">
-            <button className="lang-toggle-btn" onClick={toggleLanguage} title={i18n.language === 'en' ? 'Arabic' : 'English'}>
-              <Globe size={18} />
-              <span>{i18n.language === 'en' ? 'ع' : 'En'}</span>
-            </button>
-            <button className="btn-text" onClick={() => navigate('/auth')}>{t('guestHome.login')}</button>
-            <button className="btn-primary-pill" onClick={() => navigate('/auth')}>{t('guestHome.signup')}</button>
-          </div>
-
-          <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
-          </button>
-        </div>
-
-        {mobileMenuOpen && (
-          <div className="mobile-nav-panel">
-            <Link to="/guest-search" onClick={() => setMobileMenuOpen(false)}>{t('guestHome.browseHomes')}</Link>
-            <Link to="/how-it-works-choose" onClick={() => setMobileMenuOpen(false)}>{t('guestHome.howItWorks')}</Link>
-            <Link to={getHelpFromGuest} onClick={() => setMobileMenuOpen(false)}>{t('guestHome.helpCenter')}</Link>
-            <div className="mobile-lang-row">
-              <button className="lang-toggle-btn" onClick={() => { toggleLanguage(); setMobileMenuOpen(false); }}>
-                <Globe size={18} />
-                <span>{i18n.language === 'en' ? 'Arabic' : 'English'}</span>
-              </button>
-            </div>
-            <button className="btn-text mobile-nav-login" onClick={() => { setMobileMenuOpen(false); navigate('/auth'); }}>
-              {t('guestHome.login')}
-            </button>
-            <button className="btn-primary-pill mobile-nav-signup" onClick={() => { setMobileMenuOpen(false); navigate('/auth'); }}>
-              {t('guestHome.signup')}
-            </button>
-          </div>
-        )}
-      </nav>
+      <GuestHeader />
 
       {/* 2. Hero Section - Premium Asymmetrical Collage & Glassmorphic Search Bar */}
       <section className="hero">
@@ -443,7 +384,7 @@ const GuestHome: React.FC = () => {
       <section id="properties" className="props-section">
         <div className="props-inner">
           {/* Header */}
-          <div className="section-header reveal" style={{ padding: '0 0 0', textAlign: 'left' }}>
+          <div className="guest-section-header reveal" style={{ padding: '0 0 0', textAlign: 'left' }}>
             <div className="section-tag">Browse & Discover</div>
             <h2 className="section-title" style={{ maxWidth: '560px' }}>Find Your Next Home</h2>
 
@@ -609,7 +550,7 @@ const GuestHome: React.FC = () => {
                   <div
                     key={property.id}
                     className="prop-card reveal visible"
-                    onClick={() => navigate(`/properties/${property.id}`)}
+                    onClick={() => navigate(`/properties/${property.id}`, { state: { openedFromGuest: true } })}
                   >
                     <div className="prop-img">
                       <img src={property.image} alt={property.title} />
@@ -706,27 +647,27 @@ const GuestHome: React.FC = () => {
 
       {/* 4. Platform Overview */}
       <section id="how">
-        <div className="section-header reveal">
+        <div className="guest-section-header reveal">
           <div className="section-tag">Platform Overview</div>
           <h2 className="section-title">Everything In One Place</h2>
         </div>
 
         <div className="tabs-container">
-          <div className="tab-bar">
+          <div className="guest-tab-bar">
             <button
-              className={`tab-btn ${activeTab === 'tenant' ? 'active' : ''}`}
+              className={`guest-tab-btn ${activeTab === 'tenant' ? 'active' : ''}`}
               onClick={() => setActiveTab('tenant')}
             >
               I'm a Tenant
             </button>
             <button
-              className={`tab-btn ${activeTab === 'landlord' ? 'active' : ''}`}
+              className={`guest-tab-btn ${activeTab === 'landlord' ? 'active' : ''}`}
               onClick={() => setActiveTab('landlord')}
             >
               I'm a Landlord
             </button>
             <button
-              className={`tab-btn ${activeTab === 'provider' ? 'active' : ''}`}
+              className={`guest-tab-btn ${activeTab === 'provider' ? 'active' : ''}`}
               onClick={() => setActiveTab('provider')}
             >
               I'm a Provider
@@ -873,7 +814,7 @@ const GuestHome: React.FC = () => {
 
       {/* 5. Step-by-Step Breakdown */}
       <section id="steps" className="steps-section">
-        <div className="section-header reveal" style={{ background: 'var(--gray-50)', paddingTop: '5rem' }}>
+        <div className="guest-section-header reveal" style={{ paddingTop: '5rem' }}>
           <div className="section-tag">Step-by-Step Guide</div>
           <h2 className="section-title">How HOMI Works</h2>
         </div>
@@ -1498,7 +1439,7 @@ const GuestHome: React.FC = () => {
 
       {/* 7. Wallet Showcase (Pay Rent / Withdraw redirecting to /auth) */}
       <section id="wallet" className="wallet-section">
-        <div className="section-header reveal">
+        <div className="guest-section-header reveal">
           <div className="section-tag">Secure Wallet</div>
           <h2 className="section-title">Built-in Financial Control</h2>
         </div>
@@ -1547,7 +1488,7 @@ const GuestHome: React.FC = () => {
 
       {/* 8. FAQ accordion */}
       <section id="faq">
-        <div className="section-header reveal">
+        <div className="guest-section-header reveal">
           <div className="section-tag">Common Questions</div>
           <h2 className="section-title">Frequently Asked</h2>
         </div>

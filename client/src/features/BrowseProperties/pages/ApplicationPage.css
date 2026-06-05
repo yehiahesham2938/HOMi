@@ -1,6 +1,6 @@
 /* client\src\features\BrowseProperties\pages\ApplicationPage.css */
 
-:root {
+.application-page-wrapper {
     --primary-color: #2563eb;
     --primary-hover: #1d4ed8;
     --primary-glow: rgba(37, 99, 235, 0.15);
@@ -79,7 +79,7 @@
     align-items: center;
     justify-content: center;
     gap: 20px;
-    animation: fadeIn 0.4s ease-out;
+    animation: appFadeIn 0.4s ease-out;
 }
 
 .app-card-loading .spinner {
@@ -88,7 +88,7 @@
     border: 3.5px solid rgba(37, 99, 235, 0.1);
     border-radius: 50%;
     border-top-color: var(--primary-color);
-    animation: spin 0.8s linear infinite;
+    animation: appSpin 0.8s linear infinite;
 }
 
 .app-card-loading p {
@@ -474,7 +474,7 @@
     gap: 12px;
     margin-bottom: 30px;
     box-shadow: 0 4px 12px rgba(229, 62, 62, 0.05);
-    animation: slideDown 0.3s ease-out;
+    animation: appSlideDown 0.3s ease-out;
 }
 
 .app-error-banner svg {
@@ -509,7 +509,7 @@
     display: flex;
     flex-direction: column;
     gap: 28px;
-    animation: fadeIn 0.4s ease-out;
+    animation: appFadeIn 0.4s ease-out;
 }
 
 .form-fields-row {
@@ -659,7 +659,7 @@
     border: 2px solid rgba(255, 255, 255, 0.2);
     border-top-color: #ffffff;
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    animation: appSpin 0.8s linear infinite;
 }
 
 /* READ-ONLY / REVIEW MODE */
@@ -667,7 +667,7 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
-    animation: fadeIn 0.4s ease-out;
+    animation: appFadeIn 0.4s ease-out;
 }
 
 .readonly-row-fields {
@@ -887,7 +887,7 @@
     border: 2.5px solid rgba(37, 99, 235, 0.1);
     border-top-color: var(--primary-color);
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    animation: appSpin 0.8s linear infinite;
 }
 
 /* SUCCESS STATE STYLING */
@@ -898,7 +898,7 @@
     justify-content: center;
     padding: 64px 48px;
     text-align: center;
-    animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: appScaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .tick-bounce {
@@ -906,7 +906,7 @@
     color: var(--success-color);
     margin-bottom: 24px;
     filter: drop-shadow(0 8px 16px var(--success-glow));
-    animation: tickBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    animation: appTickBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 .app-submit-success-state h2 {
@@ -965,12 +965,12 @@
 }
 
 /* Animations */
-@keyframes spin {
+@keyframes appSpin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
 
-@keyframes fadeIn {
+@keyframes appFadeIn {
     from {
         opacity: 0;
         transform: translateY(8px);
@@ -981,7 +981,7 @@
     }
 }
 
-@keyframes scaleIn {
+@keyframes appScaleIn {
     from {
         opacity: 0;
         transform: scale(0.95);
@@ -992,7 +992,7 @@
     }
 }
 
-@keyframes slideDown {
+@keyframes appSlideDown {
     from {
         opacity: 0;
         transform: translateY(-10px);
@@ -1003,7 +1003,7 @@
     }
 }
 
-@keyframes tickBounce {
+@keyframes appTickBounce {
     0% {
         transform: scale(0.3) rotate(-10deg);
         opacity: 0;

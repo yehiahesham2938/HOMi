@@ -29,6 +29,7 @@ import { buildListingShareUrl } from '../utils/listingShare';
 
 // Layout
 import Header from '../../../components/global/header';
+import GuestHeader from '../../../components/global/GuestHeader';
 import LandlordSidebar from '../../../components/global/Landlord/sidebar';
 import TenantSidebar from '../../../components/global/Tenant/sidebar';
 import Footer from '../../../components/global/footer';
@@ -117,6 +118,7 @@ const PropertyDetailPage: React.FC = () => {
     const isUserGuest = !authService.isAuthenticated();
     const isLandlord = currentUser?.user?.role === 'LANDLORD';
     const isTenant = currentUser?.user?.role === 'TENANT';
+    const openedFromGuest = isUserGuest || !!(location.state as { openedFromGuest?: boolean })?.openedFromGuest;
 
     // Heart state
     const [isSaved, setIsSaved] = useState(false);
@@ -454,16 +456,18 @@ const PropertyDetailPage: React.FC = () => {
 
     return (
         <div className="property-detail-page-wrapper">
-            <Header />
+            {isUserGuest ? <GuestHeader showBackToHome={true} /> : <Header />}
             <div className="property-detail-page-body">
                 {isLandlord ? <LandlordSidebar /> : isTenant ? <TenantSidebar /> : null}
                 
                 <div className="property-detail-page-content">
                     {/* BREADCRUMB & BACK NAVIGATION */}
                     <div className="detail-breadcrumb-bar">
-                        <button className="back-to-search-btn" onClick={() => navigate('/browse-properties')}>
-                            Back to Search
-                        </button>
+                        {!openedFromGuest && (
+                            <button className="back-to-search-btn" onClick={() => navigate('/browse-properties')}>
+                                Back to Search
+                            </button>
+                        )}
                         <button className="breadcrumb-back-btn" onClick={() => navigate(-1)}>
                             <FaArrowLeft /> Back
                         </button>

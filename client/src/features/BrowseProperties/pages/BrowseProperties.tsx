@@ -134,7 +134,7 @@ const BrowseProperties: React.FC = () => {
     return (
         <div className="layout-wrapper">
             <Sidebar />
-            <div className="main-content">
+            <div className="main-content browse-main-content">
                 <Header />
                 <div className="browse-split-container">
                     <div className="properties-left-pane">

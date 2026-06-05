@@ -184,7 +184,7 @@ const TenantMaintenance: React.FC = () => {
     // ─── Render tabs ───────────────────────────────────────────────────────
     const renderPostTab = () => (
         <div className="tab-pane animate-in">
-            <div className="section-header">
+            <div className="tl-section-header">
                 <div>
                     <h2>Your maintenance issues</h2>
                     <p>Post a new issue from your active rental — pros will start applying with their final price.</p>
@@ -233,11 +233,11 @@ const TenantMaintenance: React.FC = () => {
                                     <p className="post-description">{req.description}</p>
                                     <div className="post-meta">
                                         <div className="meta-item flex-row-center">
-                                            <FaClock className="meta-icon" /> 
+                                            <FaClock className="meta-icon" />
                                             <span>{new Date(req.createdAt).toLocaleDateString()}</span>
                                         </div>
                                         <div className="meta-item flex-row-center">
-                                            <FaBolt className="meta-icon animated-pulse" /> 
+                                            <FaBolt className="meta-icon animated-pulse" />
                                             <span>{req.applicationsCount ?? 0} applications</span>
                                         </div>
                                     </div>
@@ -374,7 +374,7 @@ const TenantMaintenance: React.FC = () => {
         const list = activeRequests.length === 0 ? completedRequests : [...activeRequests, ...completedRequests];
         return (
             <div className="tab-pane animate-in">
-                <div className="section-header">
+                <div className="tl-section-header">
                     <div>
                         <h2>Track maintenance</h2>
                         <p>All your maintenance requests with live status updates.</p>
@@ -413,7 +413,7 @@ const TenantMaintenance: React.FC = () => {
                                         <span className="value">
                                             {req.provider
                                                 ? req.provider.businessName ??
-                                                    `${req.provider.firstName} ${req.provider.lastName}`.trim()
+                                                `${req.provider.firstName} ${req.provider.lastName}`.trim()
                                                 : 'Awaiting bids'}
                                         </span>
                                     </div>
@@ -448,117 +448,130 @@ const TenantMaintenance: React.FC = () => {
     };
 
     return (
-        <div className="tenant-maintenance-layout">
-            <Sidebar />
-            <div className="tenant-maintenance-content">
-                <Header />
-                <main className="maintenance-main-container">
-                    <header className="maintenance-hero">
-                        <div className="hero-text">
-                            <span className="pre-title">Home Care & Support</span>
-                            <h1>Maintenance Hub</h1>
-                            <p>Post issues, hire trusted pros, track every job — all paid via your HOMi wallet.</p>
-                        </div>
-
-                        <div className="maintenance-quick-stats">
-                            <div className="mini-stat">
-                                <span className="stat-num">{activeRequests.length}</span>
-                                <span className="stat-desc">Active issues</span>
+        <div className="tenant-maintenance-hub-wrapper">
+            <div className="tenant-maintenance-layout">
+                <Sidebar />
+                <div className="tenant-maintenance-content">
+                    <Header />
+                    <main className="maintenance-main-container">
+                        <header className="maintenance-hero">
+                            <div className="hero-glass-mesh"></div>
+                            <div className="hero-text">
+                                <span className="pre-title">Home Care & Support</span>
+                                <h1>Maintenance Hub</h1>
+                                <p>Post issues, hire trusted pros, track every job — all paid via your HOMi wallet.</p>
                             </div>
-                            <div className="mini-stat accent">
-                                <span className="stat-num">{providers.length}</span>
-                                <span className="stat-desc">Pros nearby</span>
-                            </div>
-                        </div>
-                    </header>
 
-                    {error && (
-                        <div style={{
-                            padding: '0.75rem 1rem',
-                            background: '#fef2f2',
-                            border: '1px solid #fecaca',
-                            color: '#b91c1c',
-                            borderRadius: 12,
-                            marginBottom: '1rem',
-                        }}>{error}</div>
+                            <div className="maintenance-quick-stats">
+                                <div className="mini-stat">
+                                    <div className="stat-icon-wrapper">
+                                        <FaTools className="stat-icon" />
+                                    </div>
+                                    <div className="stat-text-group">
+                                        <span className="stat-num">{activeRequests.length}</span>
+                                        <span className="stat-desc">Active issues</span>
+                                    </div>
+                                </div>
+                                <div className="mini-stat accent">
+                                    <div className="stat-icon-wrapper">
+                                        <FaUsers className="stat-icon" />
+                                    </div>
+                                    <div className="stat-text-group">
+                                        <span className="stat-num">{providers.length}</span>
+                                        <span className="stat-desc">Pros nearby</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </header>
+
+                        {error && (
+                            <div style={{
+                                padding: '0.75rem 1rem',
+                                background: '#fef2f2',
+                                border: '1px solid #fecaca',
+                                color: '#b91c1c',
+                                borderRadius: 12,
+                                marginBottom: '1rem',
+                            }}>{error}</div>
+                        )}
+
+                        <nav className="maintenance-tabs">
+                            <button
+                                className={`tab-btn ${activeTab === 'post' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('post')}
+                            >
+                                <FaPlus className="tab-icon" />
+                                <span>Post an Issue</span>
+                            </button>
+                            <button
+                                className={`tab-btn ${activeTab === 'browse' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('browse')}
+                            >
+                                <FaSearch className="tab-icon" />
+                                <span>Browse Providers</span>
+                            </button>
+                            <button
+                                className={`tab-btn ${activeTab === 'active' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('active')}
+                            >
+                                <FaTools className="tab-icon" />
+                                <span>Active Requests</span>
+                            </button>
+                        </nav>
+
+                        <div className="tab-content-wrapper">
+                            {activeTab === 'post' && renderPostTab()}
+                            {activeTab === 'browse' && renderBrowseTab()}
+                            {activeTab === 'active' && renderActiveTab()}
+                        </div>
+                    </main>
+
+                    <DetailedIssueModal
+                        isOpen={isIssueModalOpen}
+                        onClose={() => setIsIssueModalOpen(false)}
+                        onPostSuccess={handlePostSuccess}
+                        isViewOnly={isViewOnlyModal}
+                        initialData={selectedIssue}
+                    />
+
+                    <ProviderProfile
+                        isOpen={isProfileModalOpen}
+                        onClose={() => setIsProfileModalOpen(false)}
+                        provider={selectedProvider}
+                    />
+
+                    {appsRequest && (
+                        <ApplicationsModal
+                            isOpen
+                            onClose={() => setAppsRequest(null)}
+                            request={appsRequest}
+                            onAccepted={(updated) => {
+                                setRequests((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+                                setAppsRequest(null);
+                            }}
+                        />
                     )}
 
-                    <nav className="maintenance-tabs">
-                        <button
-                            className={`tab-btn ${activeTab === 'post' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('post')}
-                        >
-                            <FaPlus className="tab-icon" />
-                            <span>Post an Issue</span>
-                        </button>
-                        <button
-                            className={`tab-btn ${activeTab === 'browse' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('browse')}
-                        >
-                            <FaSearch className="tab-icon" />
-                            <span>Browse Providers</span>
-                        </button>
-                        <button
-                            className={`tab-btn ${activeTab === 'active' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('active')}
-                        >
-                            <FaTools className="tab-icon" />
-                            <span>Active Requests</span>
-                        </button>
-                    </nav>
+                    {trackRequest && (
+                        <LiveTrackingModal
+                            isOpen
+                            onClose={() => setTrackRequest(null)}
+                            request={trackRequest}
+                        />
+                    )}
 
-                    <div className="tab-content-wrapper">
-                        {activeTab === 'post' && renderPostTab()}
-                        {activeTab === 'browse' && renderBrowseTab()}
-                        {activeTab === 'active' && renderActiveTab()}
-                    </div>
-                </main>
+                    {confirmRequest && (
+                        <CompletionConfirmModal
+                            request={confirmRequest}
+                            onResolved={(updated) => {
+                                setRequests((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+                                setConfirmRequest(null);
+                            }}
+                        />
+                    )}
 
-                <DetailedIssueModal
-                    isOpen={isIssueModalOpen}
-                    onClose={() => setIsIssueModalOpen(false)}
-                    onPostSuccess={handlePostSuccess}
-                    isViewOnly={isViewOnlyModal}
-                    initialData={selectedIssue}
-                />
-
-                <ProviderProfile
-                    isOpen={isProfileModalOpen}
-                    onClose={() => setIsProfileModalOpen(false)}
-                    provider={selectedProvider}
-                />
-
-                {appsRequest && (
-                    <ApplicationsModal
-                        isOpen
-                        onClose={() => setAppsRequest(null)}
-                        request={appsRequest}
-                        onAccepted={(updated) => {
-                            setRequests((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
-                            setAppsRequest(null);
-                        }}
-                    />
-                )}
-
-                {trackRequest && (
-                    <LiveTrackingModal
-                        isOpen
-                        onClose={() => setTrackRequest(null)}
-                        request={trackRequest}
-                    />
-                )}
-
-                {confirmRequest && (
-                    <CompletionConfirmModal
-                        request={confirmRequest}
-                        onResolved={(updated) => {
-                            setRequests((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
-                            setConfirmRequest(null);
-                        }}
-                    />
-                )}
-
-                <Footer />
+                    <Footer />
+                </div>
             </div>
         </div>
     );

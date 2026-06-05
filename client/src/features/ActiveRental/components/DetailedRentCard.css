@@ -88,6 +88,13 @@
     margin-bottom: 0.75rem;
 }
 
+.location-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
 .location-badge {
     display: inline-flex;
     align-items: center;
@@ -99,9 +106,37 @@
     border-radius: 8px;
     font-size: 0.72rem;
     font-weight: 750;
-    margin-bottom: 0.5rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
+}
+
+.btn-view-property-details {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    color: #3b82f6;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-view-property-details svg {
+    font-size: 0.85rem;
+}
+
+.btn-view-property-details:hover {
+    color: #1d4ed8;
+    background: rgba(59, 130, 246, 0.05);
+    transform: translateY(-1px);
+}
+
+.btn-view-property-details:active {
+    transform: translateY(0);
 }
 
 .rental-header h2 {

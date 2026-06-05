@@ -6,7 +6,6 @@
     min-height: 100vh;
     background: #f8fafc;
 }
-
 .layout-wrapper>.main-content {
     margin-left: var(--sidebar-width, 260px);
     width: calc(100% - var(--sidebar-width, 260px));
@@ -14,6 +13,9 @@
     z-index: auto;
     display: flex;
     flex-direction: column;
+}
+
+.layout-wrapper>.main-content.browse-main-content {
     height: 100vh;
     overflow: hidden;
 }
@@ -22,6 +24,8 @@
     .layout-wrapper>.main-content {
         margin-left: 0;
         width: 100%;
+    }
+    .layout-wrapper>.main-content.browse-main-content {
         height: auto;
         overflow: visible;
     }

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import './DetailedRentCard.css';
 import {
@@ -11,8 +11,6 @@ import pdfService from '../../../services/pdf.service';
 import { normalizeSignatureUrl } from '../../../shared/utils/signatureUrl';
 import { propertyService } from '../../../services/property.service';
 import { mapPropertyToUI } from '../../../utils/propertyMapping';
-import PropertyDetailModal from '../../BrowseProperties/components/PropertyDetailedModal';
-import type { PropertyDetailModalProperty } from '../../BrowseProperties/components/PropertyDetailedModal';
 
 interface RentalProps {
     rental: {
@@ -32,9 +30,8 @@ interface RentalProps {
 
 const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
     const { t } = useTranslation();
+    const navigate = useNavigate();
     const [showRules, setShowRules] = useState(false);
-    const [propertyDetailData, setPropertyDetailData] = useState<PropertyDetailModalProperty | null>(null);
-    const [isPropertyLoading, setIsPropertyLoading] = useState(false);
     const modalRef = useRef<HTMLDivElement>(null);
 
     // Close modal when clicking outside
@@ -80,24 +77,10 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
     const houseRules = rental.houseRules;
     const locationBadge = rental.address.split(',')[1]?.trim() || rental.address;
 
-    const handleViewPropertyDetails = async () => {
+    const handleViewPropertyDetails = () => {
         const propertyId = contract?.property?.id || contract?.propertyId;
         if (!propertyId) return;
-        setIsPropertyLoading(true);
-        try {
-            const res = await propertyService.getPropertyById(propertyId);
-            if (res.data) {
-                const mapped = mapPropertyToUI(res.data);
-                setPropertyDetailData({
-                    ...mapped,
-                    status: 'RENTED',
-                });
-            }
-        } catch (error) {
-            console.error('Failed to fetch property details', error);
-        } finally {
-            setIsPropertyLoading(false);
-        }
+        navigate(`/properties/${propertyId}`);
     };
 
     // Derived values for progress calculation
@@ -169,14 +152,9 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
                         <button
                             type="button"
                             className="btn-view-property-details"
-                            disabled={isPropertyLoading}
-                            onClick={() => void handleViewPropertyDetails()}
+                            onClick={handleViewPropertyDetails}
                         >
-                            {isPropertyLoading ? (
-                                <span className="spinner-tiny" />
-                            ) : (
-                                <FaEye />
-                            )}
+                            <FaEye />
                             View property details
                         </button>
                     </div>
@@ -214,13 +192,6 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
                 </div>
             </div>
 
-            {propertyDetailData && createPortal(
-                <PropertyDetailModal
-                    property={propertyDetailData}
-                    onClose={() => setPropertyDetailData(null)}
-                />,
-                document.body
-            )}
         </div>
     );
 };

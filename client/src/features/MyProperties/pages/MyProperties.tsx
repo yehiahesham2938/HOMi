@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import Header from '../../../components/global/header';
 import Sidebar from '../../../components/global/Landlord/sidebar';
 import Footer from '../../../components/global/footer';
 import DetailedPropertyCard from '../components/DetailedPropertyCard';
-import AddPropertyModal from '../../home/components/LandlordHomeComponents/AddPropertyModal'; // Import modal
 import { FiPlus, FiHome } from 'react-icons/fi'; // Icons for the button
 import propertyService from '../../../services/property.service';
 import authService from '../../../services/auth.service';
@@ -14,11 +14,11 @@ import type { LandlordPropertyRow } from '../components/DetailedPropertyCard';
 
 const MyProperties = () => {
   const { t } = useTranslation();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
   const [properties, setProperties] = useState<LandlordPropertyRow[]>([]);
   const [loading, setLoading] = useState(true);
   
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [refreshKey] = useState(0);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -61,31 +61,32 @@ const MyProperties = () => {
                 }
               }
 
+
               return {
                 id: prop.id,
                 name: prop.title,
                 address: prop.address,
+                price: prop.monthlyPrice.toString(),
+                beds: prop.specifications?.bedrooms ?? 0,
+                baths: prop.specifications?.bathrooms ?? 0,
+                sqft: prop.specifications?.areaSqft ?? 0,
                 status: computedStatus,
-                price: `$${prop.monthlyPrice}`,
-                beds: prop.specifications?.bedrooms || 0,
-                baths: prop.specifications?.bathrooms || 0,
-                sqft: prop.specifications?.areaSqft || 0,
-                tenantName: tenantName,
-                leaseEnd: leaseEnd,
-                yield: "5.0", // Placeholder for now
-                occupancyRate: isOccupied ? 100 : 0,
+                tenantName,
+                leaseEnd,
+                yield: "8.4",
+                occupancyRate: activeContract ? 100 : 0,
+                images: prop.images,
+                amenities: prop.amenities.map(a => a.name),
+                houseRules: prop.houseRules.map(r => r.name),
                 activeContract: activeContract || null,
-                images: prop.images || [],
-                amenities: (prop.amenities || []).map((amenity) => amenity.name),
-                houseRules: (prop.houseRules || []).map((rule) => rule.name),
-                onUpdate: () => setRefreshKey(prev => prev + 1),
+                onUpdate: fetchProperties,
                 securityDeposit: prop.securityDeposit
               };
-           });
-           setProperties(mappedProperties);
+            });
+            setProperties(mappedProperties);
         }
-      } catch (error) {
-        console.error("Failed to fetch properties", error);
+      } catch (err) {
+        console.error('Failed to load portfolio:', err);
       } finally {
         setLoading(false);
       }
@@ -126,7 +127,7 @@ const MyProperties = () => {
             
             {/* Only show the top-right button if there IS data */}
             {hasData && (
-              <button className="add-prop-primary-btn" onClick={() => setIsModalOpen(true)}>
+              <button className="add-prop-primary-btn" onClick={() => navigate('/properties/add')}>
                 <div className="btn-icon-circle">
                   <FiPlus />
                 </div>
@@ -149,7 +150,7 @@ const MyProperties = () => {
               </div>
               <h2>{t('myProperties.noPropertiesFound')}</h2>
               <p className="my-properties-empty-state-text">{t('myProperties.noPropertiesText')}</p>
-              <button className="my-properties-empty-state-btn" onClick={() => setIsModalOpen(true)}>
+              <button className="my-properties-empty-state-btn" onClick={() => navigate('/properties/add')}>
                 <FiPlus size={20} />
                 {t('myProperties.addFirstProperty')}
               </button>
@@ -159,10 +160,6 @@ const MyProperties = () => {
         </main>
         <Footer />
       </div>
-
-      {isModalOpen && (
-        <AddPropertyModal onClose={() => setIsModalOpen(false)} />
-      )}
     </div>
   );
 };

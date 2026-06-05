@@ -8,7 +8,7 @@ import Footer from '../../../components/global/footer';
 import { propertyService } from '../../../services/property.service';
 import { mapPropertyToUI } from '../../../utils/propertyMapping';
 import type { PropertyUI as Property } from '../../../utils/propertyMapping';
-import PropertyDetailedModal from '../../BrowseProperties/components/PropertyDetailedModal';
+
 
 const GuestHome: React.FC = () => {
   const navigate = useNavigate();
@@ -25,7 +25,6 @@ const GuestHome: React.FC = () => {
   // Property and search/filter states
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [heroSearchQuery, setHeroSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('');
@@ -610,7 +609,7 @@ const GuestHome: React.FC = () => {
                   <div
                     key={property.id}
                     className="prop-card reveal visible"
-                    onClick={() => setSelectedProperty(property)}
+                    onClick={() => navigate(`/properties/${property.id}`)}
                   >
                     <div className="prop-img">
                       <img src={property.image} alt={property.title} />
@@ -1638,13 +1637,7 @@ const GuestHome: React.FC = () => {
           </div>
         </div>
       </section>
-      {selectedProperty && (
-        <PropertyDetailedModal
-          property={selectedProperty}
-          onClose={() => setSelectedProperty(null)}
-          isGuest={true}
-        />
-      )}
+
 
       {/* 10. Footer (Footer stays same) */}
       <Footer />

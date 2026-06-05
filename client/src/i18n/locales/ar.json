@@ -229,6 +229,11 @@
   },
   "landlordHome": {
     "welcomeBack": "مرحباً بعودتك",
+    "portfolioSummary": "راجع حالة وحداتك المعروضة، ومعدلات الإشغال، والمدفوعات.",
+    "propertiesCount": "العقارات",
+    "activeUnits": "الوحدات النشطة",
+    "occupiedUnits": "الوحدات المؤجرة",
+    "myPortfolio": "عقاراتي",
     "managePropertiesTrack": "قم بإدارة عقاراتك، وتتبع الإشغال، ومراجعة الطلبات الواردة.",
     "yourPortfolio": "عقاراتك المعروضة",
     "activeListings": "عقار نشط واحد",

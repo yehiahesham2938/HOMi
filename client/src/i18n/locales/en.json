@@ -229,6 +229,11 @@
   },
   "landlordHome": {
     "welcomeBack": "Welcome Back",
+    "portfolioSummary": "Review the status of your listed units, occupancy rates, and payments.",
+    "propertiesCount": "Properties",
+    "activeUnits": "Active Listings",
+    "occupiedUnits": "Occupied Units",
+    "myPortfolio": "My Portfolio",
     "managePropertiesTrack": "Manage your properties, track occupancy, and review incoming requests.",
     "yourPortfolio": "Your Portfolio",
     "activeListings": "{{count}} Active Listing",

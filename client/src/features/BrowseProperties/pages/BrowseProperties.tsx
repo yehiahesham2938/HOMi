@@ -1,13 +1,12 @@
-// client\src\features\BrowseProperties\pages\BrowseProperties.tsx
-import React, { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+// client/src/features/BrowseProperties/pages/BrowseProperties.tsx
+import React, { useEffect, useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import './BrowseProperties.css';
 import Header from '../../../components/global/header';
 import Sidebar from '../../../components/global/Tenant/sidebar';
 import Footer from '../../../components/global/footer';
 import PropertyCard from '../components/PropertyCard';
 import SearchHero from '../components/SearchHero';
-import PropertyDetailModal from '../components/PropertyDetailedModal';
 import {
     propertyService,
     type PropertyQueryParams,
@@ -22,10 +21,10 @@ import type { PropertyUI as BrowsePropertyUI } from '../../../utils/propertyMapp
 
 
 const BrowseProperties: React.FC = () => {
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
     const listingFromUrl = searchParams.get('listing');
 
-    const [selectedProperty, setSelectedProperty] = useState<BrowsePropertyUI | null>(null);
     const [properties, setProperties] = useState<BrowsePropertyUI[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -93,49 +92,14 @@ const BrowseProperties: React.FC = () => {
     /** Open listing from shared link ?listing=<propertyId> */
     useEffect(() => {
         if (!listingFromUrl) {
-            return undefined;
+            return;
         }
-
-        const fromList = properties.find((p) => p.id === listingFromUrl);
-        if (fromList) {
-            setSelectedProperty(fromList);
-            return undefined;
-        }
-
-        if (loading) {
-            return undefined;
-        }
-
-        let cancelled = false;
-        (async () => {
-            try {
-                const res = await propertyService.getPropertyById(listingFromUrl);
-                if (cancelled || !res.data) return;
-                if (String(res.data.status).toUpperCase() !== 'AVAILABLE') {
-                    setSearchParams({}, { replace: true });
-                    setSelectedProperty(null);
-                    return;
-                }
-                setSelectedProperty(mapPropertyToUI(res.data));
-            } catch {
-                setSearchParams({}, { replace: true });
-                setSelectedProperty(null);
-            }
-        })();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [listingFromUrl, properties, loading, setSearchParams]);
+        // Redirect directly to the dedicated detail page!
+        navigate(`/properties/${listingFromUrl}`, { replace: true });
+    }, [listingFromUrl, navigate]);
 
     const openPropertyDetails = (property: BrowsePropertyUI) => {
-        setSelectedProperty(property);
-        setSearchParams({ listing: property.id }, { replace: true });
-    };
-
-    const closePropertyDetails = () => {
-        setSelectedProperty(null);
-        setSearchParams({}, { replace: true });
+        navigate(`/properties/${property.id}`);
     };
 
     const renderPropertyCard = (property: BrowsePropertyUI) => (
@@ -169,7 +133,7 @@ const BrowseProperties: React.FC = () => {
 
     return (
         <div className="layout-wrapper">
-            {!selectedProperty && <Sidebar />}
+            <Sidebar />
             <div className="main-content">
                 <Header />
                 <div className="browse-split-container">
@@ -238,16 +202,6 @@ const BrowseProperties: React.FC = () => {
                     </div>
                 </div>
             </div>
-
-            {selectedProperty && (
-                <PropertyDetailModal
-                    property={selectedProperty}
-                    onClose={closePropertyDetails}
-                    isGuest={!authService.isAuthenticated()}
-                    isSaved={isPropertySaved(selectedProperty.id)}
-                    onToggleSave={handleToggleSave}
-                />
-            )}
         </div>
     );
 };

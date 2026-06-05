@@ -12,7 +12,6 @@ import PropCard from '../components/PropCard';
 import { propertyService } from '../../../services/property.service';
 import { mapPropertyToUI } from '../../../utils/propertyMapping';
 import type { PropertyUI as Property } from '../../../utils/propertyMapping';
-import PropertyDetailedModal from '../../BrowseProperties/components/PropertyDetailedModal';
 import AuthModal from '../../../components/global/AuthModal';
 import Footer from '../../../components/global/footer';
 import './GuestSearch.css';
@@ -106,7 +105,6 @@ const MapCenterUpdater = ({ center }: { center: [number, number] }) => {
 const GuestSearch: React.FC = () => {
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
-    const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
     const [properties, setProperties] = useState<Property[]>([]);
     const [loading, setLoading] = useState(true);
     const [showAuthModal, setShowAuthModal] = useState(false);
@@ -278,6 +276,10 @@ const GuestSearch: React.FC = () => {
     const getHelpFromGuest = {
         pathname: '/get-help',
         state: { fromGuestHome: true },
+    };
+
+    const handleOpenDetails = (property: Property) => {
+        navigate(`/properties/${property.id}`);
     };
 
     return (
@@ -460,7 +462,7 @@ const GuestSearch: React.FC = () => {
                                                     key={prop.id}
                                                     position={[prop.locationLat, prop.locationLng]}
                                                     eventHandlers={{
-                                                        click: () => setSelectedProperty(prop)
+                                                        click: () => handleOpenDetails(prop)
                                                     }}
                                                 />
                                             );
@@ -578,7 +580,7 @@ const GuestSearch: React.FC = () => {
                             <PropCard
                                 key={property.id}
                                 property={property}
-                                onOpenDetails={() => setSelectedProperty(property)}
+                                onOpenDetails={() => handleOpenDetails(property)}
                             />
                         ))}
                     </div>
@@ -594,14 +596,13 @@ const GuestSearch: React.FC = () => {
                                         <h2>🏆 Highest Rated Rentals</h2>
                                         <p>Most loved homes based on tenant ratings and verification status</p>
                                     </div>
-                                    =
                                 </div>
                                 <div className="curated-scroller" ref={ratedRef}>
                                     {popularProperties.map(property => (
                                         <div className="curated-card-item" key={property.id}>
                                             <PropCard
                                                 property={property}
-                                                onOpenDetails={() => setSelectedProperty(property)}
+                                                onOpenDetails={() => handleOpenDetails(property)}
                                             />
                                         </div>
                                     ))}
@@ -624,7 +625,7 @@ const GuestSearch: React.FC = () => {
                                         <div className="curated-card-item" key={property.id}>
                                             <PropCard
                                                 property={property}
-                                                onOpenDetails={() => setSelectedProperty(property)}
+                                                onOpenDetails={() => handleOpenDetails(property)}
                                             />
                                         </div>
                                     ))}
@@ -647,7 +648,7 @@ const GuestSearch: React.FC = () => {
                                         <div className="curated-card-item" key={property.id}>
                                             <PropCard
                                                 property={property}
-                                                onOpenDetails={() => setSelectedProperty(property)}
+                                                onOpenDetails={() => handleOpenDetails(property)}
                                             />
                                         </div>
                                     ))}
@@ -659,14 +660,6 @@ const GuestSearch: React.FC = () => {
             </main>
 
             <Footer />
-
-            {selectedProperty && (
-                <PropertyDetailedModal
-                    property={selectedProperty}
-                    onClose={() => setSelectedProperty(null)}
-                    isGuest={true}
-                />
-            )}
 
             {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
         </div>

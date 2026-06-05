@@ -264,9 +264,16 @@
     flex: 1;
 }
 
-/* Search Action Button */
-.sidebar-search-btn {
+/* Search Action Buttons */
+.search-buttons-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
     width: 100%;
+}
+
+.sidebar-search-btn {
+    flex: 1.8;
     background: #3b82f6;
     color: white;
     border: none;
@@ -281,7 +288,6 @@
     gap: 10px;
     transition: all 0.2s ease;
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
-    margin-top: 8px;
 }
 
 .sidebar-search-btn:hover {
@@ -290,10 +296,45 @@
     box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
 }
 
+.sidebar-clear-btn {
+    flex: 1;
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.sidebar-clear-btn:hover {
+    background: #f1f5f9;
+    color: #334155;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+}
+
 /* Mobile responsive styles */
 @media (max-width: 768px) {
     .price-inputs-row {
         flex-direction: column;
         gap: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .search-buttons-group {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .sidebar-search-btn,
+    .sidebar-clear-btn {
+        width: 100%;
+        flex: none;
     }
 }

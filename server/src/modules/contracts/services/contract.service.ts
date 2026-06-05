@@ -1930,7 +1930,12 @@ class ContractService {
 
         const activeContracts = await Contract.findAll({
             where: { status: ContractStatus.ACTIVE },
-            attributes: ['id', 'move_in_date', 'lease_duration_months', 'property_id'],
+            include: [
+                {
+                    model: Property,
+                    as: 'property',
+                }
+            ]
         });
 
         for (const contract of activeContracts) {
@@ -1939,11 +1944,65 @@ class ContractService {
             const leaseEnd = new Date(moveIn);
             leaseEnd.setMonth(leaseEnd.getMonth() + Number(contract.lease_duration_months ?? 0));
             if (now >= leaseEnd) {
-                await contract.update({ status: ContractStatus.EXPIRED });
-                await Property.update(
-                    { status: PropertyStatus.AVAILABLE },
-                    { where: { id: contract.property_id } }
-                );
+                const transaction = await sequelize.transaction();
+                try {
+                    await contract.update({ status: ContractStatus.EXPIRED }, { transaction });
+                    
+                    if (contract.property_id) {
+                        await Property.update(
+                            { status: PropertyStatus.AVAILABLE },
+                            { where: { id: contract.property_id }, transaction }
+                        );
+                    }
+
+                    const depositAmount = Number(contract.security_deposit ?? 0);
+                    if (depositAmount > 0) {
+                        const tenantProfile = await Profile.findOne({
+                            where: { user_id: contract.tenant_id },
+                            transaction,
+                            lock: transaction.LOCK.UPDATE,
+                        });
+                        if (tenantProfile) {
+                            const newBalance = Number(tenantProfile.wallet_balance ?? 0) + depositAmount;
+                            await tenantProfile.update({ wallet_balance: newBalance }, { transaction });
+                        }
+
+                        await activityLogService.log({
+                            actor: { userId: 'SYSTEM', role: 'ADMIN' },
+                            action: 'SECURITY_DEPOSIT_REFUNDED',
+                            entityType: 'CONTRACT',
+                            entityId: contract.id,
+                            description: `Security deposit of $${depositAmount} refunded to tenant wallet upon successful completion of the lease.`,
+                            metadata: {
+                                contractId: contract.id,
+                                refundAmount: depositAmount,
+                            },
+                        });
+
+                        await notificationService.create({
+                            userId: contract.tenant_id,
+                            type: 'SYSTEM',
+                            title: 'Security Deposit Refunded',
+                            body: `Your lease for property "${contract.property?.title || 'Property'}" has successfully ended. Your security deposit of $${depositAmount} has been refunded to your wallet.`,
+                            relatedEntityType: 'CONTRACT',
+                            relatedEntityId: contract.id,
+                        });
+
+                        await notificationService.create({
+                            userId: contract.landlord_id,
+                            type: 'SYSTEM',
+                            title: 'Security Deposit Returned to Tenant',
+                            body: `The lease agreement for "${contract.property?.title || 'Property'}" has ended successfully, and the security deposit of $${depositAmount} has been refunded to the tenant's wallet.`,
+                            relatedEntityType: 'CONTRACT',
+                            relatedEntityId: contract.id,
+                        });
+                    }
+
+                    await transaction.commit();
+                } catch (err) {
+                    await transaction.rollback();
+                    console.error('Failed to expire contract and refund deposit:', err);
+                }
             }
         }
     }
@@ -2261,45 +2320,67 @@ class ContractService {
                 const unpaidPeriodEnd = dueDates[paidInstallments]!;
 
                 if (now >= unpaidPeriodEnd) {
-                    await contract.update({ status: ContractStatus.TERMINATED });
-                    
-                    if (contract.property_id) {
-                        await Property.update(
-                            { status: PropertyStatus.AVAILABLE },
-                            { where: { id: contract.property_id } }
-                        );
+                    const transaction = await sequelize.transaction();
+                    try {
+                        await contract.update({ status: ContractStatus.TERMINATED }, { transaction });
+                        
+                        if (contract.property_id) {
+                            await Property.update(
+                                { status: PropertyStatus.AVAILABLE },
+                                { where: { id: contract.property_id }, transaction }
+                            );
+                        }
+
+                        const depositAmount = Number(contract.security_deposit ?? 0);
+                        if (depositAmount > 0) {
+                            const landlordProfile = await Profile.findOne({
+                                where: { user_id: contract.landlord_id },
+                                transaction,
+                                lock: transaction.LOCK.UPDATE,
+                            });
+                            if (landlordProfile) {
+                                const newBalance = Number(landlordProfile.wallet_balance ?? 0) + depositAmount;
+                                await landlordProfile.update({ wallet_balance: newBalance }, { transaction });
+                            }
+                        }
+
+                        await activityLogService.log({
+                            actor: { userId: 'SYSTEM', role: 'ADMIN' },
+                            action: 'CONTRACT_TERMINATED_NON_PAYMENT',
+                            entityType: 'CONTRACT',
+                            entityId: contract.id,
+                            description: `Contract ${contract.contract_id} terminated automatically due to non-payment of rent for the cycle starting ${unpaidPeriodStart.toLocaleDateString('en-US')}.`,
+                            metadata: {
+                                contractId: contract.id,
+                                unpaidInstallmentMonth: unpaidPeriodEnd.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+                                depositForfeited: true,
+                                depositAmount,
+                            },
+                        });
+
+                        await notificationService.create({
+                            userId: contract.tenant_id,
+                            type: 'SYSTEM',
+                            title: 'Lease Terminated - Non-Payment',
+                            body: `Your lease for property ${contract.property?.title || 'Property'} has been terminated because rent for the cycle starting ${unpaidPeriodStart.toLocaleDateString('en-US')} was not paid. Your deposit of $${depositAmount} has been forfeited.`,
+                            relatedEntityType: 'CONTRACT',
+                            relatedEntityId: contract.id,
+                        });
+
+                        await notificationService.create({
+                            userId: contract.landlord_id,
+                            type: 'SYSTEM',
+                            title: 'Lease Terminated - Tenant Non-Payment',
+                            body: `The lease agreement for ${contract.property?.title || 'Property'} has been terminated because the tenant failed to pay rent for the cycle starting ${unpaidPeriodStart.toLocaleDateString('en-US')}. The security deposit of $${depositAmount} has been transferred to your wallet balance.`,
+                            relatedEntityType: 'CONTRACT',
+                            relatedEntityId: contract.id,
+                        });
+
+                        await transaction.commit();
+                    } catch (err) {
+                        await transaction.rollback();
+                        console.error('Failed to terminate contract and forfeit deposit:', err);
                     }
-
-                    await activityLogService.log({
-                        actor: { userId: 'SYSTEM', role: 'ADMIN' },
-                        action: 'CONTRACT_TERMINATED_NON_PAYMENT',
-                        entityType: 'CONTRACT',
-                        entityId: contract.id,
-                        description: `Contract ${contract.contract_id} terminated automatically due to non-payment of rent for the cycle starting ${unpaidPeriodStart.toLocaleDateString('en-US')}.`,
-                        metadata: {
-                            contractId: contract.id,
-                            unpaidInstallmentMonth: unpaidPeriodEnd.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-                            depositForfeited: true,
-                        },
-                    });
-
-                    await notificationService.create({
-                        userId: contract.tenant_id,
-                        type: 'SYSTEM',
-                        title: 'Lease Terminated - Non-Payment',
-                        body: `Your lease for property ${contract.property?.title || 'Property'} has been terminated because rent for the cycle starting ${unpaidPeriodStart.toLocaleDateString('en-US')} was not paid. Your deposit has been forfeited.`,
-                        relatedEntityType: 'CONTRACT',
-                        relatedEntityId: contract.id,
-                    });
-
-                    await notificationService.create({
-                        userId: contract.landlord_id,
-                        type: 'SYSTEM',
-                        title: 'Lease Terminated - Tenant Non-Payment',
-                        body: `The lease agreement for ${contract.property?.title || 'Property'} has been terminated because the tenant failed to pay rent for the cycle starting ${unpaidPeriodStart.toLocaleDateString('en-US')}.`,
-                        relatedEntityType: 'CONTRACT',
-                        relatedEntityId: contract.id,
-                    });
                 } else {
                     const daysElapsed = Math.floor((now.getTime() - unpaidPeriodStart.getTime()) / (1000 * 60 * 60 * 24));
                     const rentAmt = contract.rent_amount ?? 0;

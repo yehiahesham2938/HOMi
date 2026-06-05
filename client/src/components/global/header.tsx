@@ -191,9 +191,6 @@ const Header = () => {
 
         {/* Desktop Navigation */}
         <nav className="header-nav desktop-nav" aria-label="Main navigation">
-          <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>
-            {t('header.home')}
-          </Link>
           {!isMaintainer && (
             <Link
               to={howItWorksBrowsePath}
@@ -259,9 +256,6 @@ const Header = () => {
       {/* Mobile Navigation Menu */}
       {isMobileMenuOpen && (
         <nav ref={mobileMenuRef} className="mobile-nav" aria-label="Mobile navigation" onPointerDown={(e) => e.stopPropagation()}>
-          <Link to={isSignedIn ? dashboardPath : '/'} className={`mobile-nav-link ${location.pathname === dashboardPath || (!isSignedIn && location.pathname === '/') ? 'active' : ''}`}>
-            {t('header.home')}
-          </Link>
           {!isMaintainer && (
             <Link
               to={howItWorksBrowsePath}

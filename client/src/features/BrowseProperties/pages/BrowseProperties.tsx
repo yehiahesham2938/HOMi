@@ -116,9 +116,9 @@ const BrowseProperties: React.FC = () => {
         const title = isSearching ? 'Search Results' : 'Available Properties';
         return (
             <section className="property-vertical-section animate-fade-in">
-                <div className="section-header">
+                <div className="bp-section-header">
                     <div className="properties-title-area">
-                        <h2>{title} ({properties.length})</h2>
+                        <h2>.</h2>
                     </div>
                     {isSearching && (
                         <button className="view-all-btn" onClick={fetchDefaultProperties}>Clear Search</button>
@@ -140,7 +140,7 @@ const BrowseProperties: React.FC = () => {
                     <div className="properties-left-pane">
                         {loading && (
                             <section className="property-vertical-section">
-                                <div className="section-header">
+                                <div className="bp-section-header">
                                     <div className="properties-title-area">
                                         <h2>Loading properties...</h2>
                                     </div>
@@ -150,7 +150,7 @@ const BrowseProperties: React.FC = () => {
 
                         {!loading && error && (
                             <section className="property-vertical-section">
-                                <div className="section-header">
+                                <div className="bp-section-header">
                                     <div className="properties-title-area">
                                         <h2>{error}</h2>
                                     </div>
@@ -160,7 +160,7 @@ const BrowseProperties: React.FC = () => {
 
                         {!loading && !error && properties.length === 0 && (
                             <section className="property-vertical-section">
-                                <div className="section-header">
+                                <div className="bp-section-header">
                                     <div className="properties-title-area">
                                         <h2>No properties available right now.</h2>
                                     </div>
@@ -179,7 +179,8 @@ const BrowseProperties: React.FC = () => {
                             const doSearch = async () => {
                                 setLoading(true);
                                 setError(null);
-                                setIsSearching(true);
+                                const hasFilters = Object.keys(filters).length > 0;
+                                setIsSearching(hasFilters);
                                 try {
                                     const response = await propertyService.getAllProperties({
                                         status: 'AVAILABLE',

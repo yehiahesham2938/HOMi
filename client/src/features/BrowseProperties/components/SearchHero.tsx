@@ -239,6 +239,22 @@ const SearchHero: React.FC<SearchHeroProps> = ({ onSearch }) => {
         }
     };
 
+    const handleClearClick = () => {
+        setFilters({
+            type: '',
+            furnishing: '',
+            target_tenant: '',
+            minPrice: '',
+            maxPrice: '',
+            availabilityDate: '',
+        });
+        setPosition(null);
+        setRadiusKm(5);
+        setCityQuery('');
+        setLocationError(null);
+        onSearch({});
+    };
+
     return (
         <div className="search-sidebar-container">
             <div className="map-top-section">
@@ -373,9 +389,14 @@ const SearchHero: React.FC<SearchHeroProps> = ({ onSearch }) => {
                     </div>
                 </div>
 
-                <button className="sidebar-search-btn" onClick={handleSearchClick}>
-                    <FaSearch /> Search Properties
-                </button>
+                <div className="search-buttons-group">
+                    <button type="button" className="sidebar-search-btn" onClick={handleSearchClick}>
+                        <FaSearch /> Search Properties
+                    </button>
+                    <button type="button" className="sidebar-clear-btn" onClick={handleClearClick}>
+                        Clear Search
+                    </button>
+                </div>
             </div>
         </div>
     );

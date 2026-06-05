@@ -6,13 +6,13 @@ import {
     Wallet, TrendingUp, Calendar, Clock,
     ArrowUpRight, Building2, User, Landmark,
     Plus, Download, CheckCircle2, Search,
-    Filter, CreditCard, HandCoins
+    Filter, CreditCard, HandCoins, Lock
 } from 'lucide-react';
 import './LandlordPayment.css';
 import authService from '../../../services/auth.service';
 import contractService, { type LandlordContract } from '../../../services/contract.service';
 
-type LandlordTab = 'earnings' | 'received' | 'payouts' | 'methods' | 'upcoming' | 'transfer';
+type LandlordTab = 'earnings' | 'received' | 'payouts' | 'methods' | 'upcoming' | 'transfer' | 'deposits';
 
 interface StatCardProps {
     label: string;
@@ -80,6 +80,8 @@ interface ReceivedPaymentRow {
     propertyTitle: string;
     amount: number;
     date: string;
+    type?: string;
+    statusBadge?: string;
 }
 
 interface UpcomingPaymentRow {
@@ -166,6 +168,7 @@ const LandlordPayment: React.FC = () => {
     const [pageError, setPageError] = useState<string | null>(null);
 
     const [searchTerm, setSearchTerm] = useState('');
+    const [depositSearchTerm, setDepositSearchTerm] = useState('');
 
     const [payoutMethods, setPayoutMethods] = useState<PayoutMethod[]>([]);
     const [payouts, setPayouts] = useState<TransferRecord[]>([]);
@@ -250,23 +253,45 @@ const LandlordPayment: React.FC = () => {
     };
 
     const receivedPayments = useMemo<ReceivedPaymentRow[]>(() => {
-        return contracts
-            .filter((contract) => getContractPaymentStatus(contract) === 'PAID')
-            .map((contract) => {
+        const rows: ReceivedPaymentRow[] = [];
+        contracts.forEach((contract) => {
+            const hasBeenPaid = getContractPaymentStatus(contract) === 'PAID' || 
+                                ['ACTIVE', 'EXPIRED', 'TERMINATED'].includes(contract.status);
+            
+            if (hasBeenPaid) {
                 const tenantName = `${contract.tenant?.firstName ?? ''} ${contract.tenant?.lastName ?? ''}`.trim() || 'Tenant';
                 const propertyTitle = contract.property?.title || 'Property';
-                const amount = Number(contract.rentAmount ?? contract.property?.monthlyPrice ?? 0);
+                const rentAmount = Number(contract.rentAmount ?? contract.property?.monthlyPrice ?? 0);
                 const date = contract.landlordSignedAt || contract.createdAt;
 
-                return {
-                    id: contract.id,
+                rows.push({
+                    id: `${contract.id}-rent`,
                     tenantName,
                     propertyTitle,
-                    amount,
+                    amount: rentAmount,
                     date,
-                };
-            })
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                    type: 'Rent Payment',
+                    statusBadge: 'Received',
+                });
+
+                // If lease terminated due to non-payment, deposit goes to landlord balance
+                if (contract.status === 'TERMINATED') {
+                    const depositAmount = Number(contract.securityDeposit ?? contract.property?.securityDeposit ?? 0);
+                    if (depositAmount > 0) {
+                        rows.push({
+                            id: `${contract.id}-deposit`,
+                            tenantName,
+                            propertyTitle,
+                            amount: depositAmount,
+                            date: contract.updatedAt || contract.createdAt,
+                            type: 'Forfeited Deposit',
+                            statusBadge: 'Released',
+                        });
+                    }
+                }
+            }
+        });
+        return rows.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }, [contracts]);
 
     const upcomingPayments = useMemo<UpcomingPaymentRow[]>(() => {
@@ -289,6 +314,38 @@ const LandlordPayment: React.FC = () => {
                 };
             })
             .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+    }, [contracts]);
+
+    const propertyDeposits = useMemo(() => {
+        return contracts
+            .filter((c) => Number(c.securityDeposit ?? c.property?.securityDeposit ?? 0) > 0)
+            .map((c) => {
+                const tenantName = `${c.tenant?.firstName ?? ''} ${c.tenant?.lastName ?? ''}`.trim() || 'Tenant';
+                const propertyTitle = c.property?.title || 'Property';
+                const amount = Number(c.securityDeposit ?? c.property?.securityDeposit ?? 0);
+                const date = c.moveInDate || c.createdAt;
+
+                let status: 'HELD' | 'REFUNDED' | 'RELEASED' | 'PENDING' = 'PENDING';
+                if (c.status === 'ACTIVE') {
+                    status = 'HELD';
+                } else if (c.status === 'EXPIRED') {
+                    status = 'REFUNDED';
+                } else if (c.status === 'TERMINATED') {
+                    status = 'RELEASED';
+                } else if (c.status === 'PENDING_PAYMENT') {
+                    status = 'PENDING';
+                }
+
+                return {
+                    id: c.id,
+                    tenantName,
+                    propertyTitle,
+                    amount,
+                    status,
+                    date,
+                };
+            })
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }, [contracts]);
 
     const totalEarnings = useMemo(() => {
@@ -330,6 +387,15 @@ const LandlordPayment: React.FC = () => {
             item.tenantName.toLowerCase().includes(q) || item.propertyTitle.toLowerCase().includes(q)
         );
     }, [receivedPayments, searchTerm]);
+
+    const filteredPropertyDeposits = useMemo(() => {
+        const q = depositSearchTerm.trim().toLowerCase();
+        if (!q) return propertyDeposits;
+
+        return propertyDeposits.filter((item) =>
+            item.tenantName.toLowerCase().includes(q) || item.propertyTitle.toLowerCase().includes(q)
+        );
+    }, [propertyDeposits, depositSearchTerm]);
 
     const hasRecentGrowth = receivedPayments.length >= 2;
 
@@ -580,7 +646,7 @@ const LandlordPayment: React.FC = () => {
                         <thead>
                             <tr>
                                 <th>Tenant</th>
-                                <th>Property</th>
+                                <th>Property / Type</th>
                                 <th>Amount</th>
                                 <th>Date</th>
                                 <th>Status</th>
@@ -595,10 +661,22 @@ const LandlordPayment: React.FC = () => {
                                             <span>{item.tenantName}</span>
                                         </div>
                                     </td>
-                                    <td><div className="prop-cell"><Building2 size={14} /> {item.propertyTitle}</div></td>
+                                    <td>
+                                        <div className="prop-cell">
+                                            <Building2 size={14} style={{ flexShrink: 0 }} /> 
+                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                <span>{item.propertyTitle}</span>
+                                                <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, marginTop: '2px' }}>{item.type || 'Rent Payment'}</span>
+                                            </div>
+                                        </div>
+                                    </td>
                                     <td className="font-bold">{currencyFormatter.format(item.amount)}</td>
                                     <td>{formatDate(item.date)}</td>
-                                    <td><span className="badge-success">Received</span></td>
+                                    <td>
+                                        <span className="badge-success" style={item.statusBadge === 'Released' ? { background: '#eff6ff', color: '#1d4ed8' } : undefined}>
+                                            {item.statusBadge || 'Received'}
+                                        </span>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
@@ -799,6 +877,93 @@ const LandlordPayment: React.FC = () => {
         </div>
     );
 
+    const renderDeposits = () => {
+        if (propertyDeposits.length === 0) {
+            return (
+                <div className="tab-viewport animate-fade-in">
+                    <EmptyState
+                        icon={<Lock size={48} />}
+                        title="No security deposits"
+                        description="Security deposits associated with your rented properties will be listed here during their active lease cycles."
+                    />
+                </div>
+            );
+        }
+
+        return (
+            <div className="tab-viewport animate-fade-in">
+                <div className="table-controls">
+                    <div className="search-box">
+                        <Search size={18} />
+                        <input
+                            type="text"
+                            placeholder="Search tenant or property..."
+                            value={depositSearchTerm}
+                            onChange={(e) => setDepositSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <button className="btn-filter"><Filter size={16} /> Filter</button>
+                </div>
+                <div className="modern-table-wrapper">
+                    <table className="landlord-table">
+                        <thead>
+                            <tr>
+                                <th>Tenant</th>
+                                <th>Property</th>
+                                <th>Deposit Amount</th>
+                                <th>Lease Start Date</th>
+                                <th>Escrow Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredPropertyDeposits.map((item) => {
+                                let badgeStyle = {};
+                                let statusText = 'Awaiting Payment';
+                                if (item.status === 'HELD') {
+                                    badgeStyle = { background: '#eff6ff', color: '#1d4ed8' };
+                                    statusText = 'Held in Escrow';
+                                } else if (item.status === 'REFUNDED') {
+                                    badgeStyle = { background: '#f1f5f9', color: '#475569' };
+                                    statusText = 'Returned to Tenant';
+                                } else if (item.status === 'RELEASED') {
+                                    badgeStyle = { background: '#e6fffa', color: '#007d51' };
+                                    statusText = 'Released to Landlord';
+                                } else if (item.status === 'PENDING') {
+                                    badgeStyle = { background: '#fffbeb', color: '#92400e' };
+                                    statusText = 'Awaiting Payment';
+                                }
+
+                                return (
+                                    <tr key={item.id}>
+                                        <td>
+                                            <div className="user-info-cell">
+                                                <div className="avatar-mini">{item.tenantName.charAt(0)}</div>
+                                                <span>{item.tenantName}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className="prop-cell">
+                                                <Building2 size={14} style={{ flexShrink: 0 }} /> 
+                                                <span>{item.propertyTitle}</span>
+                                            </div>
+                                        </td>
+                                        <td className="font-bold">{currencyFormatter.format(item.amount)}</td>
+                                        <td>{formatDate(item.date)}</td>
+                                        <td>
+                                            <span className="badge-success" style={badgeStyle}>
+                                                {statusText}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="dashboard-shell">
             <Sidebar />
@@ -820,6 +985,7 @@ const LandlordPayment: React.FC = () => {
                             {[
                                 { id: 'earnings', label: 'Earnings', icon: <TrendingUp size={16} /> },
                                 { id: 'received', label: 'Received', icon: <CheckCircle2 size={16} /> },
+                                { id: 'deposits', label: 'Deposits', icon: <Lock size={16} /> },
                                 { id: 'payouts', label: 'Payouts', icon: <ArrowUpRight size={16} /> },
                                 { id: 'upcoming', label: 'Upcoming', icon: <Clock size={16} /> },
                                 { id: 'methods', label: 'Methods', icon: <CreditCard size={16} /> },
@@ -849,6 +1015,7 @@ const LandlordPayment: React.FC = () => {
                             <>
                                 {activeTab === 'earnings' && renderEarnings()}
                                 {activeTab === 'received' && renderReceived()}
+                                {activeTab === 'deposits' && renderDeposits()}
                                 {activeTab === 'payouts' && renderPayouts()}
                                 {activeTab === 'methods' && renderMethods()}
                                 {activeTab === 'upcoming' && renderUpcoming()}

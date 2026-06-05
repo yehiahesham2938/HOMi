@@ -153,9 +153,7 @@ const Contract: React.FC = () => {
                             <h1>{t('tenantContract.pageTitle')}</h1>
                             <p>{t('tenantContract.pageSubtitle')}</p>
                         </div>
-                        {hasContracts && (
-                            <button className="btn-primary"><Plus size={18}/> {t('tenantContract.browseProperties')}</button>
-                        )}
+
                     </div>
 
                     {hasContracts ? (
@@ -172,15 +170,15 @@ const Contract: React.FC = () => {
                                         </div>
                                         <h3>{contract.property}</h3>
                                         <div className="tenant-card-meta">
-                                            <div className="meta-item"><Building2 size={14}/> {contract.duration}</div>
-                                            <div className="meta-item"><Clock size={14}/> {t('tenantContract.starts')} {contract.startDate}</div>
+                                            <div className="meta-item"><Building2 size={14} /> {contract.duration}</div>
+                                            <div className="meta-item"><Clock size={14} /> {t('tenantContract.starts')} {contract.startDate}</div>
                                         </div>
                                         <div className="tenant-card-footer">
                                             <div className="price-info">
                                                 <span className="label">{t('tenantContract.monthlyRent')}</span>
                                                 <span className="value">${contract.amount}</span>
                                             </div>
-                                            <button 
+                                            <button
                                                 className="btn-view-contract"
                                                 onClick={() => {
                                                     if (contract.status === 'PENDING_PAYMENT') {
@@ -197,7 +195,7 @@ const Contract: React.FC = () => {
                                                     : contract.status === 'EXPIRED'
                                                         ? t('tenantContract.settleDues')
                                                         : t('tenantContract.viewDetails')}
-                                                <ChevronRight size={16}/>
+                                                <ChevronRight size={16} />
                                             </button>
                                         </div>
                                     </div>
@@ -205,17 +203,17 @@ const Contract: React.FC = () => {
                             ))}
                         </div>
                     ) : (
-                        <div className="tenant-contract-empty-state" style={{ 
-                            textAlign: 'center', padding: '80px 20px', 
-                            backgroundColor: 'var(--saas-card-bg)', 
-                            borderRadius: '14px', border: '1px dashed var(--saas-border-hover)' 
+                        <div className="tenant-contract-empty-state" style={{
+                            textAlign: 'center', padding: '80px 20px',
+                            backgroundColor: 'var(--saas-card-bg)',
+                            borderRadius: '14px', border: '1px dashed var(--saas-border-hover)'
                         }}>
                             <FileText size={48} color="var(--saas-text-muted)" style={{ margin: '0 auto 16px' }} />
                             <h2 style={{ fontSize: '24px', marginBottom: '8px', color: 'var(--saas-text-main)' }}>{t('tenantContract.noLeaseAgreements')}</h2>
                             <p style={{ color: 'var(--saas-text-muted)', marginBottom: '24px' }}>{t('tenantContract.noContractsText')}</p>
-                            <button 
-                                className="btn-primary" 
-                                style={{ margin: '0 auto' }} 
+                            <button
+                                className="btn-primary"
+                                style={{ margin: '0 auto' }}
                                 onClick={() => navigate('/sent-requests')}
                             >
                                 {t('tenantContract.viewSentRequests')}
@@ -227,17 +225,17 @@ const Contract: React.FC = () => {
             </div>
 
             {selectedContract?.status === 'PENDING_TENANT' && (
-                <ContractDetailView 
-                    contract={selectedContract} 
+                <ContractDetailView
+                    contract={selectedContract}
                     onUpdated={fetchContracts}
-                    onClose={() => setSelectedContract(null)} 
+                    onClose={() => setSelectedContract(null)}
                 />
             )}
 
             {selectedContract?.status === 'ACTIVE' && (
-                <ActiveLeaseContract 
-                    contract={selectedContract} 
-                    onClose={() => setSelectedContract(null)} 
+                <ActiveLeaseContract
+                    contract={selectedContract}
+                    onClose={() => setSelectedContract(null)}
                 />
             )}
         </div>

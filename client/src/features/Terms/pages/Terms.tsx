@@ -96,7 +96,9 @@ const Terms = () => {
                                 <p>يُفوض المستأجرون هومي بخصم الإيجار الشهري من طريقة الدفع المختارة. يُقر المُلاك بأن هومي تعمل كوكيل تحصيل محدود. ستقوم هومي بصرف الإيجار المُحصل إلى الحساب البنكي المحدد للمالك في غضون ثلاثة (3) إلى خمسة (5) أيام عمل، بعد خصم أي رسوم مطبقة للمنصة.</p>
 
                                 <h3>6.3 مبالغ التأمين ورسوم التأخير</h3>
-                                <p>يتم الاحتفاظ بمبالغ التأمين لتغطية الأضرار المحتملة أو فواتير المرافق غير المدفوعة. يجب على المُلاك إعادة مبلغ التأمين (ناقصاً الاستقطاعات الموثقة) ضمن الإطار الزمني المحدد في العقد. قد يترتب على تأخير مدفوعات الإيجار رسوم تأخير كما هو موضح في عقد الإيجار المحدد، وبما يخضع للحدود القانونية المصرية.</p>
+                                <p>يتم الاحتفاظ بمبالغ التأمين (وديعة التأمين) بشكل آمن في نظام الضمان (Escrow) التابع لهومي طوال فترة عقد الإيجار النشط، ولا يمكن للمالك سحبها أو التصرف فيها خلال هذه الفترة.</p>
+                                <p>عند انتهاء مدة الإيجار بنجاح وسداد المستأجر لجميع الدفعات المستحقة، يتم إرجاع مبلغ التأمين تلقائيًا إلى رصيد محفظة المستأجر على المنصة. أما في حال تم إنهاء العقد بسبب تعثر المستأجر في السداد أو عدم دفع الإيجار، يتم مصادرة مبلغ التأمين وتحويله بالكامل إلى رصيد محفظة المالك.</p>
+                                <p>قد يترتب على تأخير مدفوعات الإيجار رسوم تأخير كما هو موضح في عقد الإيجار المحدد، وبما يخضع للحدود القانونية المصرية.</p>
                                 
                                 <h3>6.4 مكافحة غسيل الأموال (AML)</h3>
                                 <p>يجب ألا يستخدم المستخدمون المنصة لغسيل الأموال، أو تمويل الإرهاب، أو أي أنشطة غير مشروعة. تحتفظ هومي بالحق في تجميد الحسابات والإبلاغ عن المعاملات المشبوهة للهيئة العامة للرقابة المالية المصرية (FRA).</p>
@@ -261,8 +263,10 @@ const Terms = () => {
                             <h3>5.2 Rent Collection & Disbursements</h3>
                             <p>Tenants authorize HOMi to charge their selected payment method for monthly rent. Landlords acknowledge that HOMi acts as a limited collection agent. HOMi will disburse collected rent to the Landlord’s designated bank account within three (3) to five (5) business days, less any applicable platform fees.</p>
 
-                            <h3>5.3 Security Deposits & Late Fees</h3>
-                            <p>Security deposits are held to cover potential damages or unpaid utility bills. Landlords must return the deposit (minus documented deductions) within the timeframe specified in the lease. Late rent payments may incur late fees as outlined in the specific lease agreement, subject to Egyptian legal limits.</p>
+                            <h3>6.3 Security Deposits & Late Fees</h3>
+                            <p>Security deposits paid by the Tenant at the start of the lease are held securely in HOMi's escrow system during the active lease cycle, and the Landlord cannot withdraw or access these funds while the lease is active.</p>
+                            <p>Upon successful completion of the lease term (provided the Tenant has paid all monthly installments), the security deposit is automatically refunded back to the Tenant's wallet balance. If the lease is terminated due to Tenant non-payment or default, the security deposit is forfeited and released to the Landlord's wallet balance.</p>
+                            <p>Late rent payments may incur late fees as outlined in the specific lease agreement, subject to Egyptian legal limits.</p>
 
                             <h3>5.4 Anti-Money Laundering (AML)</h3>
                             <p>Users must not use the Platform for money laundering, terrorist financing, or any illicit activities. HOMi reserves the right to freeze accounts and report suspicious transactions to the Egyptian Financial Regulatory Authority (FRA).</p>

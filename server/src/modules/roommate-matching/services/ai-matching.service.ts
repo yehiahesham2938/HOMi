@@ -4,7 +4,7 @@ import { env } from '../../../config/env.js';
 export class AIMatchingService {
     private static genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
     private static model = AIMatchingService.genAI.getGenerativeModel({ 
-        model: env.GEMINI_MODEL_NAME || 'gemini-1.5-flash',
+        model: env.GEMINI_MODEL_NAME || 'gemini-2.5-flash',
         generationConfig: { responseMimeType: "application/json" }
     });
 
@@ -60,6 +60,77 @@ OUTPUT FORMAT:
             console.error('Gemini AI Scoring Error:', error);
             return this.fallbackScoring(userA, userB);
         }
+    }
+
+    /**
+     * HOMI Wish — rank candidates from a free-text wish using Gemini.
+     * Returns [{ id, score, reason }] ordered best-first (1-4 items).
+     */
+    static async rankByWish(wish: string, roster: any[]): Promise<Array<{ id: string; score: number; reason: string }>> {
+        const prompt = `
+You are HOMI Wish, the AI roommate matchmaker for HOMi (a rentals app in Egypt).
+The user wrote this free-text wish describing their ideal roommate and/or place:
+"""${wish}"""
+
+Here is the candidate roster (JSON):
+${JSON.stringify(roster)}
+
+Rank the candidates that best fit the wish. Return ONLY valid minified JSON, no prose, no markdown fences:
+{"matches":[{"id":"<candidate id>","score":92,"reason":"one warm sentence (max 24 words) explaining specifically why this person fits the wish, referencing their habits/area/budget"}]}
+Rules: include only genuinely relevant candidates (1 to 4). score 0-100 reflecting fit to THIS wish. Order best first. If nothing fits well, return {"matches":[]}.`;
+
+        try {
+            const result = await this.model.generateContent(prompt);
+            const response = await result.response;
+            let text = response.text().trim();
+            text = text.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
+            const a = text.indexOf('{');
+            const b = text.lastIndexOf('}');
+            if (a >= 0 && b >= 0) text = text.slice(a, b + 1);
+            const data = JSON.parse(text);
+            const rosterIds = new Set(roster.map((r) => r.id));
+            return (data.matches || [])
+                .filter((m: any) => rosterIds.has(m.id))
+                .slice(0, 4)
+                .map((m: any) => ({
+                    id: m.id,
+                    score: Math.max(0, Math.min(100, Math.round(Number(m.score) || 0))),
+                    reason: String(m.reason || 'A strong overall fit for what you described.'),
+                }));
+        } catch (error) {
+            console.error('Gemini Wish Ranking Error:', error);
+            return this.fallbackWishRanking(wish, roster);
+        }
+    }
+
+    /**
+     * Heuristic fallback for HOMI Wish when the model call fails.
+     * Keyword-matches the wish against candidate habit labels / location.
+     */
+    private static fallbackWishRanking(wish: string, roster: any[]): Array<{ id: string; score: number; reason: string }> {
+        const t = wish.toLowerCase();
+        const wants = (k: string) => t.includes(k);
+        const scored = roster.map((c) => {
+            let s = (c.baseScore ?? 60) - 10;
+            const why: string[] = [];
+            const h = c.habits || {};
+            if ((wants('quiet') || wants('calm')) && h.noise === 'Very quiet') { s += 14; why.push('keeps a very quiet home'); }
+            if (wants('non-smoker') && h.smoke === 'Non-smoker') { s += 8; why.push('is a non-smoker'); }
+            if ((wants('work from home') || wants('wfh') || wants('remote')) && h.work === 'Works from home') { s += 12; why.push('works from home'); }
+            if ((wants('clean') || wants('spotless') || wants('tidy')) && h.clean === 'Spotless') { s += 10; why.push('is spotless'); }
+            if ((wants('social') || wants('outgoing') || wants('fun')) && h.social === 'Often') { s += 12; why.push('is social and loves guests'); }
+            if (wants('cook') && h.cook === 'Cooks daily') { s += 8; why.push('cooks daily'); }
+            if ((wants('early') || wants('morning')) && h.sleep === 'Early bird') { s += 8; why.push('is an early riser'); }
+            if ((wants('pet') || wants('cat') || wants('dog')) && (h.pets === 'Pet-friendly' || h.pets === 'Has pets')) { s += 8; why.push('is pet-friendly'); }
+            if (c.area && wants(String(c.area).toLowerCase())) { s += 10; why.push(`lives in ${c.area}`); }
+            const firstName = String(c.name || 'They').split(' ')[0];
+            return {
+                id: c.id,
+                score: Math.max(45, Math.min(98, Math.round(s))),
+                reason: why.length ? `${firstName} ${why.slice(0, 2).join(' and ')}.` : 'A solid all-round lifestyle fit for what you described.',
+            };
+        });
+        return scored.sort((a, b) => b.score - a.score).slice(0, 3);
     }
 
     /**

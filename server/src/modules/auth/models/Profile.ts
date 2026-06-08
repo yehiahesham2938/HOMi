@@ -62,6 +62,8 @@ export class Profile extends Model<
 
     /** ISO code, e.g. en / ar */
     declare preferred_language: CreationOptional<string | null>;
+    /** Structured roommate lifestyle habits: { sleep, clean, social, noise, smoke, pets, cook, work } each 0-2 */
+    declare lifestyle_habits: CreationOptional<Record<string, number> | null>;
     declare tenant_rental_preferences: CreationOptional<Record<string, unknown> | null>;
     declare landlord_business_profile: CreationOptional<Record<string, unknown> | null>;
     declare onboarding_step3_skipped: CreationOptional<boolean>;
@@ -97,6 +99,14 @@ export class Profile extends Model<
     /** Step 3 (rental prefs or landlord business) submitted and saved */
     isOnboardingStep3Complete(): boolean {
         return this.onboarding_step3_completed === true;
+    }
+
+    /** True when the structured roommate lifestyle profile has all dimensions set */
+    hasLifestyleProfile(): boolean {
+        const h = this.lifestyle_habits;
+        if (!h) return false;
+        const keys = ['sleep', 'clean', 'social', 'noise', 'smoke', 'pets', 'cook', 'work'];
+        return keys.every((k) => typeof h[k] === 'number');
     }
 
     // Sanitize profile data for response
@@ -199,6 +209,10 @@ Profile.init(
         },
         preferred_language: {
             type: DataTypes.STRING(10),
+            allowNull: true,
+        },
+        lifestyle_habits: {
+            type: DataTypes.JSONB,
             allowNull: true,
         },
         tenant_rental_preferences: {

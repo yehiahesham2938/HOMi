@@ -1,36 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import './MyProfile.css'; // Reuse profile styles for consistency
-import { FaCheckCircle, FaMagic } from 'react-icons/fa';
+import { FaMagic } from 'react-icons/fa';
 import { authService } from '../../../services/auth.service';
+import { HABITS } from '../../RoommateMatching/constants/habits';
 
 interface LifestyleHabitsProps {
     role?: string | null;
 }
 
+type Habits = Record<string, number>;
+
 const LifestyleHabits: React.FC<LifestyleHabitsProps> = ({ role }) => {
-    const [userHabits, setUserHabits] = useState<string[]>([]);
-    const [initialHabits, setInitialHabits] = useState<string[]>([]);
+    const [habits, setHabits] = useState<Habits>({});
+    const [initial, setInitial] = useState<Habits>({});
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
-    const availableHabits = [
-        'Non-smoker', 'Early Riser', 'Social', 'Work from Home', 'Vegan', 'Musician',
-        'Gamer', 'Chef at Home', 'Pet Owner', 'Very Clean', 'Night Owl', 'Quiet Lifestyle',
-        'Fitness Enthusiast', 'Student', 'Minimalist', 'Plant Parent', 'Frequent Traveler',
-        'Organized', 'Eco-friendly', 'Introverted'
-    ];
 
     useEffect(() => {
         const fetchHabits = async () => {
             try {
                 if (role === 'TENANT') {
-                    const data = await authService.getUserHabits();
-                    setUserHabits(data.habit_names || []);
-                    setInitialHabits(data.habit_names || []);
+                    const data = await authService.getLifestyleHabits();
+                    const lf = data.lifestyle_habits || {};
+                    setHabits(lf);
+                    setInitial(lf);
                 }
             } catch (err) {
-                console.error('Failed to fetch habits:', err);
+                console.error('Failed to fetch lifestyle habits:', err);
             } finally {
                 setLoading(false);
             }
@@ -38,17 +35,19 @@ const LifestyleHabits: React.FC<LifestyleHabitsProps> = ({ role }) => {
         fetchHabits();
     }, [role]);
 
-    const hasChanges = JSON.stringify([...userHabits].sort()) !== JSON.stringify([...initialHabits].sort());
+    const allSet = HABITS.every((h) => typeof habits[h.key] === 'number');
+    const hasChanges = JSON.stringify(habits) !== JSON.stringify(initial);
 
     const handleSave = async () => {
+        if (!allSet) return;
         setSaving(true);
         setMessage(null);
         try {
-            await authService.setHabits(userHabits);
-            setInitialHabits([...userHabits]);
-            setMessage({ type: 'success', text: 'Habits updated successfully!' });
-        } catch (err) {
-            setMessage({ type: 'error', text: 'Failed to update habits. Please try again.' });
+            await authService.setLifestyleHabits(habits);
+            setInitial({ ...habits });
+            setMessage({ type: 'success', text: 'Lifestyle profile updated successfully!' });
+        } catch {
+            setMessage({ type: 'error', text: 'Failed to update lifestyle profile. Please try again.' });
         } finally {
             setSaving(false);
             setTimeout(() => setMessage(null), 4000);
@@ -57,8 +56,8 @@ const LifestyleHabits: React.FC<LifestyleHabitsProps> = ({ role }) => {
 
     if (loading) {
         return (
-            <div className="profile-wrapper" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
-                <div className="loading-spinner" style={{ width: 40, height: 40, border: '4px solid #e5e7eb', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            <div className="profile-wrapper" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 300 }}>
+                <div className="loading-spinner" style={{ width: 40, height: 40, border: '4px solid #e5e7eb', borderTopColor: '#197cf8', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
             </div>
         );
     }
@@ -66,69 +65,79 @@ const LifestyleHabits: React.FC<LifestyleHabitsProps> = ({ role }) => {
     return (
         <div className="profile-wrapper">
             <div className="profile-edit-surface">
-                <div className="form-section-title">Lifestyle Habits</div>
-                <p className="section-subtitle">Your habits help us find the perfect roommates for you using our AI matching engine.</p>
+                <div className="form-section-title">Lifestyle Profile</div>
+                <p className="section-subtitle">Tell us about your lifestyle. HOMI uses these to match you with compatible roommates.</p>
 
                 {message && (
-                    <div
-                        style={{
-                            padding: '10px 16px',
-                            borderRadius: 8,
-                            marginBottom: 20,
-                            fontSize: 14,
-                            fontWeight: 500,
-                            background: message.type === 'success' ? '#f0fdf4' : '#fef2f2',
-                            color: message.type === 'success' ? '#15803d' : '#dc2626',
-                            border: `1px solid ${message.type === 'success' ? '#bbf7d0' : '#fecaca'}`,
-                        }}
-                    >
+                    <div style={{
+                        padding: '10px 16px', borderRadius: 8, marginBottom: 20, fontSize: 14, fontWeight: 500,
+                        background: message.type === 'success' ? '#f0fdf4' : '#fef2f2',
+                        color: message.type === 'success' ? '#15803d' : '#dc2626',
+                        border: `1px solid ${message.type === 'success' ? '#bbf7d0' : '#fecaca'}`,
+                    }}>
                         {message.text}
                     </div>
                 )}
 
-                <div className="habits-grid-modern" style={{ marginTop: '1rem' }}>
-                    {availableHabits.map(habit => (
-                        <button
-                            key={habit}
-                            onClick={() => {
-                                if (userHabits.includes(habit)) {
-                                    setUserHabits(userHabits.filter(h => h !== habit));
-                                } else {
-                                    setUserHabits([...userHabits, habit]);
-                                }
-                            }}
-                            className={`habit-pill-modern ${userHabits.includes(habit) ? 'active' : ''}`}
-                        >
-                            {userHabits.includes(habit) && <FaCheckCircle className="pill-icon" />}
-                            {habit}
-                        </button>
-                    ))}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 18, marginTop: '1rem' }}>
+                    {HABITS.map((h) => {
+                        const Icon = h.icon;
+                        const current = habits[h.key];
+                        return (
+                            <div key={h.key} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 14, color: '#1e293b' }}>
+                                    <Icon size={16} color="#197cf8" />{h.label}
+                                </div>
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                    {h.opts.map((opt, i) => {
+                                        const active = current === i;
+                                        return (
+                                            <button
+                                                key={opt}
+                                                type="button"
+                                                onClick={() => setHabits((prev) => ({ ...prev, [h.key]: i }))}
+                                                style={{
+                                                    flex: '1 1 120px', padding: '10px 14px', borderRadius: 12, fontSize: 13.5, fontWeight: 600,
+                                                    cursor: 'pointer', transition: '.18s',
+                                                    border: active ? '1.5px solid #197cf8' : '1px solid #e7ecf3',
+                                                    background: active ? 'linear-gradient(135deg,#197cf8,#1161d9)' : '#f8fafc',
+                                                    color: active ? '#fff' : '#475569',
+                                                }}
+                                            >
+                                                {opt}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
 
-                {userHabits.length < 3 && (
-                    <div className="habit-warning">
-                        <span className="warning-dot"></span>
-                        Select at least {3 - userHabits.length} more habit(s) to be eligible for Roommate Matching.
+                {!allSet && (
+                    <div className="habit-warning" style={{ marginTop: 16 }}>
+                        <span className="warning-dot" />
+                        Answer all {HABITS.length} lifestyle questions to be eligible for Roommate Matching.
                     </div>
                 )}
 
                 <button
                     className="prime-save-button"
                     onClick={handleSave}
-                    disabled={saving || !hasChanges}
-                    style={{ opacity: saving || !hasChanges ? 0.65 : 1, marginTop: '1rem' }}
+                    disabled={saving || !hasChanges || !allSet}
+                    style={{ opacity: saving || !hasChanges || !allSet ? 0.65 : 1, marginTop: '1rem' }}
                 >
-                    {saving ? 'Saving…' : 'Save Habits'}
+                    {saving ? 'Saving…' : 'Save Lifestyle Profile'}
                 </button>
 
-                <div className="mt-8 p-6 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-start gap-4" style={{ background: '#f0f9ff', border: '1px solid #dbeafe', padding: '1.5rem', borderRadius: '1rem' }}>
-                    <div className="p-2 bg-white rounded-lg shadow-sm">
-                        <FaMagic className="text-blue-600" style={{ color: '#2563eb' }} />
+                <div style={{ marginTop: '2rem', background: '#f0f9ff', border: '1px solid #dbeafe', padding: '1.5rem', borderRadius: '1rem', display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                    <div style={{ padding: 8, background: '#fff', borderRadius: 8, boxShadow: '0 1px 2px rgba(0,0,0,.06)' }}>
+                        <FaMagic style={{ color: '#197cf8' }} />
                     </div>
                     <div>
-                        <h4 className="font-bold text-blue-900" style={{ color: '#1e3a8a', margin: 0, fontSize: '1rem' }}>AI Matching Ready</h4>
-                        <p className="text-sm text-blue-700 mt-1" style={{ color: '#1d4ed8', fontSize: '0.875rem', margin: '0.25rem 0 0' }}>
-                            Once you select 3 habits, our engine will analyze your lifestyle compatibility with thousands of other potential roommates.
+                        <h4 style={{ color: '#0b4aaa', margin: 0, fontSize: '1rem' }}>AI Matching Ready</h4>
+                        <p style={{ color: '#1d4ed8', fontSize: '0.875rem', margin: '0.25rem 0 0' }}>
+                            Once your lifestyle profile is complete, HOMI Wish and Smart Match analyze your compatibility with other roommates.
                         </p>
                     </div>
                 </div>

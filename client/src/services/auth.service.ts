@@ -522,6 +522,24 @@ class AuthService {
     }
 
     /**
+     * Get the authenticated tenant's structured roommate lifestyle habits.
+     */
+    async getLifestyleHabits(): Promise<{ lifestyle_habits: Record<string, number> | null }> {
+        const response = await apiClient.get<{ lifestyle_habits: Record<string, number> | null }>('/auth/lifestyle');
+        return response.data;
+    }
+
+    /**
+     * Replace the authenticated user's structured roommate lifestyle habits.
+     */
+    async setLifestyleHabits(habits: Record<string, number>): Promise<{ success: boolean; message: string }> {
+        const response = await apiClient.put<{ success: boolean; message: string }>('/auth/lifestyle', {
+            lifestyle_habits: habits,
+        });
+        return response.data;
+    }
+
+    /**
      * Permanently delete the authenticated account (server enforces no properties / requests / contracts).
      * Clears local session on success. Does not call logout — the user row is removed.
      */

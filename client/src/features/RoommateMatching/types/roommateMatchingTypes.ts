@@ -76,3 +76,81 @@ export interface EligibilityResponse {
     eligible: boolean;
     reasons: string[];
 }
+
+/* ── New roommate-matching concept (Wish-First) ─────────────────── */
+
+export type LifestyleHabits = Record<string, number>;
+export type ConnStatus = 'none' | 'sent' | 'received' | 'mutual';
+
+export interface HabitBreakdown {
+    key: string;
+    label: string;
+    pct: number;
+    val: number;
+}
+
+export interface SmartCandidate {
+    id: string;
+    requestId: string | null;
+    name: string;
+    avatar: string | null;
+    gender: string | null;
+    age: number | null;
+    city: string | null;
+    area: string | null;
+    verified: boolean;
+    bio: string | null;
+    budget: [number, number] | null;
+    moveIn: string | null;
+    note: string | null;
+    habits: LifestyleHabits;
+    score: number;
+    breakdown: HabitBreakdown[];
+    top: HabitBreakdown[];
+    conn: ConnStatus;
+}
+
+export interface WishMatch extends SmartCandidate {
+    reason: string;
+}
+
+export interface RoomConfig {
+    name: string;
+    ensuite: boolean;
+    rent: number;
+    listed: boolean;
+}
+
+export interface Lease {
+    id: string;
+    listingId: string | null;
+    title: string;
+    addr: string;
+    city: string | null;
+    area: string | null;
+    totalRent: number;
+    beds: number;
+    occupied: number;
+    roommatesWanted: number;
+    rooms: RoomConfig[];
+}
+
+export interface IncomingRequest {
+    matchId: string;
+    userId: string;
+    name: string;
+    avatar: string | null;
+    gender: string | null;
+    age: number | null;
+    verified: boolean;
+    bio: string | null;
+    note: string | null;
+    habits: LifestyleHabits;
+    score: number;
+    breakdown: HabitBreakdown[];
+    top: HabitBreakdown[];
+}
+
+export interface WishResponse {
+    matches: WishMatch[];
+}

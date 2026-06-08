@@ -5,7 +5,10 @@ import { validate } from '../../../shared/middleware/validate.middleware.js';
 import {
     createRoommateRequestSchema,
     updateRoommateRequestSchema,
-    respondToMatchSchema
+    respondToMatchSchema,
+    wishSchema,
+    connectSchema,
+    saveLeaseConfigSchema
 } from '../schemas/roommate-matching.schema.js';
 
 const router = Router();
@@ -85,5 +88,61 @@ router.get('/matches', RoommateMatchingController.getMatches);
  *     tags: [RoommateMatching]
  */
 router.patch('/matches/:id/respond', validate(respondToMatchSchema), RoommateMatchingController.respondToMatch);
+
+/* ── New concept: Smart Match, HOMI Wish, Connect, Lease workspace ── */
+
+/**
+ * @swagger
+ * /api/roommate-matching/smart-matches:
+ *   get:
+ *     summary: Non-AI habit-based compatible roommates
+ *     tags: [RoommateMatching]
+ */
+router.get('/smart-matches', RoommateMatchingController.smartMatches);
+
+/**
+ * @swagger
+ * /api/roommate-matching/wish:
+ *   post:
+ *     summary: HOMI Wish — AI free-text roommate matchmaking
+ *     tags: [RoommateMatching]
+ */
+router.post('/wish', validate(wishSchema), RoommateMatchingController.wish);
+
+/**
+ * @swagger
+ * /api/roommate-matching/connect:
+ *   post:
+ *     summary: Send a roommate connection request to a user
+ *     tags: [RoommateMatching]
+ */
+router.post('/connect', validate(connectSchema), RoommateMatchingController.connect);
+
+/**
+ * @swagger
+ * /api/roommate-matching/leases:
+ *   get:
+ *     summary: Get my active leases as configurable lease objects
+ *     tags: [RoommateMatching]
+ */
+router.get('/leases', RoommateMatchingController.getLeases);
+
+/**
+ * @swagger
+ * /api/roommate-matching/leases/incoming:
+ *   get:
+ *     summary: Incoming roommate connection requests awaiting my response
+ *     tags: [RoommateMatching]
+ */
+router.get('/leases/incoming', RoommateMatchingController.getIncomingRequests);
+
+/**
+ * @swagger
+ * /api/roommate-matching/leases/{contractId}/config:
+ *   put:
+ *     summary: Save room/rent/occupant config for a lease
+ *     tags: [RoommateMatching]
+ */
+router.put('/leases/:contractId/config', validate(saveLeaseConfigSchema), RoommateMatchingController.saveLeaseConfig);
 
 export default router;

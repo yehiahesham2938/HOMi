@@ -149,11 +149,13 @@ const OccupiedModal: React.FC<OccupiedModalProps> = ({ contract, onClose }) => {
                             {/* Tenant Profile */}
                             <div className="occ-tenant-profile">
                                 <div className="occ-tenant-avatar">
-                                    {contract.tenant?.avatarUrl ? (
-                                        <img src={contract.tenant.avatarUrl} alt={tenantName} />
-                                    ) : (
-                                        <FaUserCircle />
-                                    )}
+                                    <img 
+                                        src={contract.tenant?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(tenantName)}&background=6366f1&color=fff&size=120`}
+                                        alt={tenantName}
+                                        onError={(e) => {
+                                            e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(tenantName)}&background=6366f1&color=fff&size=120`;
+                                        }}
+                                    />
                                 </div>
                                 <div className="occ-tenant-info">
                                     <h3>{tenantName}</h3>

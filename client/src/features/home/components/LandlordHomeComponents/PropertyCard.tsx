@@ -89,18 +89,15 @@ const PropertyCard = ({
             style={activeContract ? { cursor: 'pointer' } : undefined}
           >
             <div className="tenant-info">
-              <div className="tenant-avatar">
-                {activeContract?.tenant?.avatarUrl ? (
-                  <img 
-                    src={activeContract.tenant.avatarUrl} 
-                    alt={displayTenantName} 
-                    className="tenant-avatar-img"
-                    style={{ width: '100%', height: '100%', borderRadius: 'inherit', objectFit: 'cover' }}
-                  />
-                ) : (
-                  displayTenantName.charAt(0)
-                )}
-              </div>
+              <img 
+                src={activeContract?.tenant?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayTenantName)}&background=6366f1&color=fff&size=80`}
+                alt={displayTenantName} 
+                className="tenant-avatar"
+                style={{ objectFit: 'cover', flexShrink: 0 }}
+                onError={(e) => {
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayTenantName)}&background=6366f1&color=fff&size=80`;
+                }}
+              />
               <div className="tenant-details">
                 <span className="label">{t('landlordHomeComponents.currentTenant')}</span>
                 <span className="name">{displayTenantName}</span>

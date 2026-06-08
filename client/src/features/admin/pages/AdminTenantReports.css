@@ -564,3 +564,111 @@
     z-index: 1000;
     animation: fadeIn 0.2s ease-out;
 }
+
+/* Admin Toolbar (Tabs & Filters) */
+.admin-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: var(--bg-main, #f8fafc);
+    border-bottom: 1px solid var(--border-color);
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.toolbar-tabs {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.toolbar-tabs button {
+    background: transparent;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.toolbar-tabs button:hover {
+    color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.toolbar-tabs button.active {
+    background: var(--primary-color, #2563eb);
+    color: white;
+}
+
+.toolbar-actions {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-box input {
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    min-width: 250px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    background: #ffffff;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: var(--primary-color, #2563eb);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.toolbar-actions select {
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    background: #ffffff;
+    cursor: pointer;
+}
+
+.toolbar-actions select:focus {
+    outline: none;
+    border-color: var(--primary-color, #2563eb);
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 0.4rem 1rem;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+.status-open {
+    background: rgba(245, 158, 11, 0.15);
+    color: #d97706;
+}
+
+.status-reviewed {
+    background: rgba(59, 130, 246, 0.15);
+    color: #2563eb;
+}
+
+.status-actioned {
+    background: rgba(16, 185, 129, 0.15);
+    color: #059669;
+}
+
+.status-dismissed {
+    background: rgba(100, 116, 139, 0.15);
+    color: #475569;
+}

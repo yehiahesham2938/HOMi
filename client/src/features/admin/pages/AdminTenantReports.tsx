@@ -61,6 +61,12 @@ const AdminTenantReports = () => {
     const [selectedReport, setSelectedReport] = useState<TenantReportData | null>(null);
     const [actionLoading, setActionLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Advanced filtering state
+    const [activeTab, setActiveTab] = useState<'OPEN' | 'CLOSED'>('OPEN');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [sortOrder, setSortOrder] = useState<'NEWEST' | 'OLDEST'>('NEWEST');
+    const [reasonFilter, setReasonFilter] = useState<string>('ALL');
     
     // User & Property inspection modal state
     const [inspectedUser, setInspectedUser] = useState<{ user: ReportUser, role: 'Tenant' | 'Landlord' } | null>(null);
@@ -122,7 +128,37 @@ const AdminTenantReports = () => {
         void fetchReports();
     }, []);
 
-    const openReports = useMemo(() => reports.filter((report) => report.status === 'OPEN'), [reports]);
+    const uniqueReasons = useMemo(() => {
+        const reasons = new Set(reports.map(r => r.reason));
+        return Array.from(reasons);
+    }, [reports]);
+
+    const processedReports = useMemo(() => {
+        let filtered = reports.filter((report) => activeTab === 'OPEN' ? report.status === 'OPEN' : report.status !== 'OPEN');
+        
+        if (reasonFilter !== 'ALL') {
+            filtered = filtered.filter(r => r.reason === reasonFilter);
+        }
+        
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            filtered = filtered.filter(r => 
+                r.reporter?.email.toLowerCase().includes(q) ||
+                r.reportedTenant?.email.toLowerCase().includes(q) ||
+                r.contract?.property?.title?.toLowerCase().includes(q) ||
+                r.contract?.property?.address?.toLowerCase().includes(q) ||
+                r.reason.toLowerCase().includes(q)
+            );
+        }
+        
+        filtered.sort((a, b) => {
+            const timeA = new Date(a.createdAt || a.created_at || 0).getTime();
+            const timeB = new Date(b.createdAt || b.created_at || 0).getTime();
+            return sortOrder === 'NEWEST' ? timeB - timeA : timeA - timeB;
+        });
+        
+        return filtered;
+    }, [reports, activeTab, searchQuery, sortOrder, reasonFilter]);
 
     const handleAction = async () => {
         if (!selectedReport || !actionType) return;
@@ -181,20 +217,48 @@ const AdminTenantReports = () => {
                 <header className="admin-header">
                     <div>
                         <h1>Tenant Reports</h1>
-                        <p>Reports submitted by Landlords against Tenants. Manage open queue here.</p>
+                        <p>Manage and review reports submitted by Landlords against Tenants.</p>
                     </div>
-                    <span className="reports-open-pill">{openReports.length} Open</span>
+                    <span className="reports-open-pill">{reports.filter(r => r.status === 'OPEN').length} Open</span>
                 </header>
+
+                <div className="admin-toolbar">
+                    <div className="toolbar-tabs">
+                        <button className={activeTab === 'OPEN' ? 'active' : ''} onClick={() => setActiveTab('OPEN')}>Open Reports</button>
+                        <button className={activeTab === 'CLOSED' ? 'active' : ''} onClick={() => setActiveTab('CLOSED')}>Closed Reports</button>
+                    </div>
+                    
+                    <div className="toolbar-actions">
+                        <div className="search-box">
+                            <input 
+                                type="text" 
+                                placeholder="Search by email, property, reason..." 
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                        <select value={reasonFilter} onChange={(e) => setReasonFilter(e.target.value)}>
+                            <option value="ALL">All Reasons</option>
+                            {uniqueReasons.map(r => (
+                                <option key={r} value={r}>{r.replace(/_/g, ' ')}</option>
+                            ))}
+                        </select>
+                        <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as 'NEWEST' | 'OLDEST')}>
+                            <option value="NEWEST">Newest First</option>
+                            <option value="OLDEST">Oldest First</option>
+                        </select>
+                    </div>
+                </div>
 
                 {loading ? (
                     <div className="admin-state">Loading tenant reports...</div>
                 ) : error ? (
                     <div className="admin-state reports-error">{error}</div>
-                ) : openReports.length === 0 ? (
-                    <div className="admin-state">No open tenant reports right now.</div>
+                ) : processedReports.length === 0 ? (
+                    <div className="admin-state">No reports found matching your criteria.</div>
                 ) : (
                     <div className="admin-content tenant-reports-grid">
-                        {openReports.map((report) => {
+                        {processedReports.map((report) => {
                             const property = report.contract?.property;
                             const landlord = report.reporter;
                             const tenant = report.reportedTenant;
@@ -213,7 +277,9 @@ const AdminTenantReports = () => {
                                             <small>Report Date</small>
                                             <h3>{formatDate(reportDateStr)}</h3>
                                         </div>
-                                        <span className="status-badge">{report.status}</span>
+                                        <span className={`status-badge status-${report.status.toLowerCase()}`}>
+                                            {report.status.charAt(0) + report.status.slice(1).toLowerCase()}
+                                        </span>
                                     </div>
 
                                     <div className="tenant-report-body">
@@ -266,14 +332,16 @@ const AdminTenantReports = () => {
                                             <p className="report-details-text">{report.details || 'No additional details provided.'}</p>
                                         </div>
                                     </div>
-                                    <div className="tenant-report-actions">
-                                        <button type="button" className="warn-btn" onClick={() => openActionModal(report, 'WARN')}>
-                                            <FiAlertCircle /> Warn Tenant
-                                        </button>
-                                        <button type="button" className="danger-btn" onClick={() => openActionModal(report, 'BAN')}>
-                                            <FiShield /> Ban Tenant
-                                        </button>
-                                    </div>
+                                    {report.status === 'OPEN' && (
+                                        <div className="tenant-report-actions">
+                                            <button type="button" className="warn-btn" onClick={() => openActionModal(report, 'WARN')}>
+                                                <FiAlertCircle /> Warn Tenant
+                                            </button>
+                                            <button type="button" className="danger-btn" onClick={() => openActionModal(report, 'BAN')}>
+                                                <FiShield /> Ban Tenant
+                                            </button>
+                                        </div>
+                                    )}
                                 </article>
                             );
                         })}

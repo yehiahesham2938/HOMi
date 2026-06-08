@@ -1,127 +1,101 @@
-import React, { useState, useEffect } from 'react';
-import { roommateMatchingService } from '../services/roommateMatchingService';
-import contractService from '../../../services/contract.service';
-import type { LandlordContract } from '../../../services/contract.service';
-import type { RoommateRequest, RoommateMatch, EligibilityResponse } from '../types/roommateMatchingTypes';
-import EligibilityGate from '../components/EligibilityGate';
-import MatchCard from '../components/MatchCard';
-import CreateRequestModal from '../components/CreateRequestModal';
-import { Search, Home, UserPlus, RefreshCw, Loader2, ArrowRight, ShieldCheck, Sparkles, MapPin } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Users, ArrowRight, Search, Home } from 'lucide-react';
 
-// Global Layout Components
+import { roommateMatchingService } from '../services/roommateMatchingService';
+import { authService } from '../../../services/auth.service';
+import type {
+    EligibilityResponse, SmartCandidate, WishMatch, LifestyleHabits, ConnStatus,
+} from '../types/roommateMatchingTypes';
+
+import EligibilityGate from '../components/EligibilityGate';
+import YouStrip from '../components/YouStrip';
+import Filters, { type FilterState } from '../components/Filters';
+import SmartGrid from '../components/SmartGrid';
+import WishBar from '../components/WishBar';
+import WishResults from '../components/WishResults';
+import LeaseSection from '../components/LeaseSection';
+import ProfileModal from '../components/ProfileModal';
+import { useWish } from '../hooks/useWish';
+
+// Global layout
 import Header from '../../../components/global/header';
 import Sidebar from '../../../components/global/Tenant/sidebar';
 import Footer from '../../../components/global/footer';
-import '../../home/pages/TenantHome.css'; // Reuse dashboard layout styles
+import '../../home/pages/TenantHome.css';
 import './RoommateMatching.css';
 
-/**
- * RoommateMatching Component
- * Main feature page for finding roommates and apartments.
- * Handles AI-based matching, eligibility checks, and request creation.
- */
 const RoommateMatching: React.FC = () => {
-    const [activeTab, setActiveTab] = useState<'SEARCH_APARTMENT' | 'SEARCH_ROOMMATE'>('SEARCH_APARTMENT');
+    const navigate = useNavigate();
     const [eligibility, setEligibility] = useState<EligibilityResponse | null>(null);
-    const [myRequest, setMyRequest] = useState<RoommateRequest | null>(null);
-    const [matches, setMatches] = useState<RoommateMatch[]>([]);
-    const [activeContracts, setActiveContracts] = useState<LandlordContract[]>([]);
     const [loading, setLoading] = useState(true);
-    const [matchingInProgress, setMatchingInProgress] = useState(false);
-    const [showCreateModal, setShowCreateModal] = useState(false);
 
+    const [tab, setTab] = useState<'B' | 'A'>('B');
+    const [youHabits, setYouHabits] = useState<LifestyleHabits>({});
+
+    const [filters, setFilters] = useState<FilterState>({ city: 'Cairo', area: 'Any area', gender: 'Any', min: 'Any' });
+    const [smart, setSmart] = useState<SmartCandidate[]>([]);
+    const [smartLoading, setSmartLoading] = useState(false);
+
+    const [override, setOverride] = useState<Record<string, ConnStatus>>({});
+    const [profile, setProfile] = useState<SmartCandidate | WishMatch | null>(null);
+
+    const wish = useWish();
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const youName = `${currentUser.first_name || currentUser.firstName || 'You'}${currentUser.last_name ? ' ' + currentUser.last_name : ''}`;
+    const youAvatar = currentUser.avatar_url || currentUser.avatarUrl || null;
 
-    const fetchData = async () => {
+    const init = async () => {
         try {
             setLoading(true);
             const el = await roommateMatchingService.checkEligibility();
             setEligibility(el);
-
             if (el.eligible) {
-                const [req, contractsRes] = await Promise.all([
-                    roommateMatchingService.getMyActiveRequest(),
-                    contractService.getTenantContracts({ status: 'ACTIVE' })
-                ]);
-                
-                setActiveContracts(contractsRes.data || []);
-                setMyRequest(req);
-                
-                if (req) {
-                    setActiveTab(req.type);
-                    const m = await roommateMatchingService.getMatches();
-                    setMatches(m);
-                }
+                try {
+                    const lf = await authService.getLifestyleHabits();
+                    setYouHabits(lf.lifestyle_habits || {});
+                } catch { /* non-fatal */ }
             }
-        } catch (error) {
-            console.error('Error fetching matching data:', error);
+        } catch (e) {
+            console.error('Eligibility check failed', e);
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => {
-        fetchData();
-    }, []);
+    useEffect(() => { init(); }, []);
 
-    const handleCreateRequest = async (data: any) => {
+    const loadSmart = useCallback(async () => {
+        setSmartLoading(true);
         try {
-            const req = await roommateMatchingService.createRequest(data);
-            setMyRequest(req);
-            setShowCreateModal(false);
-            handleFindMatches(req.id);
-        } catch (error: any) {
-            alert('Failed to create request: ' + (error.response?.data?.message || error.message || 'Unknown error'));
-        }
-    };
-
-    const handleFindMatches = async (requestId: string) => {
-        try {
-            setMatchingInProgress(true);
-            await roommateMatchingService.findMatches(requestId);
-            const m = await roommateMatchingService.getMatches();
-            setMatches(m);
-        } catch (error) {
-            console.error('Matching failed:', error);
+            const list = await roommateMatchingService.smartMatches(filters);
+            setSmart(list);
+        } catch (e) {
+            console.error('Smart match load failed', e);
         } finally {
-            setMatchingInProgress(false);
+            setSmartLoading(false);
         }
-    };
+    }, [filters]);
 
-    const handleAcceptMatch = async (matchId: string) => {
+    useEffect(() => {
+        if (eligibility?.eligible && tab === 'B') loadSmart();
+    }, [eligibility, tab, loadSmart]);
+
+    const connFor = (c: SmartCandidate | WishMatch): ConnStatus => override[c.id] ?? c.conn;
+
+    const handleConnect = async (cand: SmartCandidate | WishMatch) => {
+        const source = (cand as WishMatch).reason ? 'WISH' : 'SMART';
+        setOverride((o) => ({ ...o, [cand.id]: 'sent' }));
         try {
-            await roommateMatchingService.respondToMatch(matchId, 'ACCEPTED');
-            const m = await roommateMatchingService.getMatches();
-            setMatches(m);
-        } catch (error) {
-            alert('Action failed');
+            const res = await roommateMatchingService.connect(cand.id, source, cand.score, (cand as WishMatch).reason);
+            if (res.status === 'updated') setOverride((o) => ({ ...o, [cand.id]: 'mutual' }));
+        } catch {
+            setOverride((o) => ({ ...o, [cand.id]: 'none' }));
+            alert('Failed to send connection request');
         }
     };
 
-    const handleDeclineMatch = async (matchId: string) => {
-        try {
-            await roommateMatchingService.respondToMatch(matchId, 'DECLINED');
-            const m = await roommateMatchingService.getMatches();
-            setMatches(m);
-        } catch (error) {
-            alert('Action failed');
-        }
-    };
-
-    const handleCancelRequest = async () => {
-        if (!myRequest) return;
-        if (window.confirm('Are you sure you want to cancel your matching request?')) {
-            try {
-                await roommateMatchingService.cancelRequest(myRequest.id);
-                setMyRequest(null);
-                setMatches([]);
-            } catch (error) {
-                alert('Cancel failed');
-            }
-        }
-    };
-
-    /* ── Loading state ─────────────────────────────────────────── */
+    /* ── Loading ─────────────────────────────────────────────── */
     if (loading) {
         return (
             <div className="tenant-dashboard-root">
@@ -129,7 +103,7 @@ const RoommateMatching: React.FC = () => {
                 <div className="main-wrapper">
                     <Header />
                     <main className="content-area" style={{ display: 'grid', placeItems: 'center', minHeight: '60vh' }}>
-                        <Loader2 className="animate-spin" size={42} style={{ color: '#197cf8' }} />
+                        <div className="rmx"><div className="rm-spinner" /></div>
                     </main>
                     <Footer />
                 </div>
@@ -137,7 +111,7 @@ const RoommateMatching: React.FC = () => {
         );
     }
 
-    /* ── Eligibility gate ──────────────────────────────────────── */
+    /* ── Eligibility gate ────────────────────────────────────── */
     if (eligibility && !eligibility.eligible) {
         return (
             <div className="tenant-dashboard-root">
@@ -153,155 +127,70 @@ const RoommateMatching: React.FC = () => {
         );
     }
 
-    /* ── Main page ─────────────────────────────────────────────── */
+    /* ── Main (Wish-First) ───────────────────────────────────── */
     return (
         <div className="tenant-dashboard-root">
             <Sidebar />
             <div className="main-wrapper">
                 <Header />
-                <main className="content-area animate-fade-in">
-
-                    {/* Page Header */}
-                    <div className="rm-page-header">
-                        <h1>
-                            <span className="gradient-text">Roommate</span> Matching
-                        </h1>
-                        <p>AI-powered compatibility scoring for your next shared home.</p>
-                        {myRequest && (
-                            <button className="rm-cancel-btn" onClick={handleCancelRequest}>
-                                Cancel My Request
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Tabs */}
-                    <div className="rm-tabs">
-                        <div className="rm-tabs-inner">
-                            <button
-                                onClick={() => !myRequest && setActiveTab('SEARCH_APARTMENT')}
-                                disabled={!!myRequest && myRequest.type !== 'SEARCH_APARTMENT'}
-                                className={`rm-tab ${activeTab === 'SEARCH_APARTMENT' ? 'active' : ''}`}
-                            >
-                                <Home size={17} /> Search for Apartment
-                            </button>
-                            <button
-                                onClick={() => !myRequest && setActiveTab('SEARCH_ROOMMATE')}
-                                disabled={!!myRequest && myRequest.type !== 'SEARCH_ROOMMATE'}
-                                className={`rm-tab ${activeTab === 'SEARCH_ROOMMATE' ? 'active' : ''}`}
-                            >
-                                <UserPlus size={17} /> Search for Roommate
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* ── No request: CTA state ──────────────────────────── */}
-                    {!myRequest ? (
-                        <div className="rm-empty-state">
-                            <div className="rm-empty-icon">
-                                {activeTab === 'SEARCH_APARTMENT' ? <Home size={40} /> : <UserPlus size={40} />}
-                            </div>
-                            <h2>
-                                {activeTab === 'SEARCH_APARTMENT'
-                                    ? 'Find your dream shared home'
-                                    : 'Find the perfect roommate'}
-                            </h2>
-                            <p>
-                                {activeTab === 'SEARCH_APARTMENT'
-                                    ? 'Join our matching pool to find verified tenants who have an active contract and are looking for a compatible roommate.'
-                                    : 'List your room and let our AI find the most compatible candidates based on habits, lifestyle, and preferences.'}
-                            </p>
-                            <button className="rm-cta-btn" onClick={() => setShowCreateModal(true)}>
-                                Create My Request <ArrowRight size={18} />
-                            </button>
-                            <div className="rm-badges">
-                                <span><ShieldCheck size={16} /> AI Verified</span>
-                                <span><Sparkles size={16} /> Best Matches</span>
-                            </div>
-                        </div>
-                    ) : (
-                        /* ── Has request: banner + matches ───────────────── */
-                        <>
-                            {/* Active Request Banner */}
-                            <div className="rm-active-banner">
-                                <div className="rm-banner-left">
-                                    <div className="rm-banner-icon">
-                                        <RefreshCw className={matchingInProgress ? 'animate-spin' : ''} size={24} />
-                                    </div>
-                                    <div className="rm-banner-info">
-                                        <div className="rm-banner-badges">
-                                            <span className="rm-status-pill">Active</span>
-                                            <span className="rm-status-dot" />
-                                        </div>
-                                        <h3>
-                                            {myRequest.type === 'SEARCH_APARTMENT'
-                                                ? 'Searching for Apartment'
-                                                : 'Searching for Roommate'}
-                                        </h3>
-                                        <p className="rm-banner-meta">
-                                            <MapPin size={14} />
-                                            {myRequest.preferred_area || 'Current Location'}
-                                            {myRequest.budget_min || myRequest.budget_max
-                                                ? ` • ${myRequest.budget_min}–${myRequest.budget_max} EGP`
-                                                : ''}
-                                        </p>
-                                    </div>
+                <main className="content-area">
+                    <div className="rmx">
+                        <div className="page-head" style={{ marginBottom: 26 }}>
+                            <div className="crumb"><Users size={14} /> Matching <ArrowRight size={13} /> <b>Roommates</b></div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+                                <h1>Make a <span className="g">wish</span>. Meet your roommate.</h1>
+                                <div className="subseg">
+                                    <button className={tab === 'B' ? 'on' : ''} onClick={() => setTab('B')}><Search size={16} />Find a place</button>
+                                    <button className={tab === 'A' ? 'on' : ''} onClick={() => setTab('A')}><Home size={16} />My lease</button>
                                 </div>
-                                <button
-                                    className="rm-refresh-btn"
-                                    onClick={() => handleFindMatches(myRequest.id)}
-                                    disabled={matchingInProgress}
-                                >
-                                    <RefreshCw size={16} className={matchingInProgress ? 'animate-spin' : ''} />
-                                    {matchingInProgress ? 'Matching…' : 'Refresh Matches'}
-                                </button>
                             </div>
+                        </div>
 
-                            {/* Matches Section */}
-                            <div>
-                                <div className="rm-matches-header">
+                        {tab === 'A' ? (
+                            <LeaseSection onView={setProfile} />
+                        ) : (
+                            <>
+                                <WishBar state={wish} hero />
+                                <WishResults state={wish} youHabits={youHabits} onConnect={handleConnect} onView={setProfile} />
+
+                                <div className="or-divider">
+                                    <div className="ln" />
+                                    <span>Or browse smart matches</span>
+                                    <div className="ln" />
+                                </div>
+
+                                <YouStrip name={youName} avatar={youAvatar} habits={youHabits} onEdit={() => navigate('/settings')} />
+                                <Filters f={filters} setF={setFilters} />
+                                <div className="panel-head">
                                     <div>
-                                        <h2>Recommended for You</h2>
-                                        <p>Our AI analyzed compatibility factors to find these matches.</p>
+                                        <h2>Compatible roommates near you</h2>
+                                        <p>Habit-based matching, no AI — ranked by your combined lifestyle fit.</p>
                                     </div>
-                                    <span className="rm-match-count">{matches.length} match{matches.length !== 1 ? 'es' : ''}</span>
+                                    <span className="count-pill">{smart.length} people</span>
                                 </div>
-
-                                {matches.length > 0 ? (
-                                    <div className="rm-matches-grid">
-                                        {matches.map(match => (
-                                            <MatchCard
-                                                key={match.id}
-                                                match={match}
-                                                currentUserId={currentUser.id}
-                                                onAccept={handleAcceptMatch}
-                                                onDecline={handleDeclineMatch}
-                                            />
-                                        ))}
-                                    </div>
+                                {smartLoading ? (
+                                    <div style={{ display: 'grid', placeItems: 'center', padding: 50 }}><div className="rm-spinner" /></div>
                                 ) : (
-                                    <div className="rm-no-matches">
-                                        <div className="rm-no-matches-icon"><Search size={32} /></div>
-                                        <h3>No matches found yet</h3>
-                                        <p>We're still searching for the perfect roommate. Try refreshing or check back later!</p>
-                                    </div>
+                                    <SmartGrid
+                                        candidates={smart.map((c) => ({ ...c, conn: connFor(c) }))}
+                                        youHabits={youHabits}
+                                        onConnect={handleConnect}
+                                        onView={setProfile}
+                                    />
                                 )}
-                            </div>
-                        </>
-                    )}
+                            </>
+                        )}
 
+                        <ProfileModal
+                            cand={profile}
+                            conn={profile ? connFor(profile) : 'none'}
+                            onConnect={(c) => { handleConnect(c); setProfile(null); }}
+                            onClose={() => setProfile(null)}
+                        />
+                    </div>
                 </main>
                 <Footer />
             </div>
-
-            {showCreateModal && (
-                <CreateRequestModal
-                    type={activeTab}
-                    activeContracts={activeContracts}
-                    activeContractId={null}
-                    onClose={() => setShowCreateModal(false)}
-                    onSubmit={handleCreateRequest}
-                />
-            )}
         </div>
     );
 };

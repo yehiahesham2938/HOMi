@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { CheckCircle, Loader2, XCircle } from 'lucide-react';
 import './EmailVerificationPage.css';
 import { authService } from '../../../services/auth.service';
 
-const RESEND_COOLDOWN = 60; // seconds
+const RESEND_COOLDOWN = 120; // seconds
 
 type LocationState = {
     email?: string;
@@ -17,8 +17,6 @@ type LocationState = {
 const EmailVerificationPage: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [searchParams] = useSearchParams();
-    const tokenFromUrl = searchParams.get('token')?.trim() || null;
 
     const locationState = location.state as LocationState;
 
@@ -30,15 +28,13 @@ const EmailVerificationPage: React.FC = () => {
         return cr === 'LANDLORD' ? 'landlord' : 'tenant';
     }, [locationState?.role]);
 
-    /** After email verify: resume step 3 only if identity + role steps are already done; otherwise start at step 1/2. */
     const navigateToCompleteProfileAfterVerify = useCallback(
         async (replace: boolean) => {
+            // Check Profile and redirect
             if (authService.isAuthenticated()) {
                 try {
                     await authService.getProfile();
-                } catch {
-                    /* use cached profile if refresh fails */
-                }
+                } catch { }
             }
             const cached = authService.getCurrentUser();
             const profile = cached?.profile;
@@ -67,85 +63,15 @@ const EmailVerificationPage: React.FC = () => {
         }
     }, [locationState?.email]);
 
+    const [otp, setOtp] = useState('');
     const [countdown, setCountdown] = useState(RESEND_COOLDOWN);
     const [canResend, setCanResend] = useState(false);
     const [resending, setResending] = useState(false);
     const [resent, setResent] = useState(false);
     const [resendError, setResendError] = useState<string | null>(null);
 
-    const [verifyPhase, setVerifyPhase] = useState<'idle' | 'loading' | 'success' | 'error'>(() =>
-        searchParams.get('token')?.trim() ? 'loading' : 'idle'
-    );
+    const [verifyPhase, setVerifyPhase] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [verifyError, setVerifyError] = useState<string | null>(null);
-
-    useEffect(() => {
-        if (!tokenFromUrl) return;
-
-        let cancelled = false;
-        setVerifyPhase('loading');
-        setVerifyError(null);
-
-        (async () => {
-            try {
-                await authService.verifyEmail(tokenFromUrl);
-                if (cancelled) return;
-
-                if (authService.isAuthenticated()) {
-                    try {
-                        await authService.getProfile();
-                    } catch {
-                        // New device / expired JWT — email is still verified server-side
-                    }
-                }
-
-                if (cancelled) return;
-                setVerifyPhase('success');
-
-                navigate('/verify-email', { replace: true, state: location.state });
-            } catch (err) {
-                if (cancelled) return;
-
-                const errData =
-                    axios.isAxiosError(err) && err.response?.data && typeof err.response.data === 'object'
-                        ? (err.response.data as { code?: string; message?: string })
-                        : undefined;
-
-                if (errData?.code === 'INVALID_VERIFICATION_TOKEN' && authService.isAuthenticated()) {
-                    try {
-                        const { user } = await authService.getProfile();
-                        if (user.emailVerified) {
-                            setVerifyPhase('success');
-                            navigate('/verify-email', { replace: true, state: location.state });
-                            return;
-                        }
-                    } catch {
-                        /* fall through to error UI */
-                    }
-                }
-
-                setVerifyPhase('error');
-                let msg =
-                    'This link is invalid or has expired. You can request a new verification email below.';
-                if (errData?.message) msg = errData.message;
-                setVerifyError(msg);
-            }
-        })();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [tokenFromUrl, navigate, location.state]);
-
-    /** After a successful verify-from-link flow, continue onboarding (step 1 unless already past 1–2). */
-    useEffect(() => {
-        if (verifyPhase !== 'success') return;
-
-        const t = window.setTimeout(() => {
-            void navigateToCompleteProfileAfterVerify(true);
-        }, 1600);
-
-        return () => window.clearTimeout(t);
-    }, [verifyPhase, navigateToCompleteProfileAfterVerify]);
 
     useEffect(() => {
         if (countdown <= 0) {
@@ -155,6 +81,45 @@ const EmailVerificationPage: React.FC = () => {
         const t = setTimeout(() => setCountdown((c) => c - 1), 1000);
         return () => clearTimeout(t);
     }, [countdown]);
+
+    useEffect(() => {
+        if (verifyPhase !== 'success') return;
+        const t = window.setTimeout(() => {
+            void navigateToCompleteProfileAfterVerify(true);
+        }, 1600);
+        return () => window.clearTimeout(t);
+    }, [verifyPhase, navigateToCompleteProfileAfterVerify]);
+
+    const handleVerify = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        
+        if (otp.length !== 6) {
+            setVerifyError('OTP must be exactly 6 digits');
+            setVerifyPhase('error');
+            return;
+        }
+
+        setVerifyPhase('loading');
+        setVerifyError(null);
+
+        try {
+            await authService.verifyEmail(otp);
+            if (authService.isAuthenticated()) {
+                await authService.getProfile().catch(() => {});
+            }
+            setVerifyPhase('success');
+        } catch (err) {
+            const errData =
+                axios.isAxiosError(err) && err.response?.data && typeof err.response.data === 'object'
+                    ? (err.response.data as { code?: string; message?: string })
+                    : undefined;
+
+            setVerifyPhase('error');
+            let msg = 'The OTP is invalid or has expired. Please try again.';
+            if (errData?.message) msg = errData.message;
+            setVerifyError(msg);
+        }
+    };
 
     const handleResend = async () => {
         if (!canResend) return;
@@ -166,8 +131,13 @@ const EmailVerificationPage: React.FC = () => {
             setCanResend(false);
             setCountdown(RESEND_COOLDOWN);
             setTimeout(() => setResent(false), 4000);
-        } catch {
-            setResendError('Failed to send email. Please try again.');
+        } catch(err) {
+            const errData =
+                axios.isAxiosError(err) && err.response?.data && typeof err.response.data === 'object'
+                    ? (err.response.data as { code?: string; message?: string })
+                    : undefined;
+                    
+            setResendError(errData?.message || 'Failed to send email. Please try again.');
         } finally {
             setResending(false);
         }
@@ -180,120 +150,28 @@ const EmailVerificationPage: React.FC = () => {
     const handleLogout = async () => {
         try {
             await authService.logout();
-        } catch {
-            /* ignore */
-        } finally {
+        } catch { } finally {
             navigate('/auth', { replace: true });
         }
     };
-
-    if (verifyPhase === 'loading') {
-        return (
-            <div className="email-verify-wrapper">
-                <div className="email-verify-card">
-                    <img src="/logo.png" alt="HOMi logo" className="ev-logo-image" />
-                    <Loader2
-                        size={48}
-                        color="#2563eb"
-                        style={{ margin: '0 auto 16px', animation: 'spin 1s linear infinite' }}
-                    />
-                    <h1>Verifying your email…</h1>
-                    <p className="subtitle">Please wait a moment while we confirm your address.</p>
-                    <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-                </div>
-            </div>
-        );
-    }
 
     if (verifyPhase === 'success') {
         return (
             <div className="email-verify-wrapper">
                 <div className="email-verify-card">
                     <img src="/logo.png" alt="HOMi logo" className="ev-logo-image" />
-
-                    <h1>Check your inbox</h1>
-                    <p className="subtitle">We sent a verification link to</p>
-                    <div className="ev-email-highlight">{displayEmail || 'your email address'}</div>
-
-                    <div className="ev-success" style={{ marginBottom: 24 }}>
-                        <div className="ev-success-icon">
-                            <CheckCircle size={40} />
-                        </div>
-                        <p style={{ color: '#15803d', fontWeight: 700, fontSize: '1.05rem', margin: 0 }}>
-                            Your account is now verified
-                        </p>
-                        <p style={{ color: '#475569', fontSize: '0.95rem', margin: '8px 0 0', lineHeight: 1.5 }}>
-                            Next, finish your identity and role in Complete profile. If you already did those steps,
-                            you&apos;ll pick up where you left off.
-                        </p>
-                    </div>
-
-                    <button type="button" className="ev-btn-primary" onClick={handleContinueProfile}>
-                        Continue complete profile
+                    <CheckCircle
+                        size={64}
+                        color="#10b981"
+                        style={{ margin: '0 auto 16px', display: 'block' }}
+                    />
+                    <h1>Email Verified!</h1>
+                    <p style={{ color: '#4b5563', marginBottom: '24px' }}>
+                        Your email has been verified successfully. Redirecting you to complete your profile...
+                    </p>
+                    <button className="ev-primary-button" onClick={handleContinueProfile}>
+                        Continue Now
                     </button>
-                </div>
-            </div>
-        );
-    }
-
-    if (verifyPhase === 'error') {
-        return (
-            <div className="email-verify-wrapper">
-                <div className="email-verify-card">
-                    <img src="/logo.png" alt="HOMi logo" className="ev-logo-image" />
-
-                    <h1>Check your inbox</h1>
-                    <p className="subtitle">We sent a verification link to</p>
-                    <div className="ev-email-highlight">{displayEmail || 'your email address'}</div>
-
-                    <div
-                        style={{
-                            background: 'rgba(248, 113, 113, 0.1)',
-                            border: '1px solid rgba(248, 113, 113, 0.25)',
-                            borderRadius: 8,
-                            padding: 16,
-                            marginBottom: 24,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            gap: 8,
-                        }}
-                    >
-                        <XCircle size={40} color="#dc2626" />
-                        <p style={{ color: '#b91c1c', fontWeight: 600, margin: 0 }}>Could not verify</p>
-                        <p style={{ color: '#475569', fontSize: '0.95rem', margin: 0, lineHeight: 1.5 }}>
-                            {verifyError}
-                        </p>
-                    </div>
-
-                    <button
-                        type="button"
-                        className="ev-btn-primary"
-                        onClick={handleResend}
-                        disabled={!canResend || resending}
-                    >
-                        {resending ? 'Sending…' : 'Resend verification email'}
-                    </button>
-                    {!canResend && (
-                        <p className="ev-timer">
-                            Resend available in&nbsp;
-                            <span className="ev-countdown">{countdown}s</span>
-                        </p>
-                    )}
-                    {resendError && (
-                        <p style={{ color: '#f87171', fontSize: 13, marginTop: 8, fontWeight: 500 }}>
-                            {resendError}
-                        </p>
-                    )}
-                    <div style={{ marginTop: 16, borderTop: '1px solid #e2e8f0', paddingTop: 16, textAlign: 'center' }}>
-                        <button
-                            type="button"
-                            onClick={handleLogout}
-                            style={{ background: 'none', border: 'none', color: '#64748b', fontSize: 13, fontWeight: 500, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 3 }}
-                        >
-                            Sign out
-                        </button>
-                    </div>
                 </div>
             </div>
         );
@@ -303,76 +181,60 @@ const EmailVerificationPage: React.FC = () => {
         <div className="email-verify-wrapper">
             <div className="email-verify-card">
                 <img src="/logo.png" alt="HOMi logo" className="ev-logo-image" />
+                <h1>Verify your email</h1>
+                <p className="ev-description">
+                    We've sent a 6-digit OTP to <strong>{displayEmail || 'your email address'}</strong>.
+                    <br />
+                    Please enter the code below to verify your account.
+                </p>
 
-                <h1>Check your inbox</h1>
-                <p className="subtitle">We sent a verification link to</p>
-                <div className="ev-email-highlight">{displayEmail || 'your email address'}</div>
-
-                <div className="ev-steps">
-                    <div className="ev-step">
-                        <div className="ev-step-num">1</div>
-                        <span>
-                            Open your email inbox and look for a message from <strong>HOMi</strong>
-                        </span>
+                {verifyPhase === 'error' && verifyError && (
+                    <div className="ev-error-banner">
+                        <XCircle size={20} className="ev-error-icon" />
+                        <span>{verifyError}</span>
                     </div>
-                    <div className="ev-step">
-                        <div className="ev-step-num">2</div>
-                        <span>
-                            Click the <strong>&quot;Verify My Email&quot;</strong> button inside the email
-                        </span>
-                    </div>
-                    <div className="ev-step">
-                        <div className="ev-step-num">3</div>
-                        <span>
-                            You&apos;ll return here; this page will show when your account is verified.
-                        </span>
-                    </div>
-                </div>
-
-                {resent ? (
-                    <div className="ev-success">
-                        <div className="ev-success-icon">
-                            <CheckCircle size={32} />
-                        </div>
-                        <p style={{ color: '#4ade80', fontWeight: 600, fontSize: 14 }}>
-                            Verification email sent again!
-                        </p>
-                    </div>
-                ) : (
-                    <>
-                        <button
-                            type="button"
-                            className="ev-btn-primary"
-                            onClick={handleResend}
-                            disabled={!canResend || resending}
-                        >
-                            {resending ? 'Sending…' : 'Resend verification email'}
-                        </button>
-
-                        {resendError && (
-                            <p style={{ color: '#f87171', fontSize: 13, marginBottom: 8, fontWeight: 500 }}>
-                                {resendError}
-                            </p>
-                        )}
-
-                        {!canResend && (
-                            <p className="ev-timer">
-                                Resend available in&nbsp;
-                                <span className="ev-countdown">{countdown}s</span>
-                            </p>
-                        )}
-                    </>
                 )}
 
-                <p style={{ marginTop: 24, fontSize: 12, color: '#475569' }}>
-                    Didn&apos;t get the email? Check your spam folder or make sure you used the right address.
-                </p>
-                <div style={{ marginTop: 16, borderTop: '1px solid #e2e8f0', paddingTop: 16, textAlign: 'center' }}>
-                    <button
-                        type="button"
-                        onClick={handleLogout}
-                        style={{ background: 'none', border: 'none', color: '#64748b', fontSize: 13, fontWeight: 500, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 3 }}
+                <form onSubmit={handleVerify} className="ev-form">
+                    <div className="ev-input-group">
+                        <input
+                            type="text"
+                            maxLength={6}
+                            value={otp}
+                            onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ''))}
+                            placeholder="000000"
+                            autoFocus
+                        />
+                    </div>
+                    <button 
+                        type="submit" 
+                        className="ev-primary-button"
+                        disabled={otp.length !== 6 || verifyPhase === 'loading'}
                     >
+                        {verifyPhase === 'loading' ? (
+                            <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'}}><Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> Verifying...</span>
+                        ) : (
+                            'Verify Email'
+                        )}
+                    </button>
+                </form>
+
+                <div className="ev-resend-section">
+                    <p>Didn't receive the email? Check your spam folder.</p>
+                    {resendError && <p className="ev-error-text" style={{margin: '8px 0', color: 'red'}}>{resendError}</p>}
+                    {resent && <p className="ev-success-text" style={{margin: '8px 0', color: 'green'}}>New OTP sent successfully!</p>}
+                    
+                    <button
+                        className="ev-resend-button"
+                        onClick={handleResend}
+                        disabled={!canResend || resending}
+                    >
+                        {resending ? 'Sending...' : canResend ? 'Resend OTP' : `Resend in ${countdown}s`}
+                    </button>
+                </div>
+
+                <div className="ev-footer-actions">
+                    <button className="ev-text-button" onClick={handleLogout}>
                         Sign out
                     </button>
                 </div>

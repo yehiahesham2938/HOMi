@@ -328,102 +328,25 @@ export class AuthController {
     }
 
     /**
-     * GET /auth/verify-email
-     * Verify user's email using token from query parameter
-     * No authentication required (token is the auth)
+     * POST /auth/verify-email
+     * Verify user's email using a 6-digit OTP
+     * Authentication is required
      */
     async verifyEmail(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const raw = req.query.token;
-            const token =
-                typeof raw === 'string'
-                    ? raw.trim()
-                    : Array.isArray(raw) && typeof raw[0] === 'string'
-                      ? raw[0].trim()
-                      : '';
-            if (!token) {
-                throw new AuthError('Verification token is required', 400, 'TOKEN_REQUIRED');
+            const userId = req.user?.userId;
+            if (!userId) {
+                throw new AuthError('User not authenticated', 401, 'NOT_AUTHENTICATED');
             }
 
-            const result = await authService.verifyEmail(token);
-
-            const wantsJson =
-                req.query.format === 'json' ||
-                (typeof req.get('Accept') === 'string' && req.get('Accept')!.includes('application/json'));
-
-            if (wantsJson) {
-                res.status(200).json(result);
-                return;
+            const { otp } = req.body;
+            if (!otp) {
+                throw new AuthError('OTP is required', 400, 'OTP_REQUIRED');
             }
 
-            // HTML fallback when the link is opened without a JSON Accept header (e.g. legacy direct API URL)
-            res.status(200).send(`
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Verified - HOMi</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 50px;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 500px;
-        }
-        .checkmark {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 25px;
-        }
-        .checkmark svg { width: 40px; height: 40px; fill: white; }
-        h1 { color: #1e293b; margin-bottom: 15px; font-size: 28px; }
-        p { color: #64748b; line-height: 1.6; margin-bottom: 30px; }
-        .button {
-            display: inline-block;
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            color: white;
-            text-decoration: none;
-            padding: 15px 35px;
-            border-radius: 50px;
-            font-weight: 600;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="checkmark">
-            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-        </div>
-        <h1>Email Verified! 🎉</h1>
-        <p>${result.message}</p>
-        <a href="${env.CLIENT_URL}" class="button">Continue to HOMi</a>
-    </div>
-</body>
-</html>
-            `);
+            const result = await authService.verifyEmail(userId, otp);
+
+            res.status(200).json(result);
         } catch (error) {
             next(error);
         }

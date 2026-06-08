@@ -15,7 +15,7 @@ import {
     verifyRefreshToken,
     type TokenPair,
 } from '../../../shared/utils/jwt.util.js';
-import { generateSecureToken, hashToken } from '../../../shared/utils/encryption.util.js';
+import { generateSecureToken, hashToken, generateNumericOTP } from '../../../shared/utils/encryption.util.js';
 import { emailService } from '../../../shared/services/email.service.js';
 import type {
     RegisterRequest,
@@ -1188,7 +1188,7 @@ export class AuthService {
 
     /**
      * Send verification email to user
-     * Generates a token and sends branded email
+     * Generates a 6-digit OTP and sends branded email
      */
     async sendVerificationEmail(userId: string): Promise<EmailVerificationResponse> {
         // Find user
@@ -1206,23 +1206,31 @@ export class AuthService {
             };
         }
 
-        // Generate verification token
-        const { token, hashedToken } = generateSecureToken();
+        // Check for 2-minute cooldown
+        if (
+            user.email_verification_token_expires &&
+            user.email_verification_token_expires.getTime() > Date.now() + 8 * 60 * 1000
+        ) {
+            throw new AuthError('Please wait before requesting a new OTP.', 429, 'RATE_LIMIT_EXCEEDED');
+        }
 
-        // Set token expiration (24 hours from now)
-        const tokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        // Generate verification OTP
+        const { otp, hashedOtp } = generateNumericOTP(6);
+
+        // Set token expiration (10 minutes from now)
+        const tokenExpires = new Date(Date.now() + 10 * 60 * 1000);
 
         // Store hashed token in database
         await user.update({
-            email_verification_token_hash: hashedToken,
+            email_verification_token_hash: hashedOtp,
             email_verification_token_expires: tokenExpires,
         });
 
         // Send verification email
-        const emailSent = await emailService.sendVerificationEmail(user.email, token);
+        const emailSent = await emailService.sendVerificationEmail(user.email, otp);
 
         if (!emailSent) {
-            console.warn('Failed to send verification email, but token was generated');
+            console.warn('Failed to send verification email, but OTP was generated');
         }
 
         return {
@@ -1233,27 +1241,30 @@ export class AuthService {
     }
 
     /**
-     * Verify user email using token
-     * Called when user clicks the verification link
+     * Verify user email using OTP
+     * Called when user enters the 6-digit OTP
      */
-    async verifyEmail(token: string): Promise<EmailVerificationResponse> {
-        const trimmed = token.trim();
-        // Hash the provided token to compare with stored hash
-        const hashedToken = hashToken(trimmed);
+    async verifyEmail(userId: string, otp: string): Promise<EmailVerificationResponse> {
+        const trimmedOtp = otp.trim();
+        const hashedOtp = hashToken(trimmedOtp);
 
-        // Find user with matching token
-        const user = await User.findOne({
-            where: { email_verification_token_hash: hashedToken },
+        // Find user matching the userId
+        const user = await User.findByPk(userId, {
             include: [{ model: Profile, as: 'profile' }],
         });
 
         if (!user) {
-            throw new AuthError('Invalid or expired verification token', 400, 'INVALID_VERIFICATION_TOKEN');
+            throw new AuthError('User not found', 404, 'USER_NOT_FOUND');
+        }
+
+        // Verify OTP matches
+        if (user.email_verification_token_hash !== hashedOtp) {
+            throw new AuthError('Invalid verification OTP', 400, 'INVALID_VERIFICATION_TOKEN');
         }
 
         // Check token expiration
         if (!user.email_verification_token_expires || user.email_verification_token_expires < new Date()) {
-            throw new AuthError('Verification token has expired. Please request a new one.', 400, 'VERIFICATION_TOKEN_EXPIRED');
+            throw new AuthError('Verification OTP has expired. Please request a new one.', 400, 'VERIFICATION_TOKEN_EXPIRED');
         }
 
         // Mark email as verified and clear token

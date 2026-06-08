@@ -20,6 +20,7 @@ import {
     MaintenanceApplySchema,
     MaintenanceLoginSchema,
     MaintenanceAvailabilitySchema,
+    VerifyEmailSchema,
 } from '../schemas/auth.schemas.js';
 
 const router = Router();
@@ -723,8 +724,10 @@ router.post(
  *                   message: "Verification token has expired. Please request a new one."
  *                   code: "VERIFICATION_TOKEN_EXPIRED"
  */
-router.get(
+router.post(
     '/verify-email',
+    protect,
+    validate(VerifyEmailSchema),
     authController.verifyEmail.bind(authController)
 );
 

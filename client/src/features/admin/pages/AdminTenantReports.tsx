@@ -277,7 +277,7 @@ const AdminTenantReports = () => {
                                             <small>Report Date</small>
                                             <h3>{formatDate(reportDateStr)}</h3>
                                         </div>
-                                        <span className={`status-badge status-${report.status.toLowerCase()}`}>
+                                        <span className={`report-status-badge status-${report.status.toLowerCase()}`}>
                                             {report.status.charAt(0) + report.status.slice(1).toLowerCase()}
                                         </span>
                                     </div>

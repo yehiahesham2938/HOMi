@@ -54,6 +54,8 @@ export class RoommateRequest extends Model<
     declare preferred_move_in_date: Date | null;
     declare additional_note: string | null;
     declare max_occupants: number | null;
+    /** Per-room listing config for SEARCH_ROOMMATE: [{ name, ensuite, rent, listed }] */
+    declare rooms_config: CreationOptional<Array<Record<string, unknown>> | null>;
     declare expires_at: CreationOptional<Date>;
     declare created_at: CreationOptional<Date>;
     declare updated_at: CreationOptional<Date>;
@@ -129,6 +131,10 @@ RoommateRequest.init(
         },
         max_occupants: {
             type: DataTypes.INTEGER,
+            allowNull: true,
+        },
+        rooms_config: {
+            type: DataTypes.JSONB,
             allowNull: true,
         },
         expires_at: {

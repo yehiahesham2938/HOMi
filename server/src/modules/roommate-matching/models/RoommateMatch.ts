@@ -29,17 +29,26 @@ export const UserMatchAction = {
 
 export type UserMatchActionType = (typeof UserMatchAction)[keyof typeof UserMatchAction];
 
+export const MatchSource = {
+    SMART: 'SMART',
+    WISH: 'WISH',
+    DIRECT: 'DIRECT',
+} as const;
+
+export type MatchSourceType = (typeof MatchSource)[keyof typeof MatchSource];
+
 export class RoommateMatch extends Model<
     InferAttributes<RoommateMatch>,
     InferCreationAttributes<RoommateMatch>
 > {
     declare id: CreationOptional<string>;
-    declare request_id: ForeignKey<string>;
-    declare matched_request_id: ForeignKey<string>;
+    declare request_id: ForeignKey<string> | null;
+    declare matched_request_id: ForeignKey<string> | null;
     declare requester_id: ForeignKey<string>;
     declare matched_user_id: ForeignKey<string>;
     declare compatibility_score: number;
     declare ai_explanation: string | null;
+    declare source: CreationOptional<MatchSourceType>;
     declare status: CreationOptional<MatchStatusType>;
     declare requester_action: CreationOptional<UserMatchActionType>;
     declare matched_user_action: CreationOptional<UserMatchActionType>;
@@ -69,7 +78,7 @@ RoommateMatch.init(
         },
         request_id: {
             type: DataTypes.UUID,
-            allowNull: false,
+            allowNull: true,
             references: {
                 model: 'roommate_requests',
                 key: 'id',
@@ -77,7 +86,7 @@ RoommateMatch.init(
         },
         matched_request_id: {
             type: DataTypes.UUID,
-            allowNull: false,
+            allowNull: true,
             references: {
                 model: 'roommate_requests',
                 key: 'id',
@@ -110,6 +119,11 @@ RoommateMatch.init(
         ai_explanation: {
             type: DataTypes.TEXT,
             allowNull: true,
+        },
+        source: {
+            type: DataTypes.ENUM(...Object.values(MatchSource)),
+            allowNull: false,
+            defaultValue: MatchSource.SMART,
         },
         status: {
             type: DataTypes.ENUM(...Object.values(MatchStatus)),

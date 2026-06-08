@@ -490,6 +490,41 @@ export class AuthController {
     }
 
     /**
+     * GET /auth/lifestyle
+     * Get current user's structured roommate lifestyle habits
+     */
+    async getLifestyleHabits(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const userId = req.user?.userId;
+            if (!userId) {
+                throw new AuthError('User not authenticated', 401, 'NOT_AUTHENTICATED');
+            }
+            const result = await authService.getLifestyleHabits(userId);
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * PUT /auth/lifestyle
+     * Set (replace) the structured roommate lifestyle habits
+     */
+    async setLifestyleHabits(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const userId = req.user?.userId;
+            if (!userId) {
+                throw new AuthError('User not authenticated', 401, 'NOT_AUTHENTICATED');
+            }
+            const { lifestyle_habits } = req.body as { lifestyle_habits: Record<string, number> };
+            const result = await authService.setLifestyleHabits(userId, lifestyle_habits ?? {});
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
      * DELETE /auth/account
      * Permanently delete user and profile when no properties, rental requests, or contracts exist.
      */

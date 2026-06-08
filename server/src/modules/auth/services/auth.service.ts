@@ -1411,6 +1411,43 @@ export class AuthService {
     }
 
     /**
+     * Get the user's structured roommate lifestyle habits.
+     */
+    async getLifestyleHabits(userId: string): Promise<{ success: boolean; lifestyle_habits: Record<string, number> | null }> {
+        const profile = await Profile.findOne({ where: { user_id: userId } });
+        if (!profile) {
+            throw new AuthError('Profile not found', 404, 'PROFILE_NOT_FOUND');
+        }
+        return { success: true, lifestyle_habits: (profile.lifestyle_habits as Record<string, number>) || null };
+    }
+
+    /**
+     * Replace the user's structured roommate lifestyle habits.
+     */
+    async setLifestyleHabits(
+        userId: string,
+        habits: Record<string, number>
+    ): Promise<{ success: boolean; message: string; lifestyle_habits: Record<string, number> }> {
+        const profile = await Profile.findOne({ where: { user_id: userId } });
+        if (!profile) {
+            throw new AuthError('Profile not found', 404, 'PROFILE_NOT_FOUND');
+        }
+
+        const allowed = ['sleep', 'clean', 'social', 'noise', 'smoke', 'pets', 'cook', 'work'];
+        const sanitized: Record<string, number> = {};
+        for (const key of allowed) {
+            const v = habits?.[key];
+            if (typeof v !== 'number' || v < 0 || v > 2) {
+                throw new AuthError(`Invalid lifestyle habit value for "${key}"`, 400, 'INVALID_LIFESTYLE_HABITS');
+            }
+            sanitized[key] = Math.round(v);
+        }
+
+        await profile.update({ lifestyle_habits: sanitized });
+        return { success: true, message: 'Lifestyle habits updated successfully', lifestyle_habits: sanitized };
+    }
+
+    /**
      * Permanently delete the authenticated user and profile when there are no
      * properties, rental requests, or contracts tied to the account.
      */

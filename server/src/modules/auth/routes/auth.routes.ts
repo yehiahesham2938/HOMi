@@ -926,6 +926,36 @@ router.get(
 
 /**
  * @swagger
+ * /auth/lifestyle:
+ *   get:
+ *     summary: Get structured roommate lifestyle habits
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get(
+    '/lifestyle',
+    protect,
+    authController.getLifestyleHabits.bind(authController)
+);
+
+/**
+ * @swagger
+ * /auth/lifestyle:
+ *   put:
+ *     summary: Set structured roommate lifestyle habits
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.put(
+    '/lifestyle',
+    protect,
+    authController.setLifestyleHabits.bind(authController)
+);
+
+/**
+ * @swagger
  * /auth/account:
  *   delete:
  *     summary: Permanently delete account

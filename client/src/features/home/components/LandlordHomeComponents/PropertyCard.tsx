@@ -23,6 +23,7 @@ interface PropertyCardProps {
   id: string | number;
   activeContract?: any;
   securityDeposit?: number;
+  images?: any[];
 }
 
 const PropertyCard = ({
@@ -38,14 +39,15 @@ const PropertyCard = ({
   imageUrl = "/rentblue.jpg",
   id,
   activeContract,
-  securityDeposit
+  securityDeposit,
+  images
 }: PropertyCardProps) => {
   const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOccupiedModalOpen, setIsOccupiedModalOpen] = useState(false);
 
   const displayTenantName = tenantName || t('landlordHomeComponents.noCurrentTenant');
-  const propertyData = { id, name, address, status, price, beds, baths, sqft, tenantName: displayTenantName, securityDeposit };
+  const propertyData = { id, name, address, status, price, beds, baths, sqft, tenantName: displayTenantName, securityDeposit, imageUrl, images };
 
   return (
     <>

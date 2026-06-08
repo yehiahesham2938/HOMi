@@ -101,6 +101,7 @@ const LandlordHome = () => {
       paymentStatus: computedStatus === 'rented' ? 'Paid' : 'Pending',
       activeContract,
       securityDeposit: prop.securityDeposit,
+      images: prop.images,
     };
   });
 
@@ -178,6 +179,7 @@ const LandlordHome = () => {
                         paymentStatus={prop.paymentStatus}
                         activeContract={prop.activeContract}
                         securityDeposit={prop.securityDeposit}
+                        images={prop.images}
                       />
                     ))}
                   </div>

@@ -391,6 +391,44 @@ class EmailService {
             buttonUrl: env.CLIENT_URL,
         });
     }
+
+    /**
+     * Send Tenant Warning Email
+     */
+    async sendTenantWarningEmail(email: string, messageText: string): Promise<boolean> {
+        return this.sendEmail(email, 'Important: Account Warning from Administration', {
+            title: 'Account Warning',
+            message: `
+                We have received a report regarding your tenancy and have issued an official warning.
+                <br><br>
+                <strong>Admin Message:</strong><br>
+                ${messageText}
+                <br><br>
+                Please ensure you adhere to the platform rules and your lease agreement. Repeated violations may result in account suspension.
+            `,
+            buttonText: 'Login to HOMi',
+            buttonUrl: env.CLIENT_URL,
+        });
+    }
+
+    /**
+     * Send Tenant Ban Email
+     */
+    async sendTenantBanEmail(email: string, reason: string): Promise<boolean> {
+        return this.sendEmail(email, 'Account Suspended', {
+            title: 'Account Suspended',
+            message: `
+                Your account on HOMi has been suspended due to violations of our policies or lease agreements.
+                <br><br>
+                <strong>Reason:</strong><br>
+                ${reason}
+                <br><br>
+                If you believe this was in error, please contact our support team immediately.
+            `,
+            buttonText: 'Contact Support',
+            buttonUrl: `${env.CLIENT_URL}/get-help`,
+        });
+    }
 }
 
 // Export singleton instance

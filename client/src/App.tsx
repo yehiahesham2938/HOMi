@@ -33,6 +33,7 @@ import AdminLogin from "./features/admin/pages/AdminLogin";
 import AdminDashboard from "./features/admin/pages/AdminDashboard";
 import AdminPropertyApprovals from "./features/admin/pages/AdminPropertyApprovals";
 import AdminUserReports from "./features/admin/pages/AdminUserReports";
+import AdminTenantReports from "./features/admin/pages/AdminTenantReports";
 import AdminActivityLogs from "./features/admin/pages/AdminActivityLogs";
 import AdminUserManagement from "./features/admin/pages/AdminUserManagement";
 import AdminSupportInbox from "./features/admin/pages/AdminSupportInbox";
@@ -153,6 +154,7 @@ function App() {
         <Route path="/admin/properties" element={<AuthGuard allowedRoles={['ADMIN']}><AdminPropertyDetails /></AuthGuard>} />
         <Route path="/admin/contracts" element={<AuthGuard allowedRoles={['ADMIN']}><AdminContracts /></AuthGuard>} />
         <Route path="/admin/user-reports" element={<AuthGuard allowedRoles={['ADMIN']}><AdminUserReports /></AuthGuard>} />
+        <Route path="/admin/tenant-reports" element={<AuthGuard allowedRoles={['ADMIN']}><AdminTenantReports /></AuthGuard>} />
         <Route path="/admin/user-management" element={<AuthGuard allowedRoles={['ADMIN']}><AdminUserManagement /></AuthGuard>} />
         <Route path="/admin/activity-logs" element={<AuthGuard allowedRoles={['ADMIN']}><AdminActivityLogs /></AuthGuard>} />
         <Route path="/admin/support-inbox" element={<AuthGuard allowedRoles={['ADMIN']}><AdminSupportInbox /></AuthGuard>} />

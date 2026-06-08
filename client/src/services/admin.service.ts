@@ -352,6 +352,21 @@ class AdminService {
         const response = await apiClient.get<{ success: boolean; data: AdminPropertyListItem[] }>('/admin/properties');
         return response.data.data;
     }
+
+    async getTenantReports() {
+        const response = await apiClient.get<{ success: boolean; data: any[] }>('/admin/tenant-reports');
+        return response.data.data;
+    }
+
+    async warnTenantFromReport(reportId: string, message: string) {
+        const response = await apiClient.post<{ success: boolean; message: string }>(`/admin/tenant-reports/${reportId}/warn`, { message });
+        return response.data;
+    }
+
+    async banTenantFromReport(reportId: string, reason: string) {
+        const response = await apiClient.post<{ success: boolean; message: string }>(`/admin/tenant-reports/${reportId}/ban`, { reason });
+        return response.data;
+    }
 }
 
 export interface AdminContractItem {

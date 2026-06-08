@@ -2225,7 +2225,12 @@ class ContractService {
      * Report a tenant
      */
     async reportTenant(contractId: string, landlordId: string, data: { reason: string, details: string }) {
-        const contract = await this.findAndValidateLandlordContract(contractId, landlordId);
+        const contract = await Contract.findByPk(contractId);
+        if (!contract) throw new ContractError('Contract not found', 404, 'CONTRACT_NOT_FOUND');
+        if (contract.landlord_id !== landlordId) throw new ContractError('You do not have permission to modify this contract', 403, 'FORBIDDEN');
+        if (contract.status !== ContractStatus.ACTIVE && contract.status !== ContractStatus.EXPIRED) {
+            throw new ContractError('You can only report tenants for active or expired contracts', 400, 'INVALID_CONTRACT_STATUS');
+        }
 
         // Map reason string to enum
         let mappedReason = TenantReportReason.OTHER;
@@ -2258,7 +2263,12 @@ class ContractService {
      * Request lease termination
      */
     async requestLeaseTermination(contractId: string, landlordId: string, data: { reason: string }) {
-        const contract = await this.findAndValidateLandlordContract(contractId, landlordId);
+        const contract = await Contract.findByPk(contractId);
+        if (!contract) throw new ContractError('Contract not found', 404, 'CONTRACT_NOT_FOUND');
+        if (contract.landlord_id !== landlordId) throw new ContractError('You do not have permission to modify this contract', 403, 'FORBIDDEN');
+        if (contract.status !== ContractStatus.ACTIVE) {
+            throw new ContractError('You can only request lease termination for active contracts', 400, 'INVALID_CONTRACT_STATUS');
+        }
 
         const request = await LeaseTerminationRequest.create({
             contract_id: contract.id,

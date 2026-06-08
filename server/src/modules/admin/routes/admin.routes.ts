@@ -418,5 +418,8 @@ router.patch('/users/:userId/unban', adminController.unbanUser.bind(adminControl
 router.get('/properties/:propertyId/details', adminController.getPropertyDetails.bind(adminController));
 router.get('/contracts', adminController.getAllContracts.bind(adminController));
 router.get('/properties', adminController.getAllProperties.bind(adminController));
+router.get('/tenant-reports', adminController.getTenantReports.bind(adminController));
+router.post('/tenant-reports/:reportId/warn', adminController.warnTenantFromReport.bind(adminController));
+router.post('/tenant-reports/:reportId/ban', adminController.banTenantFromReport.bind(adminController));
 
 export default router;

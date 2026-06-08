@@ -1,8 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '../../../components/global/header';
-import Sidebar from '../../../components/global/Landlord/sidebar';
-import Footer from '../../../components/global/footer';
 import {
     Plus, Building2, Clock, ChevronRight, FileText
 } from 'lucide-react';
@@ -136,70 +133,62 @@ const LandlordContract: React.FC = () => {
     };
 
     return (
-        <div className="dashboard-shell">
-            <Sidebar />
-            <div className="landlord-contract-content">
-                <Header />
-                <main className="landlord-contract-hub">
-                    <div className="landlord-hub-header">
-                        <div>
-                            <h1>{t('landlordContract.pageTitle')}</h1>
-                            <p>{t('landlordContract.pageSubtitle')}</p>
-                        </div>
-
-                    </div>
-
-                    {hasContracts ? (
-                        <div className="contract-list-grid">
-                            {contracts.map(contract => (
-                                <div key={contract.id} className="contract-card">
-                                    <div className="card-status-bar" data-status={contract.status.toLowerCase()}></div>
-                                    <div className="card-body">
-                                        <div className="card-top">
-                                            <span className="contract-id">{contract.id}</span>
-                                            <span className={`status-tag ${contract.status.toLowerCase()}`}>
-                                                {getStatusInfo(contract.status).label}
-                                            </span>
-                                        </div>
-                                        <h3>{contract.property}</h3>
-                                        <div className="card-meta">
-                                            <div className="meta-item"><Building2 size={14} /> {contract.duration}</div>
-                                            <div className="meta-item"><Clock size={14} /> {t('landlordContract.starts')} {contract.startDate}</div>
-                                        </div>
-                                    </div>
-                                    <div className="card-footer">
-                                        <div className="price-info">
-                                            <span className="label">{t('landlordContract.monthlyRevenue')}</span>
-                                            <span className="value">${contract.amount}</span>
-                                        </div>
-                                        <button className="btn-view-contract" onClick={() => setSelectedContract(contract)}>
-                                            {contract.status === 'PENDING_LANDLORD' ? t('landlordContract.manage') : t('landlordContract.view')} <ChevronRight size={16} />
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="empty-state-container" style={{
-                            textAlign: 'center', padding: '80px 20px',
-                            backgroundColor: 'var(--saas-card-bg)',
-                            borderRadius: '14px', border: '1px dashed var(--saas-border-hover)'
-                        }}>
-                            <FileText size={48} color="var(--saas-text-muted)" style={{ margin: '0 auto 16px' }} />
-                            <h2 style={{ fontSize: '24px', marginBottom: '8px', color: 'var(--saas-text-main)' }}>{t('landlordContract.noActiveAgreements')}</h2>
-                            <p style={{ color: 'var(--saas-text-muted)', marginBottom: '24px' }}>{t('landlordContract.noContractsText')}</p>
-                            <button
-                                className="btn-primary"
-                                style={{ margin: '0 auto' }}
-                                onClick={() => navigate('/rental-requests')}
-                            >
-                                {t('landlordContract.viewRentalRequests')}
-                            </button>
-                        </div>
-                    )}
-                </main>
-                <Footer />
+        <main className="landlord-contracts-page">
+            <div className="landlord-hub-header">
+                <div>
+                    <h1>{t('landlordContract.pageTitle')}</h1>
+                    <p>{t('landlordContract.pageSubtitle')}</p>
+                </div>
             </div>
+
+            {hasContracts ? (
+                <div className="contract-list-grid">
+                    {contracts.map(contract => (
+                        <div key={contract.id} className="contract-card">
+                            <div className="card-status-bar" data-status={contract.status.toLowerCase()}></div>
+                            <div className="card-body">
+                                <div className="card-top">
+                                    <span className="contract-id">{contract.id}</span>
+                                    <span className={`status-tag ${contract.status.toLowerCase()}`}>
+                                        {getStatusInfo(contract.status).label}
+                                    </span>
+                                </div>
+                                <h3>{contract.property}</h3>
+                                <div className="card-meta">
+                                    <div className="meta-item"><Building2 size={14} /> {contract.duration}</div>
+                                    <div className="meta-item"><Clock size={14} /> {t('landlordContract.starts')} {contract.startDate}</div>
+                                </div>
+                            </div>
+                            <div className="card-footer">
+                                <div className="price-info">
+                                    <span className="label">{t('landlordContract.monthlyRevenue')}</span>
+                                    <span className="value">${contract.amount}</span>
+                                </div>
+                                <button className="btn-view-contract" onClick={() => setSelectedContract(contract)}>
+                                    {contract.status === 'PENDING_LANDLORD' ? t('landlordContract.manage') : t('landlordContract.view')} <ChevronRight size={16} />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="empty-state-container" style={{
+                    textAlign: 'center', padding: '80px 20px',
+                    backgroundColor: 'var(--saas-card-bg)',
+                    borderRadius: '14px', border: '1px dashed var(--saas-border-hover)'
+                }}>
+                    <FileText size={48} color="var(--saas-text-muted)" style={{ margin: '0 auto 16px' }} />
+                    <h2 style={{ fontSize: '24px', marginBottom: '8px', color: 'var(--saas-text-main)' }}>{t('landlordContract.noActiveAgreements')}</h2>
+                    <p style={{ color: 'var(--saas-text-muted)', marginBottom: '24px' }}>{t('landlordContract.noContractsText')}</p>
+                    <button
+                        className="btn-primary"
+                        style={{ margin: '0 auto' }}
+                        onClick={() => navigate('/rental-requests')}
+                    >
+                        {t('landlordContract.viewRentalRequests')}
+                    </button>
+                </div>
+            )}
 
             {selectedContract && selectedContract.status !== 'ACTIVE' && (
                 <ContractDetailView
@@ -216,7 +205,7 @@ const LandlordContract: React.FC = () => {
                     onClose={() => setSelectedContract(null)}
                 />
             )}
-        </div>
+        </main>
     );
 };
 

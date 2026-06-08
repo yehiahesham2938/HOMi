@@ -1,8 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import Header from '../../../components/global/header';
-import Sidebar from '../../../components/global/Landlord/sidebar';
-import Footer from '../../../components/global/footer';
 import RequestCard from '../components/RequestCard';
 import StatsOverview from '../components/StatsOverview';
 import FilterTabs from '../components/FilterTabs';
@@ -96,11 +93,8 @@ const RentalRequests: React.FC = () => {
     }, [activeTab, mappedRequests]);
 
     return (
-        <div className="layout-wrapper" dir="ltr">
-            <Sidebar />
-            <div className="main-content">
-                <Header />
-                <main className="rental-requests-page">
+        <>
+            <main className="rental-requests-page">
                     <header className="page-intro">
                         <div className="intro-text">
                             <h1>{t('rentalRequests.requests')}</h1>
@@ -130,10 +124,8 @@ const RentalRequests: React.FC = () => {
                         </div>
                     )}
 
-                </main>
-                <Footer />
-            </div>
-        </div>
+            </main>
+        </>
     );
 };
 

@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import Header from '../../../components/global/header';
-import Sidebar from '../../../components/global/Landlord/sidebar';
-import Footer from '../../../components/global/footer';
+
 import PropertyCard from '../components/LandlordHomeComponents/PropertyCard';
 import AddPropertyCard from '../components/LandlordHomeComponents/AddPropertyCard';
 import Notifications from '../components/LandlordHomeComponents/Notifications';
@@ -101,18 +99,12 @@ const LandlordHome = () => {
       tenantName,
       paymentStatus: computedStatus === 'rented' ? 'Paid' : 'Pending',
       activeContract,
-      securityDeposit: prop.securityDeposit,
       images: prop.images,
     };
   });
 
   return (
     <>
-      <div className="landlord-layout">
-        <Sidebar />
-        <div className="main-content">
-          <Header />
-
           <main className="dashboard-container">
             {isLoading ? (
               <Loader text={t('landlordHome.loadingHomePage')} />
@@ -294,19 +286,11 @@ const LandlordHome = () => {
                         </li>
                       </ul>
                     </div>
-
                   </aside>
                 </div>
               </div>
             )}
           </main>
-          <Footer />
-        </div>
-      </div>
-
-      {/* ==================================================
-          MODALS WRAPPED OUTSIDE THE MAIN LAYOUT CONTAINER 
-          ================================================== */}
 
       {isOptimizeModalOpen && (
         <OptimizeListingModal onClose={() => setIsOptimizeModalOpen(false)} />

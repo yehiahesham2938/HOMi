@@ -1,7 +1,4 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import Header from '../../../../components/global/header';
-import Footer from '../../../../components/global/footer';
-import Sidebar from '../../../../components/global/Landlord/sidebar';
 import LiveTrackingModal from '../components/LiveTrackingModal';
 import './LandlordMaintenance.css';
 import {
@@ -76,13 +73,8 @@ const LandlordMaintenance: React.FC = () => {
     }, [requests]);
 
     return (
-        <div className="landlord-maintenance-hub-wrapper">
-            <div className="landlord-maintenance-layout">
-                <Sidebar />
-                <div className="landlord-maintenance-content">
-                    <Header />
-
-                    <main className="maintenance-main-container">
+        <>
+            <main className="maintenance-main-container">
                         <header className="maintenance-hero">
                             <div className="hero-glass-mesh"></div>
                             <div className="hero-text">
@@ -354,10 +346,7 @@ const LandlordMaintenance: React.FC = () => {
                         />
                     )}
 
-                    <Footer />
-                </div>
-            </div>
-        </div>
+        </>
     );
 };
 

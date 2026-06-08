@@ -1,7 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import Header from '../../../components/global/header';
-import Sidebar from '../../../components/global/Landlord/sidebar';
-import Footer from '../../../components/global/footer';
 import {
     Wallet, TrendingUp, Calendar, Clock,
     ArrowUpRight, Building2, User, Landmark,
@@ -965,66 +962,59 @@ const LandlordPayment: React.FC = () => {
     };
 
     return (
-        <div className="dashboard-shell">
-            <Sidebar />
-            <div className="content-container">
-                <Header />
-                <main className="landlord-hub">
-                    <header className="landlord-hub-header">
-                        <div className="header-text">
-                            <h1>Financial Overview</h1>
-                        </div>
-                    </header>
+        <main className="landlord-payment-page">
+            <header className="landlord-hub-header">
+                <div className="header-text">
+                    <h1>Financial Overview</h1>
+                </div>
+            </header>
 
-                    {pageError && (
-                        <div className="landlord-payment-error-banner">{pageError}</div>
-                    )}
+            {pageError && (
+                <div className="landlord-payment-error-banner">{pageError}</div>
+            )}
 
-                    <div className="tabs-container">
-                        <nav className="modern-tabs">
-                            {[
-                                { id: 'earnings', label: 'Earnings', icon: <TrendingUp size={16} /> },
-                                { id: 'received', label: 'Received', icon: <CheckCircle2 size={16} /> },
-                                { id: 'deposits', label: 'Deposits', icon: <Lock size={16} /> },
-                                { id: 'payouts', label: 'Payouts', icon: <ArrowUpRight size={16} /> },
-                                { id: 'upcoming', label: 'Upcoming', icon: <Clock size={16} /> },
-                                { id: 'methods', label: 'Methods', icon: <CreditCard size={16} /> },
-                                { id: 'transfer', label: 'Transfer', icon: <HandCoins size={16} /> },
-                            ].map((tab) => (
-                                <button
-                                    key={tab.id}
-                                    className={activeTab === tab.id ? 'active' : ''}
-                                    onClick={() => setActiveTab(tab.id as LandlordTab)}
-                                >
-                                    {tab.icon} {tab.label}
-                                </button>
-                            ))}
-                        </nav>
+            <div className="tabs-container">
+                <nav className="modern-tabs">
+                    {[
+                        { id: 'earnings', label: 'Earnings', icon: <TrendingUp size={16} /> },
+                        { id: 'received', label: 'Received', icon: <CheckCircle2 size={16} /> },
+                        { id: 'deposits', label: 'Deposits', icon: <Lock size={16} /> },
+                        { id: 'payouts', label: 'Payouts', icon: <ArrowUpRight size={16} /> },
+                        { id: 'upcoming', label: 'Upcoming', icon: <Clock size={16} /> },
+                        { id: 'methods', label: 'Methods', icon: <CreditCard size={16} /> },
+                        { id: 'transfer', label: 'Transfer', icon: <HandCoins size={16} /> },
+                    ].map((tab) => (
+                        <button
+                            key={tab.id}
+                            className={activeTab === tab.id ? 'active' : ''}
+                            onClick={() => setActiveTab(tab.id as LandlordTab)}
+                        >
+                            {tab.icon} {tab.label}
+                        </button>
+                    ))}
+                </nav>
+            </div>
+
+            <div className="viewport-container">
+                {isLoading ? (
+                    <div className="tab-viewport animate-fade-in">
+                        <EmptyState
+                            icon={<Clock size={48} />}
+                            title="Loading payment data"
+                            description="Please wait while we fetch your latest contracts and transactions."
+                        />
                     </div>
-
-                    <div className="viewport-container">
-                        {isLoading ? (
-                            <div className="tab-viewport animate-fade-in">
-                                <EmptyState
-                                    icon={<Clock size={48} />}
-                                    title="Loading payment data"
-                                    description="Please wait while we fetch your latest contracts and transactions."
-                                />
-                            </div>
-                        ) : (
-                            <>
-                                {activeTab === 'earnings' && renderEarnings()}
-                                {activeTab === 'received' && renderReceived()}
-                                {activeTab === 'deposits' && renderDeposits()}
-                                {activeTab === 'payouts' && renderPayouts()}
-                                {activeTab === 'methods' && renderMethods()}
-                                {activeTab === 'upcoming' && renderUpcoming()}
-                                {activeTab === 'transfer' && renderTransfer()}
-                            </>
-                        )}
-                    </div>
-                </main>
-                <Footer />
+                ) : (
+                    <>
+                        {activeTab === 'earnings' && renderEarnings()}
+                        {activeTab === 'received' && renderReceived()}
+                        {activeTab === 'deposits' && renderDeposits()}
+                        {activeTab === 'payouts' && renderPayouts()}
+                        {activeTab === 'methods' && renderMethods()}
+                        {activeTab === 'upcoming' && renderUpcoming()}
+                        {activeTab === 'transfer' && renderTransfer()}
+                    </>
+                )}
             </div>
 
             {isMethodModalOpen && (
@@ -1125,7 +1115,7 @@ const LandlordPayment: React.FC = () => {
                     </div>
                 </div>
             )}
-        </div>
+        </main>
     );
 };
 

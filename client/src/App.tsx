@@ -48,6 +48,7 @@ import LandlordContract from "./features/LandlordContractView/pages/Contract";
 import GuestHome from "./features/Guest/pages/GuestHome";
 import GuestSearch from "./features/Guest/pages/GuestSearch";
 import AuthGuard from "./components/global/AuthGuard";
+import LandlordLayout from "./components/global/Landlord/LandlordLayout";
 import SentRequests from "./features/SentRequests/pages/SentRequests";
 import PageNotFound from "./features/PageNotFound/pages/PageNotFound";
 import LandlordPublicProfile from "./features/LandlordPublicProfile/pages/LandlordPublicProfile";
@@ -105,13 +106,15 @@ function App() {
         <Route path="/properties/:id/apply" element={<AuthGuard allowedRoles={['TENANT']}><ApplicationPage /></AuthGuard>} />
 
         {/* Landlord Routes — protected */}
-        <Route path="/landlord-home" element={<AuthGuard allowedRoles={['LANDLORD']}><LandlordHome /></AuthGuard>} />
-        <Route path="/my-properties" element={<AuthGuard allowedRoles={['LANDLORD']}><MyProperties /></AuthGuard>} />
-        <Route path="/rental-requests" element={<AuthGuard allowedRoles={['LANDLORD']}><RentalRequests /></AuthGuard>} />
-        <Route path="/landlord-payment" element={<AuthGuard allowedRoles={['LANDLORD']}><LandlordPayment /></AuthGuard>} />
-        <Route path="/landlord-contracts" element={<AuthGuard allowedRoles={['LANDLORD']}><LandlordContract /></AuthGuard>} />
-        <Route path="/landlord-maintenance" element={<AuthGuard allowedRoles={['LANDLORD']}><LandlordMaintenance /></AuthGuard>} />
-        <Route path="/properties/add" element={<AuthGuard allowedRoles={['LANDLORD']}><AddPropertyPage /></AuthGuard>} />
+        <Route element={<AuthGuard allowedRoles={['LANDLORD']}><LandlordLayout /></AuthGuard>}>
+          <Route path="/landlord-home" element={<LandlordHome />} />
+          <Route path="/my-properties" element={<MyProperties />} />
+          <Route path="/rental-requests" element={<RentalRequests />} />
+          <Route path="/landlord-payment" element={<LandlordPayment />} />
+          <Route path="/landlord-contracts" element={<LandlordContract />} />
+          <Route path="/landlord-maintenance" element={<LandlordMaintenance />} />
+          <Route path="/properties/add" element={<AddPropertyPage />} />
+        </Route>
 
 
 

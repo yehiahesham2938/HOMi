@@ -7,14 +7,15 @@ import RequestCard from '../components/RequestCard';
 import StatsOverview from '../components/StatsOverview';
 import FilterTabs from '../components/FilterTabs';
 import { FaInbox } from 'react-icons/fa'; // Added for the empty state
-import rentalRequestService from '../../../services/rental-request.service';
-import type { LandlordRentalRequest } from '../../../services/rental-request.service';
+import rentalRequestService, { type LandlordRentalRequest } from '../../../services/rental-request.service';
+import Loader from '../../../components/global/Loader';
 import './RentalRequests.css';
 
 const RentalRequests: React.FC = () => {
     const { t, i18n } = useTranslation();
     const [activeTab, setActiveTab] = useState('pending');
     const [requests, setRequests] = useState<LandlordRentalRequest[]>([]);
+    const [loading, setLoading] = useState(true);
 
     const formatDate = (date?: string) => {
         if (!date) return t('rentalRequests.flexible', { defaultValue: 'Flexible' });
@@ -24,10 +25,13 @@ const RentalRequests: React.FC = () => {
 
     const refreshRequests = useCallback(async () => {
         try {
+            setLoading(true);
             const response = await rentalRequestService.getLandlordRequests();
             setRequests(response.data || []);
         } catch {
             setRequests([]);
+        } finally {
+            setLoading(false);
         }
     }, []);
 
@@ -108,7 +112,9 @@ const RentalRequests: React.FC = () => {
                     <FilterTabs activeTab={activeTab} setActiveTab={setActiveTab} counts={tabCounts} />
 
                     {/* Conditional Rendering for Empty State vs Grid */}
-                    {currentRequests.length > 0 ? (
+                    {loading ? (
+                        <Loader text="Loading requests..." />
+                    ) : currentRequests.length > 0 ? (
                         <div className="rental-requests-grid">
                             {currentRequests.map(req => (
                                 <RequestCard key={req.id} data={req} onStatusChange={refreshRequests} />

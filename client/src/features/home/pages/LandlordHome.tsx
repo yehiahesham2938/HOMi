@@ -12,6 +12,7 @@ import OptimizeListingModal from '../components/LandlordHomeComponents/optimizeL
 import { FiPlus, FiHome, FiCamera, FiBookOpen, FiCreditCard, FiStar, FiZap, FiMessageSquare } from 'react-icons/fi';
 import authService from '../../../services/auth.service';
 import propertyService from '../../../services/property.service';
+import Loader from '../../../components/global/Loader';
 import type { PropertyResponse } from '../../../services/property.service';
 import contractService, { type LandlordContract } from '../../../services/contract.service';
 import './LandlordHome.css';
@@ -114,9 +115,7 @@ const LandlordHome = () => {
 
           <main className="dashboard-container">
             {isLoading ? (
-              <div className="loading-state" style={{ textAlign: 'center', padding: '2rem' }}>
-                {t('landlordHome.loadingHomePage')}
-              </div>
+              <Loader text={t('landlordHome.loadingHomePage')} />
             ) : hasData ? (
               /* =========================================
                  PREMIUM POPULATED STATE (Dashboard)

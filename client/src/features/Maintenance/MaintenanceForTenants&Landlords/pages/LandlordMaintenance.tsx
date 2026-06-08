@@ -12,6 +12,7 @@ import maintenanceService, {
     type MaintenanceRequest,
 } from '../../../../services/maintenance.service';
 import socketService from '../../../../services/socket.service';
+import Loader from '../../../../components/global/Loader';
 
 function statusBadge(status: MaintenanceRequest['status']) {
     switch (status) {
@@ -142,7 +143,7 @@ const LandlordMaintenance: React.FC = () => {
                             </div>
 
                             {loading ? (
-                                <div className="empty-state-container"><h3>Loading…</h3></div>
+                                <Loader text="Loading maintenance data..." />
                             ) : requests.length === 0 ? (
                                 <div className="empty-state-container">
                                     <div className="empty-state-icon-box"><FaTools /></div>

@@ -44,3 +44,26 @@ export const updateRoommateRequestSchema = z.object({
 export const respondToMatchSchema = z.object({
     action: z.enum(['ACCEPTED', 'DECLINED']),
 });
+
+export const wishSchema = z.object({
+    wish: z.string().min(3).max(500),
+});
+
+export const connectSchema = z.object({
+    targetUserId: z.string().uuid(),
+    source: z.enum(['SMART', 'WISH', 'DIRECT']).optional(),
+    score: z.number().min(0).max(100).optional(),
+    reason: z.string().max(500).optional().nullable(),
+});
+
+const roomConfigSchema = z.object({
+    name: z.string(),
+    ensuite: z.boolean().optional(),
+    rent: z.number().min(0),
+    listed: z.boolean().optional(),
+});
+
+export const saveLeaseConfigSchema = z.object({
+    roommatesWanted: z.number().int().min(0),
+    rooms: z.array(roomConfigSchema),
+});

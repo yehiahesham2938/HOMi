@@ -24,6 +24,10 @@ export const NotificationType = {
     MAINTENANCE_RATED: 'MAINTENANCE_RATED',
     // Generic
     SYSTEM: 'SYSTEM',
+    // Visit requests
+    VISIT_REQUEST_RECEIVED: 'VISIT_REQUEST_RECEIVED',
+    VISIT_REQUEST_ACCEPTED: 'VISIT_REQUEST_ACCEPTED',
+    VISIT_REQUEST_DECLINED: 'VISIT_REQUEST_DECLINED',
 } as const;
 
 export type NotificationTypeValue =

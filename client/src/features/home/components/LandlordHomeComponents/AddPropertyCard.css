@@ -1,74 +1,81 @@
-/* client\src\features\home\components\LandlordHomeComponents\AddPropertyCard.css */
+/* AddPropertyCard.css */
 
 .add-property-card {
-    background: #ffffff;
-    border-radius: 24px;
-    padding: 12px;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border: 1px solid #f1f5f9;
-    width: 100%;
-    min-width: 0;
-    
+  background: var(--card-bg) !important;
+  border-radius: 24px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid var(--card-border);
+  width: 100%;
+  min-width: 0;
+  display: flex;
 }
 
 .dotted-border {
-    border: 2px dashed #cbd5e1;
-    border-radius: 18px;
-    padding: 40px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    height: 380px;
+  border: 2px dashed rgba(79, 70, 229, 0.35);
+  border-radius: 18px;
+  padding: 40px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  height: 100%;
+  width: 100%;
+  min-height: 380px;
 }
 
 .add-content {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
 .plus-icon {
-    font-size: 2.5rem;
-    color: #2563eb;
-    transition: all 0.4s ease;
+  font-size: 3rem;
+  color: var(--primary);
+  filter: drop-shadow(0 4px 10px var(--primary-glow));
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
 }
 
 .add-content h3 {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: #0f172a;
-    margin: 0;
-    letter-spacing: -0.5px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.02em;
 }
 
 .add-content p {
-    font-size: 0.9rem;
-    color: #64748b;
-    margin: 0;
-    font-weight: 500;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin: 0;
+  font-weight: 500;
+  max-width: 25ch;
+  line-height: 1.4;
 }
 
 /* Hover Shine Effects */
 .add-property-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.08);
-    border-color: #dbeafe;
+  transform: translateY(-5px);
+  box-shadow: var(--hover-shadow);
+  border-color: rgba(79, 70, 229, 0.3);
 }
 
 .add-property-card:hover .dotted-border {
-    border-color: #2563eb;
-    background: #f8faff;
+  border-color: var(--primary);
+  background: rgba(79, 70, 229, 0.02);
 }
 
 .add-property-card:hover .plus-icon {
-    transform: scale(1.2) rotate(90deg);
-    color: #1d4ed8;
+  transform: scale(1.1) rotate(90deg);
+  color: var(--primary-deep);
 }
 
 .add-property-card:active {
-    transform: scale(0.96);
+  transform: scale(0.97);
 }

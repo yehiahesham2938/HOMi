@@ -8,11 +8,14 @@ import {
   FaEnvelope,
   FaPhoneAlt
 } from 'react-icons/fa';
+import authService from '../../services/auth.service';
 import './footer.css';
 
 const Footer = () => {
   const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
+  const currentUser = authService.getCurrentUser();
+  const role = currentUser?.user?.role?.toUpperCase();
 
   return (
     <footer className="site-footer">
@@ -43,12 +46,37 @@ const Footer = () => {
           {/* Platform Links */}
           <div className="footer-links">
             <h4>{t('footer.platform')}</h4>
-            <Link to="/browse-properties">{t('footer.browseHomes')}</Link>
-            <Link to="/for-landlords">{t('footer.listProperty')}</Link>
-            <Link to="/homi-plus">{t('footer.homiPro')}</Link>
-            <Link to="/pricing">{t('footer.pricingFees')}</Link>
-            <Link to="/roommate-matching">{t('footer.roommateMatching')}</Link>
-            <Link to="/maintenance-providers">Maintenance Providers</Link>
+            {role === 'LANDLORD' ? (
+              <>
+                <Link to="/landlord-home">{t('header.dashboard')}</Link>
+                <Link to="/my-properties">{t('sidebar.myProperties')}</Link>
+                <Link to="/rental-requests">{t('sidebar.rentalRequests')}</Link>
+                <Link to="/landlord-contracts">{t('sidebar.contracts')}</Link>
+                <Link to="/landlord-payment">{t('sidebar.payments')}</Link>
+                <Link to="/landlord-maintenance">{t('sidebar.maintenance')}</Link>
+                <Link to="/homi-pro">{t('footer.homiPro')}</Link>
+              </>
+            ) : role === 'TENANT' ? (
+              <>
+                <Link to="/tenant-home">{t('header.dashboard')}</Link>
+                <Link to="/browse-properties">{t('footer.browseHomes')}</Link>
+                <Link to="/roommate-matching">{t('footer.roommateMatching')}</Link>
+                <Link to="/actives">{t('sidebar.activeProperties')}</Link>
+                <Link to="/tenant-contracts">{t('sidebar.contracts')}</Link>
+                <Link to="/tenant-payment">{t('sidebar.payments')}</Link>
+                <Link to="/tenant-maintenance">{t('sidebar.maintenance')}</Link>
+                <Link to="/homi-pro">{t('footer.homiPro')}</Link>
+              </>
+            ) : (
+              <>
+                <Link to="/browse-properties">{t('footer.browseHomes')}</Link>
+                <Link to="/for-landlords">{t('footer.listProperty')}</Link>
+                <Link to="/homi-pro">{t('footer.homiPro')}</Link>
+                <Link to="/pricing">{t('footer.pricingFees')}</Link>
+                <Link to="/roommate-matching">{t('footer.roommateMatching')}</Link>
+                <Link to="/maintenance-providers">Maintenance Providers</Link>
+              </>
+            )}
           </div>
 
           {/* Resources Links */}

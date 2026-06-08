@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FaTools, FaHistory, FaPlus } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import type { LandlordContract } from '../../../../services/contract.service';
+import maintenanceService, { type MaintenanceRequest } from '../../../../services/maintenance.service';
 import './MaintenanceRequests.css';
 
 interface MaintenanceRequestsProps {
@@ -13,9 +14,25 @@ const MaintenanceRequests: React.FC<MaintenanceRequestsProps> = ({ contract }) =
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const maintenanceResponsibilities = contract?.maintenanceResponsibilities ?? [];
-  const topResponsibilities = maintenanceResponsibilities.slice(0, 3);
-  const hasResponsibilities = topResponsibilities.length > 0;
+  const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        const data = await maintenanceService.listTenantRequests();
+        setRequests(data);
+      } catch (err) {
+        console.error('Failed to fetch maintenance requests', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRequests();
+  }, []);
+
+  const activeRequests = requests.filter(r => !['COMPLETED', 'CANCELLED', 'RESOLVED_BY_ADMIN'].includes(r.status));
+  const topRequest = activeRequests.length > 0 ? activeRequests[0] : null;
 
   return (
     <div className="card-base maintenance-dashboard">
@@ -27,41 +44,43 @@ const MaintenanceRequests: React.FC<MaintenanceRequestsProps> = ({ contract }) =
 
         <div className="maintenance-header-actions">
           <span className="request-id-pill">{t('tenantHomeComponents.noOpenRequests')}</span>
-          <button className="btn-ghost-history" onClick={() => navigate('/maintenance-requests')}>
+          <button className="btn-ghost-history" onClick={() => navigate('/tenant-maintenance?tab=active')}>
             <FaHistory /> <span>{t('tenantHomeComponents.history')}</span>
           </button>
         </div>
       </header>
 
-      <div className="active-request-card">
-        {hasResponsibilities ? (
+      <div className="active-request-card" onClick={() => navigate('/tenant-maintenance?tab=active')} style={{ cursor: 'pointer' }}>
+        {loading ? (
           <div className="request-body">
             <div className="issue-details">
-              <h4 className="issue-subject">{t('tenantHomeComponents.leaseResponsibilities')}</h4>
-              <div className="tech-eta-card" style={{ display: 'block' }}>
-                {topResponsibilities.map((responsibility) => (
-                  <p key={responsibility.id} className="eta-text" style={{ marginBottom: '8px' }}>
-                    <strong>{responsibility.area}:</strong>{' '}
-                    {responsibility.responsibleParty === 'LANDLORD' ? t('tenantHomeComponents.landlord') : t('tenantHomeComponents.tenant')}
-                  </p>
-                ))}
-              </div>
+              <h4 className="issue-subject">Loading...</h4>
             </div>
-
+          </div>
+        ) : topRequest ? (
+          <div className="request-body">
+            <div className="issue-details">
+              <h4 className="issue-subject" style={{ marginBottom: '4px' }}>{topRequest.title}</h4>
+              <p className="eta-text" style={{ color: '#64748b', fontSize: '0.85rem' }}>
+                {topRequest.category} • {new Date(topRequest.createdAt).toLocaleDateString()}
+              </p>
+            </div>
             <div className="request-timeline">
-              <div className="status-badge-premium">{t('tenantHomeComponents.configured')}</div>
+              <div className={`status-badge-premium status-${topRequest.status.toLowerCase()}`} style={{ textTransform: 'capitalize' }}>
+                {topRequest.status.replace(/_/g, ' ').toLowerCase()}
+              </div>
             </div>
           </div>
         ) : (
           <div className="request-body">
             <div className="issue-details">
-              <h4 className="issue-subject">{t('tenantHomeComponents.noMaintenanceItems')}</h4>
+              <h4 className="issue-subject">{t('tenantHomeComponents.noMaintenanceItems', 'No Active Issues')}</h4>
               <div className="tech-eta-card" style={{ display: 'block' }}>
-                <p className="eta-text">{t('tenantHomeComponents.maintenanceItemsAppearHere')}</p>
+                <p className="eta-text">{t('tenantHomeComponents.maintenanceItemsAppearHere', 'Your active maintenance requests will appear here.')}</p>
               </div>
             </div>
             <div className="request-timeline">
-              <div className="status-badge-premium">{t('landlordHomeComponents.clear')}</div>
+              <div className="status-badge-premium">{t('landlordHomeComponents.clear', 'Clear')}</div>
             </div>
           </div>
         )}
@@ -73,7 +92,7 @@ const MaintenanceRequests: React.FC<MaintenanceRequestsProps> = ({ contract }) =
             <FaTools className="floating-icon" />
           </div>
           <h4>{t('tenantHomeComponents.needMaintenanceSupport')}</h4>
-          <button className="btn-new-request" onClick={() => navigate('/maintenance-requests')}>
+          <button className="btn-new-request" onClick={() => navigate('/tenant-maintenance?tab=post')}>
             <FaPlus /> <span>{t('tenantHomeComponents.newMaintenanceRequest')}</span>
           </button>
         </div>

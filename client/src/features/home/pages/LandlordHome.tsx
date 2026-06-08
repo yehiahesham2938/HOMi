@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import Header from '../../../components/global/header';
 import Sidebar from '../../../components/global/Landlord/sidebar';
 import Footer from '../../../components/global/footer';
@@ -7,7 +8,6 @@ import PropertyCard from '../components/LandlordHomeComponents/PropertyCard';
 import AddPropertyCard from '../components/LandlordHomeComponents/AddPropertyCard';
 import Notifications from '../components/LandlordHomeComponents/Notifications';
 import PaymentState from '../components/LandlordHomeComponents/PaymentState';
-import AddPropertyModal from '../components/LandlordHomeComponents/AddPropertyModal';
 import OptimizeListingModal from '../components/LandlordHomeComponents/optimizeListingModal';
 import { FiPlus, FiHome, FiCamera, FiBookOpen, FiCreditCard, FiStar, FiZap, FiMessageSquare } from 'react-icons/fi';
 import authService from '../../../services/auth.service';
@@ -18,7 +18,7 @@ import './LandlordHome.css';
 
 const LandlordHome = () => {
   const { t } = useTranslation();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
   const [isOptimizeModalOpen, setIsOptimizeModalOpen] = useState(false);
   const [properties, setProperties] = useState<PropertyResponse[]>([]);
   const [contracts, setContracts] = useState<LandlordContract[]>([]);
@@ -73,35 +73,36 @@ const LandlordHome = () => {
   }, [fetchProperties]);
 
   const hasData = properties.length > 0;
-  const mappedProperties = properties.map((prop, index) => ({
-    id: prop.id || String(index),
-    name: prop.title,
-    address: prop.address,
-    status: (prop.status || '').toLowerCase(),
-    price: String(prop.monthlyPrice ?? ''),
-    imageUrl:
-      prop.images?.find((img) => img.isMain)?.imageUrl ||
-      prop.images?.[0]?.imageUrl ||
-      '/rentblue.jpg',
-    beds: prop.specifications?.bedrooms ?? 0,
-    baths: prop.specifications?.bathrooms ?? 0,
-    sqft: prop.specifications?.areaSqft ?? '—',
-    tenantName:
-      (
-        ((prop as unknown as {
-          currentTenant?: { firstName?: string; lastName?: string };
-          activeContract?: { tenant?: { firstName?: string; lastName?: string } };
-          tenant?: { firstName?: string; lastName?: string };
-        }).currentTenant &&
-          `${(prop as unknown as { currentTenant?: { firstName?: string; lastName?: string } }).currentTenant?.firstName || ''} ${(prop as unknown as { currentTenant?: { firstName?: string; lastName?: string } }).currentTenant?.lastName || ''}`.trim()) ||
-        ((prop as unknown as { activeContract?: { tenant?: { firstName?: string; lastName?: string } } }).activeContract?.tenant &&
-          `${(prop as unknown as { activeContract?: { tenant?: { firstName?: string; lastName?: string } } }).activeContract?.tenant?.firstName || ''} ${(prop as unknown as { activeContract?: { tenant?: { firstName?: string; lastName?: string } } }).activeContract?.tenant?.lastName || ''}`.trim()) ||
-        ((prop as unknown as { tenant?: { firstName?: string; lastName?: string } }).tenant &&
-          `${(prop as unknown as { tenant?: { firstName?: string; lastName?: string } }).tenant?.firstName || ''} ${(prop as unknown as { tenant?: { firstName?: string; lastName?: string } }).tenant?.lastName || ''}`.trim())
-      ) ||
-      t('landlordHome.noCurrentTenant'),
-    paymentStatus: prop.status?.toLowerCase() === 'rented' ? 'Paid' : 'Pending',
-  }));
+  const mappedProperties = properties.map((prop, index) => {
+    const activeContract = contracts.find(
+      (c) => c.property?.id === prop.id && c.status === 'ACTIVE'
+    );
+    const computedStatus = activeContract ? 'rented' : (prop.status || '').toLowerCase();
+    
+    let tenantName = t('landlordHome.noCurrentTenant');
+    if (activeContract?.tenant) {
+      tenantName = `${activeContract.tenant.firstName} ${activeContract.tenant.lastName}`.trim();
+    }
+
+    return {
+      id: prop.id || String(index),
+      name: prop.title,
+      address: prop.address,
+      status: computedStatus,
+      price: String(prop.monthlyPrice ?? ''),
+      imageUrl:
+        prop.images?.find((img) => img.isMain)?.imageUrl ||
+        prop.images?.[0]?.imageUrl ||
+        '/rentblue.jpg',
+      beds: prop.specifications?.bedrooms ?? 0,
+      baths: prop.specifications?.bathrooms ?? 0,
+      sqft: prop.specifications?.areaSqft ?? '—',
+      tenantName,
+      paymentStatus: computedStatus === 'rented' ? 'Paid' : 'Pending',
+      activeContract,
+      securityDeposit: prop.securityDeposit,
+    };
+  });
 
   return (
     <>
@@ -131,7 +132,7 @@ const LandlordHome = () => {
                 {/* Top Actions & Summary Row */}
                 <section className="dashboard-top-row">
                   <div className="action-widget">
-                    <AddPropertyCard onClick={() => setIsModalOpen(true)} />
+                    <AddPropertyCard onClick={() => navigate('/properties/add')} />
                   </div>
 
                   <div className="payment-widget">
@@ -155,7 +156,7 @@ const LandlordHome = () => {
                       <h2>{t('landlordHome.yourPortfolio')}</h2>
                       <span className="status-badge">{t('landlordHome.activeListings', { count: mappedProperties.length })}</span>
                     </div>
-                    <button className="btn-text-primary" onClick={() => setIsModalOpen(true)}>
+                    <button className="btn-text-primary" onClick={() => navigate('/properties/add')}>
                       <FiPlus size={18} /> {t('landlordHome.addNew')}
                     </button>
                   </div>
@@ -175,6 +176,8 @@ const LandlordHome = () => {
                         sqft={prop.sqft}
                         tenantName={prop.tenantName}
                         paymentStatus={prop.paymentStatus}
+                        activeContract={prop.activeContract}
+                        securityDeposit={prop.securityDeposit}
                       />
                     ))}
                   </div>
@@ -197,7 +200,7 @@ const LandlordHome = () => {
                     <h1>{t('landlordHome.startListingToday')}</h1>
                     <p>{t('landlordHome.reachThousandsTenants')}</p>
                     <div className="lh-hero-actions">
-                      <button className="lh-btn-primary" onClick={() => setIsModalOpen(true)}>
+                      <button className="lh-btn-primary" onClick={() => navigate('/properties/add')}>
                         <FiPlus size={20} /> {t('landlordHome.addProperty')}
                       </button>
                       <button className="lh-btn-secondary">
@@ -213,7 +216,7 @@ const LandlordHome = () => {
                     {/* 2. Getting Started Cards */}
                     <div className="lh-getting-started">
                       <div className="lh-cards-grid">
-                        <div className="lh-onboarding-card" onClick={() => setIsModalOpen(true)} style={{ cursor: 'pointer' }}>
+                        <div className="lh-onboarding-card" onClick={() => navigate('/properties/add')} style={{ cursor: 'pointer' }}>
                           <div className="lh-card-icon bg-blue"><FiHome /></div>
                           <span className="lh-step-badge">{t('landlordHome.step')} 1</span>
                           <h4>{t('landlordHome.addFirstProperty')}</h4>
@@ -250,7 +253,7 @@ const LandlordHome = () => {
                       </div>
                       <h3>{t('landlordHome.haventListedProperties')}</h3>
                       <p>{t('landlordHome.portfolioWaitingBuilt')}</p>
-                      <button className="lh-btn-outline" onClick={() => setIsModalOpen(true)}>
+                      <button className="lh-btn-outline" onClick={() => navigate('/properties/add')}>
                         <FiPlus /> {t('landlordHome.addProperty')}
                       </button>
                     </div>
@@ -303,14 +306,6 @@ const LandlordHome = () => {
       {/* ==================================================
           MODALS WRAPPED OUTSIDE THE MAIN LAYOUT CONTAINER 
           ================================================== */}
-      {isModalOpen && (
-        <AddPropertyModal
-          onClose={() => setIsModalOpen(false)}
-          onPropertyAdded={() => {
-            void fetchProperties();
-          }}
-        />
-      )}
 
       {isOptimizeModalOpen && (
         <OptimizeListingModal onClose={() => setIsOptimizeModalOpen(false)} />

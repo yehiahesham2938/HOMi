@@ -5,7 +5,6 @@ import Header from '../../../components/global/header';
 import Sidebar from '../../../components/global/Tenant/sidebar';
 import Footer from '../../../components/global/footer';
 import PropertyCard from '../../BrowseProperties/components/PropertyCard';
-import PropertyDetailModal from '../../BrowseProperties/components/PropertyDetailedModal';
 import { resolveLandlordUserIdFromPropertyResponse, type PropertyResponse } from '../../../services/property.service';
 import savedPropertiesService from '../../../services/saved-properties.service';
 
@@ -65,7 +64,7 @@ const mapFurnishingLabel = (furnishing: string | null): string => {
 const mapPropertyToUI = (property: PropertyResponse): SavedPropertyUI => {
     const mainImage = property.images.find((image) => image.isMain)?.imageUrl;
     const fallbackImage = property.images[0]?.imageUrl;
-    const image = mainImage || fallbackImage || 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=800&q=80';
+    const image = mainImage || fallbackImage || 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&q=80&w=800&q=80';
     const allImages = property.images.length > 0 ? property.images.map((img) => img.imageUrl) : [image];
     const tags = property.amenities.slice(0, 2).map((amenity) => amenity.name);
     const normalizedFurnishing = mapFurnishingLabel(property.furnishing);
@@ -117,8 +116,6 @@ const mapPropertyToUI = (property: PropertyResponse): SavedPropertyUI => {
 const SavedProperties: React.FC = () => {
     const navigate = useNavigate();
     const [savedItems, setSavedItems] = useState<SavedPropertyUI[]>([]);
-    const [selectedProperty, setSelectedProperty] = useState<SavedPropertyUI | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [showClearConfirm, setShowClearConfirm] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -161,8 +158,7 @@ const SavedProperties: React.FC = () => {
     }, [savedItems]);
 
     const handleOpenDetails = (property: SavedPropertyUI) => {
-        setSelectedProperty(property);
-        setIsModalOpen(true);
+        navigate(`/properties/${property.id}`);
     };
 
     const handleClearAll = async () => {
@@ -179,10 +175,6 @@ const SavedProperties: React.FC = () => {
         try {
             await savedPropertiesService.removeSavedProperty(normalized);
             setSavedItems((prev) => prev.filter((item) => item.id !== normalized));
-            if (selectedProperty?.id === normalized) {
-                setIsModalOpen(false);
-                setSelectedProperty(null);
-            }
         } catch {
             // Keep UI stable if API fails.
         }
@@ -346,16 +338,6 @@ const SavedProperties: React.FC = () => {
 
                 <Footer />
             </div>
-
-            {isModalOpen && selectedProperty && (
-                <PropertyDetailModal
-                    property={selectedProperty}
-                    onClose={() => setIsModalOpen(false)}
-                    isGuest={false}
-                    isSaved
-                    onToggleSave={handleToggleSave}
-                />
-            )}
         </div>
     );
 };

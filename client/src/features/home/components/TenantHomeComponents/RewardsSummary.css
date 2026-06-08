@@ -1,37 +1,59 @@
+/* RewardsSummary.css */
+
 .rewards-premium-container {
   position: relative;
   overflow: hidden;
   height: 415px;
-  padding: 1.2rem !important;
-  border-radius: 16px !important;
-  background: linear-gradient(140deg, #4338ca 0%, #4f46e5 45%, #3b82f6 100%);
+  padding: 1.5rem !important;
+  border-radius: 24px !important;
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, var(--primary-deep) 100%) !important;
   color: #ffffff;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 10px 30px -10px rgba(49, 46, 129, 0.3) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
+.rewards-premium-container:hover {
+  transform: translateY(-5px);
+  border-color: rgba(99, 102, 241, 0.4) !important;
+  box-shadow: 0 20px 45px -12px rgba(49, 46, 129, 0.5) !important;
+}
+
+/* Luxury card gloss shimmer */
 .glass-shimmer {
   position: absolute;
-  inset: -30% -20% auto auto;
-  width: 260px;
-  height: 260px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0));
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0) 45%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0) 55%
+  );
+  transform: rotate(-15deg);
   pointer-events: none;
+  z-index: 2;
+  animation: shine-flow 7s ease-in-out infinite;
 }
 
 .rewards-card-header,
 .rewards-main-display,
 .perks-footer {
   position: relative;
-  z-index: 1;
+  z-index: 3;
 }
 
 .rewards-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
 }
 
 .tier-badge {
@@ -39,99 +61,155 @@
   align-items: center;
   gap: 8px;
   border-radius: 999px;
-  padding: 8px 14px;
-  font-size: 0.95rem;
-  font-weight: 700;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .crown-icon {
-  color: #facc15;
+  color: #fbbf24;
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.5));
 }
 
 .info-trigger {
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.info-trigger:hover {
+  color: #ffffff;
 }
 
 .rewards-main-display {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-top: 0.25rem;
+  gap: 1.5rem;
 }
 
 .points-hero {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 1rem;
 }
 
 .star-ring {
-  width: 62px;
-  height: 62px;
+  width: 58px;
+  height: 58px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.14);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #facc15;
-  font-size: 1.8rem;
+  color: #fbbf24;
+  font-size: 1.6rem;
+  box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.05);
+}
+
+.points-group {
+  display: flex;
+  flex-direction: column;
 }
 
 .points-value {
   margin: 0;
-  font-size: 3.2rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: 3.5rem;
   line-height: 1;
+  font-weight: 900;
   letter-spacing: -0.04em;
+  color: #ffffff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .points-label {
   margin: 4px 0 0;
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.02em;
 }
 
+/* Tier progress */
 .tier-progress-section {
-  margin-top: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .progress-labels {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 8px;
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .tier-progress-bar {
   height: 8px;
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.35);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   overflow: hidden;
 }
 
 .tier-progress-fill {
   height: 100%;
   border-radius: 999px;
-  background: #ffffff;
+  background: linear-gradient(90deg, #6366f1 0%, #a855f7 50%, #fbbf24 100%);
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Perks footer */
 .perks-footer {
-  margin-top: auto;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 1rem;
 }
 
 .perk-tag {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 10px;
+  padding: 6px 12px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  font-size: 0.88rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.78rem;
   font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  transition: all 0.2s ease;
+}
+
+.perk-tag:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.perk-tag svg {
+  color: #fbbf24;
+}
+
+@keyframes shine-flow {
+  0% {
+    left: -150%;
+    top: -150%;
+  }
+  50% {
+    left: 50%;
+    top: 50%;
+  }
+  100% {
+    left: 100%;
+    top: 100%;
+  }
 }

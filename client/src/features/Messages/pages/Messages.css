@@ -11,20 +11,22 @@
   display: flex;
   flex-direction: column;
   height: calc(100vh - 78px);
-  min-height: 0;
   margin-top: 78px;
   margin-left: 260px;
+  box-sizing: border-box;
+  min-height: 0;
 }
 
 .messages-hub-container {
   flex: 1;
-  min-height: 0;
   width: 100%;
   margin: 0;
   display: flex;
   background: #ffffff;
   border-radius: 0px;
   border: 1px solid #e2e8f0;
-  overflow: hidden; /* Clips children to the border radius */
+  overflow: hidden;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
+  min-height: 0;
+  height: 100%;
 }

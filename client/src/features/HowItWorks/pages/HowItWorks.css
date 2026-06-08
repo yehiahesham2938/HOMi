@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap');
 
 .how-page-layout {
   --how-primary: #2563eb;
@@ -8,6 +9,16 @@
   --how-muted: #64748b;
   --how-border: rgba(226, 232, 240, 0.9);
   --how-card: rgba(255, 255, 255, 0.75);
+
+  --blue: #2563eb;
+  --blue-light: #eff6ff;
+  --border-blue: rgba(37, 99, 235, 0.15);
+  --gray-900: #0f172a;
+  --gray-700: #334155;
+  --text-muted: #64748b;
+  --border: rgba(226, 232, 240, 0.9);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
 
   display: flex;
   min-height: 100vh;
@@ -43,8 +54,8 @@
 .how-hero {
   position: relative;
   overflow: hidden;
-  padding: 120px 0 72px;
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(56, 189, 248, 0.12) 45%, rgba(7, 89, 133, 0.08) 100%);
+  padding: 140px 0 80px;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.18) 0%, rgba(56, 189, 248, 0.12) 50%, rgba(7, 89, 133, 0.06) 100%);
   border-bottom: 1px solid var(--how-border);
 }
 
@@ -60,13 +71,36 @@
   pointer-events: none;
 }
 
-.how-hero-inner {
-  position: relative;
-  z-index: 1;
-  max-width: 860px;
+.how-hero-container {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
-  text-align: center;
+}
+
+@media(max-width: 1024px) {
+  .how-hero-container {
+    grid-template-columns: 1fr;
+    gap: 4rem;
+    text-align: center;
+  }
+}
+
+.how-hero-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  z-index: 2;
+}
+
+@media(max-width: 1024px) {
+  .how-hero-left {
+    align-items: center;
+  }
 }
 
 .how-badge {
@@ -84,23 +118,261 @@
   text-transform: uppercase;
 }
 
-.how-hero-inner h1 {
-  margin: 18px 0 12px;
-  font-size: clamp(2.2rem, 4vw, 3.4rem);
-  line-height: 1.05;
-  font-weight: 900;
+.how-hero-left h1 {
+  margin: 18px 0 16px;
+  font-family: 'Clash Display', sans-serif;
+  font-size: clamp(2.4rem, 4.5vw, 3.8rem);
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -1.5px;
+  color: var(--gray-900);
 }
 
-.how-hero-inner h1 span {
-  color: var(--how-primary);
+.how-hero-left h1 .gradient-text {
+  background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
 }
 
-.how-hero-inner p {
-  margin: 0 auto;
-  max-width: 640px;
-  color: var(--how-muted);
+.how-hero-subtitle {
+  color: var(--text-muted);
   font-size: 1.1rem;
   line-height: 1.7;
+  margin-bottom: 2rem;
+  max-width: 600px;
+}
+
+/* Mock Dashboard Card */
+.how-hero-right {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.mock-dashboard-card {
+  width: 100%;
+  max-width: 440px;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+  position: relative;
+  transition: all 0.3s ease;
+  z-index: 2;
+  text-align: left;
+}
+
+.mock-dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 30px 60px rgba(37, 99, 235, 0.15);
+}
+
+.how-hero-right::before {
+  content: '';
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.25) 0%, transparent 70%);
+  top: -40px;
+  right: -40px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.how-hero-right::after {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, transparent 70%);
+  bottom: -40px;
+  left: -40px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.mock-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.mock-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mock-avatar {
+  width: 42px;
+  height: 42px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.mock-user-info h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.mock-badge-verified {
+  font-size: 0.72rem;
+  color: #10b981;
+  font-weight: 700;
+}
+
+.mock-status-pill {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 50px;
+}
+
+.mock-status-pill.success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.mock-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mock-rent-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.mock-rent-strip .label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.mock-rent-strip .value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--gray-900);
+  font-family: 'Clash Display', sans-serif;
+}
+
+.mock-due-strip {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--gray-700);
+  padding: 0 4px;
+}
+
+.mock-due-strip .status-label.paid {
+  color: #10b981;
+  font-weight: 700;
+}
+
+.mock-due-strip .status-label.trend {
+  color: #10b981;
+  font-weight: 700;
+}
+
+.mock-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.05);
+  margin: 8px 0;
+}
+
+.mock-stats-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.mock-stat-col {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.mock-stat-col .stat-lbl {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mock-stat-col .stat-val {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-top: 2px;
+}
+
+.mock-stat-col .stat-val.compatibility {
+  color: var(--blue);
+}
+
+.mock-stat-col .stat-val.highlight {
+  color: #16a34a;
+}
+
+/* Floating Glass Chips */
+.floating-glass-chip {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50px;
+  padding: 10px 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  font-size: 0.82rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  animation: float-chip 4s ease-in-out infinite;
+}
+
+.floating-glass-chip.chip-1 {
+  top: -20px;
+  right: -30px;
+}
+
+.floating-glass-chip.chip-2 {
+  bottom: -15px;
+  left: -20px;
+  animation-delay: 2s;
+}
+
+@keyframes float-chip {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 .how-cta-row {
@@ -198,74 +470,191 @@
   margin-bottom: 22px;
 }
 
-.how-steps-grid {
+/* ── REVEAL ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Steps Timeline Alternating Rows */
+.how-steps-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 3rem;
+}
+
+.step-row {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  width: 100%;
+  margin: 0 auto 5rem;
+  padding-bottom: 5rem;
+  border-bottom: 1px solid var(--border);
 }
 
-.how-step-card {
-  background: var(--how-card);
-  border: 1px solid rgba(226, 232, 240, 0.95);
-  border-radius: 18px;
-  padding: 20px 18px;
-  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.03);
-  backdrop-filter: blur(12px);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-  min-height: 210px;
+.step-row:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
-.how-step-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(37, 99, 235, 0.25);
-  box-shadow: 0 28px 60px rgba(37, 99, 235, 0.10);
+.step-row.reverse {
+  direction: rtl;
 }
 
-.how-step-top {
+.step-row.reverse > * {
+  direction: ltr;
+}
+
+@media(max-width: 760px) {
+  .step-row {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .step-row.reverse {
+    direction: ltr;
+  }
+}
+
+/* Step number badge */
+.step-number-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.2rem;
+}
+
+.snb-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  font-family: 'Clash Display', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
 }
 
-.how-step-number {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  display: inline-flex;
+.snb-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--blue);
+}
+
+.step-content-title {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.8rem;
+}
+
+.step-content-desc {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.75;
+  margin-bottom: 1.5rem;
+}
+
+.step-bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 1.5rem;
+}
+
+.step-bullet {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--gray-700);
+}
+
+.step-bullet-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--blue-light);
+  display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(37, 99, 235, 0.12);
-  border: 1px solid rgba(37, 99, 235, 0.25);
-  color: var(--how-primary);
-  font-weight: 900;
+  flex-shrink: 0;
+  margin-top: 1px;
+  font-size: 0.65rem;
+  color: var(--blue);
+  font-weight: 700;
 }
 
-.how-step-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(56, 189, 248, 0.14);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  color: var(--how-primary);
+.step-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-.how-step-card h3 {
-  margin: 0 0 8px;
-  font-size: 1.05rem;
-  font-weight: 900;
-}
-
-.how-step-card p {
-  margin: 0;
-  color: var(--how-muted);
-  line-height: 1.6;
+.step-tag {
+  font-size: 0.75rem;
+  padding: 0.28rem 0.8rem;
+  border-radius: 50px;
+  background: var(--blue-light);
+  color: var(--blue);
   font-weight: 600;
-  font-size: 0.92rem;
+  border: 1px solid var(--border-blue);
+}
+
+/* Photo panel */
+.step-photo {
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+}
+
+.step-photo img {
+  width: 100%;
+  height: 340px;
+  object-fit: cover;
+  display: block;
+}
+
+.step-photo-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.75), transparent);
+  padding: 1.2rem 1.5rem;
+  color: #fff;
+}
+
+.step-photo-caption strong {
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: block;
+}
+
+.step-photo-caption span {
+  font-size: 0.78rem;
+  opacity: 0.8;
 }
 
 .how-benefits {
@@ -467,9 +856,6 @@
 }
 
 @media (max-width: 1100px) {
-  .how-steps-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
   .how-benefits-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

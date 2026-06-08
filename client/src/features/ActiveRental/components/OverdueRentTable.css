@@ -1,12 +1,23 @@
 .overdue-rent-card {
     background: #ffffff;
-    border-radius: 24px;
-    border: 1px solid #fecaca;
-    padding: 28px;
+    border-radius: 28px;
+    border: 1px solid rgba(239, 68, 68, 0.18);
+    padding: 30px;
     margin-top: 24px;
-    box-shadow: 0 18px 50px rgba(220, 38, 38, 0.08);
+    box-shadow: 
+        0 20px 50px rgba(239, 68, 68, 0.05),
+        0 4px 12px rgba(239, 68, 68, 0.02);
     position: relative;
     overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.overdue-rent-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 28px 60px rgba(239, 68, 68, 0.08),
+        0 10px 20px rgba(239, 68, 68, 0.03);
+    border-color: rgba(239, 68, 68, 0.3);
 }
 
 .overdue-rent-card::before {
@@ -16,7 +27,7 @@
     left: 0;
     right: 0;
     height: 5px;
-    background: linear-gradient(90deg, #ef4444, #dc2626);
+    background: linear-gradient(90deg, #f87171, #dc2626);
 }
 
 .overdue-rent-header {
@@ -25,12 +36,12 @@
     align-items: flex-start;
     gap: 24px;
     flex-wrap: wrap;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
 
 .overdue-rent-headline {
     display: flex;
-    gap: 14px;
+    gap: 16px;
     align-items: flex-start;
     flex: 1;
     min-width: 240px;
@@ -40,33 +51,36 @@
     width: 44px;
     height: 44px;
     border-radius: 14px;
-    background: #fee2e2;
-    color: #b91c1c;
+    background: rgba(239, 68, 68, 0.08);
+    color: #dc2626;
     display: grid;
     place-items: center;
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.1);
 }
 
 .overdue-rent-eyebrow {
     display: inline-block;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 800;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #b91c1c;
-    margin-bottom: 4px;
+    color: #dc2626;
+    margin-bottom: 6px;
 }
 
 .overdue-rent-headline h3 {
-    margin: 0 0 4px;
-    font-size: 1.2rem;
+    margin: 0 0 6px;
+    font-size: 1.25rem;
+    font-weight: 850;
     color: #0f172a;
+    letter-spacing: -0.01em;
 }
 
 .overdue-rent-headline p {
     margin: 0;
-    font-size: 0.88rem;
+    font-size: 0.9rem;
     color: #64748b;
     max-width: 520px;
     line-height: 1.45;
@@ -74,116 +88,188 @@
 
 .overdue-rent-total {
     text-align: right;
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    padding: 14px 18px;
-    border-radius: 14px;
+    background: rgba(239, 68, 68, 0.04);
+    border: 1.5px solid rgba(239, 68, 68, 0.15);
+    padding: 14px 20px;
+    border-radius: 16px;
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
 .overdue-rent-total span {
-    font-size: 0.7rem;
-    font-weight: 700;
+    font-size: 0.68rem;
+    font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #b91c1c;
+    color: #dc2626;
 }
 
 .overdue-rent-total strong {
     font-size: 1.5rem;
-    color: #b91c1c;
-    font-weight: 800;
+    color: #dc2626;
+    font-weight: 850;
     line-height: 1;
 }
 
-.overdue-rent-table-wrapper {
+/* Installment card list */
+.overdue-installments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.overdue-installment-row-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-radius: 20px;
     border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    overflow: hidden;
-    margin-bottom: 16px;
-}
-
-.overdue-rent-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    font-size: 0.88rem;
-}
-
-.overdue-rent-table thead th {
-    text-align: left;
     background: #f8fafc;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.overdue-installment-row-card:hover {
+    transform: translateY(-1.5px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.03);
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+.overdue-installment-row-card.overdue {
+    background: rgba(239, 68, 68, 0.02);
+    border-color: rgba(239, 68, 68, 0.15);
+}
+
+.overdue-installment-row-card.due {
+    background: rgba(245, 158, 11, 0.02);
+    border-color: rgba(245, 158, 11, 0.15);
+}
+
+.installment-card-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.installment-calendar-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+    background: rgba(100, 116, 139, 0.08);
     color: #475569;
-    padding: 12px 14px;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    border-bottom: 1px solid #e2e8f0;
 }
 
-.overdue-rent-table tbody td {
-    padding: 12px 14px;
-    border-bottom: 1px solid #f1f5f9;
-    color: #0f172a;
-    font-weight: 500;
+.overdue-installment-row-card.overdue .installment-calendar-icon {
+    background: rgba(239, 68, 68, 0.08);
+    color: #dc2626;
 }
 
-.overdue-rent-table tbody tr:last-child td {
-    border-bottom: 0;
+.overdue-installment-row-card.due .installment-calendar-icon {
+    background: rgba(245, 158, 11, 0.08);
+    color: #d97706;
 }
 
-.overdue-rent-table tbody tr.overdue-row td {
-    background: rgba(254, 226, 226, 0.55);
-    color: #b91c1c;
+.installment-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
-.overdue-rent-table tbody tr.overdue-row td strong {
-    color: #b91c1c;
+.installment-label {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #1e293b;
 }
 
-.overdue-rent-table tbody tr.due-row td {
-    background: rgba(254, 243, 199, 0.45);
-    color: #92400e;
+.overdue-installment-row-card.overdue .installment-label { color: #b91c1c; }
+.overdue-installment-row-card.due .installment-label { color: #92400e; }
+
+.installment-deadline {
+    font-size: 0.78rem;
+    color: #64748b;
+    font-weight: 550;
 }
 
-.overdue-rent-table tbody tr.due-row td strong {
-    color: #92400e;
+.installment-card-right {
+    display: flex;
+    align-items: center;
+    gap: 28px;
 }
+
+.installment-pricing {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+    gap: 2px;
+}
+
+.pricing-rent {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.pricing-late-fee {
+    font-size: 0.78rem;
+    color: #dc2626;
+    font-weight: 750;
+}
+
+.installment-totals-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.installment-totals-group strong {
+    font-size: 1.1rem;
+    font-weight: 850;
+}
+
+.overdue-installment-row-card.overdue .installment-totals-group strong { color: #dc2626; }
+.overdue-installment-row-card.due .installment-totals-group strong { color: #d97706; }
 
 .overdue-row-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 0.72rem;
-    font-weight: 700;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.02em;
     border: 1px solid transparent;
 }
 
 .overdue-row-pill.overdue {
-    background: #fee2e2;
-    color: #b91c1c;
-    border-color: #fca5a5;
+    background: rgba(239, 68, 68, 0.08);
+    color: #dc2626;
+    border-color: rgba(239, 68, 68, 0.15);
 }
 
 .overdue-row-pill.due {
-    background: #fef3c7;
-    color: #92400e;
-    border-color: #fcd34d;
+    background: rgba(245, 158, 11, 0.08);
+    color: #d97706;
+    border-color: rgba(245, 158, 11, 0.15);
 }
 
+/* Summary Box */
 .overdue-rent-summary {
     background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 14px 16px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 16px 20px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 18px;
+    gap: 10px;
+    margin-bottom: 22px;
 }
 
 .overdue-rent-summary-row {
@@ -192,6 +278,7 @@
     align-items: center;
     color: #475569;
     font-size: 0.92rem;
+    font-weight: 550;
 }
 
 .overdue-rent-summary-row span {
@@ -201,32 +288,33 @@
 }
 
 .overdue-rent-summary-row.warn {
-    color: #b91c1c;
+    color: #dc2626;
 }
 
 .overdue-rent-summary-row.credit {
-    color: #065f46;
+    color: #059669;
 }
 
 .overdue-rent-summary-row.total {
     border-top: 1px dashed #cbd5e1;
-    margin-top: 4px;
-    padding-top: 10px;
+    margin-top: 6px;
+    padding-top: 12px;
     color: #0f172a;
-    font-size: 1.02rem;
+    font-size: 1.05rem;
+    font-weight: 750;
 }
 
 .overdue-rent-summary-row.total strong {
-    color: #b91c1c;
-    font-size: 1.15rem;
+    color: #dc2626;
+    font-size: 1.25rem;
 }
 
 .overdue-rent-pay-btn {
     width: 100%;
-    background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     color: white;
     border: 0;
-    padding: 18px 22px;
+    padding: 18px 24px;
     border-radius: 18px;
     font-weight: 800;
     font-size: 1.05rem;
@@ -235,17 +323,17 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    box-shadow: 0 18px 36px rgba(239, 68, 68, 0.35);
-    transition: transform 0.12s ease, box-shadow 0.18s ease, opacity 0.15s ease;
+    box-shadow: 0 10px 24px rgba(220, 38, 38, 0.25);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .overdue-rent-pay-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 22px 44px rgba(239, 68, 68, 0.42);
+    box-shadow: 0 14px 30px rgba(220, 38, 38, 0.35);
 }
 
 .overdue-rent-pay-btn:disabled {
-    opacity: 0.65;
+    opacity: 0.55;
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
@@ -255,17 +343,19 @@
     text-align: center;
     font-size: 0.78rem;
     color: #64748b;
-    margin: 12px 0 0;
+    margin: 14px 0 0;
+    font-weight: 550;
 }
 
 @media (max-width: 720px) {
     .overdue-rent-card {
-        padding: 22px 18px;
+        padding: 24px 18px;
     }
 
     .overdue-rent-header {
         flex-direction: column;
         align-items: stretch;
+        gap: 16px;
     }
 
     .overdue-rent-total {
@@ -275,12 +365,14 @@
         justify-content: space-between;
     }
 
-    .overdue-rent-table {
-        font-size: 0.82rem;
+    .overdue-installment-row-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
     }
 
-    .overdue-rent-table thead th,
-    .overdue-rent-table tbody td {
-        padding: 10px 10px;
+    .installment-card-right {
+        width: 100%;
+        justify-content: space-between;
     }
 }

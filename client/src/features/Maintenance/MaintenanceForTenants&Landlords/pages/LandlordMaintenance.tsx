@@ -75,44 +75,66 @@ const LandlordMaintenance: React.FC = () => {
     }, [requests]);
 
     return (
-        <div className="landlord-maintenance-layout">
-            <Sidebar />
-            <div className="landlord-maintenance-content">
-                <Header />
+        <div className="landlord-maintenance-hub-wrapper">
+            <div className="landlord-maintenance-layout">
+                <Sidebar />
+                <div className="landlord-maintenance-content">
+                    <Header />
 
-                <main className="maintenance-main-container">
-                    <header className="maintenance-hero">
-                        <div className="hero-text">
-                            <span className="pre-title">Property care overview</span>
-                            <h1>Maintenance for your properties</h1>
-                            <p>Watch over every maintenance event happening at your properties — fully transparent.</p>
-                        </div>
+                    <main className="maintenance-main-container">
+                        <header className="maintenance-hero">
+                            <div className="hero-glass-mesh"></div>
+                            <div className="hero-text">
+                                <span className="pre-title">Property care overview</span>
+                                <h1>Maintenance for your properties</h1>
+                                <p>Watch over every maintenance event happening at your properties — fully transparent.</p>
+                            </div>
 
-                        <div className="maintenance-quick-stats">
-                            <div className="mini-stat">
-                                <span className="stat-num">{totals.active}</span>
-                                <span className="stat-desc">Active issues</span>
+                            <div className="maintenance-quick-stats">
+                                <div className="mini-stat">
+                                    <div className="stat-icon-wrapper">
+                                        <FaTools className="stat-icon" />
+                                    </div>
+                                    <div className="stat-text-group">
+                                        <span className="stat-num">{totals.active}</span>
+                                        <span className="stat-desc">Active issues</span>
+                                    </div>
+                                </div>
+                                <div className="mini-stat accent">
+                                    <div className="stat-icon-wrapper">
+                                        <FaClock className="stat-icon" />
+                                    </div>
+                                    <div className="stat-text-group">
+                                        <span className="stat-num">{totals.open}</span>
+                                        <span className="stat-desc">Awaiting maintainer</span>
+                                    </div>
+                                </div>
+                                <div className="mini-stat warning-stat">
+                                    <div className="stat-icon-wrapper">
+                                        <FaExclamationTriangle className="stat-icon" />
+                                    </div>
+                                    <div className="stat-text-group">
+                                        <span className="stat-num">{totals.disputes}</span>
+                                        <span className="stat-desc">Open disputes</span>
+                                    </div>
+                                </div>
+                                <div className="mini-stat wallet-stat">
+                                    <div className="stat-icon-wrapper">
+                                        <FaWallet className="stat-icon" />
+                                    </div>
+                                    <div className="stat-text-group">
+                                        <span className="stat-num">EGP {totals.landlordCharges.toFixed(0)}</span>
+                                        <span className="stat-desc">Charged to you</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="mini-stat accent">
-                                <span className="stat-num">{totals.open}</span>
-                                <span className="stat-desc">Awaiting maintainer</span>
-                            </div>
-                            <div className="mini-stat">
-                                <span className="stat-num">{totals.disputes}</span>
-                                <span className="stat-desc">Open disputes</span>
-                            </div>
-                            <div className="mini-stat accent">
-                                <span className="stat-num">EGP {totals.landlordCharges.toFixed(0)}</span>
-                                <span className="stat-desc">Charged to you (deducted from rent)</span>
-                            </div>
-                        </div>
-                    </header>
-
+                        </header>
+                    </main>
                     {error && <div style={{ padding: '0.75rem 1rem', background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', borderRadius: 12, marginBottom: '1rem' }}>{error}</div>}
 
-                    <section className="tab-content-wrapper">
-                        <div className="tab-pane animate-in">
-                            <div className="section-header">
+                    <section className="l-tab-content-wrapper">
+                        <div className="l-tab-pane animate-in">
+                            <div className="l-section-header">
                                 <div>
                                     <h2>All maintenance requests</h2>
                                     <p>Notifications about each event are also delivered to your inbox.</p>
@@ -158,7 +180,7 @@ const LandlordMaintenance: React.FC = () => {
                                                     <span className="value">
                                                         {req.provider
                                                             ? req.provider.businessName ??
-                                                                `${req.provider.firstName} ${req.provider.lastName}`.trim()
+                                                            `${req.provider.firstName} ${req.provider.lastName}`.trim()
                                                             : '—'}
                                                     </span>
                                                 </div>
@@ -190,52 +212,149 @@ const LandlordMaintenance: React.FC = () => {
                             )}
                         </div>
                     </section>
-                </main>
+                    {selected && (
+                        <div className="req-modal-overlay" onClick={() => setSelected(null)}>
+                            <div className="req-modal modal-md-width" onClick={(e) => e.stopPropagation()}>
 
-                {selected && (
-                    <div className="lt-modal-overlay" onClick={() => setSelected(null)}>
-                        <div className="lt-modal" onClick={(e) => e.stopPropagation()}>
-                            <header className="lt-modal-header">
-                                <div>
-                                    <h2>{selected.title}</h2>
-                                    <p>{selected.description}</p>
+                                <header className="req-modal-header">
+                                    <div className="req-modal-title-group">
+                                        <span className="modal-pre-title">
+                                            Request Details
+                                        </span>
+                                        <h2>{selected.title}</h2>
+                                        <div className="modal-badge-group">
+                                            <span className={`badge ${statusBadge(selected.status).cls}`}>
+                                                {statusBadge(selected.status).label}
+                                            </span>
+                                            <span className={`badge urgency-pill urgency-${selected.urgency?.toLowerCase()}`}>
+                                                {selected.urgency}
+                                            </span>
+                                            <span className="modal-category-badge">
+                                                {selected.category}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <button className="req-close-btn" onClick={() => setSelected(null)}>×</button>
+                                </header>
+
+                                <div className="req-modal-body">
+
+                                    <div className="modal-section">
+                                        <h4 className="modal-section-title">Description</h4>
+                                        <p className="req-modal-desc">
+                                            {selected.description}
+                                        </p>
+                                    </div>
+
+                                    <div className="modal-grid-two-col">
+                                        {/* Property and Resident */}
+                                        <div className="modal-panel-card">
+                                            <h4 className="modal-panel-title">
+                                                Property & Resident
+                                            </h4>
+                                            <div className="panel-items-list">
+                                                {selected.property && (
+                                                    <div className="panel-item-group">
+                                                        <span className="panel-item-label">Property</span>
+                                                        <strong className="panel-item-value">{selected.property.title}</strong>
+                                                        <span className="panel-item-subtext">{selected.property.address}</span>
+                                                    </div>
+                                                )}
+                                                <div className="panel-item-group">
+                                                    <span className="panel-item-label">Tenant</span>
+                                                    <strong className="panel-item-value">
+                                                        {selected.tenant ? `${selected.tenant.firstName} ${selected.tenant.lastName}`.trim() : '—'}
+                                                    </strong>
+                                                    {selected.tenant?.phone && (
+                                                        <span className="panel-item-subtext">{selected.tenant.phone}</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Maintainer & Financials */}
+                                        <div className="modal-panel-card">
+                                            <h4 className="modal-panel-title">
+                                                Provider & Cost Allocation
+                                            </h4>
+                                            <div className="panel-items-list">
+                                                <div className="panel-item-group">
+                                                    <span className="panel-item-label">Assigned Maintainer</span>
+                                                    <strong className="panel-item-value">
+                                                        {selected.provider
+                                                            ? selected.provider.businessName ?? `${selected.provider.firstName} ${selected.provider.lastName}`.trim()
+                                                            : 'Not Assigned Yet'}
+                                                    </strong>
+                                                    {selected.provider && selected.provider.rating !== undefined && (
+                                                        <span className="panel-rating">
+                                                            ★ {selected.provider.rating.toFixed(1)} ({selected.provider.ratingsCount} reviews)
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="panel-item-group">
+                                                    <span className="panel-item-label">Charge Party & Agreed Price</span>
+                                                    <strong className="panel-item-value">
+                                                        {selected.chargeParty === 'LANDLORD' ? 'Landlord Pays' : 'Tenant Pays'}
+                                                    </strong>
+                                                    <span className="panel-price">
+                                                        {selected.agreedPrice != null ? `EGP ${Number(selected.agreedPrice).toFixed(2)}` : 'Awaiting Bid'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {selected.completionNotes && (
+                                        <div className="notes-panel notes-success">
+                                            <h4 className="notes-title">Provider Completion Notes</h4>
+                                            <p className="notes-content">{selected.completionNotes}</p>
+                                        </div>
+                                    )}
+
+                                    {selected.disputedReason && (
+                                        <div className="notes-panel notes-danger">
+                                            <h4 className="notes-title">Dispute Reason</h4>
+                                            <p className="notes-content">{selected.disputedReason}</p>
+                                        </div>
+                                    )}
+
+                                    {selected.images.length > 0 && (
+                                        <div className="req-modal-gallery">
+                                            <strong className="gallery-title">Issue Photos</strong>
+                                            <div className="gallery-grid">
+                                                {selected.images.map((u, i) => (
+                                                    <img key={i} src={u} alt={`issue ${i + 1}`} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {selected.completionImages.length > 0 && (
+                                        <div className="req-modal-gallery">
+                                            <strong className="gallery-title">Completion Photos</strong>
+                                            <div className="gallery-grid">
+                                                {selected.completionImages.map((u, i) => (
+                                                    <img key={i} src={u} alt={`completion ${i + 1}`} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                                <button className="lt-close-btn" onClick={() => setSelected(null)}>×</button>
-                            </header>
-                            <div className="lt-modal-body">
-                                <div><strong>Status:</strong> {selected.status}</div>
-                                <div><strong>Charge:</strong> {selected.chargeParty}</div>
-                                <div><strong>Agreed price:</strong> {selected.agreedPrice ? `EGP ${Number(selected.agreedPrice).toFixed(2)}` : '—'}</div>
-                                {selected.images.length > 0 && (
-                                    <div>
-                                        <strong>Issue photos:</strong>
-                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
-                                            {selected.images.map((u, i) => <img key={i} src={u} alt={`issue ${i + 1}`} style={{ width: 90, height: 90, borderRadius: 8, objectFit: 'cover' }} />)}
-                                        </div>
-                                    </div>
-                                )}
-                                {selected.completionImages.length > 0 && (
-                                    <div>
-                                        <strong>Completion photos:</strong>
-                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
-                                            {selected.completionImages.map((u, i) => <img key={i} src={u} alt={`completion ${i + 1}`} style={{ width: 90, height: 90, borderRadius: 8, objectFit: 'cover' }} />)}
-                                        </div>
-                                    </div>
-                                )}
+
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {trackRequest && (
-                    <LiveTrackingModal
-                        isOpen
-                        onClose={() => setTrackRequest(null)}
-                        request={trackRequest}
-                    />
-                )}
+                    {trackRequest && (
+                        <LiveTrackingModal
+                            isOpen
+                            onClose={() => setTrackRequest(null)}
+                            request={trackRequest}
+                        />
+                    )}
 
-                <Footer />
+                    <Footer />
+                </div>
             </div>
         </div>
     );

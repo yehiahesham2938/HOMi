@@ -1,380 +1,236 @@
 /* client\src\features\BrowseProperties\components\PropertyCard.css */
 
-.tenant-card-premium {
-    background: #ffffff;
-    border-radius: 20px;
-    border: 1px solid rgba(226, 232, 240, 0.8);
-    overflow: hidden;
-    position: relative;
-    transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
-    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
-    cursor: pointer;
+.prop-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.3s;
+  cursor: pointer;
+  width: 100%;
 }
 
-/* Hover State: Deep Shadow and Lift */
-.tenant-card-premium:hover {
-    transform: translateY(-12px) scale(1.01);
-    box-shadow: 0 40px 80px -20px rgba(15, 23, 42, 0.15);
-    border-color: #3b82f6;
+.prop-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-5px);
+  border-color: var(--border-blue);
 }
 
-/* Media Section with Image Zoom */
-.card-media {
-    height: 240px;
-    position: relative;
-    overflow: hidden;
+.prop-img {
+  position: relative;
+  overflow: hidden;
 }
 
-.card-media img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 1.2s cubic-bezier(0.2, 1, 0.3, 1);
+.prop-img img {
+  width: 100%;
+  height: 210px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s;
 }
 
-.tenant-card-premium:hover .card-media img {
-    transform: scale(1.15);
+.prop-card:hover .prop-img img {
+  transform: scale(1.05);
 }
 
-/* Glass Overlay Gradient */
-.card-overlay-gradient {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.7) 100%);
-    opacity: 0.8;
+.prop-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 0.3rem 0.85rem;
+  border-radius: 50px;
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
-/* Luxury Badges */
-.card-badges {
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    display: flex;
-    gap: 8px;
-    z-index: 2;
+.prop-badge.available {
+  background: rgba(74, 222, 128, 0.92);
+  color: #14532d;
 }
 
-.badge-luxury {
-    background: rgba(15, 23, 42, 0.75);
-    backdrop-filter: blur(8px);
-    color: #fff;
-    padding: 6px 14px;
-    border-radius: 12px;
-    font-size: 0.65rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border: 1px solid rgba(255,255,255,0.1);
+.prop-badge.new {
+  background: rgba(68, 172, 255, 0.92);
+  color: #fff;
 }
 
-/* Animated Wishlist Button */
-.wishlist-btn {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    background: white;
-    border: none;
-    color: #94a3b8;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 2;
-    transition: all 0.3s ease;
-    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+.prop-badge.featured {
+  background: rgba(251, 191, 36, 0.92);
+  color: #78350f;
 }
 
-.wishlist-btn:hover {
-    color: #ef4444;
-    transform: scale(1.1);
-    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.2);
+.prop-badge.rented {
+  background: rgba(239, 68, 68, 0.92);
+  color: #fff;
 }
 
-.wishlist-btn.active {
-    background: #fee2e2;
-    color: #ef4444;
-    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.2);
+.prop-badge.unavailable {
+  background: rgba(100, 116, 139, 0.92);
+  color: #fff;
 }
 
-/* Floating Price Tag */
-.floating-price {
-    position: absolute;
-    bottom: 16px;
-    right: 16px;
-    z-index: 2;
-    width: 250px;
+
+.prop-save {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
 }
 
-.price-container {
-    background: #3b82f6;
-    color: white;
-    padding: 8px 18px;
-    border-radius: 16px;
-    display: flex;
-    align-items: baseline;
-    gap: 2px;
-    box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4);
+.prop-save:hover {
+  background: #fff;
+  transform: scale(1.1);
 }
 
-.amount { font-size: 1.3rem; font-weight: 800; }
-.term { font-size: 0.7rem; opacity: 0.8; }
-
-/* Rating Badge */
-.rating-tag {
-    position: absolute;
-    bottom: 16px;
-    left: 16px;
-    background: rgba(255, 255, 255, 0.95);
-    padding: 6px 12px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.85rem;
-    font-weight: 800;
-    color: #0f172a;
-    z-index: 2;
+.prop-save.saved {
+  color: #ef4444;
 }
 
-.star-icon { color: #f59e0b; }
-
-/* Card Body Details */
-.card-body 
-{ 
-    padding: 24px; 
-    margin-top: -27px;
+.prop-type-tag {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  padding: 0.25rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.72rem;
+  font-weight: 600;
 }
 
-.location-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #64748b;
-    font-size: 0.85rem;
-    margin-bottom: 12px;
+.prop-body {
+  padding: 1.2rem 1.3rem 1.4rem;
 }
 
-.loc-icon-bg {
-    width: 28px;
-    height: 28px;
-    background: #eff6ff;
-    color: #3b82f6;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
+.prop-price {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--blue);
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 0.25rem;
 }
 
-.card-title {
-    font-size: 1.3rem;
-    font-weight: 800;
-    color: #0f172a;
-    margin-bottom: 20px;
-    line-height: 1.2;
+.prop-price em {
+  font-style: normal;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-/* Premium Specs Grid */
-.specs-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 24px;
+.prop-title {
+  font-weight: 700;
+  font-size: 0.97rem;
+  color: var(--gray-900);
+  margin-bottom: 0.3rem;
+  line-height: 1.35;
 }
 
-.spec-pill {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: #f8fafc;
-    padding: 10px;
-    border-radius: 16px;
-    transition: 0.3s;
+.prop-location {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 1rem;
 }
 
-.tenant-card-premium:hover .spec-pill {
-    background: #f1f5f9;
+.prop-location-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--blue);
+  flex-shrink: 0;
 }
 
-.pill-icon { color: #3b82f6; font-size: 1rem; }
-.pill-info { display: flex; flex-direction: column; }
-.pill-info strong { font-size: 0.9rem; color: #1e293b; }
-.pill-info span { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
-
-/* Action Buttons */
-.card-actions {
-    display: flex;
-    align-items: center;
-    gap: 16px;
+.prop-specs {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1.1rem;
 }
 
-.btn-details-minimal {
-    background: none;
-    border: none;
-    color: #64748b;
-    font-weight: 700;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: 0.3s;
+.prop-spec {
+  flex: 1;
+  text-align: center;
+  padding: 0.55rem 0.3rem;
+  border-right: 1px solid var(--border);
+  font-size: 0.78rem;
+  color: var(--text-muted);
 }
 
-.btn-details-minimal:hover { color: #0f172a; }
-
-.btn-apply-glow {
-    flex: 1;
-    background: #0f172a;
-    color: white;
-    border: none;
-    padding: 14px;
-    border-radius: 16px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
+.prop-spec:last-child {
+  border-right: none;
 }
 
-.btn-apply-glow:hover {
-    background: #6d86af;
-    box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+.prop-spec strong {
+  display: block;
+  font-size: 0.92rem;
+  color: var(--gray-900);
+  font-weight: 700;
+  margin-bottom: 1px;
 }
 
-.arrow-icon {
-    font-size: 0.8rem;
-    transition: transform 0.3s ease;
+.prop-landlord {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
 }
 
-.btn-apply-glow:hover .arrow-icon {
-    transform: translateX(4px);
+.prop-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-blue);
 }
 
-/* --- Simplified Monthly Cost Container --- */
-.floating-price {
-    position: absolute;
-    bottom: 16px;
-    right: 16px;
-    z-index: 3;
+.prop-landlord-name {
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 
-.price-container {
-    background: rgba(94, 117, 173, 0); /* Deep slate with transparency */
-    backdrop-filter: blur(12px);
-    color: white;
-    padding: 6px 14px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    display: flex;
-    align-items: baseline;
-    gap: 2px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+.prop-landlord-name strong {
+  color: var(--gray-900);
+  font-weight: 600;
+  display: block;
+  font-size: 0.85rem;
 }
 
-.amount { 
-    font-size: 1.15rem; 
-    font-weight: 70; 
-    letter-spacing: -0.5px;
+.prop-apply-btn {
+  margin-left: auto;
+  padding: 0.42rem 1.1rem;
+  border-radius: 50px;
+  background: var(--blue-light);
+  border: 1.5px solid var(--border-blue);
+  color: var(--blue);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: all 0.2s;
 }
 
-.currency { 
-    font-size: 0.9rem; 
-    font-weight: 60; 
-    margin-right: 1px;
-}
-
-.term { 
-    font-size: 0.7rem; 
-    opacity: 0.8; 
-    font-weight: 500;
-}
-
-/* --- THE SHIMMER EFFECT --- */
-.tenant-card-premium::after {
-    content: "";
-    position: absolute;
-    top: -50%;
-    left: -60%;
-    width: 20%;
-    height: 200%;
-    background: linear-gradient(
-        to right, 
-        transparent, 
-        rgba(255, 255, 255, 0.3), 
-        transparent
-    );
-    transform: rotate(30deg);
-    animation: shimmerSweep 6s infinite;
-    pointer-events: none;
-    z-index: 10;
-}
-
-@keyframes shimmerSweep {
-    0% { left: -60%; }
-    20% { left: 120%; }
-    100% { left: 120%; }
-}
-
-/* Enhancing the Apply Button to match the simpler price tag */
-.btn-apply-glow {
-    flex: 1;
-    background: #3b82f6; /* Solid Blue */
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 14px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.btn-apply-glow:hover {
-    background: #2563eb;
-    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
-    transform: translateY(-2px);
-}
-/* Replace the old .floating-price and .price-container styles with these: */
-
-.simple-price-tag {
-    display: flex;
-    align-items: baseline;
-    gap: 4px;
-    margin-bottom: 8px;
-    color: #3b82f6; /* Matching your primary theme blue */
-}
-
-.simple-price-tag .currency {
-    font-size: 0.9rem;
-    font-weight: 700;
-}
-
-.simple-price-tag .amount {
-    font-size: 1.4rem;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    color: #0f172a; /* Darker for readability */
-}
-
-.simple-price-tag .term {
-    font-size: 0.85rem;
-    color: #64748b;
-    font-weight: 500;
-}
-
-/* Ensure the location row spacing stays tight */
-.location-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #64748b;
-    font-size: 0.85rem;
-    margin-bottom: 12px;
+.prop-apply-btn:hover {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
 }

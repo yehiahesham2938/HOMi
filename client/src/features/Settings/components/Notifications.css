@@ -1,262 +1,154 @@
-/* Container takes full height of the parent view-panel */
+/* Notifications.css - Premium Dashboard Styles */
+
 .notif-settings-wrapper {
     display: flex;
     flex-direction: column;
-    /* height: 2000px;  <-- remove this */
-    height: 100%;             /* fill whatever height the panel provides */
-    max-width: 900px;
-    overflow: hidden;         /* only the inner scroll area should scroll */
-    margin-top: 0;    
-    width: 1300px;        /* you don’t need the negative margin either */
+    gap: 2rem;
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    height: 100%;
 }
 
-.section-intro {
-    margin-bottom: 1.5rem;
-    flex-shrink: 0; /* Prevents header from shrinking */
+.settings-panel-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.025em;
 }
 
-/* Table Container Wrapper */
-.notif-table-container {
-    background: #ffffff;
-    border: 1px solid #eef2f6;
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    flex: 1; /* Grows to take available space */
-    height: 1500px; /* Important for flex-scroll to work */
-    overflow: hidden;
-    margin-top: -30px;
-    width: 1700px;
-}
-
-/* Fixed Header */
-.grid-header {
-    display: grid;
-    grid-template-columns: 1fr 80px 80px 80px;
-    background: #f8fafc;
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid #eef2f6;
-    font-weight: 700;
-    color: var(--text-dark);
-    flex-shrink: 0;
-}
-
-/* Scrollable Body */
-.scrollable-grid-body {
-    overflow-y: auto;
-    flex: 1;
-}
-
-/* Custom Scrollbar for Premium Look */
-.scrollable-grid-body::-webkit-scrollbar {
-    width: 6px;
-}
-
-.scrollable-grid-body::-webkit-scrollbar-track {
-    background: #f1f5f9;
-}
-
-.scrollable-grid-body::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 10px;
-}
-
-.scrollable-grid-body::-webkit-scrollbar-thumb:hover {
-    background: var(--primary-blue);
-}
-
-/* Rows */
-.grid-row {
-    display: grid;
-    grid-template-columns: 1fr 80px 80px 80px;
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid #f8fafc;
-    align-items: center;
-    transition: background 0.2s ease;
-}
-
-.grid-row:hover { 
-    background: #fcfdfe; 
-}
-
-.notif-info h4 { 
-    font-size: 0.95rem; 
-    color: var(--text-dark); 
-    margin: 0 0 2px 0; 
-}
-
-.notif-info p { 
-    font-size: 0.8rem; 
-    color: var(--text-light); 
+.settings-panel-subtitle {
+    font-size: 0.95rem;
+    color: #64748b;
     margin: 0;
+    line-height: 1.5;
 }
 
-.checkbox-cell {
+/* Destinations Cards Grid */
+.destinations-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+}
+
+@media (max-width: 768px) {
+    .destinations-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.destination-card {
+    background: rgba(248, 250, 252, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 20px;
+    padding: 1.5rem;
     display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.destination-card:hover {
+    transform: translateY(-2px);
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+.dest-icon-wrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
     justify-content: center;
-}
-
-/* Action Footer */
-.notif-footer-sticky {
-    padding: 1.5rem 0 0;
+    font-size: 1.3rem;
     flex-shrink: 0;
-    border-top: 1px solid #f1f5f9;
-    margin-top: auto;
-    display: flex;
-    justify-content: flex-end;
 }
 
-/* Channel Icons styling */
-.channel-col {
+.dest-icon-wrap.email {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.dest-icon-wrap.sms {
+    background: #fffbeb;
+    color: #f59e0b;
+}
+
+.dest-details {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.7rem;
-    color: var(--text-light);
+    min-width: 0;
 }
 
-.channel-col svg {
+.dest-label {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+}
+
+.dest-val {
     font-size: 1rem;
-    color: var(--text-dark);
-}
-.notif-settings-wrapper {
-    display: flex;
-    flex-direction: column;
-    /* This ensures it fills the 700px-850px height of your parent card */
-    height: 100%; 
-    max-width: 900px;
-}
-
-.section-intro {
-    flex-shrink: 0;
-    margin-bottom: 1.5rem;
-}
-
-.notif-card-container {
-    background: #ffffff;
-    border: 1px solid #eef2f6;
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1; /* Fills available space */
-    min-height: 0; /* Critical fix for flexbox overflow */
+    font-weight: 700;
+    color: #0f172a;
     overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-/* Header is sticky inside the card */
-.grid-header {
-    display: flex;
-    justify-content: space-between;
-    background: #f8fafc;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid #eef2f6;
-    font-weight: 700;
+.dest-val.empty {
+    color: #ef4444;
+    font-style: italic;
+    font-weight: 600;
 }
 
-/* Only this part scrolls */
-.notif-scroll-area {
-    overflow-y: auto;
-    flex-grow: 1;
+.dest-status {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #10b981;
+    margin-top: 4px;
 }
 
-/* Custom Slim Scrollbar */
-.notif-scroll-area::-webkit-scrollbar {
-    width: 6px;
-}
-.notif-scroll-area::-webkit-scrollbar-thumb {
-    background: #e2e8f0;
-    border-radius: 10px;
+.dest-status.warn {
+    color: #d97706;
 }
 
-.grid-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid #f8fafc;
-    transition: 0.2s;
-}
-
-.grid-row:hover { background: #fcfdfe; }
-
-/* Grouping channels to keep columns aligned */
-.channel-group {
-    display: flex;
-    gap: 0;
-}
-
-.channel-col, .checkbox-cell {
-    width: 80px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
-
-.channel-col {
-    font-size: 0.7rem;
-    color: var(--text-light);
-    gap: 4px;
-}
-
-.notif-info h4 { font-size: 0.95rem; color: var(--text-dark); margin: 0; }
-.notif-info p { font-size: 0.8rem; color: var(--text-light); margin: 2px 0 0 0; }
-
-.notif-footer-sticky {
-    padding: 1.5rem 0;
-    flex-shrink: 0;
-    display: flex;
-    justify-content: flex-end;
-}
-
-/* Ensure the wrapper fills the panel height without overflowing it */
-.notif-settings-wrapper {
-    display: flex;
-    flex-direction: column;
-    height: 100%; /* Important: Fills but doesn't exceed parent */
-    width: 100%;
-    max-width: 900px;
-}
-
-.section-intro {
-    flex-shrink: 0;
-    margin-bottom: 1.5rem;
-}
-
-/* The visual card containing the list */
+/* Preference Checklist Container */
 .notif-card-container {
     background: #ffffff;
-    border: 1px solid #eef2f6;
-    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
     display: flex;
     flex-direction: column;
-    flex-grow: 1; /* Takes up all available space */
-    min-height: 0; /* THE FIX: Allows content to be smaller than its flex-basis */
-    overflow: hidden; /* Keeps the border-radius clean */
+    min-height: 250px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.01);
 }
 
-/* Header stays at the top of the card */
 .grid-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     background: #f8fafc;
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid #eef2f6;
-    font-weight: 700;
-    flex-shrink: 0;
+    padding: 1.25rem 2rem;
+    border-bottom: 1px solid #e2e8f0;
+    font-weight: 800;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #475569;
 }
 
-/* ONLY this part scrolls */
 .notif-scroll-area {
     overflow-y: auto;
-    flex-grow: 1;
-    background: #ffffff;
+    max-height: 400px;
 }
 
-/* Custom Scrollbar */
 .notif-scroll-area::-webkit-scrollbar {
     width: 6px;
 }
@@ -269,15 +161,38 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid #f8fafc;
+    padding: 1.25rem 2rem;
+    border-bottom: 1px solid #f1f5f9;
     transition: background 0.2s;
 }
 
-.grid-row:hover { background: #fcfdfe; }
+.grid-row:hover {
+    background: #fcfdfe;
+}
+
+.notif-info {
+    flex: 1;
+    min-width: 0;
+    padding-right: 1.5rem;
+}
+
+.notif-info h4 {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.notif-info p {
+    font-size: 0.82rem;
+    color: #64748b;
+    margin: 4px 0 0 0;
+    line-height: 1.4;
+}
 
 .channel-group {
     display: flex;
+    gap: 0.75rem;
 }
 
 .channel-col, .checkbox-cell {
@@ -288,34 +203,212 @@
     justify-content: center;
 }
 
-.notif-info h4 { font-size: 0.95rem; color: var(--text-dark); margin: 0; }
-.notif-info p { font-size: 0.8rem; color: var(--text-light); margin: 4px 0 0 0; }
+.channel-col {
+    color: #64748b;
+    gap: 4px;
+}
 
-.notif-footer-sticky {
-    padding-top: 1.5rem;
-    flex-shrink: 0;
+.channel-col svg {
+    font-size: 1.1rem;
+    color: #475569;
+}
+
+/* Modern Checkbox Toggle */
+.checkbox-modern {
+    display: block;
+    position: relative;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    user-select: none;
+}
+
+.checkbox-modern input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark-box {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 24px;
+    width: 24px;
+    background-color: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+    font-size: 0.8rem;
+}
+
+.checkbox-modern:hover input ~ .checkmark-box {
+    border-color: #94a3b8;
+    transform: scale(1.05);
+}
+
+.checkbox-modern input:checked ~ .checkmark-box {
+    background-color: #2563eb;
+    border-color: #2563eb;
+    color: white;
+}
+
+/* Disabled styling */
+.checkbox-modern.disabled {
+    cursor: not-allowed;
+}
+
+.checkmark-box.disabled {
+    background-color: #e2e8f0;
+    border-color: #cbd5e1;
+    color: #94a3b8;
+}
+
+.checkbox-modern.disabled-no-phone {
+    cursor: not-allowed;
+    opacity: 0.4;
+}
+
+/* Save Footer */
+.notif-footer-sticky-action {
+    display: flex;
+    align-items: center;
     justify-content: flex-end;
+    gap: 1.5rem;
+    padding-top: 1rem;
 }
 
-.notif-settings-wrapper {
-    display: flex;
-    flex-direction: column;
-    height: 100%; /* Take 100% of the parent card, NO MORE */
-    padding: 2rem;
-    overflow: hidden; /* Let the internal scroll-area handle the mess */
+.save-success-indicator {
+    color: #16a34a;
+    font-size: 0.9rem;
+    font-weight: 700;
+    animation: fadeIn 0.3s;
 }
 
-.notif-card-container {
-    flex: 1; /* Grow to fill the space between header and save button */
-    min-height: 0; /* Flexbox trick to allow internal scrolling */
+/* Simulator Section Styling */
+.simulator-section {
+    background: linear-gradient(135deg, rgba(239, 246, 255, 0.25) 0%, rgba(250, 250, 250, 0.9) 100%);
+    border: 1px solid #dbeafe;
+    border-radius: 24px;
+    padding: 2.25rem;
+    margin-top: 2rem;
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.02);
+}
+
+.sim-header {
+    margin-bottom: 2rem;
+}
+
+.sim-badge {
+    display: inline-block;
+    background: #dbeafe;
+    color: #2563eb;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    border-radius: 99px;
+    margin-bottom: 0.75rem;
+}
+
+.sim-header h3 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.02em;
+}
+
+.sim-header p {
+    font-size: 0.9rem;
+    color: #475569;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.sim-controls {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 640px) {
+    .sim-controls {
+        grid-template-columns: 1fr;
+    }
+}
+
+.sim-field-group {
     display: flex;
     flex-direction: column;
-    border: 1px solid #eef2f6;
+    gap: 0.5rem;
+}
+
+.sim-field-group label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.sim-field-group select,
+.sim-field-group input,
+.sim-field-group textarea {
+    padding: 11px 16px;
     border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #0f172a;
+    font-weight: 600;
+    font-size: 0.9rem;
+    outline: none;
+    font-family: inherit;
+    transition: all 0.2s;
 }
 
-.notif-scroll-area {
-    overflow-y: auto; /* Only this part will scroll now */
-    flex: 1;
+.sim-field-group select:focus,
+.sim-field-group input:focus,
+.sim-field-group textarea:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+.sim-actions {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.btn-simulate {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.2);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-simulate:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+    filter: brightness(1.05);
+}
+
+.sim-play-icon {
+    font-size: 0.75rem;
 }

@@ -290,6 +290,30 @@ class AdminController {
             next(error);
         }
     }
+
+    async getAllContracts(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const contracts = await adminService.getAllContracts();
+            res.status(200).json({
+                success: true,
+                data: contracts,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getAllProperties(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const properties = await adminService.getAllPropertiesForAdmin();
+            res.status(200).json({
+                success: true,
+                data: properties,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 export const adminController = new AdminController();

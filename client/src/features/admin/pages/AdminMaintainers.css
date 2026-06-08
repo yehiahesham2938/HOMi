@@ -1,10 +1,43 @@
+/* client\src\features\admin\pages\AdminMaintainers.css */
+
 .maintainers-table {
-    min-width: 2300px;
+    min-width: 2500px;
 }
 
 .maintainers-table td {
-    max-width: 280px;
+    max-width: 320px;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.maintainers-table tr:hover td {
+    background: #f8fafc;
+}
+
+/* Specific column stylings */
+.maintainers-table td:nth-child(7) { /* Provider Type */
+    font-weight: 700;
+    color: #4f46e5;
+}
+
+.maintainers-table td:nth-child(8) { /* Application Status */
+    font-weight: 700;
+    color: #16a34a;
+}
+
+.maintainers-table td:nth-child(9) { /* Business Name */
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.maintainers-table td:nth-child(10) { /* Main Category */
+    font-weight: 600;
+    color: #0f172a;
+    background: #f8fafc;
+}
+
+.maintainers-table tr:hover td:nth-child(10) {
+    background: #f1f5f9;
 }

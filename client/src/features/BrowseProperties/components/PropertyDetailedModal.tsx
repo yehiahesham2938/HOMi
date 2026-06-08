@@ -12,7 +12,9 @@ import {
     FaChevronLeft, FaChevronRight, FaCheckCircle
 } from 'react-icons/fa';
 import ApplicationModal, { type PrefillData } from './ApplicationModal';
+import BookVisitModal from './BookVisitModal';
 import AuthModal from '../../../components/global/AuthModal';
+import { authService } from '../../../services/auth.service';
 import { messageService } from '../../../services/message.service';
 import {
     propertyService,
@@ -79,6 +81,7 @@ export interface PropertyDetailModalProperty {
     tags?: string[];
     rating?: number;
     rentalRequest?: PropertyDetailRentalRequest;
+    status?: string;
 }
 
 function availabilityRibbon(property: PropertyDetailModalProperty): { label: string; dateLine: string; tag: string } {
@@ -142,7 +145,9 @@ const PropertyDetailModal = ({
     onToggleSave,
 }: PropertyDetailModalProps) => {
     const navigate = useNavigate();
+    const isUserGuest = isGuest || !authService.isAuthenticated();
     const [showApplication, setShowApplication] = useState(false);
+    const [showBookVisit, setShowBookVisit] = useState(false);
     const [showGallery, setShowGallery] = useState(false);
     const [currentImgIdx, setCurrentImgIdx] = useState(0);
     const [showAuthModal, setShowAuthModal] = useState(false);
@@ -163,6 +168,9 @@ const PropertyDetailModal = ({
     );
 
     const ribbon = useMemo(() => availabilityRibbon(property), [property]);
+
+    const isRented = property.status?.toUpperCase() === 'RENTED';
+    const isUnavailable = property.status?.toUpperCase() === 'UNAVAILABLE';
 
     useEffect(() => {
         if (!shareMenuOpen) return undefined;
@@ -203,10 +211,18 @@ const PropertyDetailModal = ({
     const prevImg = () => setCurrentImgIdx((prev) => (prev - 1 + images.length) % images.length);
 
     const handleApplyClick = () => {
-        if (isGuest) {
+        if (isUserGuest) {
             setShowAuthModal(true);
         } else {
             setShowApplication(true);
+        }
+    };
+
+    const handleBookVisitClick = () => {
+        if (isUserGuest) {
+            setShowAuthModal(true);
+        } else {
+            setShowBookVisit(true);
         }
     };
 
@@ -235,7 +251,7 @@ const PropertyDetailModal = ({
     };
 
     const handleMessageOwner = async () => {
-        if (isGuest) {
+        if (isUserGuest) {
             setShowAuthModal(true);
             return;
         }
@@ -277,7 +293,7 @@ const PropertyDetailModal = ({
     };
 
     const handleOpenReport = () => {
-        if (isGuest) {
+        if (isUserGuest) {
             setShowAuthModal(true);
             return;
         }
@@ -288,7 +304,7 @@ const PropertyDetailModal = ({
 
     const handleSaveClick = (event: React.MouseEvent) => {
         event.stopPropagation();
-        if (isGuest) {
+        if (isUserGuest) {
             setShowAuthModal(true);
             return;
         }
@@ -647,10 +663,22 @@ const PropertyDetailModal = ({
                                 </div>
                             ) : (
                                 <>
-                                    <button className="primary-cta-btn" onClick={handleApplyClick}>
-                                        {isGuest ? 'Register to Apply' : 'Start Application'} <FaArrowRight />
-                                    </button>
-                                    <p className="cta-subtext">Verified secure application process</p>
+                                    {isRented ? (
+                                        <button className="primary-cta-btn" style={{ backgroundColor: '#64748b', cursor: 'default' }} disabled>
+                                            Already Rented
+                                        </button>
+                                    ) : isUnavailable ? (
+                                        <button className="primary-cta-btn" style={{ backgroundColor: '#64748b', cursor: 'default' }} disabled>
+                                            Unavailable
+                                        </button>
+                                    ) : (
+                                        <button className="primary-cta-btn" onClick={handleApplyClick}>
+                                            {isUserGuest ? 'Register to Apply' : 'Start Application'} <FaArrowRight />
+                                        </button>
+                                    )}
+                                    <p className="cta-subtext">
+                                        {isRented ? 'This property has been successfully rented' : isUnavailable ? 'This property is temporarily unavailable' : 'Verified secure application process'}
+                                    </p>
                                 </>
                             )}
 
@@ -662,6 +690,10 @@ const PropertyDetailModal = ({
                                     className="owner-profile-main"
                                     onClick={(e) => {
                                         e.stopPropagation();
+                                        if (isUserGuest) {
+                                            setShowAuthModal(true);
+                                            return;
+                                        }
                                         if (!landlordProfileUserId) return;
                                         // Do not call onClose here: it runs setSearchParams on /browse-properties and can
                                         // race with this navigate, leaving the user on browse instead of the profile.
@@ -710,7 +742,7 @@ const PropertyDetailModal = ({
                             </div>
 
                             <div className="secondary-actions">
-                                <button className="sec-btn"><FaCalendarAlt /> Book Viewing</button>
+                                <button className="sec-btn" onClick={handleBookVisitClick}><FaCalendarAlt /> Book Viewing</button>
                                 <button className="sec-btn" onClick={handleOpenReport}><FaRegCompass /> Report Listing</button>
                             </div>
                         </div>
@@ -794,6 +826,25 @@ const PropertyDetailModal = ({
                         </div>
                     </div>
                 </div>
+            )}
+
+            {showBookVisit && (
+                <BookVisitModal
+                    property={{
+                        id: String(property.id),
+                        title: String(property.title ?? ''),
+                        price: Number(property.price ?? 0),
+                        address: property.address,
+                        image: String(
+                            property.allImages && property.allImages.length > 0
+                                ? property.allImages[0]
+                                : property.image || ''
+                        ),
+                        ownerName: property.ownerName,
+                        landlordId: landlordProfileUserId ?? '',
+                    }}
+                    onClose={() => setShowBookVisit(false)}
+                />
             )}
         </div>
     );

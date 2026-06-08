@@ -416,5 +416,7 @@ router.get('/users/management/maintainers', adminController.getMaintainersForMan
 router.patch('/users/:userId/ban', adminController.banUser.bind(adminController));
 router.patch('/users/:userId/unban', adminController.unbanUser.bind(adminController));
 router.get('/properties/:propertyId/details', adminController.getPropertyDetails.bind(adminController));
+router.get('/contracts', adminController.getAllContracts.bind(adminController));
+router.get('/properties', adminController.getAllProperties.bind(adminController));
 
 export default router;

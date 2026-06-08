@@ -53,18 +53,18 @@ const formatDurationLabel = (duration: string | undefined): string => {
 };
 
 const livingSituationOptions: { label: string; value: LivingSituation }[] = [
-    { label: 'Single',   value: 'SINGLE'   },
-    { label: 'Married',  value: 'MARRIED'  },
-    { label: 'Family',   value: 'FAMILY'   },
+    { label: 'Single', value: 'SINGLE' },
+    { label: 'Married', value: 'MARRIED' },
+    { label: 'Family', value: 'FAMILY' },
     { label: 'Students', value: 'STUDENTS' },
 ];
 
 export interface PrefillData {
-    moveInDate:      string;
-    duration:        RentalDuration;
-    occupants:       number;
+    moveInDate: string;
+    duration: RentalDuration;
+    occupants: number;
     livingSituation: LivingSituation;
-    message:         string;
+    message: string;
 }
 
 interface ApplicationModalProps {
@@ -73,38 +73,38 @@ interface ApplicationModalProps {
         title: string;
         price: number;
         image: string;
-        ownerName?:  string;
+        ownerName?: string;
         ownerImage?: string;
     };
-    onClose:      () => void;
-    onBack:       () => void;
-    isReadOnly?:  boolean;
+    onClose: () => void;
+    onBack: () => void;
+    isReadOnly?: boolean;
     prefillData?: PrefillData;
 }
 
 const ApplicationModal = ({ property, onClose, onBack, isReadOnly = false, prefillData }: ApplicationModalProps) => {
-    const [step,          setStep]          = useState(1);
-    const [isSubmitted,   setIsSubmitted]   = useState(false);
-    const [loading,       setLoading]       = useState(false);
-    const [submitError,   setSubmitError]   = useState<string | null>(null);
+    const [step, setStep] = useState(1);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [submitError, setSubmitError] = useState<string | null>(null);
     const [habitsLoading, setHabitsLoading] = useState(true);
 
     // Step 1 — form state (initialised from prefillData when in read-only review)
     const initialDurationMonths = parseDurationMonths(prefillData?.duration);
 
-    const [moveInDate,      setMoveInDate]      = useState(prefillData?.moveInDate      ?? '');
-    const [duration,        setDuration]        = useState<RentalDuration | ''>(
+    const [moveInDate, setMoveInDate] = useState(prefillData?.moveInDate ?? '');
+    const [duration, setDuration] = useState<RentalDuration | ''>(
         initialDurationMonths > 0 ? `${initialDurationMonths}_MONTHS` : ''
     );
-    const [durationYears,   setDurationYears]   = useState(Math.floor(initialDurationMonths / 12));
-    const [durationMonths,  setDurationMonths]  = useState(initialDurationMonths % 12);
-    const [occupants,       setOccupants]       = useState<number | ''>(prefillData?.occupants       ?? '');
+    const [durationYears, setDurationYears] = useState(Math.floor(initialDurationMonths / 12));
+    const [durationMonths, setDurationMonths] = useState(initialDurationMonths % 12);
+    const [occupants, setOccupants] = useState<number | ''>(prefillData?.occupants ?? '');
     const [livingSituation, setLivingSituation] = useState<LivingSituation | ''>(prefillData?.livingSituation ?? '');
-    const [message,         setMessage]         = useState(prefillData?.message         ?? '');
+    const [message, setMessage] = useState(prefillData?.message ?? '');
 
     // Step 2 — habits
     const [selectedHabits, setSelectedHabits] = useState<string[]>([]);
-    const [customHabit,    setCustomHabit]    = useState('');
+    const [customHabit, setCustomHabit] = useState('');
 
     // Load user's habits from backend — runs for both read-only and editable views.
     // Uses a cancellation flag so a slow response after unmount won't setState on a dead component.
@@ -170,12 +170,12 @@ const ApplicationModal = ({ property, onClose, onBack, isReadOnly = false, prefi
         setSubmitError(null);
         try {
             await rentalRequestService.submitRentalRequest({
-                property_id:      property.id,
-                move_in_date:     moveInDate,
+                property_id: property.id,
+                move_in_date: moveInDate,
                 duration,
-                occupants:        Number(occupants),
+                occupants: Number(occupants),
                 living_situation: livingSituation,
-                message:          message.trim(),
+                message: message.trim(),
             });
 
             // Keep profile habits sync as best-effort so request data persistence is never blocked.
@@ -198,7 +198,7 @@ const ApplicationModal = ({ property, onClose, onBack, isReadOnly = false, prefi
         }
     };
 
-    const landlordName   = property.ownerName  || 'Property Owner';
+    const landlordName = property.ownerName || 'Property Owner';
     const landlordAvatar = property.ownerImage || null;
 
     const formatDate = (iso: string) => {
@@ -208,7 +208,7 @@ const ApplicationModal = ({ property, onClose, onBack, isReadOnly = false, prefi
         } catch { return iso; }
     };
 
-    const durationLabel     = formatDurationLabel(duration || undefined);
+    const durationLabel = formatDurationLabel(duration || undefined);
     const livSituationLabel = (livingSituationOptions.find(o => o.value === livingSituation)?.label ?? String(livingSituation)) || '—';
 
     // Custom habits that are saved but not in the preset list
@@ -241,11 +241,7 @@ const ApplicationModal = ({ property, onClose, onBack, isReadOnly = false, prefi
                                 </div>
                             </div>
 
-                            <div className="app-steps-indicator">
-                                <div className={`step-dot ${step >= 1 ? 'active' : ''}`}><span>1</span> Form</div>
-                                <div className={`step-line ${step === 2 ? 'active' : ''}`} />
-                                <div className={`step-dot ${step === 2 ? 'active' : ''}`}><span>2</span> Habits</div>
-                            </div>
+
 
                             <div className="landlord-card">
                                 <div className="landlord-header">

@@ -57,6 +57,17 @@
     transition: background 0.15s ease, transform 0.1s ease, color 0.15s ease;
 }
 
+.testing-clock-btn.go-back {
+    background: #fed7aa;
+    color: #9a3412;
+    border-color: #fdba74;
+}
+
+.testing-clock-btn.go-back:hover:not(:disabled) {
+    background: #ffedd5;
+    transform: translateY(-1px);
+}
+
 .testing-clock-btn.advance {
     background: #f59e0b;
     color: white;

@@ -19,6 +19,7 @@ export interface PendingApprovalProperty {
     title: string;
     description: string;
     monthlyPrice: number;
+    securityDeposit: number;
     address: string;
     type: string | null;
     furnishing: string | null;
@@ -34,6 +35,38 @@ export interface PendingApprovalProperty {
     ownershipDocs: Array<{
         id: string;
         documentUrl: string;
+    }>;
+    specifications: {
+        bedrooms: number;
+        bathrooms: number;
+        areaSqft: number;
+    } | null;
+    detailedLocation: {
+        floor: number;
+        city: string;
+        area: string;
+        streetName: string;
+        buildingNumber: string;
+        unitApt: string;
+        locationLat: number;
+        locationLong: number;
+    } | null;
+    images: Array<{
+        id: string;
+        imageUrl: string;
+        isMain: boolean;
+    }>;
+    amenities: Array<{
+        id: string;
+        name: string;
+    }>;
+    houseRules: Array<{
+        id: string;
+        name: string;
+    }>;
+    maintenanceResponsibilities: Array<{
+        area: string;
+        responsible_party: 'LANDLORD' | 'TENANT';
     }>;
 }
 
@@ -309,6 +342,61 @@ class AdminService {
         );
         return response.data;
     }
+
+    async getAllContracts() {
+        const response = await apiClient.get<{ success: boolean; data: AdminContractItem[] }>('/admin/contracts');
+        return response.data.data;
+    }
+
+    async getAllProperties() {
+        const response = await apiClient.get<{ success: boolean; data: AdminPropertyListItem[] }>('/admin/properties');
+        return response.data.data;
+    }
+}
+
+export interface AdminContractItem {
+    id: string;
+    contractId: string;
+    leaseId: string | null;
+    status: string;
+    rentAmount: number;
+    securityDeposit: number;
+    moveInDate: string;
+    leaseDurationMonths: number;
+    paymentStatus: string;
+    createdAt: string;
+    property: {
+        id: string;
+        title: string;
+        address: string;
+    } | null;
+    landlord: {
+        id: string;
+        email: string;
+        name: string;
+    } | null;
+    tenant: {
+        id: string;
+        email: string;
+        name: string;
+    } | null;
+}
+
+export interface AdminPropertyListItem {
+    id: string;
+    title: string;
+    address: string;
+    monthlyPrice: number;
+    status: string;
+    type: string | null;
+    furnishing: string | null;
+    createdAt: string;
+    thumbnailUrl: string | null;
+    landlord: {
+        id: string;
+        email: string;
+        name: string;
+    } | null;
 }
 
 export const adminService = new AdminService();

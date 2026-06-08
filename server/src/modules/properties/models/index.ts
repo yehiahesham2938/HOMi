@@ -20,6 +20,7 @@ import { HouseRule } from './HouseRule.js';
 import { PropertyHouseRule } from './PropertyHouseRule.js';
 import { PropertyOwnershipDoc } from './PropertyOwnershipDoc.js';
 import { PropertyReport, PropertyReportReason, PropertyReportStatus } from './PropertyReport.js';
+import { VisitBooking, VisitBookingStatus, type VisitBookingStatusType } from './VisitBooking.js';
 
 // ─── Associations ─────────────────────────────────────────────────────────────
 
@@ -157,6 +158,32 @@ User.hasMany(PropertyReport, {
     as: 'reviewedPropertyReports',
 });
 
+// Property has many VisitBookings
+Property.hasMany(VisitBooking, {
+    foreignKey: 'property_id',
+    as: 'visitBookings',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+});
+
+VisitBooking.belongsTo(Property, {
+    foreignKey: 'property_id',
+    as: 'property',
+});
+
+// User has many VisitBookings
+User.hasMany(VisitBooking, {
+    foreignKey: 'tenant_id',
+    as: 'visitBookings',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+});
+
+VisitBooking.belongsTo(User, {
+    foreignKey: 'tenant_id',
+    as: 'tenant',
+});
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 export {
@@ -177,9 +204,11 @@ export {
     PropertyReport,
     PropertyReportReason,
     PropertyReportStatus,
+    VisitBooking,
+    VisitBookingStatus,
 };
 
-export type { PropertyStatusType, FurnishingStatusType, PropertyTypeType, TargetTenantType };
+export type { PropertyStatusType, FurnishingStatusType, PropertyTypeType, TargetTenantType, VisitBookingStatusType };
 
 export default {
     sequelize,
@@ -195,4 +224,6 @@ export default {
     PropertyReport,
     PropertyReportReason,
     PropertyReportStatus,
+    VisitBooking,
+    VisitBookingStatus,
 };

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Header from '../../../../components/global/header';
 import Footer from '../../../../components/global/footer';
 import Sidebar from '../../../../components/global/Tenant/sidebar';
@@ -13,6 +14,7 @@ import {
     FaPlus, FaSearch, FaFilter, FaTools, FaCalendarCheck,
     FaHammer, FaBolt, FaCheckCircle, FaClock, FaTimesCircle,
     FaChevronRight, FaMapMarkerAlt, FaUsers,
+    FaTint, FaSnowflake, FaLeaf, FaPaintRoller, FaWrench, FaTrashAlt
 } from 'react-icons/fa';
 import maintenanceService, {
     type BrowseProvider,
@@ -36,8 +38,28 @@ function statusColor(status: MaintenanceRequest['status']) {
     }
 }
 
+function getCategoryIcon(category: string) {
+    switch (category) {
+        case 'Plumbing': return <FaTint className="type-icon-inner color-plumbing" />;
+        case 'Electrical': return <FaBolt className="type-icon-inner color-electrical" />;
+        case 'Painting': return <FaPaintRoller className="type-icon-inner color-painting" />;
+        case 'AC Service': return <FaSnowflake className="type-icon-inner color-ac" />;
+        case 'Gardening': return <FaLeaf className="type-icon-inner color-gardening" />;
+        case 'Flooring': return <FaWrench className="type-icon-inner color-flooring" />;
+        default: return <FaHammer className="type-icon-inner color-other" />;
+    }
+}
+
 const TenantMaintenance: React.FC = () => {
-    const [activeTab, setActiveTab] = useState<'post' | 'browse' | 'active'>('post');
+    const [searchParams] = useSearchParams();
+    const initialTab = (searchParams.get('tab') as 'post' | 'browse' | 'active') || 'post';
+    const [activeTab, setActiveTab] = useState<'post' | 'browse' | 'active'>(initialTab);
+
+    // Sync tab when URL param changes (e.g. navigating back with ?tab=active)
+    useEffect(() => {
+        const t = searchParams.get('tab') as 'post' | 'browse' | 'active' | null;
+        if (t && ['post', 'browse', 'active'].includes(t)) setActiveTab(t);
+    }, [searchParams]);
 
     // ── Browse providers state ────────────────────────────────────────────────
     const [providers, setProviders] = useState<BrowseProvider[]>([]);
@@ -162,7 +184,7 @@ const TenantMaintenance: React.FC = () => {
     // ─── Render tabs ───────────────────────────────────────────────────────
     const renderPostTab = () => (
         <div className="tab-pane animate-in">
-            <div className="section-header">
+            <div className="tl-section-header">
                 <div>
                     <h2>Your maintenance issues</h2>
                     <p>Post a new issue from your active rental — pros will start applying with their final price.</p>
@@ -185,39 +207,57 @@ const TenantMaintenance: React.FC = () => {
                 <div className="marketplace-grid">
                     {activeRequests.map((req) => {
                         const sc = statusColor(req.status);
+                        const urgencyClass = req.urgency ? req.urgency.toLowerCase() : 'medium';
                         return (
-                            <div key={req.id} className="post-card-premium">
-                                <div className="post-card-badge">{sc.label}</div>
+                            <div key={req.id} className={`post-card-premium card-urgency-${urgencyClass}`}>
+                                <div className="card-glass-glow"></div>
+                                <div className="post-card-header">
+                                    <div className="post-card-badge status-pill">
+                                        <span className={`status-dot dot-${sc.className}`}></span>
+                                        <span>{sc.label}</span>
+                                    </div>
+                                    {req.urgency && (
+                                        <div className={`urgency-pill urgency-${urgencyClass}`}>
+                                            {req.urgency}
+                                        </div>
+                                    )}
+                                </div>
                                 <div className="post-card-content">
                                     <div className="post-card-type">
-                                        <FaHammer className="type-icon" />
-                                        {req.category}
+                                        <div className={`type-icon-wrapper bg-${urgencyClass}`}>
+                                            {getCategoryIcon(req.category)}
+                                        </div>
+                                        <span className="category-text">{req.category}</span>
                                     </div>
-                                    <h3 style={{ margin: '4px 0 6px' }}>{req.title}</h3>
+                                    <h3 className="post-title-text">{req.title}</h3>
                                     <p className="post-description">{req.description}</p>
                                     <div className="post-meta">
-                                        <div className="meta-item"><FaClock /> {new Date(req.createdAt).toLocaleDateString()}</div>
-                                        <div className="meta-item"><FaBolt /> {req.applicationsCount ?? 0} applications</div>
-                                        {req.urgency && <div className="meta-item">Urgency: {req.urgency}</div>}
+                                        <div className="meta-item flex-row-center">
+                                            <FaClock className="meta-icon" />
+                                            <span>{new Date(req.createdAt).toLocaleDateString()}</span>
+                                        </div>
+                                        <div className="meta-item flex-row-center">
+                                            <FaBolt className="meta-icon animated-pulse" />
+                                            <span>{req.applicationsCount ?? 0} applications</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="post-card-footer">
                                     <div className="budget-info">
-                                        <span>{req.agreedPrice != null ? 'Agreed' : 'Budget'}:</span>
-                                        <strong>
+                                        <span className="budget-label">{req.agreedPrice != null ? 'Agreed price' : 'Budget estimation'}</span>
+                                        <strong className="budget-val">
                                             {req.agreedPrice != null
-                                                ? `EGP ${Number(req.agreedPrice).toFixed(2)}`
+                                                ? `EGP ${Number(req.agreedPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                                                 : req.estimatedBudget
-                                                    ? `EGP ${Number(req.estimatedBudget).toFixed(2)}`
+                                                    ? `EGP ${Number(req.estimatedBudget).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                                                     : '—'}
                                         </strong>
                                     </div>
-                                    <div style={{ display: 'flex', gap: 8 }}>
-                                        <button className="view-bids-btn" onClick={() => openViewIssueModal(req)}>View</button>
+                                    <div className="post-action-buttons">
+                                        <button className="view-bids-btn btn-view" onClick={() => openViewIssueModal(req)}>Details</button>
                                         {req.status === 'OPEN' && (
                                             <button
-                                                className="view-bids-btn"
-                                                style={{ background: '#6366f1', color: '#fff', border: 'none' }}
+                                                className="view-bids-btn btn-bids"
                                                 onClick={() => openApplicationsModal(req)}
                                             >
                                                 Bids ({req.applicationsCount ?? 0})
@@ -225,8 +265,7 @@ const TenantMaintenance: React.FC = () => {
                                         )}
                                         {(req.status === 'EN_ROUTE' || req.status === 'IN_PROGRESS') && (
                                             <button
-                                                className="view-bids-btn"
-                                                style={{ background: '#10b981', color: '#fff', border: 'none' }}
+                                                className="view-bids-btn btn-track"
                                                 onClick={() => openTrackingModal(req)}
                                             >
                                                 Track
@@ -234,8 +273,7 @@ const TenantMaintenance: React.FC = () => {
                                         )}
                                         {req.status === 'AWAITING_CONFIRMATION' && (
                                             <button
-                                                className="view-bids-btn"
-                                                style={{ background: '#f59e0b', color: '#fff', border: 'none' }}
+                                                className="view-bids-btn btn-confirm"
                                                 onClick={() => setConfirmRequest(req)}
                                             >
                                                 Confirm
@@ -243,11 +281,11 @@ const TenantMaintenance: React.FC = () => {
                                         )}
                                         {req.status === 'OPEN' && (
                                             <button
-                                                className="view-bids-btn"
-                                                style={{ background: '#fee2e2', color: '#b91c1c', border: 'none' }}
+                                                className="view-bids-btn btn-cancel-trash"
                                                 onClick={() => handleCancel(req)}
+                                                title="Cancel Request"
                                             >
-                                                <FaTimesCircle />
+                                                <FaTrashAlt />
                                             </button>
                                         )}
                                     </div>
@@ -336,7 +374,7 @@ const TenantMaintenance: React.FC = () => {
         const list = activeRequests.length === 0 ? completedRequests : [...activeRequests, ...completedRequests];
         return (
             <div className="tab-pane animate-in">
-                <div className="section-header">
+                <div className="tl-section-header">
                     <div>
                         <h2>Track maintenance</h2>
                         <p>All your maintenance requests with live status updates.</p>
@@ -375,7 +413,7 @@ const TenantMaintenance: React.FC = () => {
                                         <span className="value">
                                             {req.provider
                                                 ? req.provider.businessName ??
-                                                    `${req.provider.firstName} ${req.provider.lastName}`.trim()
+                                                `${req.provider.firstName} ${req.provider.lastName}`.trim()
                                                 : 'Awaiting bids'}
                                         </span>
                                     </div>
@@ -410,117 +448,130 @@ const TenantMaintenance: React.FC = () => {
     };
 
     return (
-        <div className="tenant-maintenance-layout">
-            <Sidebar />
-            <div className="tenant-maintenance-content">
-                <Header />
-                <main className="maintenance-main-container">
-                    <header className="maintenance-hero">
-                        <div className="hero-text">
-                            <span className="pre-title">Home Care & Support</span>
-                            <h1>Maintenance Hub</h1>
-                            <p>Post issues, hire trusted pros, track every job — all paid via your HOMi wallet.</p>
-                        </div>
-
-                        <div className="maintenance-quick-stats">
-                            <div className="mini-stat">
-                                <span className="stat-num">{activeRequests.length}</span>
-                                <span className="stat-desc">Active issues</span>
+        <div className="tenant-maintenance-hub-wrapper">
+            <div className="tenant-maintenance-layout">
+                <Sidebar />
+                <div className="tenant-maintenance-content">
+                    <Header />
+                    <main className="maintenance-main-container">
+                        <header className="maintenance-hero">
+                            <div className="hero-glass-mesh"></div>
+                            <div className="hero-text">
+                                <span className="pre-title">Home Care & Support</span>
+                                <h1>Maintenance Hub</h1>
+                                <p>Post issues, hire trusted pros, track every job — all paid via your HOMi wallet.</p>
                             </div>
-                            <div className="mini-stat accent">
-                                <span className="stat-num">{providers.length}</span>
-                                <span className="stat-desc">Pros nearby</span>
-                            </div>
-                        </div>
-                    </header>
 
-                    {error && (
-                        <div style={{
-                            padding: '0.75rem 1rem',
-                            background: '#fef2f2',
-                            border: '1px solid #fecaca',
-                            color: '#b91c1c',
-                            borderRadius: 12,
-                            marginBottom: '1rem',
-                        }}>{error}</div>
+                            <div className="maintenance-quick-stats">
+                                <div className="mini-stat">
+                                    <div className="stat-icon-wrapper">
+                                        <FaTools className="stat-icon" />
+                                    </div>
+                                    <div className="stat-text-group">
+                                        <span className="stat-num">{activeRequests.length}</span>
+                                        <span className="stat-desc">Active issues</span>
+                                    </div>
+                                </div>
+                                <div className="mini-stat accent">
+                                    <div className="stat-icon-wrapper">
+                                        <FaUsers className="stat-icon" />
+                                    </div>
+                                    <div className="stat-text-group">
+                                        <span className="stat-num">{providers.length}</span>
+                                        <span className="stat-desc">Pros nearby</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </header>
+
+                        {error && (
+                            <div style={{
+                                padding: '0.75rem 1rem',
+                                background: '#fef2f2',
+                                border: '1px solid #fecaca',
+                                color: '#b91c1c',
+                                borderRadius: 12,
+                                marginBottom: '1rem',
+                            }}>{error}</div>
+                        )}
+
+                        <nav className="maintenance-tabs">
+                            <button
+                                className={`tab-btn ${activeTab === 'post' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('post')}
+                            >
+                                <FaPlus className="tab-icon" />
+                                <span>Post an Issue</span>
+                            </button>
+                            <button
+                                className={`tab-btn ${activeTab === 'browse' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('browse')}
+                            >
+                                <FaSearch className="tab-icon" />
+                                <span>Browse Providers</span>
+                            </button>
+                            <button
+                                className={`tab-btn ${activeTab === 'active' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('active')}
+                            >
+                                <FaTools className="tab-icon" />
+                                <span>Active Requests</span>
+                            </button>
+                        </nav>
+
+                        <div className="tab-content-wrapper">
+                            {activeTab === 'post' && renderPostTab()}
+                            {activeTab === 'browse' && renderBrowseTab()}
+                            {activeTab === 'active' && renderActiveTab()}
+                        </div>
+                    </main>
+
+                    <DetailedIssueModal
+                        isOpen={isIssueModalOpen}
+                        onClose={() => setIsIssueModalOpen(false)}
+                        onPostSuccess={handlePostSuccess}
+                        isViewOnly={isViewOnlyModal}
+                        initialData={selectedIssue}
+                    />
+
+                    <ProviderProfile
+                        isOpen={isProfileModalOpen}
+                        onClose={() => setIsProfileModalOpen(false)}
+                        provider={selectedProvider}
+                    />
+
+                    {appsRequest && (
+                        <ApplicationsModal
+                            isOpen
+                            onClose={() => setAppsRequest(null)}
+                            request={appsRequest}
+                            onAccepted={(updated) => {
+                                setRequests((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+                                setAppsRequest(null);
+                            }}
+                        />
                     )}
 
-                    <nav className="maintenance-tabs">
-                        <button
-                            className={`tab-btn ${activeTab === 'post' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('post')}
-                        >
-                            <FaPlus className="tab-icon" />
-                            <span>Post an Issue</span>
-                        </button>
-                        <button
-                            className={`tab-btn ${activeTab === 'browse' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('browse')}
-                        >
-                            <FaSearch className="tab-icon" />
-                            <span>Browse Providers</span>
-                        </button>
-                        <button
-                            className={`tab-btn ${activeTab === 'active' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('active')}
-                        >
-                            <FaTools className="tab-icon" />
-                            <span>Active Requests</span>
-                        </button>
-                    </nav>
+                    {trackRequest && (
+                        <LiveTrackingModal
+                            isOpen
+                            onClose={() => setTrackRequest(null)}
+                            request={trackRequest}
+                        />
+                    )}
 
-                    <div className="tab-content-wrapper">
-                        {activeTab === 'post' && renderPostTab()}
-                        {activeTab === 'browse' && renderBrowseTab()}
-                        {activeTab === 'active' && renderActiveTab()}
-                    </div>
-                </main>
+                    {confirmRequest && (
+                        <CompletionConfirmModal
+                            request={confirmRequest}
+                            onResolved={(updated) => {
+                                setRequests((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+                                setConfirmRequest(null);
+                            }}
+                        />
+                    )}
 
-                <DetailedIssueModal
-                    isOpen={isIssueModalOpen}
-                    onClose={() => setIsIssueModalOpen(false)}
-                    onPostSuccess={handlePostSuccess}
-                    isViewOnly={isViewOnlyModal}
-                    initialData={selectedIssue}
-                />
-
-                <ProviderProfile
-                    isOpen={isProfileModalOpen}
-                    onClose={() => setIsProfileModalOpen(false)}
-                    provider={selectedProvider}
-                />
-
-                {appsRequest && (
-                    <ApplicationsModal
-                        isOpen
-                        onClose={() => setAppsRequest(null)}
-                        request={appsRequest}
-                        onAccepted={(updated) => {
-                            setRequests((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
-                            setAppsRequest(null);
-                        }}
-                    />
-                )}
-
-                {trackRequest && (
-                    <LiveTrackingModal
-                        isOpen
-                        onClose={() => setTrackRequest(null)}
-                        request={trackRequest}
-                    />
-                )}
-
-                {confirmRequest && (
-                    <CompletionConfirmModal
-                        request={confirmRequest}
-                        onResolved={(updated) => {
-                            setRequests((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
-                            setConfirmRequest(null);
-                        }}
-                    />
-                )}
-
-                <Footer />
+                    <Footer />
+                </div>
             </div>
         </div>
     );

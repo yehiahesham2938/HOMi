@@ -50,6 +50,7 @@ const AdminPropertyApprovals = () => {
     const [pendingProperties, setPendingProperties] = useState<PendingApprovalProperty[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedProperty, setSelectedProperty] = useState<PendingApprovalProperty | null>(null);
+    const [activePreviewUrl, setActivePreviewUrl] = useState<string | null>(null);
     const [actionLoading, setActionLoading] = useState(false);
     const [rejectionReason, setRejectionReason] = useState('');
     const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
@@ -89,6 +90,16 @@ const AdminPropertyApprovals = () => {
         void fetchPending();
     }, []);
 
+    const handleSelectProperty = (prop: PendingApprovalProperty) => {
+        setSelectedProperty(prop);
+        setActivePreviewUrl(null);
+    };
+
+    const handleCloseModal = () => {
+        setSelectedProperty(null);
+        setActivePreviewUrl(null);
+    };
+
     const handleVerifyClick = async (action: 'APPROVE' | 'REJECT') => {
         if (!selectedProperty) return;
         if (action === 'REJECT' && !rejectionReason.trim()) {
@@ -102,7 +113,7 @@ const AdminPropertyApprovals = () => {
                 action,
                 rejectionReason: action === 'REJECT' ? rejectionReason : undefined,
             });
-            setSelectedProperty(null);
+            handleCloseModal();
             setRejectionReason('');
             void fetchPending();
         } catch (error: unknown) {
@@ -172,7 +183,7 @@ const AdminPropertyApprovals = () => {
                                                 <p className="landlord">
                                                     Landlord: {(prop.landlord?.firstName || '').trim()} {(prop.landlord?.lastName || '').trim()} ({prop.landlord?.email})
                                                 </p>
-                                                <button type="button" onClick={() => setSelectedProperty(prop)}>Review Submission</button>
+                                                <button type="button" onClick={() => handleSelectProperty(prop)}>Review Submission</button>
                                             </div>
                                         </article>
                                     ))}
@@ -184,36 +195,113 @@ const AdminPropertyApprovals = () => {
             </main>
 
             {selectedProperty && (
-                <div className="modal-backdrop" onClick={() => setSelectedProperty(null)}>
+                <div className="modal-backdrop" onClick={handleCloseModal}>
                     <div className="modal-card" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-head">
                             <h2>Review Property Submission</h2>
-                            <button type="button" onClick={() => setSelectedProperty(null)}><FiX size={22} /></button>
+                            <button type="button" onClick={handleCloseModal}><FiX size={22} /></button>
                         </div>
 
                         <div className="approval-modal-body">
                             <div className="modal-preview">
-                                <img src={selectedProperty.thumbnailUrl || PROPERTY_FALLBACK_IMAGE} alt={selectedProperty.title} />
+                                <img 
+                                    src={activePreviewUrl || selectedProperty.thumbnailUrl || PROPERTY_FALLBACK_IMAGE} 
+                                    alt={selectedProperty.title} 
+                                    className="main-preview-img"
+                                />
+                                {selectedProperty.images && selectedProperty.images.length > 0 && (
+                                    <div className="modal-images-grid">
+                                        {selectedProperty.images.map((img) => (
+                                            <div 
+                                                key={img.id} 
+                                                className={`modal-image-thumb ${activePreviewUrl === img.imageUrl || (!activePreviewUrl && img.isMain) ? 'active' : ''}`}
+                                                onClick={() => setActivePreviewUrl(img.imageUrl)}
+                                            >
+                                                <img src={img.imageUrl} alt="detail thumb" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                             <div className="modal-details">
                                 <h3>{selectedProperty.title}</h3>
-                                <p><b>Price:</b> ${Number(selectedProperty.monthlyPrice || 0).toLocaleString()}</p>
+                                <div className="detail-row">
+                                    <p><b>Rent:</b> ${Number(selectedProperty.monthlyPrice || 0).toLocaleString()}/mo</p>
+                                    <p><b>Deposit:</b> ${Number(selectedProperty.securityDeposit || 0).toLocaleString()}</p>
+                                </div>
                                 <p><b>Submitted:</b> {new Date(selectedProperty.createdAt).toLocaleString()}</p>
                                 <p><b>Address:</b> {selectedProperty.address}</p>
                                 <p><b>Furnishing:</b> {selectedProperty.furnishing || 'Not set'}</p>
                                 <p><b>Type:</b> {selectedProperty.type || 'Not set'}</p>
+                                
+                                {selectedProperty.specifications && (
+                                    <div className="detail-specs-box">
+                                        <h4>Specifications</h4>
+                                        <p><b>Bedrooms:</b> {selectedProperty.specifications.bedrooms}</p>
+                                        <p><b>Bathrooms:</b> {selectedProperty.specifications.bathrooms}</p>
+                                        <p><b>Area:</b> {selectedProperty.specifications.areaSqft} sqft</p>
+                                    </div>
+                                )}
+
+                                {selectedProperty.detailedLocation && (
+                                    <div className="detail-location-box">
+                                        <h4>Detailed Location</h4>
+                                        <p><b>City:</b> {selectedProperty.detailedLocation.city}</p>
+                                        <p><b>Area:</b> {selectedProperty.detailedLocation.area}</p>
+                                        <p><b>Street:</b> {selectedProperty.detailedLocation.streetName}</p>
+                                        <p><b>Building:</b> {selectedProperty.detailedLocation.buildingNumber} | <b>Apt:</b> {selectedProperty.detailedLocation.unitApt}</p>
+                                        <p><b>Floor:</b> {selectedProperty.detailedLocation.floor}</p>
+                                        <p className="coords-text">Lat: {selectedProperty.detailedLocation.locationLat} | Lng: {selectedProperty.detailedLocation.locationLong}</p>
+                                    </div>
+                                )}
                                 <p className="description">{selectedProperty.description}</p>
                             </div>
                             <div className="modal-landlord">
                                 <h3>Landlord</h3>
                                 <p>{selectedProperty.landlord?.firstName} {selectedProperty.landlord?.lastName}</p>
                                 <p>{selectedProperty.landlord?.email}</p>
+                                {selectedProperty.landlord?.phone && <p><b>Phone:</b> {selectedProperty.landlord.phone}</p>}
+                                
                                 <h4>Ownership Documents</h4>
-                                {selectedProperty.ownershipDocs?.map((doc, i) => (
-                                    <button type="button" key={doc.id || i} onClick={() => void openDocument(doc.documentUrl)}>
-                                        <FiFileText /> View Document {i + 1}
-                                    </button>
-                                ))}
+                                <div className="documents-list-box">
+                                    {selectedProperty.ownershipDocs?.map((doc, i) => (
+                                        <button type="button" key={doc.id || i} onClick={() => void openDocument(doc.documentUrl)}>
+                                            <FiFileText /> View Document {i + 1}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {selectedProperty.amenities && selectedProperty.amenities.length > 0 && (
+                                    <div className="detail-amenities-box">
+                                        <h4>Amenities</h4>
+                                        <div className="detail-chips">
+                                            {selectedProperty.amenities.map(a => <span key={a.id} className="chip">{a.name}</span>)}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {selectedProperty.houseRules && selectedProperty.houseRules.length > 0 && (
+                                    <div className="detail-rules-box">
+                                        <h4>House Rules</h4>
+                                        <div className="detail-chips">
+                                            {selectedProperty.houseRules.map(h => <span key={h.id} className="chip rule">{h.name}</span>)}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {selectedProperty.maintenanceResponsibilities && selectedProperty.maintenanceResponsibilities.length > 0 && (
+                                    <div className="detail-maintenance-box">
+                                        <h4>Maintenance</h4>
+                                        <div className="maintenance-responsibilities-list">
+                                            {selectedProperty.maintenanceResponsibilities.map((mr, i) => (
+                                                <div key={i} className="maintenance-row-item">
+                                                    <span>{mr.area}:</span>
+                                                    <strong className={mr.responsible_party.toLowerCase()}>{mr.responsible_party}</strong>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 

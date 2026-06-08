@@ -619,4 +619,16 @@ router.post(
     contractController.verifyWalletTopup.bind(contractController)
 );
 
+router.post(
+    '/:id/report-tenant',
+    protect,
+    contractController.reportTenant.bind(contractController)
+);
+
+router.post(
+    '/:id/terminate',
+    protect,
+    contractController.terminateLease.bind(contractController)
+);
+
 export default router;

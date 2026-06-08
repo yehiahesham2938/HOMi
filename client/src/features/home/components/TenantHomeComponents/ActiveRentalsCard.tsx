@@ -106,9 +106,7 @@ const ActiveRentalsCard: React.FC<ActiveRentalsCardProps> = ({ contract, propert
 
   return (
     <div className="card-base rental-card-premium">
-      <div className="ribbon-wrapper">
-        <span className="ribbon-text">{t('tenantHomeComponents.primaryResidence')}</span>
-      </div>
+
 
       <div className="rental-grid">
         {/* Left: Media Section */}
@@ -143,8 +141,8 @@ const ActiveRentalsCard: React.FC<ActiveRentalsCardProps> = ({ contract, propert
               </div>
               <div className="progress-container">
                 <div className="progress-track">
-                  <div 
-                    className="progress-fill" 
+                  <div
+                    className="progress-fill"
                     style={{ width: `${leaseProgress}%` }}
                   >
                     <div className="progress-glow"></div>
@@ -165,7 +163,7 @@ const ActiveRentalsCard: React.FC<ActiveRentalsCardProps> = ({ contract, propert
                 </div>
               ))}
             </div>
-            
+
             <button className="btn-manage-circle" title={t('tenantHomeComponents.manageRental')} onClick={handleDetailsClick}>
               <FaArrowRight />
             </button>

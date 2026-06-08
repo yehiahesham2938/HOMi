@@ -97,6 +97,10 @@ const TenantPayment: React.FC = () => {
         deposit: number;
         serviceFee: number;
         total: number;
+        isMonthlyInstallment?: boolean;
+        lateFee?: number;
+        credit?: number;
+        payableCount?: number;
     } | null>(null);
 
     const tenantProfile = authService.getCurrentUser()?.profile;
@@ -105,6 +109,11 @@ const TenantPayment: React.FC = () => {
     useEffect(() => {
         if (location.state?.tab) {
             setActiveTab(location.state.tab as TabType);
+        }
+        if (location.state?.paymentReviewData) {
+            setPaymentReviewData(location.state.paymentReviewData);
+            setActiveTab('receipt');
+            window.history.replaceState({}, document.title);
         }
     }, [location.state]);
 
@@ -314,7 +323,7 @@ const TenantPayment: React.FC = () => {
     const annualSpendAmount = paidContracts.reduce((sum, c) => sum + Number(c.rentAmount ?? c.property?.monthlyPrice ?? 0), 0);
     const hasAnnualSpend = paidContracts.length > 0;
 
-        const pendingTotalDue = pendingPaymentContract ? getTotalContractCharge(pendingPaymentContract) : 0;
+    const pendingTotalDue = pendingPaymentContract ? getTotalContractCharge(pendingPaymentContract) : 0;
     const canAffordPendingPayment = walletBalance >= pendingTotalDue;
 
     const hasUpcomingPayments = activeContracts.length > 0 || Boolean(pendingPaymentContract);
@@ -357,8 +366,6 @@ const TenantPayment: React.FC = () => {
         }
 
         activeContracts.forEach((contract) => {
-            const cycle = getRentCycleSummary(contract);
-            const amount = Number(contract.rentAmount ?? contract.property?.monthlyPrice ?? 0);
             const stats = getRentInstallmentStats(contract);
             const paidInstallments = paymentHistory
                 .filter((row) =>
@@ -368,6 +375,13 @@ const TenantPayment: React.FC = () => {
                 )
                 .reduce((sum, row) => sum + Math.max(Number(row.installmentsCount ?? 1), 1), getPrepaidInstallmentsCount(contract));
             const outstandingInstallments = Math.max(stats.dueCount - paidInstallments, 0);
+
+            if (outstandingInstallments <= 0) {
+                return;
+            }
+
+            const cycle = getRentCycleSummary(contract);
+            const amount = Number(contract.rentAmount ?? contract.property?.monthlyPrice ?? 0);
             const overdueOutstanding = Math.max(stats.overdueCount - paidInstallments, 0);
             const lateFeePerInstallment = Math.max(Number(contract.lateFeeAmount ?? 0), 0);
             const estimatedLateFee = overdueOutstanding * lateFeePerInstallment;
@@ -462,8 +476,9 @@ const TenantPayment: React.FC = () => {
     const handlePayFromBalance = async (contractId?: string) => {
         const targetContractId = contractId ?? pendingPaymentContract?.id;
         if (!targetContractId) return;
-        const targetContract = tenantContracts.find((contract) => contract.id === targetContractId);
-        const targetRequiredAmount = targetContract ? getTotalContractCharge(targetContract) : pendingTotalDue;
+
+        const isInstallment = paymentReviewData?.isMonthlyInstallment;
+        const targetRequiredAmount = paymentReviewData ? paymentReviewData.total : pendingTotalDue;
 
         if (walletBalance < targetRequiredAmount) {
             setPaymentActionError('Insufficient wallet balance to complete this payment.');
@@ -474,7 +489,12 @@ const TenantPayment: React.FC = () => {
         setPaymentActionError(null);
 
         try {
-            const result = await contractService.payContractFromBalance(targetContractId);
+            let result;
+            if (isInstallment) {
+                result = await contractService.payMonthlyRentFromBalance(targetContractId);
+            } else {
+                result = await contractService.payContractFromBalance(targetContractId);
+            }
             setWalletBalance(Number(result.remainingBalance ?? 0));
             setSuccessMessage(`Payment of ${formatMoney(Number(result.debitedAmount ?? 0))} deducted from your wallet successfully.`);
             setShowSuccessToast(true);
@@ -492,18 +512,29 @@ const TenantPayment: React.FC = () => {
 
     const renderReceipt = () => {
         if (!paymentReviewData) return null;
-        const { propertyTitle, rent, deposit, serviceFee, total, contractId } = paymentReviewData;
+        const {
+            propertyTitle,
+            rent,
+            deposit,
+            serviceFee,
+            total,
+            contractId,
+            isMonthlyInstallment = false,
+            lateFee = 0,
+            credit = 0,
+            payableCount = 1,
+        } = paymentReviewData;
 
         return (
             <div className="tab-viewport animate-fade-up">
                 <div className="checkout-distributed-layout">
                     <div className="checkout-main-content">
                         <header className="checkout-page-header">
-                            <button className="back-button-link" onClick={() => { setPaymentReviewData(null); setActiveTab('pending'); }}>
-                                <ArrowLeft size={16} /> Back to Applications
+                            <button className="back-button-link" onClick={() => { setPaymentReviewData(null); setActiveTab(isMonthlyInstallment ? 'upcoming' : 'pending'); }}>
+                                <ArrowLeft size={16} /> Back to {isMonthlyInstallment ? 'Upcoming Payments' : 'Applications'}
                             </button>
                             <h2>Complete Your Payment</h2>
-                            <p>Review the breakdown below and confirm your lease execution.</p>
+                            <p>{isMonthlyInstallment ? 'Review your monthly rent installment details and confirm payment.' : 'Review the breakdown below and confirm your lease execution.'}</p>
                         </header>
 
                         <div className="checkout-sections-stack">
@@ -517,7 +548,7 @@ const TenantPayment: React.FC = () => {
                                         <span className="prop-label">Contract For</span>
                                         <span className="prop-name">{propertyTitle}</span>
                                     </div>
-                                    <div className="prop-status-badge">Approved</div>
+                                    <div className="prop-status-badge">{isMonthlyInstallment ? 'Active Lease' : 'Approved'}</div>
                                 </div>
                             </section>
 
@@ -549,7 +580,11 @@ const TenantPayment: React.FC = () => {
                                     <h3>Execution Terms</h3>
                                 </div>
                                 <div className="execution-terms-box">
-                                    <p>By clicking "Pay & Execute", you agree to the lease terms and authorize HOMi to transfer the security deposit to the landlord's escrow account.</p>
+                                    <p>
+                                        {isMonthlyInstallment
+                                            ? 'By clicking "Pay Rent", you authorize HOMi to settle the outstanding rent installment(s) from your wallet balance.'
+                                            : 'By clicking "Pay & Execute", you agree to the lease terms and authorize HOMi to transfer the security deposit to the landlord\'s escrow account.'}
+                                    </p>
                                 </div>
                             </section>
                         </div>
@@ -558,23 +593,46 @@ const TenantPayment: React.FC = () => {
                     <aside className="checkout-order-summary">
                         <div className="summary-sticky-card">
                             <h3 className="summary-title">Payment Summary</h3>
-                            
+
                             <div className="summary-rows">
-                                <div className="summary-row-item">
-                                    <span>First Month Rent</span>
-                                    <span>{formatMoney(rent)}</span>
-                                </div>
-                                <div className="summary-row-item">
-                                    <span>Security Deposit</span>
-                                    <span>{formatMoney(deposit)}</span>
-                                </div>
-                                <div className="summary-row-item">
-                                    <span>Platform Service Fee</span>
-                                    <span>{formatMoney(serviceFee)}</span>
-                                </div>
-                                
+                                {isMonthlyInstallment ? (
+                                    <>
+                                        <div className="summary-row-item">
+                                            <span>Rent ({payableCount} month{payableCount === 1 ? '' : 's'})</span>
+                                            <span>{formatMoney(rent)}</span>
+                                        </div>
+                                        {lateFee > 0 && (
+                                            <div className="summary-row-item text-danger" style={{ color: '#ef4444' }}>
+                                                <span>Late Fees</span>
+                                                <span>{formatMoney(lateFee)}</span>
+                                            </div>
+                                        )}
+                                        {credit > 0 && (
+                                            <div className="summary-row-item text-success" style={{ color: '#10b981' }}>
+                                                <span>Maintenance Credit</span>
+                                                <span>−{formatMoney(credit)}</span>
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="summary-row-item">
+                                            <span>First Month Rent</span>
+                                            <span>{formatMoney(rent)}</span>
+                                        </div>
+                                        <div className="summary-row-item">
+                                            <span>Security Deposit</span>
+                                            <span>{formatMoney(deposit)}</span>
+                                        </div>
+                                        <div className="summary-row-item">
+                                            <span>Platform Service Fee</span>
+                                            <span>{formatMoney(serviceFee)}</span>
+                                        </div>
+                                    </>
+                                )}
+
                                 <div className="summary-hr"></div>
-                                
+
                                 <div className="summary-total-display">
                                     <div className="total-label-col">
                                         <span className="total-label">Total Amount</span>
@@ -584,7 +642,7 @@ const TenantPayment: React.FC = () => {
                                 </div>
                             </div>
 
-                            <button 
+                            <button
                                 className="btn-execute-payment"
                                 disabled={isProcessingPayment || walletBalance < total}
                                 onClick={() => void handlePayFromBalance(contractId)}
@@ -595,7 +653,7 @@ const TenantPayment: React.FC = () => {
                                         Processing...
                                     </>
                                 ) : (
-                                    'Pay & Execute Contract'
+                                    isMonthlyInstallment ? 'Pay Rent' : 'Pay & Execute Contract'
                                 )}
                             </button>
 
@@ -611,7 +669,7 @@ const TenantPayment: React.FC = () => {
 
                             <div className="checkout-security-badge">
                                 <ShieldCheck size={14} />
-                                Secure Encypted Payment
+                                Secure Encrypted Payment
                             </div>
                         </div>
                     </aside>
@@ -678,7 +736,7 @@ const TenantPayment: React.FC = () => {
                         <TrendingUp size={16} className={hasNextRent ? 'text-success' : 'text-muted'} />
                     </div>
                     <div className="flex-baseline">
-                            <h3 className={hasNextRent ? '' : 'text-muted'}>{formatMoney(hasNextRent ? nextRentAmount : 0)}</h3>
+                        <h3 className={hasNextRent ? '' : 'text-muted'}>{formatMoney(hasNextRent ? nextRentAmount : 0)}</h3>
                         <span className="sub-label">/mo</span>
                     </div>
                     <div className="due-indicator">
@@ -817,14 +875,14 @@ const TenantPayment: React.FC = () => {
                             <div className="application-card-premium" key={req.id}>
                                 <div className="app-card-top">
                                     <span className={`status-tag ${req.status.toLowerCase()}`}>
-                                        {req.status === 'Accepted' ? <CheckCircle2 size={12}/> : <Clock size={12}/>}
+                                        {req.status === 'Accepted' ? <CheckCircle2 size={12} /> : <Clock size={12} />}
                                         {req.status}
                                     </span>
-                                    <button className="icon-btn"><MoreVertical size={16}/></button>
+                                    <button className="icon-btn"><MoreVertical size={16} /></button>
                                 </div>
                                 <div className="app-card-body">
                                     <h4>{req.property}</h4>
-                                    <p className="location-tag"><MapPin size={12}/> {req.loc}</p>
+                                    <p className="location-tag"><MapPin size={12} /> {req.loc}</p>
                                 </div>
                                 <div className="app-card-footer">
                                     <div className="price-group payment-breakdown">
@@ -932,7 +990,7 @@ const TenantPayment: React.FC = () => {
                 <div className="methods-list-side">
                     {hasSavedMethods ? (
                         <div className="method-entry active">
-                            <div className="method-icon-wrap"><Landmark size={20}/></div>
+                            <div className="method-icon-wrap"><Landmark size={20} /></div>
                             <div className="method-info-text">
                                 <h5>{primaryMethod?.brand?.toUpperCase() ?? 'Card'} •••• {primaryMethod?.last4 ?? '0000'}</h5>
                                 <p>{primaryMethod?.isDefault ? 'Primary payment method' : 'Saved payment method'}</p>
@@ -1037,12 +1095,12 @@ const TenantPayment: React.FC = () => {
                     <div className="tabs-wrapper">
                         <nav className="modern-tabs">
                             {[
-                                { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={16}/> },
-                                { id: 'upcoming', label: 'Upcoming', icon: <CalendarClock size={16}/> },
-                                { id: 'history', label: 'History', icon: <History size={16}/> },
-                                { id: 'topup', label: 'Top Up', icon: <Wallet size={16}/> },
-                                { id: 'methods', label: 'Methods', icon: <CreditCard size={16}/> },
-                                { id: 'pending', label: 'Requests', icon: <FileSearch size={16}/> },
+                                { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={16} /> },
+                                { id: 'upcoming', label: 'Upcoming', icon: <CalendarClock size={16} /> },
+                                { id: 'history', label: 'History', icon: <History size={16} /> },
+                                { id: 'topup', label: 'Top Up', icon: <Wallet size={16} /> },
+                                { id: 'methods', label: 'Methods', icon: <CreditCard size={16} /> },
+                                { id: 'pending', label: 'Requests', icon: <FileSearch size={16} /> },
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
@@ -1055,7 +1113,7 @@ const TenantPayment: React.FC = () => {
                         </nav>
                     </div>
 
-                    <div className="viewport-container">
+                    <div className="tenant-payment-viewport-container">
                         {viewportContent}
                     </div>
                 </main>

@@ -27,12 +27,16 @@ function statusForType(type: NotificationItem['type']): string {
             return 'completed';
         case 'MAINTENANCE_DISPUTED':
         case 'MAINTENANCE_LANDLORD_CHARGE':
+        case 'VISIT_REQUEST_RECEIVED':
             return 'pending';
         case 'MAINTENANCE_APPLICATION_ACCEPTED':
         case 'MAINTENANCE_PROVIDER_ARRIVED':
         case 'MAINTENANCE_PROVIDER_EN_ROUTE':
         case 'MAINTENANCE_AWAITING_CONFIRMATION':
+        case 'VISIT_REQUEST_ACCEPTED':
             return 'success';
+        case 'VISIT_REQUEST_DECLINED':
+            return 'info';
         default:
             return 'info';
     }
@@ -40,6 +44,7 @@ function statusForType(type: NotificationItem['type']): string {
 
 function tagForType(type: NotificationItem['type']): string {
     if (type.startsWith('MAINTENANCE_')) return 'maintenance';
+    if (type.startsWith('VISIT_')) return 'visit';
     if (type === 'SYSTEM') return 'system';
     return 'system';
 }
@@ -76,7 +81,8 @@ const NotificationsBar: React.FC<Props> = ({ isOpen, onClose }) => {
         if (disabledByAuth) return;
         const sock = socketService.connect();
         if (!sock) return;
-        const onNew = (n: NotificationItem) => {
+        const onNew = (payload: unknown) => {
+            const n = payload as NotificationItem;
             setNotifications((prev) => [n, ...prev]);
             setUnreadCount((c) => c + 1);
         };

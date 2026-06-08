@@ -1,0 +1,3400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NestFlow — Smart Rental Management</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --blue: #44ACFF;
+      --blue-dark: #1a8fe0;
+      --blue-deeper: #0d70bf;
+      --blue-light: #e8f5ff;
+      --blue-mid: #cce8ff;
+      --blue-ultra: #f0f8ff;
+      --white: #ffffff;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-300: #cbd5e1;
+      --gray-400: #94a3b8;
+      --gray-500: #64748b;
+      --gray-700: #334155;
+      --gray-900: #0f172a;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --text-light: #94a3b8;
+      --border: #e2e8f0;
+      --border-blue: rgba(68, 172, 255, 0.25);
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+      --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.1);
+      --shadow-blue: 0 8px 32px rgba(68, 172, 255, 0.2);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #fff;
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 200;
+      padding: 1rem 5%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      transition: box-shadow 0.3s;
+    }
+
+    nav.scrolled {
+      box-shadow: var(--shadow);
+    }
+
+    .logo {
+      font-family: 'Clash Display', sans-serif;
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+
+    .logo span {
+      color: var(--blue);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--gray-900);
+    }
+
+    .nav-cta {
+      background: var(--blue) !important;
+      color: #fff !important;
+      padding: 0.55rem 1.4rem;
+      border-radius: 50px;
+      font-weight: 600 !important;
+      transition: background 0.2s, transform 0.15s !important;
+    }
+
+    .nav-cta:hover {
+      background: var(--blue-dark) !important;
+      transform: translateY(-1px);
+    }
+
+    /* ── BUTTONS ── */
+    .btn-primary {
+      background: var(--blue);
+      color: #fff;
+      padding: 0.85rem 2rem;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .btn-primary:hover {
+      background: var(--blue-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-blue);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--blue);
+      padding: 0.85rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      border: 2px solid var(--blue);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-outline:hover {
+      background: var(--blue);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    .btn-ghost {
+      background: var(--gray-100);
+      color: var(--gray-700);
+      padding: 0.75rem 1.8rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-ghost:hover {
+      background: var(--gray-200);
+    }
+
+    /* ── SECTION UTILS ── */
+    section {
+      position: relative;
+    }
+
+    .section-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 0.75rem;
+      background: var(--blue-light);
+      padding: 0.3rem 0.9rem;
+      border-radius: 50px;
+    }
+
+    .section-title {
+      font-family: 'Clash Display', sans-serif;
+      font-size: clamp(1.9rem, 3.5vw, 2.8rem);
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1.15;
+      color: var(--gray-900);
+      margin-bottom: 1rem;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    .section-header {
+      text-align: center;
+      padding: 5rem 5% 3rem;
+    }
+
+    /* ── REVEAL ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ═══════════════════════════════════
+   HERO
+═══════════════════════════════════ */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 9rem 5% 5rem;
+      background: linear-gradient(180deg, var(--blue-ultra) 0%, #fff 60%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 800px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(68, 172, 255, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      border: 1.5px solid var(--border-blue);
+      border-radius: 50px;
+      padding: 0.4rem 1.1rem;
+      font-size: 0.82rem;
+      color: var(--blue);
+      font-weight: 600;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-sm);
+      animation: fadeDown 0.7s ease both;
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--blue);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.5;
+        transform: scale(0.7);
+      }
+    }
+
+    .hero h1 {
+      font-family: 'Clash Display', sans-serif;
+      font-size: clamp(2.8rem, 6vw, 5.5rem);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -2px;
+      margin-bottom: 1.5rem;
+      color: var(--gray-900);
+      animation: fadeDown 0.8s 0.1s ease both;
+    }
+
+    .hero h1 .accent {
+      color: var(--blue);
+    }
+
+    .hero h1 .outline {
+      -webkit-text-stroke: 2.5px var(--blue);
+      color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 540px;
+      margin: 0 auto 2.5rem;
+      font-weight: 400;
+      line-height: 1.75;
+      animation: fadeDown 0.8s 0.2s ease both;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeDown 0.8s 0.3s ease both;
+      margin-bottom: 3.5rem;
+    }
+
+    .hero-img {
+      width: 100%;
+      max-width: 900px;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(68, 172, 255, 0.18), 0 4px 16px rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--border);
+      animation: fadeDown 0.9s 0.4s ease both;
+      position: relative;
+    }
+
+    .hero-img img {
+      width: 100%;
+      height: 380px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .hero-img-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(15, 23, 42, 0.6), transparent);
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: flex-end;
+      gap: 1rem;
+    }
+
+    .hero-chip {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 50px;
+      padding: 0.4rem 1rem;
+      font-size: 0.8rem;
+      color: #fff;
+      font-weight: 500;
+    }
+
+    @keyframes fadeDown {
+      from {
+        opacity: 0;
+        transform: translateY(-16px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ═══════════════════════════════════
+   STATS STRIP
+═══════════════════════════════════ */
+    .stats-strip {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+      background: #fff;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat {
+      text-align: center;
+      padding: 2rem 3rem;
+      border-right: 1px solid var(--border);
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .stat:last-child {
+      border-right: none;
+    }
+
+    .stat-num {
+      font-family: 'Clash Display', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--blue);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 5px;
+      font-weight: 500;
+    }
+
+    /* ═══════════════════════════════════
+   PLATFORM OVERVIEW — TABS
+═══════════════════════════════════ */
+    .tabs-container {
+      padding: 0 5% 5rem;
+    }
+
+    .tab-bar {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-bottom: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 0.65rem 1.8rem;
+      border-radius: 50px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      background: #fff;
+      color: var(--text-muted);
+      transition: all 0.2s;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .tab-btn.active {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+      box-shadow: var(--shadow-blue);
+    }
+
+    .tab-btn:hover:not(.active) {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* Feature cards grid */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 1.2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .feature-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.8rem;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--blue), var(--blue-dark));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--border-blue);
+      box-shadow: var(--shadow-blue);
+      transform: translateY(-5px);
+    }
+
+    .feature-card:hover::after {
+      opacity: 1;
+    }
+
+    .feature-card.wide {
+      grid-column: span 2;
+    }
+
+    @media(max-width:680px) {
+      .feature-card.wide {
+        grid-column: span 1;
+      }
+    }
+
+    .feature-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 14px;
+      background: var(--blue-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.2rem;
+      font-size: 1.4rem;
+    }
+
+    .feature-title {
+      font-family: 'Clash Display', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--gray-900);
+    }
+
+    .feature-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      margin-top: 1.2rem;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .step-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .step-text {
+      font-size: 0.87rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .step-text strong {
+      color: var(--gray-900);
+    }
+
+    /* ═══════════════════════════════════
+   STEP-BY-STEP BREAKDOWN
+═══════════════════════════════════ */
+    .steps-section {
+      background: var(--gray-50);
+      padding: 0 0 6rem;
+    }
+
+    .steps-tabs-bar {
+      display: flex;
+      gap: 0;
+      justify-content: center;
+      margin-bottom: 4rem;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 0 5%;
+      overflow-x: auto;
+    }
+
+    .steps-tab {
+      padding: 1.1rem 1.8rem;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .steps-tab.active {
+      color: var(--blue);
+      border-bottom-color: var(--blue);
+    }
+
+    .steps-tab:hover:not(.active) {
+      color: var(--gray-900);
+    }
+
+    .steps-panel {
+      display: none;
+      padding: 0 5%;
+    }
+
+    .steps-panel.active {
+      display: block;
+    }
+
+    /* Each step row */
+    .step-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      max-width: 1100px;
+      margin: 0 auto 5rem;
+      padding-bottom: 5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .step-row:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .step-row.reverse {
+      direction: rtl;
+    }
+
+    .step-row.reverse>* {
+      direction: ltr;
+    }
+
+    @media(max-width:760px) {
+      .step-row {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .step-row.reverse {
+        direction: ltr;
+      }
+    }
+
+    /* Step number badge */
+    .step-number-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 1.2rem;
+    }
+
+    .snb-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: #fff;
+      font-family: 'Clash Display', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(68, 172, 255, 0.35);
+    }
+
+    .snb-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--blue);
+    }
+
+    .step-content-title {
+      font-family: 'Clash Display', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      line-height: 1.15;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.8rem;
+    }
+
+    .step-content-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      margin-bottom: 1.5rem;
+    }
+
+    .step-bullets {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .step-bullet {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: var(--gray-700);
+    }
+
+    .step-bullet-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--blue-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+      font-size: 0.65rem;
+      color: var(--blue);
+      font-weight: 700;
+    }
+
+    .step-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .step-tag {
+      font-size: 0.75rem;
+      padding: 0.28rem 0.8rem;
+      border-radius: 50px;
+      background: var(--blue-light);
+      color: var(--blue);
+      font-weight: 600;
+      border: 1px solid var(--border-blue);
+    }
+
+    /* Photo panel */
+    .step-photo {
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+
+    .step-photo img {
+      width: 100%;
+      height: 340px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .step-photo-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(15, 23, 42, 0.75), transparent);
+      padding: 1.2rem 1.5rem;
+      color: #fff;
+    }
+
+    .step-photo-caption strong {
+      font-size: 0.88rem;
+      font-weight: 600;
+      display: block;
+    }
+
+    .step-photo-caption span {
+      font-size: 0.78rem;
+      opacity: 0.8;
+    }
+
+    .step-photo-badge {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 50px;
+      padding: 0.35rem 0.9rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--blue);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ═══════════════════════════════════
+   ROLE CARDS
+═══════════════════════════════════ */
+    .roles-section {
+      padding: 5rem 5%;
+    }
+
+    .roles-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      max-width: 1000px;
+      margin: 3rem auto 0;
+    }
+
+    @media(max-width:720px) {
+      .roles-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .role-card {
+      border-radius: 24px;
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      border: 1.5px solid var(--border);
+    }
+
+    .role-card.tenant {
+      background: linear-gradient(135deg, var(--blue-ultra), var(--blue-light));
+      border-color: var(--border-blue);
+    }
+
+    .role-card.landlord {
+      background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+      border-color: rgba(34, 197, 94, 0.2);
+    }
+
+    .role-card::after {
+      content: attr(data-emoji);
+      position: absolute;
+      bottom: -15px;
+      right: 15px;
+      font-size: 7rem;
+      opacity: 0.07;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .role-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.73rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 1rem;
+      padding: 0.3rem 0.9rem;
+      border-radius: 50px;
+    }
+
+    .role-card.tenant .role-badge-pill {
+      color: var(--blue);
+      background: rgba(68, 172, 255, 0.12);
+    }
+
+    .role-card.landlord .role-badge-pill {
+      color: #16a34a;
+      background: rgba(22, 163, 74, 0.1);
+    }
+
+    .role-title {
+      font-family: 'Clash Display', sans-serif;
+      font-size: 1.85rem;
+      font-weight: 700;
+      margin-bottom: 0.7rem;
+      letter-spacing: -0.5px;
+      color: var(--gray-900);
+    }
+
+    .role-desc {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.8rem;
+      line-height: 1.6;
+    }
+
+    .role-features {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-bottom: 2rem;
+    }
+
+    .role-feat {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+      color: var(--gray-700);
+    }
+
+    .role-feat .check {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 0.62rem;
+      font-weight: 700;
+    }
+
+    .role-card.tenant .check {
+      background: rgba(68, 172, 255, 0.15);
+      color: var(--blue);
+    }
+
+    .role-card.landlord .check {
+      background: rgba(22, 163, 74, 0.15);
+      color: #16a34a;
+    }
+
+    /* ═══════════════════════════════════
+   WALLET
+═══════════════════════════════════ */
+    .wallet-section {
+      padding: 0 5% 6rem;
+    }
+
+    .wallet-card {
+      max-width: 980px;
+      margin: 3rem auto 0;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    @media(max-width:680px) {
+      .wallet-card {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .wallet-left {
+      background: linear-gradient(145deg, #0f2d4a, #1a4a73, #0d3a5c);
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .wallet-left::before {
+      content: '';
+      position: absolute;
+      top: -80px;
+      right: -80px;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      background: rgba(68, 172, 255, 0.12);
+    }
+
+    .wallet-left::after {
+      content: '';
+      position: absolute;
+      bottom: -60px;
+      left: -60px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: rgba(68, 172, 255, 0.08);
+    }
+
+    .wallet-balance-label {
+      font-size: 0.72rem;
+      color: rgba(255, 255, 255, 0.6);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .wallet-balance {
+      font-family: 'Clash Display', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.1;
+      margin-bottom: 1.8rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .wallet-balance em {
+      font-style: normal;
+      font-size: 1.2rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .wallet-actions {
+      display: flex;
+      gap: 0.6rem;
+      margin-bottom: 1.8rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .wallet-btn {
+      flex: 1;
+      padding: 0.55rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: background 0.2s;
+    }
+
+    .wallet-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .wallet-btn.pay {
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .wallet-tx {
+      position: relative;
+      z-index: 1;
+    }
+
+    .tx-label {
+      font-size: 0.72rem;
+      color: rgba(255, 255, 255, 0.5);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 0.8rem;
+    }
+
+    .tx-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .tx-row:last-child {
+      border-bottom: none;
+    }
+
+    .tx-name {
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .tx-amount {
+      font-weight: 700;
+    }
+
+    .tx-amount.in {
+      color: #4ade80;
+    }
+
+    .tx-amount.out {
+      color: #f87171;
+    }
+
+    .wallet-right {
+      padding: 2.5rem;
+    }
+
+    .wallet-right h3 {
+      font-family: 'Clash Display', sans-serif;
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 0.8rem;
+      letter-spacing: -0.5px;
+    }
+
+    .wallet-right p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.7;
+      margin-bottom: 1.2rem;
+    }
+
+    .wallet-points {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .wp {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 0.88rem;
+      color: var(--gray-700);
+      padding: 0.8rem;
+      border-radius: 12px;
+      background: var(--gray-50);
+    }
+
+    .wp-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--blue-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 0.9rem;
+    }
+
+    /* ═══════════════════════════════════
+   FAQ
+═══════════════════════════════════ */
+    .faq {
+      padding: 0 5% 6rem;
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    .faq-item {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 0.8rem;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .faq-q {
+      font-size: 0.97rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--gray-900);
+      padding: 1.3rem 1.5rem;
+      gap: 1rem;
+      transition: background 0.2s;
+    }
+
+    .faq-q:hover {
+      background: var(--gray-50);
+    }
+
+    .faq-toggle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--blue);
+      font-size: 1rem;
+      font-weight: 400;
+      flex-shrink: 0;
+      transition: all 0.3s;
+    }
+
+    .faq-a {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, padding 0.3s;
+      padding: 0 1.5rem;
+    }
+
+    .faq-item.open .faq-a {
+      max-height: 200px;
+      padding: 0 1.5rem 1.3rem;
+    }
+
+    .faq-item.open .faq-toggle {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+      transform: rotate(45deg);
+    }
+
+    .faq-item.open .faq-q {
+      background: var(--blue-ultra);
+    }
+
+    /* ═══════════════════════════════════
+   CTA
+═══════════════════════════════════ */
+    .cta-section {
+      padding: 5rem 5%;
+      background: var(--gray-50);
+      text-align: center;
+    }
+
+    .cta-box {
+      max-width: 720px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, #0f2d4a, #1d4d80);
+      border-radius: 32px;
+      padding: 4rem 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-box::before {
+      content: '';
+      position: absolute;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(68, 172, 255, 0.18), transparent 70%);
+    }
+
+    .cta-box h2 {
+      font-family: 'Clash Display', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700;
+      letter-spacing: -1px;
+      color: #fff;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .cta-box p {
+      color: rgba(255, 255, 255, 0.65);
+      margin-bottom: 2rem;
+      font-size: 1rem;
+      position: relative;
+    }
+
+    .cta-btns {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    .btn-white {
+      background: #fff;
+      color: var(--blue);
+      padding: 0.85rem 2rem;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-white:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-white-outline {
+      background: transparent;
+      color: #fff;
+      padding: 0.85rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      border: 1.5px solid rgba(255, 255, 255, 0.35);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-white-outline:hover {
+      border-color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* ═══════════════════════════════════
+   FOOTER
+═══════════════════════════════════ */
+    footer {
+      padding: 2.5rem 5%;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      background: #fff;
+    }
+
+    .footer-logo {
+      font-family: 'Clash Display', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      text-decoration: none;
+    }
+
+    .footer-logo span {
+      color: var(--blue);
+    }
+
+    .footer-copy {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .footer-links a {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--blue);
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-blue);
+      border-radius: 10px;
+    }
+
+    /* ═══════════════════════════════════
+   PROPERTIES BROWSE SECTION
+═══════════════════════════════════ */
+    .props-section {
+      background: var(--gray-50);
+      padding: 5rem 0 6rem;
+    }
+
+    .props-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 5%;
+    }
+
+    /* ── Search & Filter Bar ── */
+    .props-search-wrap {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.6rem 1.8rem;
+      box-shadow: var(--shadow);
+      margin-top: 2.5rem;
+    }
+
+    .props-search-row {
+      display: grid;
+      grid-template-columns: 1fr 160px 140px 140px auto;
+      gap: 0.75rem;
+      align-items: end;
+    }
+
+    @media(max-width:900px) {
+      .props-search-row {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media(max-width:560px) {
+      .props-search-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .search-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .search-field label {
+      font-size: 0.73rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .search-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input-wrap .si-icon {
+      position: absolute;
+      left: 12px;
+      font-size: 1rem;
+      color: var(--text-light);
+      pointer-events: none;
+    }
+
+    .props-input {
+      width: 100%;
+      padding: 0.7rem 0.9rem 0.7rem 2.4rem;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .props-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(68, 172, 255, 0.12);
+    }
+
+    .props-select {
+      width: 100%;
+      padding: 0.7rem 0.9rem;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+      transition: border-color 0.2s;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 2rem;
+    }
+
+    .props-select:focus {
+      border-color: var(--blue);
+    }
+
+    .search-btn {
+      background: var(--blue);
+      color: #fff;
+      padding: 0.72rem 1.6rem;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.92rem;
+      font-weight: 700;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      white-space: nowrap;
+    }
+
+    .search-btn:hover {
+      background: var(--blue-dark);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-blue);
+    }
+
+    /* Filter chips */
+    .props-filter-chips {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 1.1rem;
+      padding-top: 1.1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .filter-chip {
+      padding: 0.35rem 1rem;
+      border-radius: 50px;
+      border: 1.5px solid var(--border);
+      background: #fff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+
+    .filter-chip:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .filter-chip.active {
+      background: var(--blue-light);
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    /* ── Results header ── */
+    .props-results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 2.2rem 0 1.4rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .props-count {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .props-count strong {
+      color: var(--gray-900);
+      font-weight: 700;
+    }
+
+    .props-sort-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .props-sort-wrap label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .sort-select {
+      padding: 0.45rem 2rem 0.45rem 0.8rem;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.82rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+      appearance: none;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+    }
+
+    /* ── Property Cards Grid ── */
+    .props-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.4rem;
+    }
+
+    @media(max-width:1000px) {
+      .props-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media(max-width:580px) {
+      .props-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .prop-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .prop-card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-5px);
+      border-color: var(--border-blue);
+    }
+
+    .prop-img {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .prop-img img {
+      width: 100%;
+      height: 210px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s;
+    }
+
+    .prop-card:hover .prop-img img {
+      transform: scale(1.05);
+    }
+
+    .prop-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      padding: 0.3rem 0.85rem;
+      border-radius: 50px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .prop-badge.available {
+      background: rgba(74, 222, 128, 0.92);
+      color: #14532d;
+    }
+
+    .prop-badge.new {
+      background: rgba(68, 172, 255, 0.92);
+      color: #fff;
+    }
+
+    .prop-badge.featured {
+      background: rgba(251, 191, 36, 0.92);
+      color: #78350f;
+    }
+
+    .prop-save {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.92);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: all 0.2s;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .prop-save:hover {
+      background: #fff;
+      transform: scale(1.1);
+    }
+
+    .prop-save.saved {
+      color: #ef4444;
+    }
+
+    .prop-type-tag {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      padding: 0.25rem 0.75rem;
+      border-radius: 50px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .prop-body {
+      padding: 1.2rem 1.3rem 1.4rem;
+    }
+
+    .prop-price {
+      font-family: 'Clash Display', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--blue);
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      margin-bottom: 0.25rem;
+    }
+
+    .prop-price em {
+      font-style: normal;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .prop-title {
+      font-weight: 700;
+      font-size: 0.97rem;
+      color: var(--gray-900);
+      margin-bottom: 0.3rem;
+      line-height: 1.35;
+    }
+
+    .prop-location {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 1rem;
+    }
+
+    .prop-location-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--blue);
+      flex-shrink: 0;
+    }
+
+    .prop-specs {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 1.1rem;
+    }
+
+    .prop-spec {
+      flex: 1;
+      text-align: center;
+      padding: 0.55rem 0.3rem;
+      border-right: 1px solid var(--border);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .prop-spec:last-child {
+      border-right: none;
+    }
+
+    .prop-spec strong {
+      display: block;
+      font-size: 0.92rem;
+      color: var(--gray-900);
+      font-weight: 700;
+      margin-bottom: 1px;
+    }
+
+    .prop-landlord {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .prop-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border-blue);
+    }
+
+    .prop-landlord-name {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .prop-landlord-name strong {
+      color: var(--gray-900);
+      font-weight: 600;
+      display: block;
+      font-size: 0.85rem;
+    }
+
+    .prop-apply-btn {
+      margin-left: auto;
+      padding: 0.42rem 1.1rem;
+      border-radius: 50px;
+      background: var(--blue-light);
+      border: 1.5px solid var(--border-blue);
+      color: var(--blue);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: all 0.2s;
+    }
+
+    .prop-apply-btn:hover {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+    }
+
+    /* ── Pagination ── */
+    .props-pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 2.5rem;
+    }
+
+    .page-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: #fff;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: all 0.18s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page-btn:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .page-btn.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    .page-btn.arrow {
+      font-size: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <a href="#" class="logo">Nest<span>Flow</span></a>
+    <ul class="nav-links">
+      <li><a href="#how">Features</a></li>
+      <li><a href="#properties">Properties</a></li>
+      <li><a href="#steps">How It Works</a></li>
+      <li><a href="#wallet">Wallet</a></li>
+      <li><a href="#faq">FAQ</a></li>
+      <li><a href="#start" class="nav-cta">Get Started</a></li>
+    </ul>
+  </nav>
+
+  <!-- ══ HERO ══ -->
+  <section class="hero">
+    <div class="hero-badge">
+      <div class="badge-dot"></div>
+      The all-in-one rental management platform
+    </div>
+    <h1>Renting Made <span class="accent">Simple.</span><br />Living Made <span class="outline">Better.</span></h1>
+    <p class="hero-sub">NestFlow connects tenants and landlords in one seamless platform — from finding properties and
+      signing leases digitally, to paying rent and resolving maintenance.</p>
+    <div class="hero-btns">
+      <a href="#steps" class="btn-primary">See How It Works ›</a>
+      <a href="#start" class="btn-outline">Get Started Free</a>
+    </div>
+    <div class="hero-img reveal">
+      <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=80&fit=crop"
+        alt="Modern apartment building" />
+      <div class="hero-img-overlay">
+        <div class="hero-chip">🏠 Property Search</div>
+        <div class="hero-chip">📄 Digital Leases</div>
+        <div class="hero-chip">💳 Wallet Payments</div>
+        <div class="hero-chip">🔧 Maintenance</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ STATS ══ -->
+  <div class="stats-strip reveal">
+    <div class="stat">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Digital Process</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">2 Roles</div>
+      <div class="stat-label">Tenant & Landlord</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">6 Steps</div>
+      <div class="stat-label">Apply to Move-In</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">24/7</div>
+      <div class="stat-label">Maintenance Reporting</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">Safe</div>
+      <div class="stat-label">Encrypted Wallet</div>
+    </div>
+  </div>
+
+  <!-- start of properties browse section -->
+  <section id="properties" class="props-section">
+    <div class="props-inner">
+
+      <!-- Header -->
+      <div class="section-header reveal" style="padding:0 0 0;text-align:left;">
+        <div class="section-tag">Browse & Discover</div>
+        <h2 class="section-title" style="max-width:560px;">Find Your Next Home</h2>
+        <p class="section-desc" style="margin:0;max-width:500px;">Search through verified listings across all areas.
+          Filter by price, size, and amenities to find the property that fits your life.</p>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="props-search-wrap reveal">
+        <div class="props-search-row">
+          <div class="search-field" style="grid-column:1/-1;display:block;">
+            <label>Search Location or Property Name</label>
+          </div>
+          <div class="search-field" style="grid-column:1/-1;">
+            <div class="search-input-wrap">
+              <span class="si-icon">🔍</span>
+              <input type="text" class="props-input" placeholder="e.g. Cairo, Maadi, Zamalek, New Cairo…"
+                id="prop-search-input" oninput="filterProps()" />
+            </div>
+          </div>
+
+          <div class="search-field">
+            <label>Type</label>
+            <select class="props-select" id="prop-type" onchange="filterProps()">
+              <option value="">All Types</option>
+              <option value="Apartment">Apartment</option>
+              <option value="Studio">Studio</option>
+              <option value="Villa">Villa</option>
+              <option value="Duplex">Duplex</option>
+            </select>
+          </div>
+
+          <div class="search-field">
+            <label>Bedrooms</label>
+            <select class="props-select" id="prop-beds" onchange="filterProps()">
+              <option value="">Any</option>
+              <option value="1">1 Bed</option>
+              <option value="2">2 Beds</option>
+              <option value="3">3 Beds</option>
+              <option value="4">4+ Beds</option>
+            </select>
+          </div>
+
+          <div class="search-field">
+            <label>Max Price / mo</label>
+            <select class="props-select" id="prop-price" onchange="filterProps()">
+              <option value="">Any Price</option>
+              <option value="5000">Up to 5,000</option>
+              <option value="8000">Up to 8,000</option>
+              <option value="12000">Up to 12,000</option>
+              <option value="20000">Up to 20,000</option>
+            </select>
+          </div>
+
+          <div class="search-field" style="justify-content:flex-end;">
+            <label style="visibility:hidden;">Search</label>
+            <button class="search-btn" onclick="filterProps()">
+              <span>🔍</span> Search
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Chips -->
+        <div class="props-filter-chips">
+          <span
+            style="font-size:0.78rem;font-weight:700;color:var(--text-muted);align-self:center;margin-right:4px;">Quick:</span>
+          <button class="filter-chip active" onclick="setChip(this,'')">All</button>
+          <button class="filter-chip" onclick="setChip(this,'furnished')">Furnished</button>
+          <button class="filter-chip" onclick="setChip(this,'parking')">Parking</button>
+          <button class="filter-chip" onclick="setChip(this,'gym')">Gym</button>
+          <button class="filter-chip" onclick="setChip(this,'pool')">Pool</button>
+          <button class="filter-chip" onclick="setChip(this,'pets')">Pet-Friendly</button>
+          <button class="filter-chip" onclick="setChip(this,'balcony')">Balcony</button>
+          <button class="filter-chip" onclick="setChip(this,'security')">Security</button>
+        </div>
+      </div>
+
+      <!-- Results Header -->
+      <div class="props-results-header">
+        <div class="props-count"><strong id="prop-count">9</strong> properties found</div>
+        <div class="props-sort-wrap">
+          <label>Sort by:</label>
+          <select class="sort-select" onchange="sortProps(this.value)">
+            <option value="featured">Featured</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="newest">Newest</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Property Cards -->
+      <div class="props-grid" id="props-grid">
+
+        <div class="prop-card reveal" data-type="Apartment" data-beds="3" data-price="9500"
+          data-tags="furnished parking gym security">
+          <div class="prop-img">
+            <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80&fit=crop"
+              alt="Modern apartment" />
+            <span class="prop-badge featured">⭐ Featured</span>
+            <button class="prop-save" onclick="toggleSave(this)" title="Save">🤍</button>
+            <span class="prop-type-tag">Apartment</span>
+          </div>
+          <div class="prop-body">
+            <div class="prop-price">9,500 <em>EGP / month</em></div>
+            <div class="prop-title">Luxury 3-Bedroom in New Cairo</div>
+            <div class="prop-location">
+              <div class="prop-location-dot"></div>New Cairo, 5th Settlement
+            </div>
+            <div class="prop-specs">
+              <div class="prop-spec"><strong>3</strong>Beds</div>
+              <div class="prop-spec"><strong>2</strong>Baths</div>
+              <div class="prop-spec"><strong>180</strong>m²</div>
+              <div class="prop-spec"><strong>3rd</strong>Floor</div>
+            </div>
+            <div class="prop-landlord">
+              <img class="prop-avatar"
+                src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&q=80&fit=crop&crop=face"
+                alt="Landlord" />
+              <div class="prop-landlord-name"><strong>Ahmed Karim</strong>Verified Landlord</div>
+              <button class="prop-apply-btn">Apply Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prop-card reveal" data-type="Studio" data-beds="1" data-price="4200"
+          data-tags="furnished balcony security">
+          <div class="prop-img">
+            <img src="https://images.unsplash.com/photo-1536376072261-38c75010e6c9?w=600&q=80&fit=crop"
+              alt="Studio apartment" />
+            <span class="prop-badge new">✨ New</span>
+            <button class="prop-save" onclick="toggleSave(this)" title="Save">🤍</button>
+            <span class="prop-type-tag">Studio</span>
+          </div>
+          <div class="prop-body">
+            <div class="prop-price">4,200 <em>EGP / month</em></div>
+            <div class="prop-title">Cozy Furnished Studio — Zamalek</div>
+            <div class="prop-location">
+              <div class="prop-location-dot"></div>Zamalek, Cairo
+            </div>
+            <div class="prop-specs">
+              <div class="prop-spec"><strong>1</strong>Bed</div>
+              <div class="prop-spec"><strong>1</strong>Bath</div>
+              <div class="prop-spec"><strong>55</strong>m²</div>
+              <div class="prop-spec"><strong>7th</strong>Floor</div>
+            </div>
+            <div class="prop-landlord">
+              <img class="prop-avatar"
+                src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&q=80&fit=crop&crop=face"
+                alt="Landlord" />
+              <div class="prop-landlord-name"><strong>Sara Nour</strong>Verified Landlord</div>
+              <button class="prop-apply-btn">Apply Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prop-card reveal" data-type="Villa" data-beds="4" data-price="18000"
+          data-tags="parking pool gym pets security">
+          <div class="prop-img">
+            <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80&fit=crop" alt="Villa" />
+            <span class="prop-badge available">✓ Available</span>
+            <button class="prop-save" onclick="toggleSave(this)" title="Save">🤍</button>
+            <span class="prop-type-tag">Villa</span>
+          </div>
+          <div class="prop-body">
+            <div class="prop-price">18,000 <em>EGP / month</em></div>
+            <div class="prop-title">Spacious 4-Bed Villa with Pool</div>
+            <div class="prop-location">
+              <div class="prop-location-dot"></div>Sheikh Zayed, 6th October
+            </div>
+            <div class="prop-specs">
+              <div class="prop-spec"><strong>4</strong>Beds</div>
+              <div class="prop-spec"><strong>3</strong>Baths</div>
+              <div class="prop-spec"><strong>320</strong>m²</div>
+              <div class="prop-spec"><strong>Ground</strong>Floor</div>
+            </div>
+            <div class="prop-landlord">
+              <img class="prop-avatar"
+                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&q=80&fit=crop&crop=face"
+                alt="Landlord" />
+              <div class="prop-landlord-name"><strong>Omar Fathy</strong>Verified Landlord</div>
+              <button class="prop-apply-btn">Apply Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prop-card reveal" data-type="Apartment" data-beds="2" data-price="7500"
+          data-tags="furnished balcony parking">
+          <div class="prop-img">
+            <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&q=80&fit=crop"
+              alt="Apartment interior" />
+            <span class="prop-badge available">✓ Available</span>
+            <button class="prop-save" onclick="toggleSave(this)" title="Save">🤍</button>
+            <span class="prop-type-tag">Apartment</span>
+          </div>
+          <div class="prop-body">
+            <div class="prop-price">7,500 <em>EGP / month</em></div>
+            <div class="prop-title">Modern 2-Bed with Nile View</div>
+            <div class="prop-location">
+              <div class="prop-location-dot"></div>Maadi, Cairo
+            </div>
+            <div class="prop-specs">
+              <div class="prop-spec"><strong>2</strong>Beds</div>
+              <div class="prop-spec"><strong>2</strong>Baths</div>
+              <div class="prop-spec"><strong>130</strong>m²</div>
+              <div class="prop-spec"><strong>9th</strong>Floor</div>
+            </div>
+            <div class="prop-landlord">
+              <img class="prop-avatar"
+                src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&q=80&fit=crop&crop=face"
+                alt="Landlord" />
+              <div class="prop-landlord-name"><strong>Layla Hassan</strong>Verified Landlord</div>
+              <button class="prop-apply-btn">Apply Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prop-card reveal" data-type="Duplex" data-beds="3" data-price="11000"
+          data-tags="furnished parking security gym">
+          <div class="prop-img">
+            <img src="https://images.unsplash.com/photo-1567496898669-ee935f5f647a?w=600&q=80&fit=crop" alt="Duplex" />
+            <span class="prop-badge new">✨ New</span>
+            <button class="prop-save" onclick="toggleSave(this)" title="Save">🤍</button>
+            <span class="prop-type-tag">Duplex</span>
+          </div>
+          <div class="prop-body">
+            <div class="prop-price">11,000 <em>EGP / month</em></div>
+            <div class="prop-title">Elegant Duplex — Heliopolis</div>
+            <div class="prop-location">
+              <div class="prop-location-dot"></div>Heliopolis, Cairo
+            </div>
+            <div class="prop-specs">
+              <div class="prop-spec"><strong>3</strong>Beds</div>
+              <div class="prop-spec"><strong>2</strong>Baths</div>
+              <div class="prop-spec"><strong>210</strong>m²</div>
+              <div class="prop-spec"><strong>2 Levels</strong></div>
+            </div>
+            <div class="prop-landlord">
+              <img class="prop-avatar"
+                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&q=80&fit=crop&crop=face"
+                alt="Landlord" />
+              <div class="prop-landlord-name"><strong>Karim Adel</strong>Verified Landlord</div>
+              <button class="prop-apply-btn">Apply Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prop-card reveal" data-type="Studio" data-beds="1" data-price="3800" data-tags="furnished balcony">
+          <div class="prop-img">
+            <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&q=80&fit=crop" alt="Studio" />
+            <span class="prop-badge available">✓ Available</span>
+            <button class="prop-save" onclick="toggleSave(this)" title="Save">🤍</button>
+            <span class="prop-type-tag">Studio</span>
+          </div>
+          <div class="prop-body">
+            <div class="prop-price">3,800 <em>EGP / month</em></div>
+            <div class="prop-title">Bright Studio Near AUC</div>
+            <div class="prop-location">
+              <div class="prop-location-dot"></div>Tagamoa, New Cairo
+            </div>
+            <div class="prop-specs">
+              <div class="prop-spec"><strong>1</strong>Bed</div>
+              <div class="prop-spec"><strong>1</strong>Bath</div>
+              <div class="prop-spec"><strong>48</strong>m²</div>
+              <div class="prop-spec"><strong>4th</strong>Floor</div>
+            </div>
+            <div class="prop-landlord">
+              <img class="prop-avatar"
+                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&q=80&fit=crop&crop=face"
+                alt="Landlord" />
+              <div class="prop-landlord-name"><strong>Mona Sherif</strong>Verified Landlord</div>
+              <button class="prop-apply-btn">Apply Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prop-card reveal" data-type="Apartment" data-beds="2" data-price="6500"
+          data-tags="furnished security parking">
+          <div class="prop-img">
+            <img src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=600&q=80&fit=crop"
+              alt="Apartment" />
+            <span class="prop-badge available">✓ Available</span>
+            <button class="prop-save" onclick="toggleSave(this)" title="Save">🤍</button>
+            <span class="prop-type-tag">Apartment</span>
+          </div>
+          <div class="prop-body">
+            <div class="prop-price">6,500 <em>EGP / month</em></div>
+            <div class="prop-title">2-Bed Semi-Furnished — Dokki</div>
+            <div class="prop-location">
+              <div class="prop-location-dot"></div>Dokki, Giza
+            </div>
+            <div class="prop-specs">
+              <div class="prop-spec"><strong>2</strong>Beds</div>
+              <div class="prop-spec"><strong>1</strong>Bath</div>
+              <div class="prop-spec"><strong>115</strong>m²</div>
+              <div class="prop-spec"><strong>5th</strong>Floor</div>
+            </div>
+            <div class="prop-landlord">
+              <img class="prop-avatar"
+                src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&q=80&fit=crop&crop=face"
+                alt="Landlord" />
+              <div class="prop-landlord-name"><strong>Hany Saleh</strong>Verified Landlord</div>
+              <button class="prop-apply-btn">Apply Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prop-card reveal" data-type="Villa" data-beds="4" data-price="22000"
+          data-tags="pool parking pets gym security">
+          <div class="prop-img">
+            <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=600&q=80&fit=crop"
+              alt="Luxury villa" />
+            <span class="prop-badge featured">⭐ Featured</span>
+            <button class="prop-save" onclick="toggleSave(this)" title="Save">🤍</button>
+            <span class="prop-type-tag">Villa</span>
+          </div>
+          <div class="prop-body">
+            <div class="prop-price">22,000 <em>EGP / month</em></div>
+            <div class="prop-title">Premium Villa — Katameya Heights</div>
+            <div class="prop-location">
+              <div class="prop-location-dot"></div>Katameya, New Cairo
+            </div>
+            <div class="prop-specs">
+              <div class="prop-spec"><strong>4</strong>Beds</div>
+              <div class="prop-spec"><strong>4</strong>Baths</div>
+              <div class="prop-spec"><strong>450</strong>m²</div>
+              <div class="prop-spec"><strong>Private</strong>Garden</div>
+            </div>
+            <div class="prop-landlord">
+              <img class="prop-avatar"
+                src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=80&q=80&fit=crop&crop=face"
+                alt="Landlord" />
+              <div class="prop-landlord-name"><strong>Dina Magdi</strong>Verified Landlord</div>
+              <button class="prop-apply-btn">Apply Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prop-card reveal" data-type="Apartment" data-beds="1" data-price="5000"
+          data-tags="furnished balcony gym security">
+          <div class="prop-img">
+            <img src="https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?w=600&q=80&fit=crop"
+              alt="Apartment bedroom" />
+            <span class="prop-badge new">✨ New</span>
+            <button class="prop-save" onclick="toggleSave(this)" title="Save">🤍</button>
+            <span class="prop-type-tag">Apartment</span>
+          </div>
+          <div class="prop-body">
+            <div class="prop-price">5,000 <em>EGP / month</em></div>
+            <div class="prop-title">1-Bed Fully Furnished — Nasr City</div>
+            <div class="prop-location">
+              <div class="prop-location-dot"></div>Nasr City, Cairo
+            </div>
+            <div class="prop-specs">
+              <div class="prop-spec"><strong>1</strong>Bed</div>
+              <div class="prop-spec"><strong>1</strong>Bath</div>
+              <div class="prop-spec"><strong>80</strong>m²</div>
+              <div class="prop-spec"><strong>6th</strong>Floor</div>
+            </div>
+            <div class="prop-landlord">
+              <img class="prop-avatar"
+                src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=80&q=80&fit=crop&crop=face"
+                alt="Landlord" />
+              <div class="prop-landlord-name"><strong>Youssef Ali</strong>Verified Landlord</div>
+              <button class="prop-apply-btn">Apply Now</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /props-grid -->
+
+      <!-- No results message -->
+      <div id="no-results" style="display:none;text-align:center;padding:4rem 0;">
+        <div style="font-size:3rem;margin-bottom:1rem;">🔍</div>
+        <div
+          style="font-family:'Clash Display',sans-serif;font-size:1.3rem;font-weight:700;color:var(--gray-900);margin-bottom:0.5rem;">
+          No properties found</div>
+        <div style="color:var(--text-muted);font-size:0.95rem;">Try adjusting your filters or search term.</div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="props-pagination">
+        <button class="page-btn arrow">‹</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <span style="color:var(--text-muted);padding:0 4px;font-size:0.9rem;">…</span>
+        <button class="page-btn">12</button>
+        <button class="page-btn arrow">›</button>
+      </div>
+
+    </div><!-- /props-inner -->
+  </section>
+  <!-- End of properties browse section -->
+
+  <!-- ══ PLATFORM OVERVIEW ══ -->
+  <section id="how">
+    <div class="section-header reveal">
+      <div class="section-tag">Platform Overview</div>
+      <h2 class="section-title">Everything In One Place</h2>
+      <p class="section-desc">Whether you're renting a home or managing properties, NestFlow handles every step for you.
+      </p>
+    </div>
+
+    <div class="tabs-container">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('tenant',this)">🏠 I'm a Tenant</button>
+        <button class="tab-btn" onclick="switchTab('landlord',this)">🏗️ I'm a Landlord</button>
+      </div>
+
+      <!-- TENANT -->
+      <div class="tab-panel active" id="tab-tenant">
+        <div class="feature-grid">
+          <div class="feature-card wide reveal">
+            <div class="feature-icon">🔍</div>
+            <div class="feature-title">Find Your Perfect Home</div>
+            <div class="feature-desc">Browse verified listings with smart filters. Every property shows full details,
+              photos, and pricing. Apply directly through the platform with a single click.</div>
+            <div class="step-list">
+              <div class="step-item">
+                <div class="step-num">1</div>
+                <div class="step-text"><strong>Create your account</strong> — build a verified tenant profile with your
+                  details and preferences.</div>
+              </div>
+              <div class="step-item">
+                <div class="step-num">2</div>
+                <div class="step-text"><strong>Search properties</strong> — filter by area, price, size, and amenities
+                  to find the right fit.</div>
+              </div>
+              <div class="step-item">
+                <div class="step-num">3</div>
+                <div class="step-text"><strong>Apply online</strong> — submit your rental application instantly, no
+                  paperwork needed.</div>
+              </div>
+            </div>
+          </div>
+          <div class="feature-card reveal">
+            <div class="feature-icon">🤝</div>
+            <div class="feature-title">Roommate Matching</div>
+            <div class="feature-desc">Post a profile, set your preferences, and connect with compatible co-tenants based
+              on lifestyle, budget, and preferred area.</div>
+          </div>
+          <div class="feature-card reveal">
+            <div class="feature-icon">📄</div>
+            <div class="feature-title">Digital Lease Signing</div>
+            <div class="feature-desc">Review every clause of your contract and sign digitally — legally binding, no
+              printing or scanning required.</div>
+          </div>
+          <div class="feature-card reveal">
+            <div class="feature-icon">💳</div>
+            <div class="feature-title">Pay Rent via Wallet</div>
+            <div class="feature-desc">Top up your NestFlow wallet and pay monthly rent in seconds. Full payment history
+              and automatic reminders included.</div>
+          </div>
+          <div class="feature-card reveal">
+            <div class="feature-icon">🏡</div>
+            <div class="feature-title">Manage Active Rental</div>
+            <div class="feature-desc">View lease details, rental duration, contact your landlord, and stay on top of
+              your active tenancy — all from one dashboard.</div>
+          </div>
+          <div class="feature-card reveal">
+            <div class="feature-icon">🔧</div>
+            <div class="feature-title">Maintenance Requests</div>
+            <div class="feature-desc">Report issues instantly, track resolution in real time, and communicate directly
+              with maintenance providers through the app.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LANDLORD -->
+      <div class="tab-panel" id="tab-landlord">
+        <div class="feature-grid">
+          <div class="feature-card wide reveal">
+            <div class="feature-icon">🏗️</div>
+            <div class="feature-title">Manage All Your Properties</div>
+            <div class="feature-desc">List unlimited properties with photos, pricing, and availability. Edit anytime,
+              mark units as occupied, and control every listing from your central dashboard.</div>
+            <div class="step-list">
+              <div class="step-item">
+                <div class="step-num">1</div>
+                <div class="step-text"><strong>Create your landlord account</strong> — verify identity and set up your
+                  management profile.</div>
+              </div>
+              <div class="step-item">
+                <div class="step-num">2</div>
+                <div class="step-text"><strong>List properties</strong> — add details, photos, and pricing in minutes.
+                </div>
+              </div>
+              <div class="step-item">
+                <div class="step-num">3</div>
+                <div class="step-text"><strong>Review & accept</strong> — view applicant profiles and decide who moves
+                  in.</div>
+              </div>
+            </div>
+          </div>
+          <div class="feature-card reveal">
+            <div class="feature-icon">👥</div>
+            <div class="feature-title">Review Applications</div>
+            <div class="feature-desc">See complete tenant profiles, rental history, and application details. Accept or
+              reject with one tap — all communication stays in the platform.</div>
+          </div>
+          <div class="feature-card reveal">
+            <div class="feature-icon">✍️</div>
+            <div class="feature-title">Sign Lease Contracts</div>
+            <div class="feature-desc">Generate, review, and digitally sign leases. Both parties receive secure, stored
+              copies accessible anytime.</div>
+          </div>
+          <div class="feature-card reveal">
+            <div class="feature-icon">💰</div>
+            <div class="feature-title">Receive & Withdraw Rent</div>
+            <div class="feature-desc">Monthly rent lands in your NestFlow wallet automatically. Withdraw to your bank at
+              any time with a full earnings history.</div>
+          </div>
+          <div class="feature-card reveal">
+            <div class="feature-icon">🔩</div>
+            <div class="feature-title">Maintenance Oversight</div>
+            <div class="feature-desc">Monitor all tenant-reported issues across your properties. Assign providers, track
+              status, and resolve efficiently.</div>
+          </div>
+          <div class="feature-card reveal">
+            <div class="feature-icon">📊</div>
+            <div class="feature-title">Property Analytics</div>
+            <div class="feature-desc">Occupancy rates, income reports, and portfolio performance at a glance — make
+              data-driven decisions.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ STEP-BY-STEP BREAKDOWN ══ -->
+  <section id="steps" class="steps-section">
+    <div class="section-header reveal" style="background:var(--gray-50);padding-top:5rem;">
+      <div class="section-tag">Step-by-Step Guide</div>
+      <h2 class="section-title">How NestFlow Works</h2>
+      <p class="section-desc">A detailed visual walkthrough of every step — from creating your account to managing your
+        active rental.</p>
+    </div>
+
+    <div class="steps-tabs-bar">
+      <button class="steps-tab active" onclick="switchStepsTab('tenant-steps',this)">🏠 Tenant Journey</button>
+      <button class="steps-tab" onclick="switchStepsTab('landlord-steps',this)">🏗️ Landlord Journey</button>
+    </div>
+
+    <!-- ── TENANT STEPS ── -->
+    <div class="steps-panel active" id="tenant-steps">
+
+      <!-- Step 1 -->
+      <div class="step-row reveal">
+        <div class="step-content">
+          <div class="step-number-badge">
+            <div class="snb-circle">1</div>
+            <div class="snb-label">Step One</div>
+          </div>
+          <div class="step-content-title">Create Your Tenant Account</div>
+          <div class="step-content-desc">Start your journey by registering as a tenant on NestFlow. Your profile becomes
+            your trusted digital identity across the platform — landlords will review it when you apply.</div>
+          <div class="step-bullets">
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Enter your personal information and contact details
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Upload an ID for profile verification
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Set your rental preferences (area, budget, size)
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Receive a verified badge on your profile
+            </div>
+          </div>
+          <div class="step-tags"><span class="step-tag">Registration</span><span
+              class="step-tag">Verification</span><span class="step-tag">Profile Setup</span></div>
+        </div>
+        <div class="step-photo">
+          <img src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&q=80&fit=crop"
+            alt="Person setting up account on laptop" />
+          <div class="step-photo-badge">Step 1 of 8</div>
+          <div class="step-photo-caption"><strong>Account Registration</strong><span>Quick sign-up — ready in under 2
+              minutes</span></div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-row reverse reveal">
+        <div class="step-content">
+          <div class="step-number-badge">
+            <div class="snb-circle">2</div>
+            <div class="snb-label">Step Two</div>
+          </div>
+          <div class="step-content-title">Search & Browse Properties</div>
+          <div class="step-content-desc">Explore a wide marketplace of verified rental listings. Use powerful filters to
+            narrow down properties by location, price range, number of rooms, amenities, and availability date.</div>
+          <div class="step-bullets">
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Filter by area, price, size, and amenities
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>View high-resolution photos of every property
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Read full property descriptions and landlord details
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Save favorites and compare multiple listings
+            </div>
+          </div>
+          <div class="step-tags"><span class="step-tag">Property Search</span><span class="step-tag">Smart
+              Filters</span><span class="step-tag">Favorites</span></div>
+        </div>
+        <div class="step-photo">
+          <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80&fit=crop"
+            alt="Apartment building exterior" />
+          <div class="step-photo-badge">Step 2 of 8</div>
+          <div class="step-photo-caption"><strong>Browse Verified Listings</strong><span>Hundreds of properties across
+              all areas</span></div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-row reveal">
+        <div class="step-content">
+          <div class="step-number-badge">
+            <div class="snb-circle">3</div>
+            <div class="snb-label">Step Three</div>
+          </div>
+          <div class="step-content-title">Find a Roommate (Optional)</div>
+          <div class="step-content-desc">Looking to share? Use NestFlow's roommate matching system to connect with
+            compatible people. Post your profile with your lifestyle preferences and let the platform surface suitable
+            matches.</div>
+          <div class="step-bullets">
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Create a roommate profile with your preferences
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Browse and filter compatible roommate profiles
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Contact matches directly through the platform
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Apply for a shared unit together
+            </div>
+          </div>
+          <div class="step-tags"><span class="step-tag">Roommate Matching</span><span class="step-tag">Shared
+              Rentals</span><span class="step-tag">Messaging</span></div>
+        </div>
+        <div class="step-photo">
+          <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80&fit=crop"
+            alt="Two people discussing housing" />
+          <div class="step-photo-badge">Step 3 of 8</div>
+          <div class="step-photo-caption"><strong>Roommate Matching</strong><span>Find someone compatible, not just
+              available</span></div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step-row reverse reveal">
+        <div class="step-content">
+          <div class="step-number-badge">
+            <div class="snb-circle">4</div>
+            <div class="snb-label">Step Four</div>
+          </div>
+          <div class="step-content-title">Submit a Rental Application</div>
+          <div class="step-content-desc">Found the right place? Apply with a single click. Your tenant profile is
+            automatically attached so the landlord sees everything they need — no forms to fill, no documents to scan.
+          </div>
+          <div class="step-bullets">
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Submit your application directly from the listing
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Your verified profile is attached automatically
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Add a personal note or message to the landlord
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Track your application status in real time
+            </div>
+          </div>
+          <div class="step-tags"><span class="step-tag">Rental Application</span><span class="step-tag">One-Click
+              Apply</span><span class="step-tag">Status Tracking</span></div>
+        </div>
+        <div class="step-photo">
+          <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80&fit=crop"
+            alt="Person filling rental application" />
+          <div class="step-photo-badge">Step 4 of 8</div>
+          <div class="step-photo-caption"><strong>Apply Instantly</strong><span>No paperwork — everything is
+              digital</span></div>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="step-row reveal">
+        <div class="step-content">
+          <div class="step-number-badge">
+            <div class="snb-circle">5</div>
+            <div class="snb-label">Step Five</div>
+          </div>
+          <div class="step-content-title">Review & Sign Your Lease</div>
+          <div class="step-content-desc">Once accepted, your lease contract is generated on the platform. Read every
+            term in detail, ask questions, and sign digitally when you're ready — fully legal and secure.</div>
+          <div class="step-bullets">
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>View the full contract with all terms and clauses
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Both tenant and landlord sign digitally
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Signed copy stored securely in your account
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Access your contract anytime from your dashboard
+            </div>
+          </div>
+          <div class="step-tags"><span class="step-tag">Lease Contract</span><span class="step-tag">Digital
+              Signature</span><span class="step-tag">Secure Storage</span></div>
+        </div>
+        <div class="step-photo">
+          <img src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&q=80&fit=crop"
+            alt="Signing a rental contract" />
+          <div class="step-photo-badge">Step 5 of 8</div>
+          <div class="step-photo-caption"><strong>Digital Lease Signing</strong><span>Legally binding — no printing
+              needed</span></div>
+        </div>
+      </div>
+
+      <!-- Step 6 -->
+      <div class="step-row reverse reveal">
+        <div class="step-content">
+          <div class="step-number-badge">
+            <div class="snb-circle">6</div>
+            <div class="snb-label">Step Six</div>
+          </div>
+          <div class="step-content-title">Pay Rent Through Your Wallet</div>
+          <div class="step-content-desc">Top up your NestFlow wallet and pay monthly rent in just a few taps. No bank
+            transfers, no cash — everything is tracked, timestamped, and confirmed automatically.</div>
+          <div class="step-bullets">
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Add funds to your wallet with ease
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Pay your monthly rent directly to the landlord
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Receive payment confirmations and receipts
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Full transaction history always available
+            </div>
+          </div>
+          <div class="step-tags"><span class="step-tag">Wallet Top-Up</span><span class="step-tag">Rent
+              Payment</span><span class="step-tag">Receipts</span></div>
+        </div>
+        <div class="step-photo">
+          <img src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80&fit=crop"
+            alt="Digital payment on phone" />
+          <div class="step-photo-badge">Step 6 of 8</div>
+          <div class="step-photo-caption"><strong>Wallet Rent Payment</strong><span>Instant, trackable, and always
+              confirmed</span></div>
+        </div>
+      </div>
+
+      <!-- Step 7 -->
+      <div class="step-row reveal">
+        <div class="step-content">
+          <div class="step-number-badge">
+            <div class="snb-circle">7</div>
+            <div class="snb-label">Step Seven</div>
+          </div>
+          <div class="step-content-title">Manage Your Active Rental</div>
+          <div class="step-content-desc">You're in! Your active rental dashboard gives you a complete view of your
+            tenancy — lease dates, upcoming payments, landlord contact, and everything about your current home.</div>
+          <div class="step-bullets">
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>View lease start date, end date, and monthly rent
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>See upcoming due dates and payment schedule
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Access landlord contact directly from the dashboard
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>View full rental history and all past payments
+            </div>
+          </div>
+          <div class="step-tags"><span class="step-tag">Rental Dashboard</span><span class="step-tag">Lease
+              Details</span><span class="step-tag">Payment History</span></div>
+        </div>
+        <div class="step-photo">
+          <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80&fit=crop"
+            alt="Modern apartment interior living" />
+          <div class="step-photo-badge">Step 7 of 8</div>
+          <div class="step-photo-caption"><strong>Your Home Dashboard</strong><span>Everything about your tenancy, in
+              one view</span></div>
+        </div>
+      </div>
+
+      <!-- Step 8 -->
+      <div class="step-row reverse reveal">
+        <div class="step-content">
+          <div class="step-number-badge">
+            <div class="snb-circle">8</div>
+            <div class="snb-label">Step Eight</div>
+          </div>
+          <div class="step-content-title">Report Maintenance Issues</div>
+          <div class="step-content-desc">Spot a problem in your unit? Submit a maintenance request instantly. Describe
+            the issue, attach photos, and track the resolution in real time — with direct contact to the assigned
+            provider.</div>
+          <div class="step-bullets">
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Post a request with description and urgency level
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Attach photos to document the issue clearly
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Track the status from submitted to resolved
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Contact the assigned maintenance provider directly
+            </div>
+          </div>
+          <div class="step-tags"><span class="step-tag">Maintenance Request</span><span class="step-tag">Status
+              Tracking</span><span class="step-tag">Provider Contact</span></div>
+        </div>
+        <div class="step-photo">
+          <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&q=80&fit=crop"
+            alt="Maintenance worker repairing apartment" />
+          <div class="step-photo-badge">Step 8 of 8</div>
+          <div class="step-photo-caption"><strong>Maintenance Reporting</strong><span>Fast response, real-time
+              updates</span></div>
+        </div>
+      </div>
+
+    </div><!-- /tenant-steps -->
+
+    <!-- ── LANDLORD STEPS ── -->
+    <div class="steps-panel" id="landlord-steps">
+
+      <!-- Step 1 -->
+      <div class="step-row reveal">
+        <div class="step-content">
+          <div class="step-number-badge">
+            <div class="snb-circle">1</div>
+            <div class="snb-label">Step One</div>
+          </div>
+          <div class="step-content-title">Create Your Landlord Account</div>
+          <div class="step-content-desc">Register as a landlord and set up your verified profile. Your account is the
+            control center for all your properties, tenants, and rental income.</div>
+          <div class="step-bullets">
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Register with your name, contact info, and ID
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Verify your account for landlord trust badge
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Set up your property management profile
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Access your central landlord dashboard
+            </div>
+          </div>
+          <div class="step-tags"><span class="step-tag">Landlord Registration</span><span
+              class="step-tag">Verification</span><span class="step-tag">Dashboard</span></div>
+        </div>
+        <div class="step-photo">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80&fit=crop"
+            alt="Landlord at computer setting up account" />
+          <div class="step-photo-badge">Step 1 of 7</div>
+          <div class="step-photo-caption"><strong>Landlord Account Setup</strong><span>Be up and running in
+              minutes</span></div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-row reverse reveal">
+        <div class="step-content">
+          <div class="step-number-badge">
+            <div class="snb-circle">2</div>
+            <div class="snb-label">Step Two</div>
+          </div>
+          <div class="step-content-title">List Your Properties</div>
+          <div class="step-content-desc">Add your properties to the NestFlow marketplace. Upload photos, write detailed
+            descriptions, set pricing, and specify availability — each listing gets its own management page.</div>
+          <div class="step-bullets">
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Add property address, type, and size details
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Upload high-quality photos and a virtual tour
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Set monthly rent, deposit, and availability date
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>List amenities and building features
+            </div>
+          </div>
+          <div class="step-tags"><span class="step-tag">Property Listing</span><span class="step-tag">Photos</span><span
+              class="step-tag">Pricing</span></div>
+        </div>
+        <div class="step-photo">
+          <img src="https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&q=80&fit=crop"
+            alt="Modern apartment listed for rent" />
+          <div class="step-photo-badge">Step 2 of 7</div>
+          <div class="step-photo-caption"><strong>Property Listing</strong><span>Reach thousands of potential
+              tenants</span></div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-row reveal">
+        <div class="step-content">
+          <div class="step-number-badge">
+            <div class="snb-circle">3</div>
+            <div class="snb-label">Step Three</div>
+          </div>
+          <div class="step-content-title">View & Manage Listings</div>
+          <div class="step-content-desc">All your properties live in one dashboard. Edit details anytime, update
+            availability, toggle listings active or inactive, and see performance stats for each property.</div>
+          <div class="step-bullets">
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>View all listed properties in a unified dashboard
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Edit any property detail at any time
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Mark properties as occupied or available
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>See listing views and application count per property
+            </div>
+          </div>
+          <div class="step-tags"><span class="step-tag">Property Management</span><span
+              class="step-tag">Dashboard</span><span class="step-tag">Analytics</span></div>
+        </div>
+        <div class="step-photo">
+          <img src="https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?w=800&q=80&fit=crop"
+            alt="Property management dashboard view" />
+          <div class="step-photo-badge">Step 3 of 7</div>
+          <div class="step-photo-caption"><strong>Property Dashboard</strong><span>Full control over all your
+              listings</span></div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step-row reverse reveal">
+        <div class="step-content">
+          <div class="step-number-badge">
+            <div class="snb-circle">4</div>
+            <div class="snb-label">Step Four</div>
+          </div>
+          <div class="step-content-title">Review Tenant Applications</div>
+          <div class="step-content-desc">When tenants apply, you receive a notification with their full profile. Review
+            their personal details, rental preferences, and application note — then decide whether to accept or decline.
+          </div>
+          <div class="step-bullets">
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>View full tenant profile and rental history
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Read the personal application note from the tenant
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Accept or reject the application with one tap
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Tenant is notified automatically of your decision
+            </div>
+          </div>
+          <div class="step-tags"><span class="step-tag">Application Review</span><span class="step-tag">Tenant
+              Profiles</span><span class="step-tag">Accept / Reject</span></div>
+        </div>
+        <div class="step-photo">
+          <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800&q=80&fit=crop"
+            alt="Landlord reviewing applications on tablet" />
+          <div class="step-photo-badge">Step 4 of 7</div>
+          <div class="step-photo-caption"><strong>Application Review</strong><span>Full tenant visibility before you
+              decide</span></div>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="step-row reveal">
+        <div class="step-content">
+          <div class="step-number-badge">
+            <div class="snb-circle">5</div>
+            <div class="snb-label">Step Five</div>
+          </div>
+          <div class="step-content-title">Sign the Lease Contract</div>
+          <div class="step-content-desc">Once you accept a tenant, the lease contract is generated automatically. Review
+            the terms, make any required adjustments, and sign digitally — the tenant countersigns on their end.</div>
+          <div class="step-bullets">
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Review the auto-generated lease contract
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Confirm rental period, amount, and conditions
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Sign digitally — tenant receives it instantly
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Both copies stored securely on the platform
+            </div>
+          </div>
+          <div class="step-tags"><span class="step-tag">Lease Generation</span><span class="step-tag">Digital
+              Signature</span><span class="step-tag">Secure Storage</span></div>
+        </div>
+        <div class="step-photo">
+          <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80&fit=crop"
+            alt="Contract signing and legal documents" />
+          <div class="step-photo-badge">Step 5 of 7</div>
+          <div class="step-photo-caption"><strong>Lease Contract</strong><span>Legally binding — done in seconds</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 6 -->
+      <div class="step-row reverse reveal">
+        <div class="step-content">
+          <div class="step-number-badge">
+            <div class="snb-circle">6</div>
+            <div class="snb-label">Step Six</div>
+          </div>
+          <div class="step-content-title">Receive Rent & Withdraw Earnings</div>
+          <div class="step-content-desc">Rent payments arrive in your NestFlow wallet automatically each month. Check
+            your balance, view all incoming payments, and withdraw to your bank account whenever you choose.</div>
+          <div class="step-bullets">
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Monthly rent deposited to your wallet automatically
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>View payment history per property and tenant
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Withdraw to your registered bank account anytime
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Download earnings reports and financial statements
+            </div>
+          </div>
+          <div class="step-tags"><span class="step-tag">Rent Collection</span><span class="step-tag">Wallet</span><span
+              class="step-tag">Bank Withdrawal</span></div>
+        </div>
+        <div class="step-photo">
+          <img src="https://images.unsplash.com/photo-1559526324-593bc073d938?w=800&q=80&fit=crop"
+            alt="Financial management and earnings" />
+          <div class="step-photo-badge">Step 6 of 7</div>
+          <div class="step-photo-caption"><strong>Income Management</strong><span>Receive, track, and withdraw rent
+              easily</span></div>
+        </div>
+      </div>
+
+      <!-- Step 7 -->
+      <div class="step-row reveal">
+        <div class="step-content">
+          <div class="step-number-badge">
+            <div class="snb-circle">7</div>
+            <div class="snb-label">Step Seven</div>
+          </div>
+          <div class="step-content-title">Oversee Maintenance Requests</div>
+          <div class="step-content-desc">Stay on top of all maintenance issues reported across your properties. Assign
+            providers, monitor progress, and mark issues as resolved — keeping your tenants happy and your properties in
+            shape.</div>
+          <div class="step-bullets">
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>See all incoming requests across all properties
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>View photos and descriptions submitted by tenants
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Assign a maintenance provider to each issue
+            </div>
+            <div class="step-bullet">
+              <div class="step-bullet-icon">✓</div>Track resolution status and mark as complete
+            </div>
+          </div>
+          <div class="step-tags"><span class="step-tag">Maintenance</span><span class="step-tag">Provider
+              Assignment</span><span class="step-tag">Issue Tracking</span></div>
+        </div>
+        <div class="step-photo">
+          <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&q=80&fit=crop"
+            alt="Maintenance team working on property" />
+          <div class="step-photo-badge">Step 7 of 7</div>
+          <div class="step-photo-caption"><strong>Maintenance Oversight</strong><span>Keep properties in top
+              condition</span></div>
+        </div>
+      </div>
+
+    </div><!-- /landlord-steps -->
+  </section>
+
+  <!-- ══ ROLE CARDS ══ -->
+  <section>
+    <div class="section-header reveal">
+      <div class="section-tag">Who Is This For?</div>
+      <h2 class="section-title">Built for Both Sides</h2>
+      <p class="section-desc">NestFlow gives tenants and landlords dedicated, purpose-built tools for their unique
+        needs.</p>
+    </div>
+    <div class="roles-section" style="padding-top:0;">
+      <div class="roles-grid">
+        <div class="role-card tenant reveal" data-emoji="🏠">
+          <div class="role-badge-pill">🏠 For Tenants</div>
+          <div class="role-title">Find, Apply & Live</div>
+          <div class="role-desc">From first search to last payment — NestFlow is your rental companion at every stage.
+          </div>
+          <div class="role-features">
+            <div class="role-feat">
+              <div class="check">✓</div>Create a verified tenant profile
+            </div>
+            <div class="role-feat">
+              <div class="check">✓</div>Search & filter available properties
+            </div>
+            <div class="role-feat">
+              <div class="check">✓</div>Submit rental applications online
+            </div>
+            <div class="role-feat">
+              <div class="check">✓</div>Find a compatible roommate
+            </div>
+            <div class="role-feat">
+              <div class="check">✓</div>Sign lease contracts digitally
+            </div>
+            <div class="role-feat">
+              <div class="check">✓</div>Pay rent through your wallet
+            </div>
+            <div class="role-feat">
+              <div class="check">✓</div>Manage your active rental
+            </div>
+            <div class="role-feat">
+              <div class="check">✓</div>Post & track maintenance requests
+            </div>
+          </div>
+          <a href="#start" class="btn-primary">Start as Tenant ›</a>
+        </div>
+        <div class="role-card landlord reveal" data-emoji="🏗️">
+          <div class="role-badge-pill">🏗️ For Landlords</div>
+          <div class="role-title">List, Manage & Earn</div>
+          <div class="role-desc">Powerful tools to manage properties, tenants, and income — all from one dashboard.
+          </div>
+          <div class="role-features">
+            <div class="role-feat">
+              <div class="check">✓</div>Create a verified landlord account
+            </div>
+            <div class="role-feat">
+              <div class="check">✓</div>List properties with full details & photos
+            </div>
+            <div class="role-feat">
+              <div class="check">✓</div>View & manage all listings
+            </div>
+            <div class="role-feat">
+              <div class="check">✓</div>Review tenant profiles & applications
+            </div>
+            <div class="role-feat">
+              <div class="check">✓</div>Accept or reject applications
+            </div>
+            <div class="role-feat">
+              <div class="check">✓</div>Sign lease contracts digitally
+            </div>
+            <div class="role-feat">
+              <div class="check">✓</div>Receive rent to wallet & withdraw
+            </div>
+            <div class="role-feat">
+              <div class="check">✓</div>Monitor all maintenance requests
+            </div>
+          </div>
+          <a href="#start" class="btn-outline">List a Property ›</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ WALLET ══ -->
+  <section id="wallet" style="background:var(--gray-50);padding-top:1px;">
+    <div class="section-header reveal">
+      <div class="section-tag">Built-In Finance</div>
+      <h2 class="section-title">Your NestFlow Wallet</h2>
+      <p class="section-desc">A secure, built-in wallet for rent payments and earnings — no third-party apps ever
+        needed.</p>
+    </div>
+    <div class="wallet-section">
+      <div class="wallet-card reveal">
+        <div class="wallet-left">
+          <div class="wallet-balance-label">Available Balance</div>
+          <div class="wallet-balance"><em>EGP</em> 12,450.00</div>
+          <div class="wallet-actions">
+            <div class="wallet-btn">Top Up</div>
+            <div class="wallet-btn">Withdraw</div>
+            <div class="wallet-btn pay">Pay Rent</div>
+          </div>
+          <div class="wallet-tx">
+            <div class="tx-label">Recent Transactions</div>
+            <div class="tx-row">
+              <div class="tx-name">Rent received — Unit 4B</div>
+              <div class="tx-amount in">+5,200</div>
+            </div>
+            <div class="tx-row">
+              <div class="tx-name">May Rent Payment</div>
+              <div class="tx-amount out">-3,500</div>
+            </div>
+            <div class="tx-row">
+              <div class="tx-name">Wallet Top-Up</div>
+              <div class="tx-amount in">+10,000</div>
+            </div>
+            <div class="tx-row">
+              <div class="tx-name">Withdrawal to Bank</div>
+              <div class="tx-amount out">-4,000</div>
+            </div>
+          </div>
+        </div>
+        <div class="wallet-right">
+          <h3>Seamless Money Management for Rentals</h3>
+          <p>NestFlow's built-in wallet makes rent payments instant and hassle-free — for both tenants and landlords.
+          </p>
+          <div class="wallet-points">
+            <div class="wp">
+              <div class="wp-icon">🏠</div>
+              <div><strong>Tenants</strong> top up their wallet and pay monthly rent directly through the platform — no
+                bank transfers needed.</div>
+            </div>
+            <div class="wp">
+              <div class="wp-icon">🏗️</div>
+              <div><strong>Landlords</strong> receive rent payments to their wallet automatically when rent is due.
+              </div>
+            </div>
+            <div class="wp">
+              <div class="wp-icon">🏦</div>
+              <div>Withdraw your earnings to your registered bank account at any time.</div>
+            </div>
+            <div class="wp">
+              <div class="wp-icon">📋</div>
+              <div>All transactions are logged, timestamped, and fully traceable for your records.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ FAQ ══ -->
+  <section id="faq">
+    <div class="section-header reveal">
+      <div class="section-tag">Common Questions</div>
+      <h2 class="section-title">Frequently Asked</h2>
+    </div>
+    <div class="faq">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Is NestFlow free to use?<span class="faq-toggle">+</span></div>
+        <div class="faq-a">Creating an account is completely free for both tenants and landlords. All core features are
+          available at no cost. You'll always know what's free and what isn't before using any feature.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">How does digital lease signing work?<span
+            class="faq-toggle">+</span></div>
+        <div class="faq-a">Once an application is accepted, a lease contract is auto-generated with all agreed terms.
+          Both the tenant and landlord review and sign digitally on the platform. Signed copies are stored securely and
+          accessible to both parties forever.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">How secure is the wallet and my payments?<span
+            class="faq-toggle">+</span></div>
+        <div class="faq-a">Your wallet is protected with industry-standard encryption. All transactions are logged and
+          auditable. Funds can only be sent to verified landlords, and withdrawals go only to your registered bank
+          account.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Can I list multiple properties as a landlord?<span
+            class="faq-toggle">+</span></div>
+        <div class="faq-a">Yes — landlords can list and manage as many properties as they own. Each property has its own
+          dedicated page, applications queue, and tenant management tools.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">How does the roommate matching feature work?<span
+            class="faq-toggle">+</span></div>
+        <div class="faq-a">Tenants create a roommate profile with their preferences — lifestyle habits, budget,
+          preferred area, and schedule. NestFlow surfaces compatible profiles and lets you message potential roommates
+          directly through the platform.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">What happens after I submit a maintenance request?<span
+            class="faq-toggle">+</span></div>
+        <div class="faq-a">Your request becomes immediately visible to your landlord. You can include photos and urgency
+          level. You'll be notified as the status changes — from submitted → assigned → resolved. You can also contact
+          the assigned maintenance provider directly.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">How long does the rental application process take?<span
+            class="faq-toggle">+</span></div>
+        <div class="faq-a">Applying takes under a minute — just click Apply on any listing and your profile is attached
+          automatically. The landlord is notified instantly and you'll receive their decision as a notification on the
+          platform.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ CTA ══ -->
+  <section id="start" class="cta-section">
+    <div class="cta-box reveal">
+      <div style="font-size:3rem;margin-bottom:1rem;position:relative;">🏠</div>
+      <h2>Ready to Get Started?</h2>
+      <p>Join NestFlow today and experience rental management the way it should be — simple, transparent, and fully
+        digital.</p>
+      <div class="cta-btns">
+        <a href="#" class="btn-white">Create Tenant Account ›</a>
+        <a href="#" class="btn-white-outline">List Your Property</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ FOOTER ══ -->
+  <footer>
+    <a href="#" class="footer-logo">Nest<span>Flow</span></a>
+    <div class="footer-copy">© 2025 NestFlow. Smart Rental Management.</div>
+    <div class="footer-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Support</a>
+      <a href="#">Contact</a>
+    </div>
+  </footer>
+
+  <script>
+    function switchTab(role, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + role).classList.add('active');
+    }
+    function switchStepsTab(id, btn) {
+      document.querySelectorAll('.steps-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.steps-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(id).classList.add('active');
+    }
+    function toggleFaq(el) {
+      const item = el.parentElement;
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    }
+    // Scroll reveal
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach((e, i) => { if (e.isIntersecting) { setTimeout(() => e.target.classList.add('visible'), i * 70); } });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+    // Nav scroll shadow
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+    });
+
+    // ── Properties filter ──
+    let activeChip = '';
+
+    function setChip(el, tag) {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      activeChip = tag;
+      filterProps();
+    }
+
+    function filterProps() {
+      const q = (document.getElementById('prop-search-input').value || '').toLowerCase();
+      const type = document.getElementById('prop-type').value;
+      const beds = document.getElementById('prop-beds').value;
+      const maxP = parseInt(document.getElementById('prop-price').value) || Infinity;
+
+      const cards = document.querySelectorAll('#props-grid .prop-card');
+      let visible = 0;
+
+      cards.forEach(card => {
+        const cType = card.dataset.type || '';
+        const cBeds = parseInt(card.dataset.beds) || 0;
+        const cPrice = parseInt(card.dataset.price) || 0;
+        const cTags = card.dataset.tags || '';
+        const cText = card.innerText.toLowerCase();
+
+        const matchQ = !q || cText.includes(q);
+        const matchType = !type || cType === type;
+        const matchBeds = !beds || (beds === '4' ? cBeds >= 4 : cBeds === parseInt(beds));
+        const matchPrice = cPrice <= maxP;
+        const matchChip = !activeChip || cTags.includes(activeChip);
+
+        const show = matchQ && matchType && matchBeds && matchPrice && matchChip;
+        card.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+
+      document.getElementById('prop-count').textContent = visible;
+      document.getElementById('no-results').style.display = visible === 0 ? 'block' : 'none';
+    }
+
+    function sortProps(val) {
+      const grid = document.getElementById('props-grid');
+      const cards = [...grid.querySelectorAll('.prop-card')];
+
+      cards.sort((a, b) => {
+        if (val === 'price-asc') return parseInt(a.dataset.price) - parseInt(b.dataset.price);
+        if (val === 'price-desc') return parseInt(b.dataset.price) - parseInt(a.dataset.price);
+        return 0;
+      });
+
+      cards.forEach(c => grid.appendChild(c));
+    }
+
+    function toggleSave(btn) {
+      const saved = btn.classList.toggle('saved');
+      btn.textContent = saved ? '❤️' : '🤍';
+    }
+
+    // Pagination buttons (cosmetic)
+    document.querySelectorAll('.page-btn:not(.arrow)').forEach(btn => {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.page-btn:not(.arrow)').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  </script>
+</body>
+
+</html>

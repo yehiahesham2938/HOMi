@@ -1,5 +1,5 @@
 // client\src\features\MyProperties\components\DetailedPropertyCard.tsx
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -7,7 +7,12 @@ import {
   FaUserCircle, FaCalendarAlt, FaTools, FaEllipsisH
 } from 'react-icons/fa';
 import ManagePropertyModal from './ManagePropertyModal'; // Import the new modal
+import OccupiedModal from './OccupiedModal';
+import DisablePropertyModal from './DisablePropertyModal';
+import LandlordVisitsModal from './LandlordVisitsModal';
+import propertyService from '../../../services/property.service';
 import './DetailedPropertyCard.css';
+import type { LandlordContract } from '../../../services/contract.service';
 
 export type LandlordPropertyRow = {
   id: string;
@@ -18,19 +23,57 @@ export type LandlordPropertyRow = {
   beds: number;
   baths: number;
   sqft: number;
-  tenantName: null;
-  leaseEnd: null;
+  tenantName: string | null;
+  leaseEnd: string | null;
   yield: string;
   occupancyRate: number;
   images: Array<{ image_url?: string; imageUrl?: string }>;
   amenities: string[];
   houseRules: string[];
+  activeContract?: LandlordContract | null;
   onUpdate: () => void;
+  securityDeposit?: number;
 };
 
 const DetailedPropertyCard = ({ property }: { property: LandlordPropertyRow }) => {
   const { t } = useTranslation();
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const [isOccupiedModalOpen, setIsOccupiedModalOpen] = useState(false);
+  const [isDisableModalOpen, setIsDisableModalOpen] = useState(false);
+  const [isVisitsModalOpen, setIsVisitsModalOpen] = useState(false);
+  const [enabling, setEnabling] = useState(false);
+  const [pendingVisitsCount, setPendingVisitsCount] = useState(0);
+
+  const fetchPendingCount = useCallback(async () => {
+    try {
+      const res = await propertyService.getPropertyVisits(property.id);
+      if (res.success && res.data) {
+        const count = res.data.filter((v: any) => v.status === 'PENDING').length;
+        setPendingVisitsCount(count);
+      }
+    } catch (err) {
+      console.error("Failed to fetch visits count for property", property.id, err);
+    }
+  }, [property.id]);
+
+  useEffect(() => {
+    void fetchPendingCount();
+  }, [fetchPendingCount]);
+
+  const handleEnable = async () => {
+    setEnabling(true);
+    try {
+      const res = await propertyService.updateProperty(property.id, { status: 'AVAILABLE' });
+      if (res.success) {
+        property.onUpdate();
+      }
+    } catch (err) {
+      console.error("Failed to enable property", err);
+    } finally {
+      setEnabling(false);
+    }
+  };
+
   const status = String(property?.status || '').toLowerCase();
   const isManageLocked = status === 'pending_approval' || status === 'rejected';
 
@@ -99,7 +142,7 @@ const DetailedPropertyCard = ({ property }: { property: LandlordPropertyRow }) =
               <FaCalendarAlt className="icon" />
               <div>
                 <label>{t('tenantHomeComponents.period')}</label>
-                <p>{property.leaseEnd || '—'}</p>
+                <p>{property.leaseEnd || 'N/A'}</p>
               </div>
             </div>
           </div>
@@ -117,6 +160,11 @@ const DetailedPropertyCard = ({ property }: { property: LandlordPropertyRow }) =
               <span className="period">/mo</span>
             </div>
           </div>
+          {property.activeContract && (
+            <div style={{ marginTop: '12px', fontSize: '0.9rem', color: '#10b981', fontWeight: 600 }}>
+              Upcoming Payment Due: ${property.activeContract.rentAmount}
+            </div>
+          )}
           <div className="action-buttons">
             {/* TRIGGER MODAL HERE */}
             <button
@@ -127,7 +175,25 @@ const DetailedPropertyCard = ({ property }: { property: LandlordPropertyRow }) =
             >
               {t('myProperties.manageProperty')}
             </button>
-            <button className="history-btn">{t('tenantHomeComponents.history')}</button>
+            {property.activeContract ? (
+              <button className="history-btn" onClick={() => setIsOccupiedModalOpen(true)}>
+                View Occupied
+              </button>
+            ) : status === 'unavailable' ? (
+              <button className="history-btn" onClick={handleEnable} disabled={enabling}>
+                {enabling ? 'Enabling...' : 'Enable'}
+              </button>
+            ) : (
+              <button className="history-btn" onClick={() => setIsDisableModalOpen(true)}>
+                Disable Property
+              </button>
+            )}
+            <button className="history-btn" onClick={() => setIsVisitsModalOpen(true)} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              Booked Visits
+              {pendingVisitsCount > 0 && (
+                <span className="visit-badge-count">{pendingVisitsCount}</span>
+              )}
+            </button>
           </div>
         </div>
       </div>
@@ -141,6 +207,36 @@ const DetailedPropertyCard = ({ property }: { property: LandlordPropertyRow }) =
           />,
           document.body
         )
+      )}
+
+      {isVisitsModalOpen && (
+        createPortal(
+          <LandlordVisitsModal
+            property={{ id: property.id, name: property.name }}
+            onClose={() => {
+              setIsVisitsModalOpen(false);
+              void fetchPendingCount();
+            }}
+          />,
+          document.body
+        )
+      )}
+
+      {/* OCCUPIED MODAL */}
+      {isOccupiedModalOpen && property.activeContract && (
+        <OccupiedModal
+          contract={property.activeContract}
+          onClose={() => setIsOccupiedModalOpen(false)}
+        />
+      )}
+
+      {/* DISABLE MODAL */}
+      {isDisableModalOpen && (
+        <DisablePropertyModal
+          propertyId={property.id}
+          onClose={() => setIsDisableModalOpen(false)}
+          onSuccess={() => property.onUpdate()}
+        />
       )}
     </>
   );

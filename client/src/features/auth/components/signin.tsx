@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Lock, LogIn } from 'lucide-react';
+import { Mail, Lock, LogIn, Fingerprint } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -62,7 +62,7 @@ const SignIn: React.FC<SignInProps> = ({ rememberMe, onRememberMeChange }) => {
   };
 
   const identifierTrimmed = formData.identifier.trim();
-  const canTryPasskey = identifierTrimmed.length > 0 && passkeyService.isSupported();
+  const canTryPasskey = passkeyService.isSupported();
 
   const handlePasskeySignIn = async () => {
     if (!identifierTrimmed) {
@@ -160,7 +160,9 @@ const SignIn: React.FC<SignInProps> = ({ rememberMe, onRememberMeChange }) => {
           className="btn-secondary-v2"
           disabled={passkeyLoading || loading}
           onClick={handlePasskeySignIn}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
         >
+          <Fingerprint size={18} />
           <span>{passkeyLoading ? t('auth.verifyingPasskey') : t('auth.usePasskey')}</span>
         </button>
       )}

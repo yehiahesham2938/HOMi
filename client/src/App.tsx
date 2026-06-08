@@ -26,6 +26,7 @@ import LandlordPayment from "./features/LandlordPayment/pages/LandlordPayment";
 import HowItWorks from "./features/HowItWorks/pages/HowItWorks";
 import HowItWorksChoose from "./features/HowItWorks/pages/HowItWorksChoose";
 import ForTenants from "./features/HowItWorks/pages/ForTenants";
+import ForMaintenance from "./features/HowItWorks/pages/ForMaintenance";
 import ProMain from "./features/HomiPro/pages/ProMain";
 import Rewards from "./features/Rewards/pages/Rewards";
 import AdminLogin from "./features/admin/pages/AdminLogin";
@@ -38,6 +39,8 @@ import AdminSupportInbox from "./features/admin/pages/AdminSupportInbox";
 import AdminMaintenanceApprovals from "./features/admin/pages/AdminMaintenanceApprovals";
 import AdminMaintainers from "./features/admin/pages/AdminMaintainers";
 import AdminRoommateMatching from "./features/admin/pages/AdminRoommateMatching";
+import AdminContracts from "./features/admin/pages/AdminContracts";
+import AdminPropertyDetails from "./features/admin/pages/AdminPropertyDetails";
 
 import Contract from "./features/TenantContractView/pages/Contract";
 import LandlordContract from "./features/LandlordContractView/pages/Contract";
@@ -59,8 +62,12 @@ import TenantMaintenance from "./features/Maintenance/MaintenanceForTenants&Land
 import LandlordMaintenance from "./features/Maintenance/MaintenanceForTenants&Landlords/pages/LandlordMaintenance";
 import MaintenanceProviderOnboarding from "./features/MaintenanceProvider/pages/MaintenanceProviderOnboarding";
 import MaintenanceConfirmationGate from "./features/Maintenance/MaintenanceForTenants&Landlords/components/MaintenanceConfirmationGate";
-import AdminMaintenanceConflicts from "./features/admin/pages/AdminMaintenanceConflicts";
 import Terms from "./features/Terms/pages/Terms";
+import AddPropertyPage from "./features/home/pages/AddPropertyPage";
+import PropertyDetailPage from "./features/BrowseProperties/pages/PropertyDetailPage";
+import ApplicationPage from "./features/BrowseProperties/pages/ApplicationPage";
+import AdminMaintenanceConflicts from "./features/admin/pages/AdminMaintenanceConflicts";
+
 
 
 function App() {
@@ -93,6 +100,8 @@ function App() {
           element={<AuthGuard allowedRoles={['TENANT']}><RoommateMatching /></AuthGuard>}
         />
         <Route path="/tenant-maintenance" element={<AuthGuard allowedRoles={['TENANT']}><TenantMaintenance /></AuthGuard>} />
+        <Route path="/properties/:id" element={<PropertyDetailPage />} />
+        <Route path="/properties/:id/apply" element={<AuthGuard allowedRoles={['TENANT']}><ApplicationPage /></AuthGuard>} />
 
         {/* Landlord Routes — protected */}
         <Route path="/landlord-home" element={<AuthGuard allowedRoles={['LANDLORD']}><LandlordHome /></AuthGuard>} />
@@ -101,6 +110,8 @@ function App() {
         <Route path="/landlord-payment" element={<AuthGuard allowedRoles={['LANDLORD']}><LandlordPayment /></AuthGuard>} />
         <Route path="/landlord-contracts" element={<AuthGuard allowedRoles={['LANDLORD']}><LandlordContract /></AuthGuard>} />
         <Route path="/landlord-maintenance" element={<AuthGuard allowedRoles={['LANDLORD']}><LandlordMaintenance /></AuthGuard>} />
+        <Route path="/properties/add" element={<AuthGuard allowedRoles={['LANDLORD']}><AddPropertyPage /></AuthGuard>} />
+
 
 
         {/* Maintenance Routes */}
@@ -119,6 +130,7 @@ function App() {
         <Route path="/how-it-works" element={<HowItWorks />} />
         <Route path="/for-landlords" element={<HowItWorks />} />
         <Route path="/for-tenants" element={<ForTenants />} />
+        <Route path="/for-maintenance" element={<ForMaintenance />} />
         <Route path="/homi-pro" element={<ProMain />} />
         <Route path="/terms" element={<Terms />} />
 
@@ -138,6 +150,8 @@ function App() {
         <Route path="/admin/auth/login" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AuthGuard allowedRoles={['ADMIN']}><AdminDashboard /></AuthGuard>} />
         <Route path="/admin/property-approvals" element={<AuthGuard allowedRoles={['ADMIN']}><AdminPropertyApprovals /></AuthGuard>} />
+        <Route path="/admin/properties" element={<AuthGuard allowedRoles={['ADMIN']}><AdminPropertyDetails /></AuthGuard>} />
+        <Route path="/admin/contracts" element={<AuthGuard allowedRoles={['ADMIN']}><AdminContracts /></AuthGuard>} />
         <Route path="/admin/user-reports" element={<AuthGuard allowedRoles={['ADMIN']}><AdminUserReports /></AuthGuard>} />
         <Route path="/admin/user-management" element={<AuthGuard allowedRoles={['ADMIN']}><AdminUserManagement /></AuthGuard>} />
         <Route path="/admin/activity-logs" element={<AuthGuard allowedRoles={['ADMIN']}><AdminActivityLogs /></AuthGuard>} />

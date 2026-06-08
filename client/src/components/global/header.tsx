@@ -8,6 +8,7 @@ import NotificationsBar from '../../features/home/components/TenantHomeComponent
 import notificationService from '../../services/notification.service';
 import socketService from '../../services/socket.service';
 import TestingClockBadge from './TestingClockBadge';
+import { simulateChannels } from '../../shared/utils/notificationSimulator';
 import './header.css';
 
 
@@ -119,7 +120,16 @@ const Header = () => {
     if (!isSignedIn || realtimeDisabled) return;
     const socket = socketService.connect();
     if (!socket) return;
-    const onNew = () => setUnreadCount((c) => c + 1);
+    const onNew = (payload: any) => {
+      setUnreadCount((c) => c + 1);
+      if (payload && typeof payload === 'object' && payload.type) {
+        simulateChannels({
+          title: payload.title || 'New Notification',
+          body: payload.body || '',
+          type: payload.type,
+        });
+      }
+    };
     socketService.onNotificationNew(onNew);
     const id = window.setInterval(refreshUnreadCount, 60_000);
     return () => {
@@ -181,9 +191,6 @@ const Header = () => {
 
         {/* Desktop Navigation */}
         <nav className="header-nav desktop-nav" aria-label="Main navigation">
-          <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>
-            {t('header.home')}
-          </Link>
           {!isMaintainer && (
             <Link
               to={howItWorksBrowsePath}
@@ -249,9 +256,6 @@ const Header = () => {
       {/* Mobile Navigation Menu */}
       {isMobileMenuOpen && (
         <nav ref={mobileMenuRef} className="mobile-nav" aria-label="Mobile navigation" onPointerDown={(e) => e.stopPropagation()}>
-          <Link to={isSignedIn ? dashboardPath : '/'} className={`mobile-nav-link ${location.pathname === dashboardPath || (!isSignedIn && location.pathname === '/') ? 'active' : ''}`}>
-            {t('header.home')}
-          </Link>
           {!isMaintainer && (
             <Link
               to={howItWorksBrowsePath}

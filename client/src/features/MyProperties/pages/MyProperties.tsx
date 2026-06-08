@@ -1,23 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import Header from '../../../components/global/header';
 import Sidebar from '../../../components/global/Landlord/sidebar';
 import Footer from '../../../components/global/footer';
 import DetailedPropertyCard from '../components/DetailedPropertyCard';
-import AddPropertyModal from '../../home/components/LandlordHomeComponents/AddPropertyModal'; // Import modal
 import { FiPlus, FiHome } from 'react-icons/fi'; // Icons for the button
 import propertyService from '../../../services/property.service';
 import authService from '../../../services/auth.service';
 import './MyProperties.css';
 import type { LandlordPropertyRow } from '../components/DetailedPropertyCard';
 
+
 const MyProperties = () => {
   const { t } = useTranslation();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
   const [properties, setProperties] = useState<LandlordPropertyRow[]>([]);
   const [loading, setLoading] = useState(true);
   
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [refreshKey] = useState(0);
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -29,33 +30,63 @@ const MyProperties = () => {
           return;
         }
         
-        const response = await propertyService.getAllProperties({
-           landlordId: currentUser.user.id
-        });
+        const [propRes, contractRes] = await Promise.all([
+          propertyService.getAllProperties({
+             landlordId: currentUser.user.id
+          }),
+          import('../../../services/contract.service').then(m => 
+            m.default.getLandlordContracts({ page: 1, limit: 100 })
+          )
+        ]);
         
-        if (response.success && response.data) {
-           const mappedProperties = response.data.map(prop => ({
-              id: prop.id,
-              name: prop.title,
-              address: prop.address,
-              status: prop.status.toLowerCase(),
-              price: `$${prop.monthlyPrice}`,
-              beds: prop.specifications?.bedrooms || 0,
-              baths: prop.specifications?.bathrooms || 0,
-              sqft: prop.specifications?.areaSqft || 0,
-              tenantName: null,
-              leaseEnd: null,
-              yield: "5.0", // Placeholder for now
-              occupancyRate: prop.status === 'Rented' ? 100 : 0,
-              images: prop.images || [],
-                amenities: (prop.amenities || []).map((amenity) => amenity.name),
-                houseRules: (prop.houseRules || []).map((rule) => rule.name),
-              onUpdate: () => setRefreshKey(prev => prev + 1)
-           }));
-           setProperties(mappedProperties);
+        if (propRes.success && propRes.data) {
+           const contracts = contractRes?.data || [];
+            const mappedProperties = propRes.data.map(prop => {
+              const activeContract = contracts.find(c => c.property?.id === prop.id && c.status === 'ACTIVE');
+              const isOccupied = !!activeContract;
+              const computedStatus = isOccupied ? 'rented' : prop.status.toLowerCase();
+              
+              let tenantName = null;
+              if (activeContract?.tenant) {
+                tenantName = `${activeContract.tenant.firstName} ${activeContract.tenant.lastName}`.trim();
+              }
+
+              let leaseEnd = null;
+              if (activeContract) {
+                const moveIn = new Date(activeContract.moveInDate);
+                if (!Number.isNaN(moveIn.getTime())) {
+                  const end = new Date(moveIn);
+                  end.setMonth(end.getMonth() + activeContract.leaseDurationMonths);
+                  leaseEnd = end.toLocaleDateString();
+                }
+              }
+
+
+              return {
+                id: prop.id,
+                name: prop.title,
+                address: prop.address,
+                price: prop.monthlyPrice.toString(),
+                beds: prop.specifications?.bedrooms ?? 0,
+                baths: prop.specifications?.bathrooms ?? 0,
+                sqft: prop.specifications?.areaSqft ?? 0,
+                status: computedStatus,
+                tenantName,
+                leaseEnd,
+                yield: "8.4",
+                occupancyRate: activeContract ? 100 : 0,
+                images: prop.images,
+                amenities: prop.amenities.map(a => a.name),
+                houseRules: prop.houseRules.map(r => r.name),
+                activeContract: activeContract || null,
+                onUpdate: fetchProperties,
+                securityDeposit: prop.securityDeposit
+              };
+            });
+            setProperties(mappedProperties);
         }
-      } catch (error) {
-        console.error("Failed to fetch properties", error);
+      } catch (err) {
+        console.error('Failed to load portfolio:', err);
       } finally {
         setLoading(false);
       }
@@ -96,7 +127,7 @@ const MyProperties = () => {
             
             {/* Only show the top-right button if there IS data */}
             {hasData && (
-              <button className="add-prop-primary-btn" onClick={() => setIsModalOpen(true)}>
+              <button className="add-prop-primary-btn" onClick={() => navigate('/properties/add')}>
                 <div className="btn-icon-circle">
                   <FiPlus />
                 </div>
@@ -119,7 +150,7 @@ const MyProperties = () => {
               </div>
               <h2>{t('myProperties.noPropertiesFound')}</h2>
               <p className="my-properties-empty-state-text">{t('myProperties.noPropertiesText')}</p>
-              <button className="my-properties-empty-state-btn" onClick={() => setIsModalOpen(true)}>
+              <button className="my-properties-empty-state-btn" onClick={() => navigate('/properties/add')}>
                 <FiPlus size={20} />
                 {t('myProperties.addFirstProperty')}
               </button>
@@ -129,10 +160,6 @@ const MyProperties = () => {
         </main>
         <Footer />
       </div>
-
-      {isModalOpen && (
-        <AddPropertyModal onClose={() => setIsModalOpen(false)} />
-      )}
     </div>
   );
 };

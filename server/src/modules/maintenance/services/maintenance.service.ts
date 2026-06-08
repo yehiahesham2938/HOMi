@@ -301,7 +301,7 @@ class MaintenanceService {
         const applications = (req as any).applications as MaintenanceJobApplication[] | undefined;
 
         let providerExtra:
-            | { category: string | null; providerType: string | null; businessName: string | null; rating: number; ratingsCount: number }
+            | { category: string | null; providerType: string | null; businessName: string | null; rating: number; ratingsCount: number; avatarUrl?: string | null }
             | undefined;
         if (provider) {
             const [appRow, ratings] = await Promise.all([
@@ -311,12 +311,14 @@ class MaintenanceService {
             const avg = ratings.length
                 ? ratings.reduce((s, r) => s + r.rating, 0) / ratings.length
                 : 0;
+            const profile = (provider as any).profile as Profile | undefined;
             providerExtra = {
                 category: appRow?.category ?? null,
                 providerType: appRow?.provider_type ?? null,
                 businessName: appRow?.business_name ?? null,
                 rating: Number(avg.toFixed(2)),
                 ratingsCount: ratings.length,
+                avatarUrl: profile?.avatar_url ?? appRow?.selfie_image ?? null,
             };
         }
 
@@ -410,7 +412,7 @@ class MaintenanceService {
                 id: provider.id,
                 firstName: profile?.first_name ?? 'User',
                 lastName: profile?.last_name ?? '',
-                avatarUrl: profile?.avatar_url ?? null,
+                avatarUrl: profile?.avatar_url ?? appRow?.selfie_image ?? null,
                 phone: profile?.phone_number ?? null,
                 rating: Number(avg.toFixed(2)),
                 ratingsCount: ratings.length,
@@ -1798,7 +1800,7 @@ class MaintenanceService {
                 id: user.id,
                 firstName: profile?.first_name ?? 'User',
                 lastName: profile?.last_name ?? '',
-                avatarUrl: profile?.avatar_url ?? null,
+                avatarUrl: profile?.avatar_url ?? app.selfie_image ?? null,
                 bio: profile?.bio ?? null,
                 providerType: app.provider_type as 'INDIVIDUAL' | 'CENTER',
                 businessName: app.business_name ?? null,

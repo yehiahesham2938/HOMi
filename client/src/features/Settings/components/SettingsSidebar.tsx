@@ -1,9 +1,9 @@
 // Updated SettingsSidebar.tsx
 import React from 'react';
 import './SettingsSidebar.css';
-import { 
-  FaUser, FaShieldAlt, FaCog, FaTrashAlt, 
-  FaBell, FaCreditCard, FaUserShield, FaMagic
+import {
+    FaUser, FaShieldAlt, FaCog, FaTrashAlt,
+    FaBell, FaCreditCard, FaUserShield, FaMagic
 } from 'react-icons/fa';
 
 interface SettingsSidebarProps {
@@ -19,7 +19,6 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ activeTab, setActiveT
         { id: 'billing', label: 'Plan & Billing', icon: <FaCreditCard /> }, // NEW
         { id: 'notifications', label: 'Notifications', icon: <FaBell /> }, // NEW
         { id: 'security', label: 'Security', icon: <FaShieldAlt /> },
-        { id: 'privacy', label: 'Privacy & Data', icon: <FaUserShield /> }, // NEW
         { id: 'lifestyle', label: 'Lifestyle Habits', icon: <FaMagic />, tenantOnly: true },
         { id: 'preferences', label: 'Preferences', icon: <FaCog /> },
     ];
@@ -44,7 +43,7 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ activeTab, setActiveT
                 ))}
             </nav>
             <div className="nav-divider"></div>
-            <button 
+            <button
                 className={`nav-item delete-nav ${activeTab === 'delete' ? 'active' : ''}`}
                 onClick={() => setActiveTab('delete')}
             >

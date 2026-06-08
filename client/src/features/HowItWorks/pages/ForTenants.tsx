@@ -58,38 +58,146 @@ const ForTenants: React.FC = () => {
     navigate('/for-landlords', { replace: true, state: { fromAppNavbar: true } });
   }, [navigate, fromAppNavbar, isSignedIn, storedUserRole]);
 
+  useEffect(() => {
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry, index) => {
+          if (entry.isIntersecting) {
+            setTimeout(() => {
+              entry.target.classList.add('visible');
+            }, index * 70);
+          }
+        });
+      },
+      { threshold: 0.08 }
+    );
+    reveals.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   const steps = useMemo(
     () => [
       {
-        title: 'Create your tenant profile',
-        description:
-          'Set up your account once so you can apply faster, track requests, and manage rentals in one place.',
-        icon: <Sparkles size={22} />,
+        label: 'Step One',
+        title: 'Create Your Tenant Account',
+        description: 'Start your journey by registering as a tenant on HOMI. Your profile becomes your trusted digital identity across the platform — landlords will review it when you apply.',
+        bullets: [
+          'Enter your personal information and contact details',
+          'Upload an ID for profile verification',
+          'Set your rental preferences (area, budget, size)',
+          'Receive a verified badge on your profile'
+        ],
+        tags: ['Registration', 'Verification', 'Profile Setup'],
+        image: 'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&q=80&fit=crop',
+        imageCaptionTitle: 'Account Registration',
+        imageCaptionSub: 'Quick sign-up — ready in under 2 minutes'
       },
       {
-        title: 'Browse and compare listings',
-        description:
-          'Filter by budget, location, and preferences to quickly find homes that match your lifestyle.',
-        icon: <Search size={22} />,
+        label: 'Step Two',
+        title: 'Search & Browse Properties',
+        description: 'Explore a wide marketplace of verified rental listings. Use powerful filters to narrow down properties by location, price range, number of rooms, amenities, and availability date.',
+        bullets: [
+          'Filter by area, price, size, and amenities',
+          'View high-resolution photos of every property',
+          'Read full property descriptions and landlord details',
+          'Save favorites and compare multiple listings'
+        ],
+        tags: ['Property Search', 'Smart Filters', 'Favorites'],
+        image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80&fit=crop',
+        imageCaptionTitle: 'Browse Verified Listings',
+        imageCaptionSub: 'Hundreds of properties across all areas'
       },
       {
-        title: 'Apply with clear details',
-        description:
-          'Submit your request and keep your application status visible without chasing updates manually.',
-        icon: <FileText size={22} />,
+        label: 'Step Three',
+        title: 'Find a Roommate (Optional)',
+        description: "Looking to share? Use HOMI's roommate matching system to connect with compatible people. Post your profile with your lifestyle preferences and let the platform surface suitable matches.",
+        bullets: [
+          'Create a roommate profile with your preferences',
+          'Browse and filter compatible roommate profiles',
+          'Contact matches directly through the platform',
+          'Apply for a shared unit together'
+        ],
+        tags: ['Roommate Matching', 'Shared Rentals', 'Messaging'],
+        image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80&fit=crop',
+        imageCaptionTitle: 'Roommate Matching',
+        imageCaptionSub: 'Find someone compatible, not just available'
       },
       {
-        title: 'Sign digitally and move in',
-        description:
-          'Review lease terms, sign securely, and keep your contract history easy to access anytime.',
-        icon: <KeyRound size={22} />,
+        label: 'Step Four',
+        title: 'Submit a Rental Application',
+        description: 'Found the right place? Apply with a single click. Your tenant profile is automatically attached so the landlord sees everything they need — no forms to fill, no documents to scan.',
+        bullets: [
+          'Submit your application directly from the listing',
+          'Your verified profile is attached automatically',
+          'Add a personal note or message to the landlord',
+          'Track your application status in real time'
+        ],
+        tags: ['Rental Application', 'One-Click Apply', 'Status Tracking'],
+        image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80&fit=crop',
+        imageCaptionTitle: 'Apply Instantly',
+        imageCaptionSub: 'No paperwork — everything is digital'
       },
       {
-        title: 'Pay rent and request maintenance',
-        description:
-          'Handle payments, report issues, and track maintenance progress from one tenant dashboard.',
-        icon: <Wrench size={22} />,
+        label: 'Step Five',
+        title: 'Review & Sign Your Lease',
+        description: "Once accepted, your lease contract is generated on the platform. Read every term in detail, ask questions, and sign digitally when you're ready — fully legal and secure.",
+        bullets: [
+          'View the full contract with all terms and clauses',
+          'Both tenant and landlord sign digitally',
+          'Signed copy stored securely in your account',
+          'Access your contract anytime from your dashboard'
+        ],
+        tags: ['Lease Contract', 'Digital Signature', 'Secure Storage'],
+        image: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&q=80&fit=crop',
+        imageCaptionTitle: 'Digital Lease Signing',
+        imageCaptionSub: 'Legally binding — no printing needed'
       },
+      {
+        label: 'Step Six',
+        title: 'Pay Rent Through Your Wallet',
+        description: 'Top up your HOMI wallet and pay monthly rent in just a few taps. No bank transfers, no cash — everything is tracked, timestamped, and confirmed automatically.',
+        bullets: [
+          'Add funds to your wallet with ease',
+          'Pay your monthly rent directly to the landlord',
+          'Receive payment confirmations and receipts',
+          'Full transaction history always available'
+        ],
+        tags: ['Wallet Rent Payment', 'Instant Payment', 'Receipts'],
+        image: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80&fit=crop',
+        imageCaptionTitle: 'Wallet Rent Payment',
+        imageCaptionSub: 'Instant, trackable, and always confirmed'
+      },
+      {
+        label: 'Step Seven',
+        title: 'Manage Your Active Rental',
+        description: "You're in! Your active rental dashboard gives you a complete view of your tenancy — lease dates, upcoming payments, landlord contact, and everything about your current home.",
+        bullets: [
+          'View lease start date, end date, and monthly rent',
+          'See upcoming due dates and payment schedule',
+          'Access landlord contact directly from the dashboard',
+          'View full rental history and all past payments'
+        ],
+        tags: ['Rental Dashboard', 'Lease Details', 'Payment History'],
+        image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80&fit=crop',
+        imageCaptionTitle: 'Your Home Dashboard',
+        imageCaptionSub: 'Everything about your tenancy, in one view'
+      },
+      {
+        label: 'Step Eight',
+        title: 'Report Maintenance Issues',
+        description: 'Spot a problem in your unit? Submit a maintenance request instantly. Describe the issue, attach photos, and track the resolution in real time — with direct contact to the assigned provider.',
+        bullets: [
+          'Post a request with description and urgency level',
+          'Attach photos to document the issue clearly',
+          'Track the status from submitted to resolved',
+          'Contact the assigned maintenance provider directly'
+        ],
+        tags: ['Maintenance Request', 'Status Tracking', 'Provider Contact'],
+        image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&q=80&fit=crop',
+        imageCaptionTitle: 'Maintenance Reporting',
+        imageCaptionSub: 'Fast response, real-time updates'
+      }
     ],
     []
   );
@@ -161,46 +269,96 @@ const ForTenants: React.FC = () => {
           <section className="how-hero">
             <div className="how-hero-bg" aria-hidden="true" />
 
-            <div className="how-hero-inner">
-              <span className="how-badge">How it works</span>
-              <h1>
-                Find, apply, and rent—<span>all in one place</span>
-              </h1>
-              <p>
-                HOMi helps tenants discover the right home, track applications, pay rent, and handle maintenance with less friction.
-              </p>
+            <div className="how-hero-container">
+              <div className="how-hero-left">
+                <span className="how-badge">🏠 Tenant Journey</span>
+                <h1>
+                  Find, apply, and rent—<br />
+                  <span className="gradient-text">all in one place.</span>
+                </h1>
+                <p className="how-hero-subtitle">
+                  HOMi helps you discover the right home, match with roommates, sign lease contracts online, pay rent securely, and report repairs instantly.
+                </p>
 
-              <div className="how-cta-row">
-                {isSignedIn ? (
-                  <Link to="/browse-properties" className="how-btn-primary">
-                    Explore properties
+                <div className="how-cta-row">
+                  {isSignedIn ? (
+                    <Link to="/browse-properties" className="how-btn-primary">
+                      Explore properties
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      className="how-btn-primary"
+                      onClick={() => setShowAuthModal(true)}
+                    >
+                      Explore properties
+                    </button>
+                  )}
+                  <Link to="/get-help" className="how-btn-secondary">
+                    See tenant support
                   </Link>
-                ) : (
-                  <button
-                    type="button"
-                    className="how-btn-primary"
-                    onClick={() => setShowAuthModal(true)}
-                  >
-                    Explore properties
-                  </button>
-                )}
-                <Link to="/get-help" className="how-btn-secondary">
-                  See tenant support
-                </Link>
+                </div>
+
+                <div className="how-hero-metrics" aria-label="Quick highlights">
+                  <div className="metric-pill">
+                    <CheckCircle2 size={16} />
+                    <span>Application visibility</span>
+                  </div>
+                  <div className="metric-pill">
+                    <CheckCircle2 size={16} />
+                    <span>Easy payment tracking</span>
+                  </div>
+                  <div className="metric-pill">
+                    <CheckCircle2 size={16} />
+                    <span>Maintenance updates</span>
+                  </div>
+                </div>
               </div>
 
-              <div className="how-hero-metrics" aria-label="Quick highlights">
-                <div className="metric-pill">
-                  <CheckCircle2 size={16} />
-                  <span>Application visibility</span>
-                </div>
-                <div className="metric-pill">
-                  <CheckCircle2 size={16} />
-                  <span>Easy payment tracking</span>
-                </div>
-                <div className="metric-pill">
-                  <CheckCircle2 size={16} />
-                  <span>Maintenance updates</span>
+              <div className="how-hero-right">
+                <div className="mock-dashboard-card">
+                  <div className="mock-card-header">
+                    <div className="mock-user-info">
+                      <div className="mock-avatar">👩‍💼</div>
+                      <div>
+                        <h4>Sarah Jenkins</h4>
+                        <span className="mock-badge-verified">✓ Verified Tenant</span>
+                      </div>
+                    </div>
+                    <span className="mock-status-pill success">Active Rental</span>
+                  </div>
+
+                  <div className="mock-card-body">
+                    <div className="mock-rent-strip">
+                      <span className="label">Monthly Rent</span>
+                      <span className="value">12,000 EGP</span>
+                    </div>
+                    <div className="mock-due-strip">
+                      <span>Next Due: <strong>June 1, 2026</strong></span>
+                      <span className="status-label paid">✓ Auto-Paid</span>
+                    </div>
+
+                    <div className="mock-divider" />
+
+                    <div className="mock-stats-row">
+                      <div className="mock-stat-col">
+                        <span className="stat-lbl">Active Lease</span>
+                        <span className="stat-val">12 Months</span>
+                      </div>
+                      <div className="mock-stat-col">
+                        <span className="stat-lbl">Roommate Score</span>
+                        <span className="stat-val compatibility">98% Match</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Floating Glass Chips */}
+                  <div className="floating-glass-chip chip-1">
+                    <span>💳 Wallet: 25,800 EGP</span>
+                  </div>
+                  <div className="floating-glass-chip chip-2">
+                    <span>🔧 AC Repair: Fixed</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -209,23 +367,46 @@ const ForTenants: React.FC = () => {
           <section className="how-section how-steps" aria-label="Step by step">
             <div className="how-container">
               <div className="how-section-head">
-                <h2>5 steps for a smoother tenant journey</h2>
+                <h2>8 steps for a smoother tenant journey</h2>
                 <p>From first search to move-in management, each step is designed to save time.</p>
               </div>
 
-              <div className="how-steps-grid">
+              <div className="how-steps-timeline">
                 {steps.map((step, idx) => (
-                  <div key={step.title} className="how-step-card">
-                    <div className="how-step-top">
-                      <div className="how-step-number" aria-hidden="true">
-                        {idx + 1}
+                  <div
+                    key={step.title}
+                    className={`step-row reveal ${idx % 2 === 1 ? 'reverse' : ''}`}
+                  >
+                    <div className="step-content">
+                      <div className="step-number-badge">
+                        <div className="snb-circle">{idx + 1}</div>
+                        <div className="snb-label">{step.label}</div>
                       </div>
-                      <div className="how-step-icon" aria-hidden="true">
-                        {step.icon}
+                      <div className="step-content-title">{step.title}</div>
+                      <div className="step-content-desc">{step.description}</div>
+                      <div className="step-bullets">
+                        {step.bullets.map((bullet, bIdx) => (
+                          <div key={bIdx} className="step-bullet">
+                            <div className="step-bullet-icon">✓</div>
+                            {bullet}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="step-tags">
+                        {step.tags.map((tag) => (
+                          <span key={tag} className="step-tag">
+                            {tag}
+                          </span>
+                        ))}
                       </div>
                     </div>
-                    <h3>{step.title}</h3>
-                    <p>{step.description}</p>
+                    <div className="step-photo">
+                      <img src={step.image} alt={step.title} />
+                      <div className="step-photo-caption">
+                        <strong>{step.imageCaptionTitle}</strong>
+                        <span>{step.imageCaptionSub}</span>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>

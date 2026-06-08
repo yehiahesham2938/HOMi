@@ -559,4 +559,36 @@ router.post(
     propertyController.reportProperty.bind(propertyController)
 );
 
+router.post(
+    '/:id/visits',
+    protect,
+    requireVerified,
+    restrictTo('TENANT'),
+    propertyController.bookVisit.bind(propertyController)
+);
+
+router.get(
+    '/:id/my-visit',
+    protect,
+    requireVerified,
+    restrictTo('TENANT'),
+    propertyController.getMyVisit.bind(propertyController)
+);
+
+router.get(
+    '/:id/visits',
+    protect,
+    requireVerified,
+    restrictTo('LANDLORD'),
+    propertyController.getPropertyVisits.bind(propertyController)
+);
+
+router.patch(
+    '/:id/visits/:visitId',
+    protect,
+    requireVerified,
+    restrictTo('LANDLORD'),
+    propertyController.updateVisitStatus.bind(propertyController)
+);
+
 export default router;

@@ -217,6 +217,7 @@ export interface ContractResponse {
         firstName: string;
         lastName: string;
         email: string;
+        avatarUrl?: string | null;
         signatureUrl?: string | null;
     };
     tenant?: {
@@ -224,6 +225,7 @@ export interface ContractResponse {
         firstName: string;
         lastName: string;
         email: string;
+        avatarUrl?: string | null;
         signatureUrl?: string | null;
     };
     property?: {

@@ -1,23 +1,46 @@
 .installments-modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.65);
-    backdrop-filter: blur(6px);
+    background: rgba(8, 12, 24, 0.82);
+    backdrop-filter: blur(12px);
     display: grid;
     place-items: center;
-    z-index: 1500;
+    z-index: 2000;
     padding: 24px;
+    animation: fadeInOverlay 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .installments-modal {
-    background: #ffffff;
-    border-radius: 22px;
-    width: min(960px, 100%);
+    background: linear-gradient(160deg, #0b0f19 0%, #111827 100%);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 28px;
+    width: min(980px, 100%);
     max-height: calc(100vh - 48px);
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 24px 80px rgba(15, 23, 42, 0.32);
+    box-shadow: 
+        0 24px 80px rgba(0, 0, 0, 0.65), 
+        0 0 50px rgba(59, 130, 246, 0.08),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    color: #f1f5f9;
+    animation: slideUpModal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUpModal {
+    from { 
+        opacity: 0; 
+        transform: translateY(30px) scale(0.96); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+    }
 }
 
 .installments-modal-header {
@@ -25,301 +48,447 @@
     justify-content: space-between;
     align-items: flex-start;
     gap: 16px;
-    padding: 22px 26px 12px;
-    border-bottom: 1px solid #e2e8f0;
+    padding: 28px 32px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .installments-eyebrow {
     display: inline-block;
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     font-weight: 800;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: #2563eb;
-    margin-bottom: 4px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
 }
 
 .installments-modal-header h2 {
-    margin: 0 0 4px;
-    font-size: 1.35rem;
-    color: #0f172a;
+    margin: 0 0 6px;
+    font-size: 1.5rem;
+    font-weight: 750;
+    color: #ffffff;
+    letter-spacing: -0.01em;
 }
 
 .installments-subtitle {
     margin: 0;
-    font-size: 0.85rem;
-    color: #64748b;
+    font-size: 0.88rem;
+    color: #94a3b8;
+    line-height: 1.4;
 }
 
 .installments-close {
-    background: #f1f5f9;
-    border: none;
-    width: 36px;
-    height: 36px;
-    border-radius: 999px;
-    color: #475569;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    color: #94a3b8;
     display: grid;
     place-items: center;
     cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.installments-close:hover { background: #e2e8f0; color: #0f172a; }
+.installments-close:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    transform: rotate(90deg);
+}
 
-.installments-state {
-    padding: 32px;
+/* Spinner & State states */
+.installments-state-loading {
+    padding: 80px 32px;
     text-align: center;
-    color: #64748b;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    color: #94a3b8;
+}
+
+.installments-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(59, 130, 246, 0.1);
+    border-radius: 50%;
+    border-top-color: #3b82f6;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 .installments-summary {
-    padding: 16px 26px;
+    padding: 24px 32px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    border-bottom: 1px solid #e2e8f0;
+    gap: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .installments-summary-row {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 10px;
+    gap: 16px;
 }
 
 .summary-pill {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 18px;
+    padding: 14px 18px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.summary-pill:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(59, 130, 246, 0.35);
+    box-shadow: 
+        0 12px 24px rgba(0, 0, 0, 0.25),
+        0 0 15px rgba(59, 130, 246, 0.05);
 }
 
 .summary-pill span {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 700;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: #64748b;
 }
 
 .summary-pill strong {
-    font-size: 1.05rem;
-    color: #0f172a;
+    font-size: 1.25rem;
+    font-weight: 750;
+    color: #ffffff;
 }
 
 .summary-pill strong.danger {
-    color: #dc2626;
+    color: #f87171;
+    text-shadow: 0 0 10px rgba(248, 113, 113, 0.15);
 }
 
+/* Custom Sliding Toggle for Autopay */
 .autopay-row {
     display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 12px 14px;
-    border-radius: 14px;
-    background: #ecfeff;
-    border: 1px solid #67e8f9;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 16px 20px;
+    border-radius: 20px;
+    background: rgba(6, 182, 212, 0.04);
+    border: 1px solid rgba(6, 182, 212, 0.15);
     cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.autopay-row input {
-    margin-top: 4px;
+.autopay-row:hover:not(.busy) {
+    background: rgba(6, 182, 212, 0.07);
+    border-color: rgba(6, 182, 212, 0.35);
+    box-shadow: 0 8px 24px rgba(6, 182, 212, 0.08);
+}
+
+.autopay-row.busy {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.autopay-label-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.autopay-label-group strong {
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    font-weight: 650;
+}
+
+.autopay-label-group small {
+    color: #94a3b8;
+    font-size: 0.8rem;
+    line-height: 1.3;
+}
+
+.custom-switch {
+    position: relative;
+    width: 46px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    padding: 2px;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    flex-shrink: 0;
+}
+
+.custom-switch.checked {
+    background: #06b6d4;
+    box-shadow: 0 0 12px rgba(6, 182, 212, 0.45);
+    border-color: rgba(6, 182, 212, 0.2);
+}
+
+.custom-switch-handle {
     width: 18px;
     height: 18px;
-    accent-color: #0891b2;
+    background: #ffffff;
+    border-radius: 50%;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.autopay-row strong {
-    color: #0f172a;
-    display: block;
-    margin-bottom: 2px;
+.custom-switch.checked .custom-switch-handle {
+    transform: translateX(22px);
 }
 
-.autopay-row small {
-    color: #475569;
-    font-size: 0.78rem;
-}
-
+/* Ledger Table */
 .installments-table-wrapper {
     overflow-y: auto;
     flex: 1;
-    padding: 4px 26px 12px;
+    padding: 8px 32px 16px;
+}
+
+/* Custom Scrollbar for dark theme modal */
+.installments-table-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+.installments-table-wrapper::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+}
+.installments-table-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    border: 2px solid transparent;
+}
+.installments-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.18);
 }
 
 .installments-table {
     width: 100%;
     border-collapse: separate;
-    border-spacing: 0;
+    border-spacing: 0 8px;
     font-size: 0.88rem;
 }
 
 .installments-table thead th {
     position: sticky;
     top: 0;
-    background: #f8fafc;
-    color: #475569;
+    background: #0b0f19;
+    color: #64748b;
     text-align: left;
-    padding: 10px 12px;
-    font-size: 0.72rem;
+    padding: 12px 16px;
+    font-size: 0.68rem;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    border-bottom: 1px solid #e2e8f0;
+    letter-spacing: 0.1em;
+    font-weight: 800;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
     z-index: 1;
 }
 
 .installments-table tbody tr {
-    transition: background 0.12s ease;
+    transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.015);
 }
 
-.installments-table tbody tr:hover { background: #f1f5f9; }
+.installments-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.035);
+    transform: scale(1.002);
+}
 
 .installments-table tbody td {
-    padding: 10px 12px;
-    border-bottom: 1px solid #f1f5f9;
-    color: #0f172a;
+    padding: 14px 16px;
+    color: #cbd5e1;
     font-weight: 500;
+    border-top: 1px solid rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
 
-.row-paid td { color: #065f46; }
+.installments-table tbody td:first-child {
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+    border-left: 1px solid rgba(255, 255, 255, 0.03);
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: #64748b;
+}
 
-.row-overdue td { background: rgba(248, 113, 113, 0.08); color: #b91c1c; }
+.installments-table tbody td:last-child {
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    border-right: 1px solid rgba(255, 255, 255, 0.03);
+}
 
-.row-due td { background: rgba(250, 204, 21, 0.08); color: #92400e; }
-
-.row-upcoming td { color: #475569; }
-
+/* Status Pill Glimmer & Styling */
 .row-status-pill {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 7px;
     font-size: 0.72rem;
-    font-weight: 700;
-    padding: 4px 10px;
+    font-weight: 750;
+    padding: 4px 12px;
     border-radius: 999px;
     border: 1px solid transparent;
 }
 
 .row-status-pill.paid {
-    background: #dcfce7;
-    color: #166534;
-    border-color: #86efac;
+    background: rgba(16, 185, 129, 0.09);
+    color: #10b981;
+    border-color: rgba(16, 185, 129, 0.25);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.06);
 }
 
 .row-status-pill.overdue {
-    background: #fee2e2;
-    color: #b91c1c;
-    border-color: #fca5a5;
+    background: rgba(239, 68, 68, 0.09);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.25);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.06);
 }
 
 .row-status-pill.due {
-    background: #fef3c7;
-    color: #92400e;
-    border-color: #fcd34d;
+    background: rgba(245, 158, 11, 0.09);
+    color: #f59e0b;
+    border-color: rgba(245, 158, 11, 0.25);
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.06);
 }
 
 .row-status-pill.upcoming {
-    background: #eff6ff;
-    color: #1d4ed8;
-    border-color: #93c5fd;
+    background: rgba(59, 130, 246, 0.09);
+    color: #3b82f6;
+    border-color: rgba(59, 130, 246, 0.25);
 }
 
+/* Totals Panel */
 .installments-totals {
-    border-top: 1px solid #e2e8f0;
-    padding: 16px 26px;
-    background: #f8fafc;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 20px 32px;
+    background: rgba(0, 0, 0, 0.15);
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 
 .installments-totals-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: #475569;
-}
-
-.installments-totals-row.warn {
-    color: #b91c1c;
-}
-
-.installments-totals-row.credit {
-    color: #065f46;
-}
-
-.installments-totals-row.total {
-    margin-top: 6px;
-    padding-top: 10px;
-    border-top: 1px dashed #cbd5e1;
-    font-size: 1.05rem;
-    color: #0f172a;
-}
-
-.installments-totals-row.total strong {
-    color: #1d4ed8;
-}
-
-.installments-error {
-    margin: 12px 26px 0;
-    padding: 10px 14px;
-    border-radius: 12px;
-    background: #fee2e2;
-    color: #b91c1c;
-    font-weight: 600;
+    color: #94a3b8;
     font-size: 0.85rem;
 }
 
+.installments-totals-row.warn {
+    color: #f87171;
+}
+
+.installments-totals-row.credit {
+    color: #34d399;
+}
+
+.installments-totals-row.total {
+    margin-top: 8px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    font-size: 1.1rem;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.installments-totals-row.total strong {
+    color: #60a5fa;
+    text-shadow: 0 0 15px rgba(96, 165, 250, 0.2);
+}
+
+/* Error message box */
+.installments-error {
+    margin: 12px 32px 0;
+    padding: 12px 16px;
+    border-radius: 14px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: #fca5a5;
+    font-weight: 650;
+    font-size: 0.82rem;
+}
+
+/* Footer layout */
 .installments-footer {
-    padding: 16px 26px 22px;
+    padding: 20px 32px 28px;
     display: flex;
-    gap: 10px;
+    gap: 12px;
     justify-content: flex-end;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .installments-btn {
     border: 0;
-    border-radius: 14px;
-    padding: 12px 18px;
+    border-radius: 16px;
+    padding: 12px 22px;
     font-weight: 700;
+    font-size: 0.92rem;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: background 0.15s ease, transform 0.1s ease;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.installments-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.installments-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
 
 .installments-btn.ghost {
-    background: #f1f5f9;
-    color: #0f172a;
+    background: rgba(255, 255, 255, 0.05);
+    color: #e2e8f0;
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .installments-btn.ghost:hover:not(:disabled) {
-    background: #e2e8f0;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
 }
 
 .installments-btn.primary {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    color: white;
-    box-shadow: 0 12px 28px rgba(37, 99, 235, 0.25);
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: #ffffff;
+    box-shadow: 0 10px 24px rgba(59, 130, 246, 0.25);
 }
 
 .installments-btn.primary:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 16px 36px rgba(37, 99, 235, 0.32);
+    transform: translateY(-2px);
+    box-shadow: 
+        0 14px 30px rgba(59, 130, 246, 0.38),
+        0 0 15px rgba(59, 130, 246, 0.15);
 }
 
 @media (max-width: 760px) {
     .installments-summary-row {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
     }
 
-    .installments-modal-header h2 { font-size: 1.15rem; }
-    .installments-table { font-size: 0.78rem; }
+    .installments-modal-header { padding: 20px 20px 12px; }
+    .installments-summary { padding: 16px 20px; }
+    .installments-table-wrapper { padding: 8px 20px 12px; }
+    .installments-totals { padding: 16px 20px; }
+    .installments-footer { padding: 16px 20px 20px; }
 
+    .installments-modal-header h2 { font-size: 1.25rem; }
+    .installments-table { font-size: 0.78rem; }
     .installments-table thead th,
-    .installments-table tbody td { padding: 8px 8px; }
+    .installments-table tbody td { padding: 10px 10px; }
 }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { FaForward, FaUndo } from 'react-icons/fa';
+import { FaForward, FaBackward, FaUndo } from 'react-icons/fa';
 import contractService from '../../services/contract.service';
 import './TestingClockBadge.css';
 
@@ -54,6 +54,24 @@ const TestingClockBadge = () => {
         }
     };
 
+    const handleGoBack = async () => {
+        if (isBusy || offsetDays <= 0) return;
+        setIsBusy(true);
+        setLastError(null);
+        try {
+            const state = await contractService.advanceTestingClock(-5);
+            setNow(state.now);
+            setOffsetDays(Number(state.offsetDays ?? 0));
+            globalThis.dispatchEvent(new CustomEvent('homi:testing-clock-changed', {
+                detail: { now: state.now, offsetDays: state.offsetDays },
+            }));
+        } catch (err: any) {
+            setLastError(err?.response?.data?.message ?? 'Could not go back in time.');
+        } finally {
+            setIsBusy(false);
+        }
+    };
+
     const handleReset = async () => {
         if (isBusy || offsetDays <= 0) return;
         setIsBusy(true);
@@ -85,6 +103,15 @@ const TestingClockBadge = () => {
                 </span>
             </div>
             <div className="testing-clock-actions">
+                <button
+                    type="button"
+                    className="testing-clock-btn go-back"
+                    onClick={handleGoBack}
+                    disabled={isBusy || offsetDays <= 0 || !serverEnabled}
+                    aria-label="Go back test clock by 5 days"
+                >
+                    <FaBackward /> -5d
+                </button>
                 <button
                     type="button"
                     className="testing-clock-btn advance"

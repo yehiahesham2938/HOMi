@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { FaExclamationTriangle, FaArrowRight, FaClock, FaCalendarAlt } from 'react-icons/fa';
+import { FaExclamationTriangle, FaArrowRight, FaCalendarAlt } from 'react-icons/fa';
 import type { ContractInstallments, RentInstallmentItem } from '../../../services/contract.service';
 import './OverdueRentTable.css';
 
@@ -18,13 +18,6 @@ const formatDateLabel = (iso: string): string => {
     return parsed.toLocaleDateString(undefined, { month: 'short', day: '2-digit', year: 'numeric' });
 };
 
-/**
- * Inline arrears table that automatically appears in ActiveRental when the
- * tenant has more than one outstanding rent installment (or any overdue one).
- * It highlights overdue months in red, lists late fees per month, and exposes
- * a single "Pay All Now" action that funnels back through the existing
- * wallet-based settlement modal.
- */
 const OverdueRentTable = ({ installments, onPayNow, isPaying }: OverdueRentTableProps) => {
     const unpaidItems = useMemo<RentInstallmentItem[]>(
         () => installments.items.filter((item) => item.status === 'OVERDUE' || item.status === 'DUE'),
@@ -68,40 +61,37 @@ const OverdueRentTable = ({ installments, onPayNow, isPaying }: OverdueRentTable
                 </div>
             </header>
 
-            <div className="overdue-rent-table-wrapper">
-                <table className="overdue-rent-table">
-                    <thead>
-                        <tr>
-                            <th>Month</th>
-                            <th>Due Date</th>
-                            <th>Rent</th>
-                            <th>Late Fee</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {unpaidItems.map((item) => {
-                            const isOverdue = item.status === 'OVERDUE';
-                            return (
-                                <tr key={item.index} className={isOverdue ? 'overdue-row' : 'due-row'}>
-                                    <td>{item.label}</td>
-                                    <td>{formatDateLabel(item.dueDate)}</td>
-                                    <td>{formatMoney(item.rentAmount)}</td>
-                                    <td>{item.lateFeeAmount > 0 ? formatMoney(item.lateFeeAmount) : '—'}</td>
-                                    <td><strong>{formatMoney(item.totalAmount)}</strong></td>
-                                    <td>
-                                        <span className={`overdue-row-pill ${isOverdue ? 'overdue' : 'due'}`}>
-                                            {isOverdue
-                                                ? (<><FaExclamationTriangle aria-hidden="true" /> Overdue</>)
-                                                : (<><FaClock aria-hidden="true" /> Due</>)}
-                                        </span>
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
+            <div className="overdue-installments-list">
+                {unpaidItems.map((item) => {
+                    const isOverdue = item.status === 'OVERDUE';
+                    return (
+                        <div key={item.index} className={`overdue-installment-row-card ${isOverdue ? 'overdue' : 'due'}`}>
+                            <div className="installment-card-left">
+                                <div className="installment-calendar-icon">
+                                    <FaCalendarAlt />
+                                </div>
+                                <div className="installment-details">
+                                    <span className="installment-label">{item.label}</span>
+                                    <span className="installment-deadline">Deadline: {formatDateLabel(item.dueDate)}</span>
+                                </div>
+                            </div>
+                            <div className="installment-card-right">
+                                <div className="installment-pricing">
+                                    <span className="pricing-rent">Rent: {formatMoney(item.rentAmount)}</span>
+                                    {item.lateFeeAmount > 0 && (
+                                        <span className="pricing-late-fee">Late Fee: {formatMoney(item.lateFeeAmount)}</span>
+                                    )}
+                                </div>
+                                <div className="installment-totals-group">
+                                    <strong>{formatMoney(item.totalAmount)}</strong>
+                                    <span className={`overdue-row-pill ${isOverdue ? 'overdue' : 'due'}`}>
+                                        {isOverdue ? 'Overdue' : 'Due'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
 
             <div className="overdue-rent-summary">

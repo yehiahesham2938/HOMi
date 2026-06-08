@@ -19,8 +19,11 @@
 .settings-main-area {
   flex: 1;
   width: 100%;
-  /* Fixed header is 88px — leave a clear gap so banners and content never sit under the navbar */
-  padding: calc(88px + 1.25rem) 1.5rem 1.5rem 0;
+  padding: 88px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 88px);
+  box-sizing: border-box;
 }
 
 /* Banners sit below the header padding; keep stacking context sane vs. header (z-index 1000) */
@@ -120,22 +123,23 @@
 
 .settings-glass-card {
   background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-left: none; /* Removes double border against the sidebar */
-  border-radius: 0 0 0 0; /* Flat on the left, rounded on the right */
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  border: none;
+  border-left: 1px solid #eef2f6;
+  border-radius: 0;
+  box-shadow: none;
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
   width: 100%;
-  min-height: calc(100vh - 140px); /* Responsive height instead of fixed 850px */
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
 .settings-view-panel {
   min-width: 0;
-  padding: 2rem;
-  border-left: 1px solid #f1f5f9;
-  overflow: auto;
+  padding: 3rem 4rem; /* more generous padding for a premium look */
+  background: #ffffff;
+  overflow-y: auto;
 }
 
 /* Danger zone */
@@ -252,20 +256,37 @@
   .settings-main-area {
     /* Add padding back to the left side on mobile since the sidebar is hidden */
     padding: calc(88px + 1.25rem) 1.25rem 1.25rem 1.25rem;
+    height: auto;
   }
 
   .settings-glass-card {
     grid-template-columns: 1fr;
     border-radius: 16px; /* Full border radius on mobile */
-    border-left: 1px solid #e5e7eb; /* Restore border on mobile */
+    border: 1px solid #e5e7eb; /* Restore border on mobile */
+    height: auto;
+    flex: none;
   }
 
   .settings-view-panel {
     border-left: none;
     border-top: 1px solid #f1f5f9;
+    padding: 1.5rem;
+    background: transparent;
+    overflow-y: visible;
   }
 }
 
 .danger-icon-wrapper{
   margin-left: 240px;
+}
+
+/* Hide global footer in settings view on desktop, restore on mobile */
+.settings-viewport .site-footer {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .settings-viewport .site-footer {
+    display: block;
+  }
 }

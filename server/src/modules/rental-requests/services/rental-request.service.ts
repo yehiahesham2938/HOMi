@@ -1,4 +1,4 @@
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 import {
     RentalRequest,
     RentalRequestStatus,
@@ -171,7 +171,7 @@ class RentalRequestService {
                         {
                             model: Profile,
                             as: 'profile',
-                            attributes: ['first_name', 'last_name', 'avatar_url', 'bio', 'tenant_rental_preferences'],
+                            attributes: ['first_name', 'last_name', 'avatar_url', 'bio', 'tenant_rental_preferences', 'phone_number'],
                         },
                         {
                             model: Habit,
@@ -242,7 +242,14 @@ class RentalRequestService {
                         {
                             model: PropertyImage,
                             as: 'images',
-                            attributes: ['id', 'image_url', 'is_main']
+                            attributes: [
+                                'id',
+                                'is_main',
+                                [
+                                    Sequelize.literal(`CASE WHEN "property->images"."image_url" LIKE 'data:image%' THEN '/api/properties/images/' || "property->images"."id" ELSE "property->images"."image_url" END`),
+                                    'image_url'
+                                ]
+                            ]
                         },
                         {
                             model: PropertySpecifications,
@@ -479,6 +486,10 @@ class RentalRequestService {
                 bio: profile?.bio ?? null,
                 income: profile?.tenant_rental_preferences?.incomeRange || null,
                 habits: (request.tenant as any)?.habits?.map((h: any) => h.name) ?? [],
+                email: request.tenant.email,
+                phoneNumber: profile?.phone_number ?? null,
+                employment: profile?.tenant_rental_preferences?.employment ?? null,
+                workplace: profile?.tenant_rental_preferences?.workplace ?? null,
             };
         }
 

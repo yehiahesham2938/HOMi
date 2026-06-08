@@ -11,7 +11,6 @@ import savedPropertiesService from '../../../services/saved-properties.service';
 import { mapPropertyToUI } from '../../../utils/propertyMapping';
 import type { PropertyUI as BrowsePropertyUI } from '../../../utils/propertyMapping';
 import PropertyCard from '../../BrowseProperties/components/PropertyCard';
-import PropertyDetailModal from '../../BrowseProperties/components/PropertyDetailedModal';
 import '../../BrowseProperties/pages/BrowseProperties.css';
 import './LandlordPublicProfile.css';
 
@@ -30,12 +29,11 @@ const LandlordPublicProfile = () => {
   const [listings, setListings] = useState<BrowsePropertyUI[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedProperty, setSelectedProperty] = useState<BrowsePropertyUI | null>(null);
   const [savedIds, setSavedIds] = useState<string[]>([]);
 
   useEffect(() => {
     const loadSaved = async () => {
-      if (!authService.getCurrentUser()) {
+      if (!authService.isAuthenticated()) {
         setSavedIds([]);
         return;
       }
@@ -49,15 +47,15 @@ const LandlordPublicProfile = () => {
     void loadSaved();
   }, []);
 
-  const handleToggleSave = async (propertyId: string) => {
+  const handleToggleSave = async (propertyId: string | number) => {
     const normalized = String(propertyId);
     const currentlySaved = savedIds.includes(normalized);
     try {
       if (currentlySaved) {
-        await savedPropertiesService.removeSavedProperty(propertyId);
+        await savedPropertiesService.removeSavedProperty(normalized);
         setSavedIds((prev) => prev.filter((id) => id !== normalized));
       } else {
-        await savedPropertiesService.saveProperty(propertyId);
+        await savedPropertiesService.saveProperty(normalized);
         setSavedIds((prev) => Array.from(new Set([...prev, normalized])));
       }
     } catch {
@@ -79,7 +77,7 @@ const LandlordPublicProfile = () => {
         propertyService.getPublicLandlordProfile(landlordId),
         propertyService.getAllProperties({
           landlordId,
-          status: 'AVAILABLE',
+          status: 'AVAILABLE,RENTED,UNAVAILABLE',
           page: 1,
           limit: 100,
         }),
@@ -107,7 +105,7 @@ const LandlordPublicProfile = () => {
 
   return (
     <div className="layout-wrapper">
-      {!selectedProperty && <Sidebar />}
+      <Sidebar />
       <div className="main-content">
         <Header />
         <div className="landlord-public-page">
@@ -143,7 +141,7 @@ const LandlordPublicProfile = () => {
                       <FiHome size={20} />
                     </div>
                     <h2>Listings on HOMi</h2>
-                    <span className="lpp-count-badge">{listings.length} available</span>
+                    <span className="lpp-count-badge">{listings.filter(l => l.status?.toUpperCase() === 'AVAILABLE').length} available</span>
                   </div>
                 </div>
 
@@ -155,7 +153,9 @@ const LandlordPublicProfile = () => {
                       <PropertyCard
                         key={property.id}
                         property={property}
-                        onOpenDetails={() => setSelectedProperty(property)}
+                        onOpenDetails={() => navigate(`/properties/${property.id}`)}
+                        isSaved={savedIds.includes(String(property.id))}
+                        onToggleSave={authService.isAuthenticated() ? handleToggleSave : undefined}
                       />
                     ))}
                   </div>
@@ -166,16 +166,6 @@ const LandlordPublicProfile = () => {
         </div>
         <Footer />
       </div>
-
-      {selectedProperty && (
-        <PropertyDetailModal
-          property={selectedProperty}
-          onClose={() => setSelectedProperty(null)}
-          isGuest={!authService.getCurrentUser()}
-          isSaved={savedIds.includes(String(selectedProperty.id))}
-          onToggleSave={authService.getCurrentUser() ? handleToggleSave : undefined}
-        />
-      )}
     </div>
   );
 };

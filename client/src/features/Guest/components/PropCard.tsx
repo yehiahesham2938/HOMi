@@ -13,7 +13,7 @@ interface PropCardProps {
 const PropCard: React.FC<PropCardProps> = ({ property, onOpenDetails }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  
+
   // Normalize data between the two mock arrays
   const location = property.address || 'Location unavailable';
   const currency = 'EGP';
@@ -41,7 +41,7 @@ const PropCard: React.FC<PropCardProps> = ({ property, onOpenDetails }) => {
         <div className="prop-overlay-gradient"></div>
         {displayBadge && (
           <div className="prop-badge">
-            <Star size={12} className="fill-star"/> {displayBadge}
+            <Star size={12} className="fill-star" /> {displayBadge}
           </div>
         )}
         <button className="heart-btn" onClick={handleHeartClick}>
@@ -52,14 +52,14 @@ const PropCard: React.FC<PropCardProps> = ({ property, onOpenDetails }) => {
       </div>
       <div className="prop-details">
         <div className="prop-meta-top">
-          <span className="prop-loc"><MapPin size={14}/> {location}</span>
-          <span className="prop-rating"><Star size={14} className="fill-star"/> {property.rating} ({reviewsCount})</span>
+          <span className="prop-loc"><MapPin size={14} /> {location}</span>
+          <span className="prop-rating"><Star size={14} className="fill-star" /> {property.rating} ({reviewsCount})</span>
         </div>
         <h3 className="prop-title">{property.title}</h3>
         <div className="prop-specs">
-          <span><Bed size={16}/> {property.beds} {t('guestHome.beds')}</span>
-          <span><Bath size={16}/> {property.baths} {t('guestHome.baths')}</span>
-          <span><Maximize size={16}/> {property.sqft} {t('guestHome.sqm')}</span>
+          <span><Bed size={16} /> {property.beds} {t('guestHome.beds')}</span>
+          <span><Bath size={16} /> {property.baths} {t('guestHome.baths')}</span>
+          <span><Maximize size={16} /> {property.sqft} {t('guestHome.sqm')}</span>
         </div>
         <div className="prop-footer-split">
           <div className="prop-price-block">

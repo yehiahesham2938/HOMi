@@ -30,8 +30,21 @@ class ContractController {
     async advanceTestingClock(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const days = Number((req.body as any)?.days ?? 5);
-            // Capture a DB snapshot before the first advance, then move the clock.
-            const state = await contractService.advanceTestingClockWithSnapshot(days);
+            let state;
+            if (days < 0) {
+                const currentState = contractService.getTestingClockState();
+                const currentOffset = currentState.offsetDays;
+                const targetOffset = Math.max(0, currentOffset + days);
+                
+                await contractService.resetTestingClockWithRestore();
+                if (targetOffset > 0) {
+                    state = await contractService.advanceTestingClockWithSnapshot(targetOffset);
+                } else {
+                    state = contractService.getTestingClockState();
+                }
+            } else {
+                state = await contractService.advanceTestingClockWithSnapshot(days);
+            }
 
             // After clock advances, autopay-eligible contracts for the calling
             // tenant settle automatically so the simulated time-jump reflects
@@ -49,7 +62,9 @@ class ContractController {
 
             res.status(200).json({
                 success: true,
-                message: `Testing clock advanced by ${Math.max(0, Math.floor(days))} day(s).`,
+                message: days < 0
+                    ? `Testing clock set back by ${Math.abs(days)} day(s).`
+                    : `Testing clock advanced by ${Math.floor(days)} day(s).`,
                 data: { ...state, autopay },
             });
         } catch (error) {
@@ -401,8 +416,8 @@ class ContractController {
     async getContractInstallments(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const { id } = req.params;
-            const tenantId = (req as any).user.userId;
-            const data = await contractService.getContractInstallments(id as string, tenantId);
+            const callerId = (req as any).user.userId;
+            const data = await contractService.getContractInstallments(id as string, callerId);
             res.status(200).json({
                 success: true,
                 data,
@@ -443,6 +458,50 @@ class ContractController {
             res.status(200).json({
                 success: true,
                 data: rows,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * POST /api/contracts/:id/report-tenant
+     */
+    async reportTenant(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { id } = req.params;
+            const landlordId = (req as any).user?.userId as string;
+            const { reason, details } = req.body;
+
+            const report = await contractService.reportTenant(id as string, landlordId, { reason, details });
+
+            res.status(200).json({
+                success: true,
+                message: 'Tenant reported successfully. The administration has been notified.',
+                data: report,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+
+
+    /**
+     * POST /api/contracts/:id/terminate
+     */
+    async terminateLease(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { id } = req.params;
+            const landlordId = (req as any).user?.userId as string;
+            const { reason } = req.body;
+            
+            const request = await contractService.requestLeaseTermination(id as string, landlordId, { reason });
+
+            res.status(200).json({
+                success: true,
+                message: 'Lease termination request submitted successfully.',
+                data: request,
             });
         } catch (error) {
             next(error);

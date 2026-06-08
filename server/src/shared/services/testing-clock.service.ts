@@ -55,6 +55,21 @@ interface MaintenanceRequestSnapshot {
     resolved_at: Date | null;
 }
 
+interface NotificationSnapshot {
+    id: string;
+    user_id: string;
+    type: string;
+    title: string;
+    body: string;
+    related_entity_type: string | null;
+    related_entity_id: string | null;
+    data: Record<string, unknown>;
+    is_read: boolean;
+    read_at: Date | null;
+    created_at: Date;
+    updated_at: Date;
+}
+
 interface DbSnapshot {
     takenAt: string;           // ISO — the real-wall-clock moment the snap was taken
     contracts: ContractSnapshot[];
@@ -64,6 +79,7 @@ interface DbSnapshot {
     activityLogCutoff: string; // ISO — delete logs created after this timestamp
     maintenanceCharges: MaintenanceChargeSnapshot[];
     maintenanceRequests: MaintenanceRequestSnapshot[];
+    notifications: NotificationSnapshot[];
 }
 
 // ─── Service ───────────────────────────────────────────────────────────────────

@@ -1,21 +1,19 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import confetti from 'canvas-confetti';
-import { 
-  FaTimes, FaBed, FaBath, FaParking, FaImage, 
-  FaMapMarkerAlt, FaChevronRight, FaChevronLeft, FaCloudUploadAlt, 
-  FaRocket, FaCalendarAlt, FaShieldAlt, FaChair, 
+import {
+  FaTimes, FaBed, FaBath, FaParking, FaImage,
+  FaMapMarkerAlt, FaChevronRight, FaChevronLeft, FaCloudUploadAlt,
+  FaRocket, FaCalendarAlt, FaShieldAlt, FaChair,
   FaMapMarkedAlt, FaCity, FaBuilding, FaLayerGroup,
-  FaTools, FaUserTie, FaUserAlt, FaExclamationTriangle
+  FaTools, FaUserTie, FaUserAlt, FaExclamationTriangle, FaHome
 } from 'react-icons/fa';
-
 // Leaflet Imports
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-control-geocoder';
 import 'leaflet-control-geocoder/dist/Control.Geocoder.css';
-
 // CSS Import
 import './AddPropertyModal.css';
 import { propertyService } from '../../../../services/property.service';
@@ -26,15 +24,15 @@ import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
 const DefaultIcon = L.icon({
-    iconUrl: icon,
-    shadowUrl: iconShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41]
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41]
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
 const EGYPT_BOUNDS = L.latLngBounds(
-  L.latLng(21.9, 24.6), 
+  L.latLng(21.9, 24.6),
   L.latLng(31.7, 36.9)
 );
 
@@ -130,7 +128,7 @@ const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onClose, onProperty
   const [buildingNumber, setBuildingNumber] = useState('');
   const [unitApt, setUnitApt] = useState('');
   const [aboutProperty, setAboutProperty] = useState('');
-  const [position, setPosition] = useState<{lat: number, lng: number} | null>(null);
+  const [position, setPosition] = useState<{ lat: number, lng: number } | null>(null);
   const [isMapActive, setIsMapActive] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
@@ -218,6 +216,10 @@ const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onClose, onProperty
 
       if (!securityDeposit || Number.isNaN(parsedSecurityDeposit) || parsedSecurityDeposit < 0) {
         return t('landlordHomeComponents.depositInvalid', { defaultValue: 'Please enter a valid security deposit.' });
+      }
+
+      if (parsedSecurityDeposit < parsedMonthlyPrice) {
+        return t('landlordHomeComponents.depositTooLow', { defaultValue: 'Security deposit cannot be less than the monthly rent.' });
       }
 
       if (!availabilityDate) {
@@ -441,6 +443,11 @@ const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onClose, onProperty
       return;
     }
 
+    if (parsedSecurityDeposit < parsedMonthlyPrice) {
+      setSubmitError(t('landlordHomeComponents.depositTooLow', { defaultValue: 'Security deposit cannot be less than the monthly rent.' }));
+      return;
+    }
+
     const imagesPayload = uploadedImages.map((image, index) => ({
       image_url: image,
       is_main: index === 0,
@@ -528,354 +535,446 @@ const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onClose, onProperty
 
   return (
     <div className="property-modal-overlay" onClick={onClose} dir="ltr">
-      <div className={`property-modal-container ${isSuccess ? 'success-mode' : ''} ${step === 4 ? 'wide-modal' : ''}`} onClick={(e) => e.stopPropagation()}>
+      <div className={`property-modal-container ${isSuccess ? 'success-mode' : ''}`} onClick={(e) => e.stopPropagation()}>
         {!isSuccess ? (
-          <>
-            <div className="property-modal-header">
-              <div className="header-titles">
-                <h2>{t('landlordHomeComponents.listNewProperty', { defaultValue: 'List New Property' })}</h2>
-                <p>{t('landlordHome.step')} {step} {t('guestHome.of')} 4: {
-                  step === 1 ? t('myProperties.tabs.general') : 
-                  step === 2 ? t('myProperties.tabs.media') : 
-                  step === 3 ? t('myProperties.labels.locationDetails') : t('myProperties.tabs.maintenance')
-                }</p>
+          <div className="modal-split-layout">
+            <aside className="modal-sidebar-stepper">
+              <div className="sidebar-brand">
+                <FaRocket className="brand-rocket-icon" />
+                <div>
+                  <h3>HOMi</h3>
+                  <p>{t('landlordHomeComponents.listNewProperty', { defaultValue: 'List Property' })}</p>
+                </div>
               </div>
-              <button className="example-fill-btn" onClick={loadExampleProperty}>
-                {t('landlordHomeComponents.loadExample', { defaultValue: 'Load Example Property' })}
-              </button>
-              <button className="close-btn" onClick={onClose}><FaTimes /></button>
-            </div>
 
-            <div className="modal-progress-bar">
-              <div className="progress-fill" style={{ width: `${(step / 4) * 100}%` }}></div>
-            </div>
+              <div className="sidebar-steps-list">
+                <div className={`sidebar-step-item ${step === 1 ? 'active' : ''} ${step > 1 ? 'completed' : ''}`}>
+                  <div className="step-icon-circle">
+                    {step > 1 ? '✓' : <FaHome />}
+                  </div>
+                  <div className="step-label-group">
+                    <span className="step-number-label">Step 1</span>
+                    <span className="step-title-label">{t('myProperties.tabs.general')}</span>
+                  </div>
+                </div>
 
-            {showVerificationWarning && (
-              <div className="verification-warning-banner" role="alert" aria-live="polite">
-                <FaExclamationTriangle className="verification-warning-icon" aria-hidden="true" />
-                <span>{t('landlordHomeComponents.verificationRequired', { defaultValue: 'Your account must be verified before adding a property.' })}</span>
+                <div className={`sidebar-step-item ${step === 2 ? 'active' : ''} ${step > 2 ? 'completed' : ''}`}>
+                  <div className="step-icon-circle">
+                    {step > 2 ? '✓' : <FaImage />}
+                  </div>
+                  <div className="step-label-group">
+                    <span className="step-number-label">Step 2</span>
+                    <span className="step-title-label">{t('myProperties.tabs.media')}</span>
+                  </div>
+                </div>
+
+                <div className={`sidebar-step-item ${step === 3 ? 'active' : ''} ${step > 3 ? 'completed' : ''}`}>
+                  <div className="step-icon-circle">
+                    {step > 3 ? '✓' : <FaMapMarkedAlt />}
+                  </div>
+                  <div className="step-label-group">
+                    <span className="step-number-label">Step 3</span>
+                    <span className="step-title-label">{t('myProperties.labels.locationDetails')}</span>
+                  </div>
+                </div>
+
+                <div className={`sidebar-step-item ${step === 4 ? 'active' : ''}`}>
+                  <div className="step-icon-circle">
+                    <FaTools />
+                  </div>
+                  <div className="step-label-group">
+                    <span className="step-number-label">Step 4</span>
+                    <span className="step-title-label">{t('myProperties.tabs.maintenance')}</span>
+                  </div>
+                </div>
               </div>
-            )}
 
-            {submitError && (
-              <div className="property-modal-error-text property-modal-error-top">
-                {submitError}
+              <div className="sidebar-tip-box">
+                <div className="tip-header">
+                  <FaShieldAlt /> <span>Pro Tip</span>
+                </div>
+                <p className="tip-content">
+                  {step === 1 && "Competitive pricing and setting realistic security deposits attract tenants 40% faster."}
+                  {step === 2 && "Bright, wide-angle photos and official property documents increase credibility and build trust."}
+                  {step === 3 && "An accurate map pin helps verified tenants find and view your listing with confidence."}
+                  {step === 4 && "Clearly defining utility bills and repair responsibilities minimizes landlord-tenant friction."}
+                </p>
               </div>
-            )}
+            </aside>
 
-            <div className="modal-body-content">
-              {step === 1 && (
-                <div className="step-view animate-fade-in">
-                  <div className="field-group">
-                    <label>{t('myProperties.labels.marketingTitle')}</label>
-                    <input type="text" placeholder="e.g. Modern Sunset Loft" className="premium-input" value={title} onChange={(e) => setTitle(e.target.value)} />
-                  </div>
-                  <div className="form-row">
-                    <div className="field-group">
-                      <label>{t('guestHome.propertyType')}</label>
-                      <select className="premium-select" value={propertyType} onChange={(e) => setPropertyType(e.target.value)}>
-                        <option value="Apartment">{t('guestHome.apartments')}</option>
-                        <option value="Villa">{t('guestHome.villas')}</option>
-                        <option value="Student Room">{t('guestHome.sharedRooms')}</option>
-                      </select>
-                    </div>
-                    <div className="field-group">
-                      <label><FaChair /> {t('guestHome.furnishing')}</label>
-                      <select className="premium-select" value={furnishing} onChange={(e) => setFurnishing(e.target.value)}>
-                        <option value="Fully Furnished">{t('tenantHomeComponents.fullyFurnished')}</option>
-                        <option value="Semi-Furnished">{t('tenantHomeComponents.semiFurnished')}</option>
-                        <option value="Unfurnished">{t('myProperties.unfurnished')}</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="form-row">
-                    <div className="field-group">
-                      <label>{t('myProperties.labels.monthlyRent')} ($)</label>
-                      <input type="number" placeholder="2400" className="premium-input" value={monthlyPrice} onChange={(e) => setMonthlyPrice(e.target.value)} />
-                    </div>
-                    <div className="field-group">
-                      <label><FaShieldAlt /> {t('myProperties.labels.securityDeposit')} ($)</label>
-                      <input type="number" placeholder="1000" className="premium-input" value={securityDeposit} onChange={(e) => setSecurityDeposit(e.target.value)} />
-                    </div>
-                  </div>
-                  <div className="field-group">
-                    <label><FaCalendarAlt /> {t('rentalRequests.labels.moveIn')}</label>
-                    <input type="date" className="premium-input" value={availabilityDate} onChange={(e) => setAvailabilityDate(e.target.value)} />
-                  </div>
+            <div className="modal-main-content">
+              <div className="property-modal-header">
+                <div className="header-titles">
+                  <h2>
+                    {step === 1 && "Let's start with general details"}
+                    {step === 2 && "Upload beautiful photos & verification docs"}
+                    {step === 3 && "Pinpoint property location on map"}
+                    {step === 4 && "Set maintenance responsibilities & rules"}
+                  </h2>
+                </div>
+                <button className="example-fill-btn" onClick={loadExampleProperty}>
+                  {t('landlordHomeComponents.loadExample', { defaultValue: 'Load Example Property' })}
+                </button>
+                <button className="close-btn" onClick={onClose}><FaTimes /></button>
+              </div>
+
+              {showVerificationWarning && (
+                <div className="verification-warning-banner" role="alert" aria-live="polite">
+                  <FaExclamationTriangle className="verification-warning-icon" aria-hidden="true" />
+                  <span>{t('landlordHomeComponents.verificationRequired', { defaultValue: 'Your account must be verified before adding a property.' })}</span>
                 </div>
               )}
 
-              {step === 2 && (
-                <div className="step-view animate-fade-in">
-                  <div className="specs-grid">
-                    <div className="spec-item"><FaBed /><input type="number" placeholder={t('myProperties.beds')} value={beds} onChange={(e) => setBeds(e.target.value)} /></div>
-                    <div className="spec-item"><FaBath /><input type="number" placeholder={t('myProperties.baths')} value={baths} onChange={(e) => setBaths(e.target.value)} /></div>
-                    <div className="spec-item"><FaLayerGroup /><input type="number" placeholder={t('landlordHome.step')} value={floor} onChange={(e) => setFloor(e.target.value)} /></div>
-                    <div className="spec-item"><FaParking /><input type="number" placeholder={t('landlordHomeComponents.amenities')} value={parking} onChange={(e) => setParking(e.target.value)} /></div>
-                    <div className="spec-item"><span className="sqft-label">{t('myProperties.sqft')}</span><input type="number" placeholder={t('guestHome.area')} value={sqft} onChange={(e) => setSqft(e.target.value)} /></div>
-                  </div>
-                  <div className="photo-upload-section">
-                    <label><FaImage /> {t('myProperties.labels.propertyGallery')}</label>
-                    <div className="upload-grid">
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={handleFilesSelected}
-                        style={{ display: 'none' }}
-                      />
-                      <button type="button" className="upload-placeholder" onClick={handleUploadClick}>
-                        <FaCloudUploadAlt />
-                        <span>{t('myProperties.labels.uploadNew')}</span>
-                      </button>
-                      {uploadedImages.map((img, index) => (
-                        <div key={`property-img-${index}`} className="upload-attachment-tile">
-                          <div className="uploaded-photo-slot-inner">
-                            <img src={img} alt={`Property ${index + 1}`} />
-                          </div>
-                          <button
-                            type="button"
-                            className="upload-attachment-remove"
-                            onClick={() => removeUploadedImage(index)}
-                            aria-label={`Remove property photo ${index + 1}`}
-                          >
-                            <FaTimes aria-hidden />
-                          </button>
+              {submitError && (
+                <div className="property-modal-error-text property-modal-error-top">
+                  {submitError}
+                </div>
+              )}
+
+              <div className="modal-body-content">
+                {step === 1 && (
+                  <div className="step-view animate-fade-in">
+                    <div className="field-group">
+                      <label>{t('myProperties.labels.marketingTitle')}</label>
+                      <div className="premium-input-wrapper">
+                        <FaHome className="field-icon" />
+                        <input type="text" placeholder="e.g. Modern Sunset Loft" className="premium-input with-icon" value={title} onChange={(e) => setTitle(e.target.value)} />
+                      </div>
+                    </div>
+                    <div className="form-row">
+                      <div className="field-group">
+                        <label>{t('guestHome.propertyType')}</label>
+                        <select className="premium-select" value={propertyType} onChange={(e) => setPropertyType(e.target.value)}>
+                          <option value="Apartment">{t('guestHome.apartments')}</option>
+                          <option value="Villa">{t('guestHome.villas')}</option>
+                          <option value="Student Room">{t('guestHome.sharedRooms')}</option>
+                        </select>
+                      </div>
+                      <div className="field-group">
+                        <label><FaChair /> {t('guestHome.furnishing')}</label>
+                        <select className="premium-select" value={furnishing} onChange={(e) => setFurnishing(e.target.value)}>
+                          <option value="Fully Furnished">{t('tenantHomeComponents.fullyFurnished')}</option>
+                          <option value="Semi-Furnished">{t('tenantHomeComponents.semiFurnished')}</option>
+                          <option value="Unfurnished">{t('myProperties.unfurnished')}</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="form-row">
+                      <div className="field-group">
+                        <label>{t('myProperties.labels.monthlyRent')} ($)</label>
+                        <div className="premium-input-wrapper">
+                          <span className="field-currency">$</span>
+                          <input type="number" placeholder="2400" className="premium-input with-prefix" value={monthlyPrice} onChange={(e) => setMonthlyPrice(e.target.value)} />
                         </div>
-                      ))}
-                      {Array.from({ length: Math.max(0, 4 - uploadedImages.length) }).map((_, i) => (
-                        <div key={`empty-${i}`} className="empty-photo-slot"></div>
-                      ))}
+                      </div>
+                      <div className="field-group">
+                        <label><FaShieldAlt /> {t('myProperties.labels.securityDeposit')} ($)</label>
+                        <div className="premium-input-wrapper">
+                          <span className="field-currency">$</span>
+                          <input type="number" placeholder="1000" className="premium-input with-prefix" value={securityDeposit} onChange={(e) => setSecurityDeposit(e.target.value)} />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="field-group">
+                      <label><FaCalendarAlt /> {t('rentalRequests.labels.moveIn')}</label>
+                      <div className="premium-input-wrapper">
+                        <FaCalendarAlt className="field-icon" />
+                        <input type="date" className="premium-input with-icon" value={availabilityDate} onChange={(e) => setAvailabilityDate(e.target.value)} />
+                      </div>
                     </div>
                   </div>
+                )}
 
-                  {/* Legal Ownership Documents Upload */}
-                  <div className="photo-upload-section" style={{ marginTop: '20px' }}>
-                    <label><FaShieldAlt /> {t('landlordHomeComponents.ownershipDocs', { defaultValue: 'Legal Ownership Documents' })}</label>
-                    <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '10px' }}>
+                {step === 2 && (
+                  <div className="step-view animate-fade-in">
+                    <div className="specs-grid">
+                      <div className="spec-item"><FaBed /><input type="number" placeholder={t('Bedrooms')} value={beds} onChange={(e) => setBeds(e.target.value)} /></div>
+                      <div className="spec-item"><FaBath /><input type="number" placeholder={t('Bathrooms')} value={baths} onChange={(e) => setBaths(e.target.value)} /></div>
+                      <div className="spec-item"><FaLayerGroup /><input type="number" placeholder={t('Floor')} value={floor} onChange={(e) => setFloor(e.target.value)} /></div>
+                      <div className="spec-item"><FaParking /><input type="number" placeholder={t('Parking')} value={parking} onChange={(e) => setParking(e.target.value)} /></div>
+                      <div className="spec-item"><span className="sqft-label">{t('Area (sqft)')}</span><input type="number" placeholder={t('guestHome.area')} value={sqft} onChange={(e) => setSqft(e.target.value)} /></div>
+                    </div>
+                    <div className="photo-upload-section">
+                      <label><FaImage /> {t('myProperties.labels.propertyGallery')}</label>
+                      <div className="upload-grid">
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleFilesSelected}
+                          style={{ display: 'none' }}
+                        />
+                        <button type="button" className="upload-placeholder" onClick={handleUploadClick}>
+                          <FaCloudUploadAlt />
+                          <span>{t('myProperties.labels.uploadNew')}</span>
+                        </button>
+                        {uploadedImages.map((img, index) => (
+                          <div key={`property-img-${index}`} className="upload-attachment-tile">
+                            <div className="uploaded-photo-slot-inner">
+                              <img src={img} alt={`Property ${index + 1}`} />
+                            </div>
+                            <button
+                              type="button"
+                              className="upload-attachment-remove"
+                              onClick={() => removeUploadedImage(index)}
+                              aria-label={`Remove property photo ${index + 1}`}
+                            >
+                              <FaTimes aria-hidden />
+                            </button>
+                          </div>
+                        ))}
+                        {Array.from({ length: Math.max(0, 4 - uploadedImages.length) }).map((_, i) => (
+                          <div key={`empty-${i}`} className="empty-photo-slot"></div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Legal Ownership Documents Upload */}
+                    <div className="photo-upload-section" style={{ marginTop: '20px' }}>
+                      <label><FaShieldAlt /> {t('landlordHomeComponents.ownershipDocs', { defaultValue: 'Legal Ownership Documents' })}</label>
+                      <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '10px' }}>
                         {t('landlordHomeComponents.docsInstruction', { defaultValue: 'Upload files (PDFs/Images) proving your ownership. These are required for Admin verification.' })}
-                    </p>
-                    <div className="upload-grid">
-                      <input
-                        ref={docInputRef}
-                        type="file"
-                        accept="image/*,application/pdf"
-                        multiple
-                        onChange={handleDocsSelected}
-                        style={{ display: 'none' }}
-                      />
-                      <button type="button" className="upload-placeholder" onClick={handleDocUploadClick}>
-                        <FaCloudUploadAlt />
-                        <span>{t('myProperties.labels.uploadNew')} Docs</span>
-                      </button>
-                      {uploadedDocuments.map((doc, index) => (
-                        <div key={`ownership-doc-${index}`} className="upload-attachment-tile">
-                          <div className="uploaded-photo-slot-inner uploaded-doc-preview">
-                            <span className="uploaded-doc-preview-text">
-                              {doc.startsWith('data:application/pdf') ? 'PDF' : doc.startsWith('data:image') ? 'Image' : 'File'}
-                            </span>
-                            <span className="uploaded-doc-preview-snippet">{doc.substring(0, 28)}…</span>
-                          </div>
-                          <button
-                            type="button"
-                            className="upload-attachment-remove"
-                            onClick={() => removeUploadedDocument(index)}
-                            aria-label={`Remove ownership document ${index + 1}`}
-                          >
-                            <FaTimes aria-hidden />
-                          </button>
-                        </div>
-                      ))}
-                      {Array.from({ length: Math.max(0, 3 - uploadedDocuments.length) }).map((_, i) => (
-                        <div key={`empty-doc-${i}`} className="empty-photo-slot"></div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {step === 3 && (
-                <div className="step-view animate-fade-in">
-                  <div className={`map-picker-container ${isMapActive ? 'active-map' : ''}`}>
-                    {!isMapActive ? (
-                      <div className="map-placeholder">
-                        <FaMapMarkedAlt size={40} />
-                        {position ? (
-                          <div className="coord-badge">
-                            {t('landlordHomeComponents.locationSet', { defaultValue: 'Location Set' })}: {position.lat.toFixed(4)}, {position.lng.toFixed(4)}
-                          </div>
-                        ) : (
-                          <p>{t('landlordHomeComponents.pinpoint', { defaultValue: 'Pinpoint the location in Egypt' })}</p>
-                        )}
-                        <div className="map-quick-actions">
-                          <button className="map-trigger-btn" onClick={() => setIsMapActive(true)}>
-                            {position ? t('landlordHomeComponents.changeLocation', { defaultValue: "Change Location" }) : t('landlordHomeComponents.openMap', { defaultValue: "Open Interactive Map" })}
-                          </button>
-                          <button className="current-location-btn" onClick={handleUseCurrentLocation} disabled={isLocating}>
-                            {isLocating ? t('auth.loading') : t('landlordHomeComponents.useCurrentLoc', { defaultValue: 'Use Current Location' })}
-                          </button>
-                        </div>
-                        {locationError && <p className="location-error-text">{locationError}</p>}
-                      </div>
-                    ) : (
-                      <div className="leaflet-wrapper" style={{ height: '100%', width: '100%', position: 'relative' }}>
-                        <MapContainer 
-                          center={position ? [position.lat, position.lng] : [26.8206, 30.8025]} 
-                          zoom={6} 
-                          maxBounds={EGYPT_BOUNDS}
-                          style={{ height: '100%', width: '100%' }}
-                        >
-                          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                          <SearchField onLocationSelect={handleLocationSelect} />
-                          <MapEventsHandler position={position} onLocationSelect={handleLocationSelect} />
-                          {position && <MapCenterUpdater center={[position.lat, position.lng]} />}
-                        </MapContainer>
-                        <div className="map-action-bar">
-                          <button className="current-location-btn" onClick={handleUseCurrentLocation} disabled={isLocating}>
-                            {isLocating ? t('auth.loading') : t('landlordHomeComponents.useCurrentLoc', { defaultValue: 'Use Current Location' })}
-                          </button>
-                          <button className="confirm-map-btn" onClick={() => setIsMapActive(false)}>{t('confirmModal.confirm')}</button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  {locationError && isMapActive && <p className="location-error-text location-error-map">{locationError}</p>}
-
-                  <div className="address-grid-structured">
-                    <div className="field-group">
-                      <label><FaCity /> {t('landlordHomeComponents.city', { defaultValue: 'City' })}</label>
-                      <input type="text" value={city} onChange={(e) => setCity(e.target.value)} placeholder="e.g. Cairo" className="premium-input" />
-                    </div>
-                    <div className="field-group">
-                      <label><FaMapMarkerAlt /> {t('guestHome.area')}</label>
-                      <input type="text" value={area} onChange={(e) => setArea(e.target.value)} placeholder="e.g. Maadi" className="premium-input" />
-                    </div>
-                    <div className="field-group">
-                      <label>{t('landlordHomeComponents.street', { defaultValue: 'Street Name' })}</label>
-                      <input type="text" placeholder="Street 9" className="premium-input" value={streetName} onChange={(e) => setStreetName(e.target.value)} />
-                    </div>
-                    <div className="form-row-triple">
-                        <div className="field-group">
-                            <label><FaBuilding /> {t('landlordHomeComponents.bldgNumber', { defaultValue: 'Bldg #' })}</label>
-                            <input type="text" placeholder="102" className="premium-input" value={buildingNumber} onChange={(e) => setBuildingNumber(e.target.value)} />
-                        </div>
-                        <div className="field-group">
-                            <label>{t('landlordHome.step')}</label>
-                            <input type="text" placeholder="12" className="premium-input" value={floor} onChange={(e) => setFloor(e.target.value)} />
-                        </div>
-                        <div className="field-group">
-                            <label>{t('rentalRequests.card.unit', { defaultValue: 'Unit/Apt' })}</label>
-                            <input type="text" placeholder="4B" className="premium-input" value={unitApt} onChange={(e) => setUnitApt(e.target.value)} />
-                        </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {step === 4 && (
-                <div className="step-view animate-fade-in step-four-layout">
-                  <div className="maintenance-box">
-                    <div className="section-header-flex">
-                      <FaTools className="header-icon" />
-                      <div>
-                        <label className="section-subtitle">{t('myProperties.tabs.maintenance')}</label>
-                        <p className="section-desc">{t('myProperties.labels.maintenanceInstruction')}</p>
-                        <p className="maintenance-legend">L = {t('tenantHomeComponents.landlord')}, T = {t('tenantHomeComponents.tenant')}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="maintenance-grid">
-                      {Object.entries(maintenance).map(([type, assigned]) => (
-                        <div key={type} className="maintenance-card">
-                          <span className="m-title">{t(`myProperties.maintenanceTypes.${type}`)}</span>
-                          <div className="m-toggle-group">
-                            <button 
-                              className={`m-btn ${assigned === 'landlord' ? 'active landlord' : ''}`}
-                              onClick={() => toggleMaintenance(type, 'landlord')}
+                      </p>
+                      <div className="upload-grid">
+                        <input
+                          ref={docInputRef}
+                          type="file"
+                          accept="image/*,application/pdf"
+                          multiple
+                          onChange={handleDocsSelected}
+                          style={{ display: 'none' }}
+                        />
+                        <button type="button" className="upload-placeholder" onClick={handleDocUploadClick}>
+                          <FaCloudUploadAlt />
+                          <span>{t('myProperties.labels.uploadNew')} Docs</span>
+                        </button>
+                        {uploadedDocuments.map((doc, index) => (
+                          <div key={`ownership-doc-${index}`} className="upload-attachment-tile">
+                            <div className="uploaded-photo-slot-inner uploaded-doc-preview">
+                              <span className="uploaded-doc-preview-text">
+                                {doc.startsWith('data:application/pdf') ? 'PDF' : doc.startsWith('data:image') ? 'Image' : 'File'}
+                              </span>
+                              <span className="uploaded-doc-preview-snippet">{doc.substring(0, 28)}…</span>
+                            </div>
+                            <button
+                              type="button"
+                              className="upload-attachment-remove"
+                              onClick={() => removeUploadedDocument(index)}
+                              aria-label={`Remove ownership document ${index + 1}`}
                             >
-                              <FaUserTie /> L
-                            </button>
-                            <button 
-                              className={`m-btn ${assigned === 'tenant' ? 'active tenant' : ''}`}
-                              onClick={() => toggleMaintenance(type, 'tenant')}
-                            >
-                              <FaUserAlt /> T
+                              <FaTimes aria-hidden />
                             </button>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="details-box">
-                    <div className="field-group">
-                      <label>{t('landlordHomeComponents.aboutProperty', { defaultValue: 'About Property' })}</label>
-                      <textarea 
-                        className="premium-textarea" 
-                        placeholder={t('landlordHomeComponents.aboutPlaceholder', { defaultValue: 'Describe what makes your property special...' })} 
-                        value={aboutProperty} 
-                        onChange={(e) => setAboutProperty(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="chips-section">
-                      <label>{t('myProperties.labels.coreAmenities')}</label>
-                      <div className="chips-grid">
-                        {amenitiesList.map(item => (
-                          <button 
-                            key={item} 
-                            className={`chip ${selectedAmenities.includes(item) ? 'active' : ''}`}
-                            onClick={() => toggleChip(item, selectedAmenities, setSelectedAmenities)}
-                          >
-                            {item}
-                          </button>
                         ))}
-                      </div>
-                    </div>
-
-                    <div className="chips-section">
-                      <label>{t('myProperties.labels.houseRules')}</label>
-                      <div className="chips-grid">
-                        {houseRules.map(item => (
-                          <button 
-                            key={item} 
-                            className={`chip ${selectedHouseRules.includes(item) ? 'active' : ''}`}
-                            onClick={() => toggleChip(item, selectedHouseRules, setSelectedHouseRules)}
-                          >
-                            {item}
-                          </button>
+                        {Array.from({ length: Math.max(0, 3 - uploadedDocuments.length) }).map((_, i) => (
+                          <div key={`empty-doc-${i}`} className="empty-photo-slot"></div>
                         ))}
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
 
-            <div className="property-modal-footer">
-              {step > 1 && (
-                <button className="footer-nav-btn prev" onClick={prevStep}>
-                  <FaChevronLeft /> {t('common.back')}
-                </button>
-              )}
-              {step < 4 ? (
-                <button className="footer-nav-btn next" onClick={nextStep}>
-                  {t('common.next')} <FaChevronRight />
-                </button>
-              ) : (
-                <button className="publish-final-btn" onClick={handlePublish} disabled={loading}>
-                  {loading ? <div className="spinner-mini"></div> : <><FaRocket /> {t('landlordHomeComponents.publishListing', { defaultValue: 'Publish Listing' })}</>}
-                </button>
-              )}
+                {step === 3 && (
+                  <div className="step-view animate-fade-in">
+                    <div className={`map-picker-container ${isMapActive ? 'active-map' : ''}`}>
+                      {!isMapActive ? (
+                        <div className="map-placeholder">
+                          <FaMapMarkedAlt size={40} />
+                          {position ? (
+                            <div className="coord-badge">
+                              {t('landlordHomeComponents.locationSet', { defaultValue: 'Location Set' })}: {position.lat.toFixed(4)}, {position.lng.toFixed(4)}
+                            </div>
+                          ) : (
+                            <p>{t('landlordHomeComponents.pinpoint', { defaultValue: 'Pinpoint the location in Egypt' })}</p>
+                          )}
+                          <div className="map-quick-actions">
+                            <button className="map-trigger-btn" onClick={() => setIsMapActive(true)}>
+                              {position ? t('landlordHomeComponents.changeLocation', { defaultValue: "Change Location" }) : t('landlordHomeComponents.openMap', { defaultValue: "Open Interactive Map" })}
+                            </button>
+                            <button className="current-location-btn" onClick={handleUseCurrentLocation} disabled={isLocating}>
+                              {isLocating ? t('auth.loading') : t('landlordHomeComponents.useCurrentLoc', { defaultValue: 'Use Current Location' })}
+                            </button>
+                          </div>
+                          {locationError && <p className="location-error-text">{locationError}</p>}
+                        </div>
+                      ) : (
+                        <div className="leaflet-wrapper" style={{ height: '100%', width: '100%', position: 'relative' }}>
+                          <MapContainer
+                            center={position ? [position.lat, position.lng] : [26.8206, 30.8025]}
+                            zoom={6}
+                            maxBounds={EGYPT_BOUNDS}
+                            style={{ height: '100%', width: '100%' }}
+                          >
+                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                            <SearchField onLocationSelect={handleLocationSelect} />
+                            <MapEventsHandler position={position} onLocationSelect={handleLocationSelect} />
+                            {position && <MapCenterUpdater center={[position.lat, position.lng]} />}
+                          </MapContainer>
+                          <div className="map-action-bar">
+                            <button className="current-location-btn" onClick={handleUseCurrentLocation} disabled={isLocating}>
+                              {isLocating ? t('auth.loading') : t('landlordHomeComponents.useCurrentLoc', { defaultValue: 'Use Current Location' })}
+                            </button>
+                            <button className="confirm-map-btn" onClick={() => setIsMapActive(false)}>{t('confirmModal.confirm')}</button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    {locationError && isMapActive && <p className="location-error-text location-error-map">{locationError}</p>}
+
+                    <div className="address-grid-structured">
+                      <div className="field-group">
+                        <label><FaCity /> {t('landlordHomeComponents.city', { defaultValue: 'City' })}</label>
+                        <div className="premium-input-wrapper">
+                          <FaCity className="field-icon" />
+                          <input type="text" value={city} onChange={(e) => setCity(e.target.value)} placeholder="e.g. Cairo" className="premium-input with-icon" />
+                        </div>
+                      </div>
+                      <div className="field-group">
+                        <label><FaMapMarkerAlt /> {t('guestHome.area')}</label>
+                        <div className="premium-input-wrapper">
+                          <FaMapMarkerAlt className="field-icon" />
+                          <input type="text" value={area} onChange={(e) => setArea(e.target.value)} placeholder="e.g. Maadi" className="premium-input with-icon" />
+                        </div>
+                      </div>
+                      <div className="field-group">
+                        <label>{t('landlordHomeComponents.street', { defaultValue: 'Street Name' })}</label>
+                        <div className="premium-input-wrapper">
+                          <FaMapMarkerAlt className="field-icon" />
+                          <input type="text" placeholder="Street 9" className="premium-input with-icon" value={streetName} onChange={(e) => setStreetName(e.target.value)} />
+                        </div>
+                      </div>
+                      <div className="form-row-triple">
+                        <div className="field-group">
+                          <label><FaBuilding /> {t('landlordHomeComponents.bldgNumber', { defaultValue: 'Bldg #' })}</label>
+                          <div className="premium-input-wrapper">
+                            <FaBuilding className="field-icon" />
+                            <input type="text" placeholder="102" className="premium-input with-icon" value={buildingNumber} onChange={(e) => setBuildingNumber(e.target.value)} />
+                          </div>
+                        </div>
+                        <div className="field-group">
+                          <label>{t('landlordHome.step')}</label>
+                          <div className="premium-input-wrapper">
+                            <FaLayerGroup className="field-icon" />
+                            <input type="text" placeholder="12" className="premium-input with-icon" value={floor} onChange={(e) => setFloor(e.target.value)} />
+                          </div>
+                        </div>
+                        <div className="field-group">
+                          <label>{t('rentalRequests.card.unit', { defaultValue: 'Unit/Apt' })}</label>
+                          <div className="premium-input-wrapper">
+                            <FaHome className="field-icon" />
+                            <input type="text" placeholder="4B" className="premium-input with-icon" value={unitApt} onChange={(e) => setUnitApt(e.target.value)} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {step === 4 && (
+                  <div className="step-view animate-fade-in step-four-layout">
+                    <div className="maintenance-box">
+                      <div className="section-header-flex">
+                        <FaTools className="header-icon" />
+                        <div>
+                          <label className="section-subtitle">{t('myProperties.tabs.maintenance')}</label>
+                          <p className="section-desc">{t('myProperties.labels.maintenanceInstruction')}</p>
+                          <p className="maintenance-legend">L = {t('tenantHomeComponents.landlord')}, T = {t('tenantHomeComponents.tenant')}</p>
+                        </div>
+                      </div>
+
+                      <div className="maintenance-grid">
+                        {Object.entries(maintenance).map(([type, assigned]) => (
+                          <div key={type} className="maintenance-card">
+                            <span className="m-title">{t(`myProperties.maintenanceTypes.${type}`)}</span>
+                            <div className="m-toggle-group">
+                              <button
+                                className={`m-btn ${assigned === 'landlord' ? 'active landlord' : ''}`}
+                                onClick={() => toggleMaintenance(type, 'landlord')}
+                              >
+                                <FaUserTie /> L
+                              </button>
+                              <button
+                                className={`m-btn ${assigned === 'tenant' ? 'active tenant' : ''}`}
+                                onClick={() => toggleMaintenance(type, 'tenant')}
+                              >
+                                <FaUserAlt /> T
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="details-box">
+                      <div className="field-group">
+                        <label>{t('landlordHomeComponents.aboutProperty', { defaultValue: 'About Property' })}</label>
+                        <textarea
+                          className="premium-textarea"
+                          placeholder={t('landlordHomeComponents.aboutPlaceholder', { defaultValue: 'Describe what makes your property special...' })}
+                          value={aboutProperty}
+                          onChange={(e) => setAboutProperty(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="chips-section">
+                        <label>{t('myProperties.labels.coreAmenities')}</label>
+                        <div className="chips-grid">
+                          {amenitiesList.map(item => (
+                            <button
+                              key={item}
+                              className={`chip ${selectedAmenities.includes(item) ? 'active' : ''}`}
+                              onClick={() => toggleChip(item, selectedAmenities, setSelectedAmenities)}
+                            >
+                              {item}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="chips-section">
+                        <label>{t('myProperties.labels.houseRules')}</label>
+                        <div className="chips-grid">
+                          {houseRules.map(item => (
+                            <button
+                              key={item}
+                              className={`chip ${selectedHouseRules.includes(item) ? 'active' : ''}`}
+                              onClick={() => toggleChip(item, selectedHouseRules, setSelectedHouseRules)}
+                            >
+                              {item}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="property-modal-footer">
+                {step > 1 && (
+                  <button className="footer-nav-btn prev" onClick={prevStep}>
+                    <FaChevronLeft /> {t('common.back')}
+                  </button>
+                )}
+                {step < 4 ? (
+                  <button className="footer-nav-btn next" onClick={nextStep}>
+                    {t('common.next')} <FaChevronRight />
+                  </button>
+                ) : (
+                  <button className="publish-final-btn" onClick={handlePublish} disabled={loading}>
+                    {loading ? <div className="spinner-mini"></div> : <><FaRocket /> {t('landlordHomeComponents.publishListing', { defaultValue: 'Publish Listing' })}</>}
+                  </button>
+                )}
+              </div>
             </div>
-          </>
+          </div>
         ) : (
           <div className="success-state animate-fade-in">
             <div className="checkmark-wrapper">
               <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
-                <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none" />
+                <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
               </svg>
             </div>
             <div className="success-text-content">

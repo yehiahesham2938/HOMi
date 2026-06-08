@@ -18,7 +18,9 @@ export const PropertyStatus = {
     AVAILABLE: 'AVAILABLE',
     REJECTED: 'REJECTED',
     RENTED: 'RENTED',
+    UNAVAILABLE: 'UNAVAILABLE',
 } as const;
+
 
 export type PropertyStatusType = (typeof PropertyStatus)[keyof typeof PropertyStatus];
 

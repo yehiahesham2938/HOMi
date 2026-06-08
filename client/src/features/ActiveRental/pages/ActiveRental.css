@@ -1,135 +1,304 @@
 /* Container and Layout Base */
 .active-rentals-container {
-    padding: 2rem 3rem;
+    padding: 2.5rem 3.5rem;
     max-width: 1900px;
-    margin: 120px auto 0 auto; /* Fixed overlapping with header */
+    margin: 120px auto 0 auto;
     background-color: #f8fafc;
     min-height: 100vh;
-    margin-top: 110px;
 }
 
-/* Page Header */
-.page-header {
+/* Dashboard Hero Banner */
+.active-rental-hero-banner {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border-radius: 28px;
+    padding: 35px 40px;
+    color: white;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 30px;
     margin-bottom: 2.5rem;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.header-text h1 {
-    font-size: 2.5rem;
+.hero-banner-content {
+    flex: 1;
+}
+
+.hero-banner-eyebrow {
+    font-size: 0.7rem;
     font-weight: 800;
-    color: #0f172a;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    background: linear-gradient(90deg, #60a5fa, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+    display: inline-block;
+}
+
+.hero-banner-content h1 {
+    margin: 0 0 8px 0;
+    font-size: 2.25rem;
+    font-weight: 850;
+    color: #ffffff;
     letter-spacing: -1px;
+}
+
+.hero-banner-subtitle {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #94a3b8;
+    line-height: 1.45;
+    max-width: 600px;
+}
+
+.hero-banner-stats {
+    display: flex;
+    gap: 16px;
+    flex-shrink: 0;
+}
+
+.hero-stat-box {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 16px 20px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 135px;
+    text-align: center;
+    backdrop-filter: blur(8px);
+}
+
+.stat-label {
+    font-size: 0.65rem;
+    color: #94a3b8;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.stat-value {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.stat-value.active-pulse {
+    color: #34d399;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.stat-value.active-pulse::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #34d399;
+    display: inline-block;
+    animation: statPulse 1.5s infinite;
+}
+
+.stat-value.highlight {
+    color: #60a5fa;
+}
+
+@keyframes statPulse {
+    0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); }
+    70% { box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
 }
 
 /* Sidebar Grid Layout */
 .active-rental-content {
     display: grid;
-    grid-template-columns: 1fr 400px;
-    gap: 2.5rem;
+    grid-template-columns: 1fr 410px;
+    gap: 3rem;
     align-items: start;
 }
 
 .payment-sidebar {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.75rem;
     position: sticky;
     top: 2rem;
 }
 
-/* Support Card - Refined border and margin */
+/* Support Card - Refined gradients and transitions */
 .support-card {
-    background: white;
-    padding: 2rem;
-    border-radius: 24px;
-    border: 2px solid #4897ff; /* Reduced from 5px for cleaner look */
+    background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
+    padding: 2.25rem 2rem;
+    border-radius: 28px;
+    border: 1px solid rgba(59, 130, 246, 0.15);
     text-align: center;
-    box-shadow: 0 10px 20px rgba(72, 151, 255, 0.1);
-    margin-top: 100px;
+    box-shadow: 
+        0 20px 40px -15px rgba(59, 130, 246, 0.08),
+        0 4px 12px rgba(15, 23, 42, 0.01);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.support-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 28px 50px -15px rgba(59, 130, 246, 0.12),
+        0 8px 16px rgba(15, 23, 42, 0.02);
+    border-color: rgba(59, 130, 246, 0.3);
 }
 
 .support-card h4 {
     color: #0f172a;
+    font-size: 1.25rem;
+    font-weight: 800;
     margin-bottom: 0.5rem;
+    letter-spacing: -0.01em;
 }
 
-/* NEW: Cancel Rental Card */
+.support-card p {
+    color: #64748b;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    margin-bottom: 1.5rem;
+}
+
+/* Cancel Rental Card */
 .cancel-rental-card {
-    background: #fff1f2; /* Soft red tint */
-    padding: 2rem;
-    border-radius: 24px;
-    border: 1px solid #fecdd3;
+    background: linear-gradient(135deg, #ffffff 0%, #fff1f2 100%);
+    padding: 2.25rem 2rem;
+    border-radius: 28px;
+    border: 1px solid rgba(244, 63, 94, 0.15);
     text-align: center;
+    box-shadow: 
+        0 20px 40px -15px rgba(244, 63, 94, 0.05),
+        0 4px 12px rgba(15, 23, 42, 0.01);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cancel-rental-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 28px 50px -15px rgba(244, 63, 94, 0.08),
+        0 8px 16px rgba(15, 23, 42, 0.02);
+    border-color: rgba(244, 63, 94, 0.3);
 }
 
 .cancel-rental-card h4 {
-    color: #9f1239; /* Deep red */
+    color: #9f1239;
     font-size: 1.25rem;
+    font-weight: 800;
     margin-bottom: 0.5rem;
+    letter-spacing: -0.01em;
 }
 
 .cancel-rental-card p {
-    color: #be123c;
-    font-size: 0.9rem;
-    opacity: 0.8;
+    color: #b91c1c;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    opacity: 0.85;
     margin-bottom: 1.5rem;
 }
 
 .cancel-btn {
     width: 100%;
-    padding: 12px;
-    background: #e11d48;
+    padding: 14px;
+    background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
     color: white;
     border: none;
-    border-radius: 12px;
-    font-weight: 700;
+    border-radius: 16px;
+    font-weight: 800;
+    font-size: 0.95rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    box-shadow: 0 8px 16px rgba(225, 29, 72, 0.2);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .cancel-btn:hover {
-    background: #be123c;
-    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(225, 29, 72, 0.35);
 }
 
 .secondary-btn {
     width: 100%;
-    padding: 12px;
-    background: #4897ff;
+    padding: 14px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     border: none;
-    border-radius: 12px;
-    font-weight: 600;
+    border-radius: 16px;
+    font-weight: 800;
+    font-size: 0.95rem;
     color: white;
     cursor: pointer;
-    transition: transform 0.2s;
-    margin-top: 9px;
+    box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .secondary-btn:hover {
-    transform: translateY(-2px);
-    background: #3680e5;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(37, 99, 235, 0.35);
 }
 
+/* State Boxes */
 .active-rental-state-box {
     background: #ffffff;
-    border: 1px dashed #cbd5e1;
-    border-radius: 16px;
-    padding: 28px;
+    border: 2px dashed #cbd5e1;
+    border-radius: 20px;
+    padding: 40px;
     text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
 }
 
 .active-rental-state-title {
-    margin: 0 0 8px;
-    color: #1e293b;
-    font-size: 1.25rem;
-    font-weight: 700;
+    margin: 0 0 10px;
+    color: #0f172a;
+    font-size: 1.35rem;
+    font-weight: 800;
 }
 
 .active-rental-state-text {
     margin: 0;
     color: #64748b;
+    font-size: 0.95rem;
+    font-weight: 500;
 }
 
-/* ... keep existing pulse-icon animations ... */
+/* Responsiveness adjustments */
+@media (max-width: 1200px) {
+    .active-rental-hero-banner {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 30px;
+        gap: 20px;
+    }
+    
+    .hero-banner-stats {
+        justify-content: space-between;
+    }
+
+    .active-rental-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .payment-sidebar {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .active-rentals-container {
+        padding: 1.5rem 1.5rem;
+    }
+
+    .hero-banner-content h1 {
+        font-size: 1.75rem;
+    }
+
+    .hero-banner-stats {
+        flex-direction: column;
+    }
+}

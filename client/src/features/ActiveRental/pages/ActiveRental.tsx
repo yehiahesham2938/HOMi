@@ -6,7 +6,6 @@ import Sidebar from '../../../components/global/Tenant/sidebar';
 import Footer from '../../../components/global/footer';
 import DetailedRentCard from '../components/DetailedRentCard';
 import UpcomingPayment from '../components/UpcomingPayment';
-import QuickActions from '../components/QuickActions';
 import MaintenanceStatus from '../components/MaintenanceStatus';
 import contractService, { type ContractInstallments, type LandlordContract } from '../../../services/contract.service';
 import { propertyService, type PropertyResponse } from '../../../services/property.service';
@@ -184,15 +183,27 @@ const ActiveRental: React.FC = () => {
         () => (installmentsData?.items ?? []).filter((item) => item.status === 'DUE' || item.status === 'OVERDUE'),
         [installmentsData]
     );
-    /** Show the inline arrears table when more than one month is unpaid OR any month is overdue. */
-    const isInArrears = useMemo(
-        () => overdueItems.length > 0 || payableItems.length > 1,
-        [overdueItems.length, payableItems.length]
-    );
     const nextDisplayInstallment = useMemo(() => {
         if (payableItems.length > 0) return payableItems[0];
         return (installmentsData?.items ?? []).find((item) => item.status === 'UPCOMING') ?? null;
     }, [installmentsData, payableItems]);
+
+    const daysElapsed = useMemo((): number | null => {
+        if (!selectedContract?.moveInDate || !nextDisplayInstallment || !installmentsData?.now) return null;
+        if (nextDisplayInstallment.status !== 'DUE' && nextDisplayInstallment.status !== 'OVERDUE') return null;
+        const moveIn = new Date(selectedContract.moveInDate);
+        const periodStart = new Date(moveIn.getFullYear(), moveIn.getMonth() + nextDisplayInstallment.index, moveIn.getDate());
+        const now = new Date(installmentsData.now);
+        const diffMs = now.getTime() - periodStart.getTime();
+        return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    }, [selectedContract?.moveInDate, nextDisplayInstallment, installmentsData?.now]);
+
+    /** Show the inline arrears table when more than one month is unpaid OR any month is overdue OR 20+ days passed without paying. */
+    const isInArrears = useMemo(
+        () => overdueItems.length > 0 || payableItems.length > 1 || (daysElapsed !== null && daysElapsed >= 20),
+        [overdueItems.length, payableItems.length, daysElapsed]
+    );
+
     const dueDateLabel = nextDisplayInstallment ? formatDateLabel(nextDisplayInstallment.dueDate) : 'N/A';
 
     /** Smart countdown: positive = future, negative = overdue */
@@ -283,10 +294,32 @@ const ActiveRental: React.FC = () => {
                         </div>
                     )}
 
-                    <QuickActions />
-
                     {!isLoading && rentalData && (
                         <>
+                            <header className="active-rental-hero-banner">
+                                <div className="hero-banner-content">
+                                    <span className="hero-banner-eyebrow">Active Lease Portal</span>
+                                    <h1>Welcome to {rentalData.title}</h1>
+                                    <p className="hero-banner-subtitle">
+                                        Manage your lease terms, rent ledger payments, maintenance requests, and settings.
+                                    </p>
+                                </div>
+                                <div className="hero-banner-stats">
+                                    <div className="hero-stat-box">
+                                        <span className="stat-label">Lease Status</span>
+                                        <span className="stat-value active-pulse">Active</span>
+                                    </div>
+                                    <div className="hero-stat-box">
+                                        <span className="stat-label">Wallet Balance</span>
+                                        <span className="stat-value highlight">${installmentsData?.walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? '0.00'}</span>
+                                    </div>
+                                    <div className="hero-stat-box">
+                                        <span className="stat-label">Lease Progress</span>
+                                        <span className="stat-value">{installmentsData?.paidInstallments ?? 0} / {installmentsData?.leaseDurationMonths ?? 0} mo</span>
+                                    </div>
+                                </div>
+                            </header>
+
                             <div className="active-rental-content">
                                 <section className="main-rental-info">
                                     <DetailedRentCard rental={rentalData} contract={selectedContract} />

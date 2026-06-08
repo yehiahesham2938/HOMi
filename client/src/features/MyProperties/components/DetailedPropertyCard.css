@@ -4,17 +4,17 @@
   background: white;
   margin-bottom: 32px;
   overflow: hidden;
-  border: 2.5px solid #669de6;
+  border: 1px solid #e2e8f0;
   border-radius: 24px;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 320px; /* Ensures a consistent height */
 }
 
 .detailed-card:hover {
-  transform: translateY(-5px) translateX(8px);
+  transform: translateY(-5px) translateX(4px);
   border-color: #3b82f6;
-  box-shadow: 0 25px 50px -12px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 20px 40px -12px rgba(59, 130, 246, 0.15);
 }
 
 /* IMAGE SECTION - FIXED HEIGHT */
@@ -23,6 +23,7 @@
   position: relative;
   flex-shrink: 0; /* Prevents image from squishing */
   clip-path: polygon(0 0, 100% 0, 88% 100%, 0% 100%);
+  overflow: hidden;
 }
 
 .detailed-image-section img {
@@ -30,6 +31,11 @@
   height: 100%;
   object-fit: cover; /* This makes the image fill the area without stretching */
   display: block;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.detailed-card:hover .detailed-image-section img {
+  transform: scale(1.06);
 }
 
 /* STATUS BADGES - PREMIUM LOOK */
@@ -57,17 +63,22 @@
 
 /* Status Colors */
 .detailed-badge.rented {
-  background: rgba(16, 185, 129, 0.9);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
 }
 
 .detailed-badge.available {
-  background: rgba(59, 130, 246, 0.9);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+.detailed-badge.unavailable {
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
   color: white;
 }
 
 .detailed-badge.pending {
-  background: rgba(245, 158, 11, 0.9);
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: white;
 }
 
@@ -450,4 +461,34 @@
   color: #94a3b8;
   font-style: italic;
   font-weight: 500;
+}
+
+/* Pending Visits Badge styling */
+.visit-badge-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ef4444;
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 800;
+  border-radius: 50px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  margin-left: 2px;
+  line-height: 1;
+  box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4);
+  animation: badgeScaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes badgeScaleIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }

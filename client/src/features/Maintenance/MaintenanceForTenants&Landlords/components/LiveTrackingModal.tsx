@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { FaTimes, FaMapMarkerAlt, FaUser, FaPhone, FaCar, FaCheckCircle } from 'react-icons/fa';
+import { FaTimes, FaMapMarkerAlt, FaUser, FaPhone, FaCar, FaCheckCircle, FaCircle, FaWrench } from 'react-icons/fa';
 import maintenanceService, {
     type MaintenanceRequest,
     type MaintenanceLocationData,
@@ -20,8 +20,8 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
     const a =
         Math.sin(dLat / 2) ** 2 +
         Math.cos((lat1 * Math.PI) / 180) *
-            Math.cos((lat2 * Math.PI) / 180) *
-            Math.sin(dLng / 2) ** 2;
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLng / 2) ** 2;
     return 2 * R * Math.asin(Math.sqrt(a));
 }
 
@@ -81,79 +81,113 @@ const LiveTrackingModal: React.FC<Props> = ({ isOpen, onClose, request }) => {
     return (
         <div className="lt-modal-overlay" onClick={onClose}>
             <div className="lt-modal" onClick={(e) => e.stopPropagation()}>
+
+                {/* Header */}
                 <header className="lt-modal-header">
-                    <div>
-                        <h2>Live tracking</h2>
+                    <div className="lt-header-content">
+                        <div className="lt-title-group">
+                            <h2>Live Tracking</h2>
+                            <span className="lt-live-badge">
+                                <FaCircle className="lt-pulse-icon" /> Live
+                            </span>
+                        </div>
                         <p>
                             {status === 'EN_ROUTE'
                                 ? 'Your maintainer is on the way to your property.'
                                 : status === 'IN_PROGRESS'
-                                ? 'Your maintainer arrived and is working on the issue.'
-                                : 'Tracking the maintainer for this issue.'}
+                                    ? 'Your maintainer arrived and is working on the issue.'
+                                    : 'Tracking the maintainer for this issue.'}
                         </p>
                     </div>
-                    <button className="lt-close-btn" onClick={onClose}><FaTimes /></button>
+                    <button className="lt-close-btn" onClick={onClose} aria-label="Close modal">
+                        <FaTimes />
+                    </button>
                 </header>
 
                 <div className="lt-modal-body">
+
+                    {/* Provider Card */}
                     <div className="lt-provider-card">
                         <div className="lt-avatar">
                             {provider?.avatarUrl ? <img src={provider.avatarUrl} alt={fullName} /> : <FaUser />}
                         </div>
                         <div className="lt-provider-info">
                             <h4>{provider?.businessName ?? fullName ?? 'Maintainer'}</h4>
-                            <span className="lt-provider-type">{provider?.providerType === 'CENTER' ? 'Center' : 'Individual'}</span>
+                            <div className="lt-provider-meta">
+                                <span className="lt-provider-type">
+                                    {provider?.providerType === 'CENTER' ? 'Service Center' : 'Independent'}
+                                </span>
+                            </div>
                             {provider?.phone && (
                                 <a href={`tel:${provider.phone}`} className="lt-provider-phone">
                                     <FaPhone /> {provider.phone}
                                 </a>
                             )}
                         </div>
-                        <div className="lt-status-pill">
-                            {arrived ? 'Arrived' : status === 'EN_ROUTE' ? 'En route' : status === 'IN_PROGRESS' ? 'Working' : status}
+                        <div className={`lt-status-pill ${arrived ? 'arrived' : 'en-route'}`}>
+                            {arrived ? 'Arrived' : status === 'EN_ROUTE' ? 'En Route' : status === 'IN_PROGRESS' ? 'Working' : status}
                         </div>
                     </div>
 
-                    <div className="lt-map-placeholder">
+                    {/* Simulated Map Area */}
+                    <div className="lt-map-area">
                         {loading ? (
-                            <span>Loading position…</span>
+                            <div className="lt-map-loading">
+                                <div className="lt-spinner"></div>
+                                <span>Locating maintainer...</span>
+                            </div>
                         ) : location ? (
-                            <div className="lt-position-card">
-                                <FaMapMarkerAlt />
-                                <div>
-                                    <strong>{location.lat.toFixed(5)}, {location.lng.toFixed(5)}</strong>
-                                    <small>Last update {new Date(location.reportedAt).toLocaleTimeString()}</small>
+                            <div className="lt-map-visuals">
+                                {/* Maintainer Location Pin */}
+                                <div className="lt-location-pin maintainer-pin">
+                                    <div className="pin-icon bg-blue"><FaCar /></div>
+                                    <div className="pin-details">
+                                        <strong>{location.lat.toFixed(5)}, {location.lng.toFixed(5)}</strong>
+                                        <small>Updated {new Date(location.reportedAt).toLocaleTimeString()}</small>
+                                    </div>
                                 </div>
+
+                                {/* Connection Line Graphic (Decorative) */}
+                                <div className="lt-route-line"></div>
+
+                                {/* Property Location Pin */}
+                                {request.property && (
+                                    <div className="lt-location-pin property-pin">
+                                        <div className="pin-icon bg-green"><FaMapMarkerAlt /></div>
+                                        <div className="pin-details">
+                                            <strong>{request.property.title}</strong>
+                                            <small>{request.property.address}</small>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         ) : (
-                            <span>Waiting for the maintainer to start sharing location…</span>
-                        )}
-
-                        {request.property && (
-                            <div className="lt-property-card">
-                                <FaMapMarkerAlt />
-                                <div>
-                                    <strong>{request.property.title}</strong>
-                                    <small>{request.property.address}</small>
-                                </div>
+                            <div className="lt-map-empty">
+                                <FaMapMarkerAlt className="empty-icon" />
+                                <span>Waiting for GPS signal...</span>
                             </div>
                         )}
                     </div>
 
+                    {/* Telemetry Stats */}
                     <div className="lt-stats">
                         <div className="lt-stat">
-                            <span className="lt-stat-label">Distance to property</span>
-                            <strong>{distanceKm == null ? '—' : `${distanceKm.toFixed(2)} km`}</strong>
+                            <span className="lt-stat-label">Distance</span>
+                            <strong className="text-blue">
+                                {distanceKm == null ? '—' : `${distanceKm.toFixed(2)} km`}
+                            </strong>
                         </div>
                         <div className="lt-stat">
                             <span className="lt-stat-label">Status</span>
-                            <strong>
-                                {arrived ? <><FaCheckCircle /> Arrived</> : <><FaCar /> {status.replace('_', ' ')}</>}
+                            <strong className={arrived ? 'text-green' : 'text-orange'}>
+                                {arrived ? <><FaCheckCircle /> Arrived</> : <><FaWrench /> {status.replace('_', ' ')}</>}
                             </strong>
                         </div>
                         <div className="lt-stat">
                             <span className="lt-stat-label">Speed</span>
-                            <strong>{location?.speed != null ? `${(location.speed * 3.6).toFixed(0)} km/h` : '—'}</strong>
+                            <strong>
+                                {location?.speed != null ? `${(location.speed * 3.6).toFixed(0)} km/h` : '—'}
+                            </strong>
                         </div>
                     </div>
                 </div>

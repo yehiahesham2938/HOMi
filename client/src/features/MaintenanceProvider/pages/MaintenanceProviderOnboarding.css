@@ -1,89 +1,132 @@
+/* ═══════════════════════════════════════════════════════════════
+   MAINTENANCE PROVIDER ONBOARDING — PREMIUM LIGHT THEME
+   ═══════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --brand-blue: #2563eb;
+    --brand-blue-hover: #1d4ed8;
+    --brand-blue-light: #eff6ff;
+    --success-green: #10b981;
+    --success-green-light: #ecfdf5;
+    --error-red: #ef4444;
+    --error-red-light: #fef2f2;
+    
+    --neutral-50: #f8fafc;
+    --neutral-100: #f1f5f9;
+    --neutral-200: #e2e8f0;
+    --neutral-300: #cbd5e1;
+    --neutral-400: #94a3b8;
+    --neutral-500: #64748b;
+    --neutral-600: #475569;
+    --neutral-800: #1e293b;
+    --neutral-900: #0f172a;
+    
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 20px;
+    --radius-2xl: 24px;
+    --radius-pill: 9999px;
+    
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.05), 0 4px 6px -4px rgba(15, 23, 42, 0.03);
+    --shadow-stripe: 0 15px 35px rgba(15, 23, 42, 0.04), 0 5px 15px rgba(15, 23, 42, 0.02);
+}
+
+/* ── Page Shell ── */
 .mp-page {
     min-height: 100vh;
-    background:
-        radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.2), transparent 30%),
-        radial-gradient(circle at 85% 10%, rgba(34, 197, 94, 0.18), transparent 28%),
-        linear-gradient(140deg, #eef4ff 0%, #f8fafc 55%, #eff6ff 100%);
-    animation: mpFloatBg 10s ease-in-out infinite alternate;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--neutral-50);
+    background-image: 
+        radial-gradient(ellipse 80% 50% at 20% 0%, rgba(37, 99, 235, 0.06), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(16, 185, 129, 0.04), transparent),
+        radial-gradient(ellipse 40% 30% at 50% 50%, rgba(37, 99, 235, 0.03), transparent);
+    color: var(--neutral-900);
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Animated floating orbs behind the card */
+.mp-page::before,
+.mp-page::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.25;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.mp-page::before {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.12), transparent 70%);
+    top: -120px;
+    left: -100px;
+    animation: mpOrbFloat1 15s ease-in-out infinite alternate;
+}
+
+.mp-page::after {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.08), transparent 70%);
+    bottom: -80px;
+    right: -60px;
+    animation: mpOrbFloat2 13s ease-in-out infinite alternate;
 }
 
 .mp-page.rtl {
-    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Arial, sans-serif;
 }
 
+/* ── Main Layout ── */
 .mp-main {
     min-height: 100vh;
-    padding: 20px 16px;
+    padding: 32px 20px;
     display: grid;
     place-items: center;
+    position: relative;
+    z-index: 1;
 }
 
+/* ── Shell Card ── */
 .mp-shell {
-    width: min(980px, 100%);
-    border-radius: 24px;
-    border: 1px solid rgba(37, 99, 235, 0.14);
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(12px);
-    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.1);
-    padding: 24px;
-    animation: mpCardIn 0.45s ease;
+    width: min(680px, 100%);
+    border-radius: var(--radius-2xl);
+    border: 1px solid var(--neutral-200);
+    background: #ffffff;
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.02),
+        0 20px 40px -15px rgba(15, 23, 42, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    padding: 40px 36px;
+    animation: mpCardIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* ── Logo ── */
 .mp-logo-wrap {
     display: flex;
     justify-content: center;
-    margin-bottom: 12px;
+    margin-bottom: 20px;
 }
 
 .mp-logo {
-    width: 120px;
+    width: 90px;
     height: auto;
     object-fit: contain;
+    filter: drop-shadow(0 4px 12px rgba(37, 99, 235, 0.15));
+    transition: transform 0.3s ease;
 }
 
-.mp-mode-row {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 12px;
+.mp-logo:hover {
+    transform: scale(1.06);
 }
 
-.mp-mode-card,
-.mp-home-link,
-.mp-lang {
-    border: 1px solid #cbd5e1;
-    border-radius: 999px;
-    padding: 9px 14px;
-    background: #fff;
-    color: #0f172a;
-    cursor: pointer;
-    font-weight: 700;
-    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-}
-
-.mp-mode-card:hover,
-.mp-home-link:hover,
-.mp-lang:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
-}
-
-.mp-mode-card.active,
-.mp-lang.active {
-    background: linear-gradient(135deg, #1d4ed8, #2563eb);
-    border-color: #1d4ed8;
-    color: #fff;
-}
-
-.mp-home-link {
-    margin-left: auto;
-}
-
-.mp-page.rtl .mp-home-link {
-    margin-left: 0;
-    margin-right: auto;
-}
-
+/* ── Language Row ── */
 .mp-lang-row {
     display: flex;
     align-items: center;
@@ -92,132 +135,274 @@
 }
 
 .mp-lang-outside {
-    width: min(980px, 100%);
+    width: min(680px, 100%);
     justify-content: flex-end;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .mp-page.rtl .mp-lang-outside {
     justify-content: flex-start;
 }
 
-.mp-mode-card {
-    min-width: 210px;
-    text-align: center;
-    padding: 12px 14px;
-}
-
 .mp-lang-row label {
-    font-size: 13px;
-    color: #334155;
-    font-weight: 700;
+    font-size: 12px;
+    color: var(--neutral-500);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
 }
 
+/* ── Mode Row (Join / Sign In / Home) ── */
+.mp-mode-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.mp-mode-card,
+.mp-home-link,
+.mp-lang {
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-lg);
+    padding: 10px 18px;
+    background: var(--neutral-50);
+    color: var(--neutral-600);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.2px;
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mp-mode-card:hover,
+.mp-home-link:hover,
+.mp-lang:hover {
+    transform: translateY(-2px);
+    border-color: var(--brand-blue-hover);
+    box-shadow: var(--shadow-sm);
+    background: var(--neutral-100);
+    color: var(--neutral-900);
+}
+
+.mp-mode-card.active,
+.mp-lang.active {
+    background: var(--neutral-900);
+    border-color: var(--neutral-900);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+}
+
+.mp-mode-card {
+    min-width: 180px;
+    text-align: center;
+    padding: 14px 20px;
+    font-size: 14px;
+}
+
+.mp-home-link {
+    margin-left: auto;
+    font-size: 13px;
+}
+
+.mp-page.rtl .mp-home-link {
+    margin-left: 0;
+    margin-right: auto;
+}
+
+/* ── Headings ── */
 .mp-shell h1 {
-    margin: 6px 0 6px;
-    font-size: clamp(1.4rem, 2vw, 1.95rem);
-    color: #0f172a;
+    margin: 0 0 8px;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 800;
+    color: var(--neutral-900);
+    letter-spacing: -0.5px;
+    line-height: 1.2;
 }
 
 .mp-shell > p {
-    margin: 0 0 16px;
-    color: #64748b;
+    margin: 0 0 24px;
+    color: var(--neutral-500);
+    font-size: 14px;
+    line-height: 1.6;
 }
 
+/* ── Form Container ── */
 .mp-form {
     display: grid;
-    gap: 12px;
+    gap: 16px;
     margin-top: 4px;
 }
 
+/* ── Provider Type Switch ── */
 .mp-type-switch {
     display: flex;
     gap: 8px;
+    background: var(--neutral-100);
+    border-radius: var(--radius-lg);
+    padding: 6px;
+    border: 1px solid var(--neutral-200);
 }
 
 .mp-type-switch button {
-    border: 1px solid #cbd5e1;
-    border-radius: 999px;
-    padding: 8px 12px;
-    background: #f8fafc;
-    color: #0f172a;
+    flex: 1;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    padding: 11px 16px;
+    background: transparent;
+    color: var(--neutral-600);
     cursor: pointer;
     font-weight: 700;
+    font-size: 13px;
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mp-type-switch button:hover {
+    color: var(--neutral-900);
+    background: var(--neutral-200);
 }
 
 .mp-type-switch button.active {
-    background: linear-gradient(135deg, #1e40af, #2563eb);
-    border-color: #1e40af;
-    color: #fff;
+    background: #ffffff;
+    border-color: var(--neutral-200);
+    color: var(--neutral-900);
+    box-shadow: var(--shadow-sm);
 }
 
+/* ── Progress Bar ── */
 .mp-progress-wrap {
-    margin-top: 4px;
+    margin-top: 8px;
 }
 
 .mp-progress-track {
     width: 100%;
-    height: 10px;
-    border-radius: 999px;
-    background: #e2e8f0;
+    height: 6px;
+    border-radius: var(--radius-pill);
+    background: var(--neutral-100);
     overflow: hidden;
+    border: 1px solid var(--neutral-200);
 }
 
 .mp-progress-fill {
-    height: 10px;
-    border-radius: 999px;
-    background: linear-gradient(90deg, #2563eb, #22c55e);
-    transition: width 0.28s ease;
+    height: 100%;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(90deg, var(--brand-blue), #3b82f6);
+    transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 0 8px rgba(37, 99, 235, 0.2);
+    position: relative;
+}
+
+.mp-progress-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+    animation: mpShimmer 2s ease-in-out infinite;
 }
 
 .mp-progress-label {
-    margin: 8px 0 0;
-    font-size: 13px;
-    color: #1e3a8a;
+    margin: 10px 0 0;
+    font-size: 12px;
+    color: var(--brand-blue);
     font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
+/* ── Grid 2-column ── */
 .mp-grid-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 12px;
 }
 
+/* ── Input / Textarea / Select ── */
 .mp-form input,
 .mp-form textarea,
 .mp-form select {
-    border: 1px solid #cbd5e1;
-    border-radius: 12px;
-    padding: 12px 13px;
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
     font-size: 14px;
-    background: #fff;
+    font-family: inherit;
+    background: var(--neutral-50);
+    color: var(--neutral-900);
     outline: none;
-    transition: border-color 0.16s ease, box-shadow 0.16s ease;
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mp-form input::placeholder,
+.mp-form textarea::placeholder {
+    color: var(--neutral-400);
+}
+
+.mp-form input:hover,
+.mp-form textarea:hover,
+.mp-form select:hover {
+    border-color: var(--neutral-300);
+    background: #ffffff;
 }
 
 .mp-form input:focus,
 .mp-form textarea:focus,
 .mp-form select:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14);
+    border-color: var(--brand-blue);
+    box-shadow:
+        0 0 0 4px rgba(37, 99, 235, 0.1),
+        0 0 12px rgba(37, 99, 235, 0.05);
+    background: #ffffff;
+}
+
+.mp-form select option {
+    background: #ffffff;
+    color: var(--neutral-900);
 }
 
 .mp-form textarea {
-    min-height: 110px;
+    min-height: 120px;
     resize: vertical;
 }
 
+/* ── Step Cards ── */
 .mp-step-card {
-    border: 1px solid #dbeafe;
-    background: linear-gradient(180deg, #f8fbff 0%, #eff6ff 100%);
-    border-radius: 14px;
-    padding: 14px;
-    animation: mpStepIn 0.24s ease;
+    border: 1px solid var(--neutral-200);
+    background: linear-gradient(180deg, var(--neutral-50) 0%, #ffffff 100%);
+    border-radius: var(--radius-xl);
+    padding: 24px 20px;
+    animation: mpStepIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    position: relative;
+    overflow: hidden;
 }
 
+.mp-step-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--brand-blue), transparent);
+}
+
+.mp-step-card h3 {
+    margin: 0 0 8px;
+    color: var(--neutral-900);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.mp-step-card p {
+    margin: 0 0 16px;
+    color: var(--neutral-500);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* ── Categories ── */
 .mp-categories-wrap {
     display: grid;
-    gap: 12px;
+    gap: 14px;
 }
 
 .mp-category-list {
@@ -227,24 +412,34 @@
 }
 
 .mp-category-pill {
-    border: 1px solid #93c5fd;
-    border-radius: 999px;
-    background: #eff6ff;
-    color: #1d4ed8;
-    padding: 8px 12px;
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-pill);
+    background: var(--neutral-50);
+    color: var(--neutral-600);
+    padding: 9px 16px;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mp-category-pill:hover {
+    border-color: var(--brand-blue-hover);
+    background: var(--brand-blue-light);
+    color: var(--brand-blue);
 }
 
 .mp-category-pill.active {
-    border-color: #1d4ed8;
-    background: #1d4ed8;
-    color: #fff;
+    border-color: var(--brand-blue);
+    background: var(--brand-blue-light);
+    color: var(--brand-blue);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+    font-weight: 700;
 }
 
 .mp-custom-category-row {
     display: flex;
-    gap: 8px;
+    gap: 10px;
 }
 
 .mp-custom-category-row input {
@@ -255,55 +450,95 @@
     white-space: nowrap;
 }
 
-.mp-step-card h3 {
-    margin: 0 0 6px;
-    color: #0f172a;
-}
-
-.mp-step-card p {
-    margin: 0 0 10px;
-    color: #475569;
-}
-
+/* ── Buttons (Primary / Secondary) ── */
 .mp-step-card button,
 .mp-step-actions button,
 .mp-form > button {
     border: 0;
-    border-radius: 12px;
-    padding: 11px 14px;
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    color: #fff;
+    border-radius: var(--radius-lg);
+    padding: 13px 20px;
+    font-family: inherit;
+    font-size: 14px;
     font-weight: 700;
     cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    background: var(--brand-blue);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.mp-step-card button:hover,
+.mp-step-actions button:hover,
+.mp-form > button:hover {
+    background: var(--brand-blue-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
+}
+
+.mp-step-card button:active,
+.mp-step-actions button:active,
+.mp-form > button:active {
+    transform: translateY(0);
 }
 
 .mp-step-actions button:disabled {
-    opacity: 0.45;
+    opacity: 0.35;
     cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
 }
 
 .mp-step-actions .secondary {
-    background: #e2e8f0;
-    color: #0f172a;
+    background: var(--neutral-100);
+    border: 1px solid var(--neutral-200);
+    color: var(--neutral-600);
+    box-shadow: none;
 }
 
+.mp-step-actions .secondary:hover {
+    background: var(--neutral-200);
+    border-color: var(--neutral-300);
+    color: var(--neutral-900);
+}
+
+/* ── File Labels ── */
 .mp-file-label {
     display: grid;
-    gap: 6px;
+    gap: 8px;
     font-size: 14px;
-    color: #334155;
+    color: var(--neutral-600);
     font-weight: 600;
 }
 
-.mp-capture-status {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 10px;
-    font-size: 13px;
-    color: #1e3a8a;
+.mp-file-label input[type="file"] {
+    padding: 12px;
+    border: 2px dashed var(--neutral-300);
+    border-radius: var(--radius-lg);
+    background: var(--neutral-50);
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
+.mp-file-label input[type="file"]:hover {
+    border-color: var(--brand-blue);
+    background: var(--brand-blue-light);
+}
+
+/* ── Capture Status ── */
+.mp-capture-status {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--brand-blue);
+    letter-spacing: 0.3px;
+}
+
+/* ── Tags & Doc Chips ── */
 .mp-tags,
 .mp-doc-list {
     display: flex;
@@ -313,99 +548,177 @@
 
 .mp-tag,
 .mp-doc-chip {
-    border: 1px solid #bfdbfe;
-    background: #eff6ff;
-    color: #1d4ed8;
-    border-radius: 999px;
-    padding: 6px 10px;
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    background: var(--brand-blue-light);
+    color: var(--brand-blue);
+    border-radius: var(--radius-pill);
+    padding: 7px 14px;
     font-size: 12px;
     cursor: pointer;
-    font-weight: 700;
+    font-weight: 600;
+    transition: all 0.2s ease;
 }
 
+.mp-tag:hover,
+.mp-doc-chip:hover {
+    background: var(--error-red-light);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: var(--error-red);
+}
+
+/* ── Checkbox ── */
 .mp-checkbox {
     display: inline-flex;
-    gap: 8px;
+    gap: 10px;
     align-items: center;
-    color: #334155;
+    color: var(--neutral-600);
     font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
 }
 
+.mp-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--brand-blue);
+    cursor: pointer;
+}
+
+/* ── Step Actions ── */
 .mp-step-actions {
     display: flex;
     justify-content: space-between;
-    gap: 8px;
+    gap: 12px;
+    margin-top: 4px;
 }
 
+/* ── Error Message ── */
 .mp-error {
-    margin-top: 6px;
-    color: #b91c1c;
-    font-weight: 700;
-    font-size: 14px;
+    margin-top: 8px;
+    padding: 12px 16px;
+    border-radius: var(--radius-lg);
+    background: var(--error-red-light);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: var(--error-red);
+    font-weight: 600;
+    font-size: 13px;
+    animation: mpShakeIn 0.3s ease;
 }
 
+/* ── Overlays (Camera / Success / Validation) ── */
 .mp-camera-overlay,
 .mp-success-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.72);
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     display: grid;
     place-items: center;
     z-index: 2000;
-    padding: 16px;
+    padding: 20px;
+    animation: mpOverlayIn 0.25s ease;
 }
 
 .mp-camera-card,
 .mp-success-card {
-    width: min(720px, 100%);
-    background: #fff;
-    border-radius: 18px;
-    padding: 18px;
-    box-shadow: 0 20px 60px rgba(2, 6, 23, 0.25);
+    width: min(680px, 100%);
+    background: #ffffff;
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-2xl);
+    padding: 28px 24px;
+    box-shadow:
+        0 25px 50px -12px rgba(15, 23, 42, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    animation: mpModalIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .mp-success-card {
-    width: min(560px, 100%);
+    width: min(500px, 100%);
     text-align: center;
+    padding: 40px 32px;
 }
 
 .mp-success-logo {
-    width: 86px;
-    margin-bottom: 10px;
+    width: 80px;
+    margin-bottom: 16px;
+    filter: drop-shadow(0 4px 12px rgba(37, 99, 235, 0.15));
 }
 
 .mp-success-card h2 {
-    margin: 0 0 8px;
-    color: #0f172a;
+    margin: 0 0 12px;
+    color: var(--neutral-900);
+    font-size: 22px;
+    font-weight: 800;
 }
 
 .mp-success-card p {
     margin: 0;
-    color: #475569;
+    color: var(--neutral-500);
+    font-size: 14px;
+    line-height: 1.6;
 }
 
 .mp-success-actions {
-    margin-top: 16px;
+    margin-top: 24px;
     display: flex;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
+}
+
+.mp-success-actions button {
+    border: 0;
+    border-radius: var(--radius-lg);
+    padding: 13px 24px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    background: var(--brand-blue);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+.mp-success-actions button:hover {
+    background: var(--brand-blue-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
 }
 
 .mp-success-actions .secondary {
-    background: #e2e8f0;
-    color: #0f172a;
+    background: var(--neutral-100);
+    border: 1px solid var(--neutral-200);
+    color: var(--neutral-600);
+    box-shadow: none;
 }
 
+.mp-success-actions .secondary:hover {
+    background: var(--neutral-200);
+    border-color: var(--neutral-300);
+    color: var(--neutral-900);
+}
+
+/* ── Camera UI ── */
 .mp-camera-card h3 {
-    margin: 0 0 6px;
+    margin: 0 0 8px;
+    color: var(--neutral-900);
+    font-weight: 700;
+}
+
+.mp-camera-card p {
+    color: var(--neutral-500);
+    margin: 0 0 4px;
+    font-size: 14px;
 }
 
 .mp-camera-preview {
     position: relative;
-    border-radius: 14px;
+    border-radius: var(--radius-lg);
     overflow: hidden;
-    background: #0f172a;
-    margin-top: 10px;
+    background: var(--neutral-900);
+    margin-top: 12px;
+    border: 1px solid var(--neutral-200);
 }
 
 .mp-camera-preview video {
@@ -420,11 +733,12 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    border: 3px dashed #22c55e;
-    border-radius: 12px;
+    border: 2px dashed rgba(37, 99, 235, 0.8);
+    border-radius: 16px;
     width: 62%;
     height: 38%;
-    box-shadow: 0 0 0 9999px rgba(2, 6, 23, 0.35);
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+    animation: mpGuidePulse 2s ease-in-out infinite;
 }
 
 .mp-camera-preview.selfie .mp-camera-guide {
@@ -436,19 +750,47 @@
 .mp-camera-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 8px;
-    margin-top: 10px;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.mp-camera-actions button {
+    border: 0;
+    border-radius: var(--radius-lg);
+    padding: 12px 20px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    background: var(--brand-blue);
+    color: #ffffff;
+}
+
+.mp-camera-actions button:hover {
+    background: var(--brand-blue-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
 }
 
 .mp-camera-actions .secondary {
-    background: #e2e8f0;
-    color: #0f172a;
+    background: var(--neutral-100);
+    border: 1px solid var(--neutral-200);
+    color: var(--neutral-600);
 }
+
+.mp-camera-actions .secondary:hover {
+    background: var(--neutral-200);
+}
+
+/* ═══════════════════════
+   KEYFRAMES
+   ═══════════════════════ */
 
 @keyframes mpCardIn {
     from {
         opacity: 0;
-        transform: translateY(10px) scale(0.99);
+        transform: translateY(24px) scale(0.97);
     }
     to {
         opacity: 1;
@@ -459,7 +801,7 @@
 @keyframes mpStepIn {
     from {
         opacity: 0;
-        transform: translateY(4px);
+        transform: translateY(8px);
     }
     to {
         opacity: 1;
@@ -467,29 +809,68 @@
     }
 }
 
-@keyframes mpFloatBg {
+@keyframes mpOrbFloat1 {
+    from { transform: translate(0, 0) scale(1); }
+    to { transform: translate(60px, 80px) scale(1.15); }
+}
+
+@keyframes mpOrbFloat2 {
+    from { transform: translate(0, 0) scale(1); }
+    to { transform: translate(-50px, -60px) scale(1.1); }
+}
+
+@keyframes mpShimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+@keyframes mpOverlayIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes mpModalIn {
     from {
-        background-position: 0% 0%;
+        opacity: 0;
+        transform: translateY(16px) scale(0.96);
     }
     to {
-        background-position: 100% 20%;
+        opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
 
+@keyframes mpGuidePulse {
+    0%, 100% { border-color: rgba(37, 99, 235, 0.8); }
+    50% { border-color: rgba(37, 99, 235, 0.3); }
+}
+
+@keyframes mpShakeIn {
+    0% { transform: translateX(-6px); }
+    25% { transform: translateX(4px); }
+    50% { transform: translateX(-2px); }
+    75% { transform: translateX(1px); }
+    100% { transform: translateX(0); }
+}
+
+/* ═══════════════════════
+   RESPONSIVE
+   ═══════════════════════ */
+
 @media (max-width: 900px) {
     .mp-shell {
-        padding: 18px;
+        padding: 28px 22px;
     }
 }
 
 @media (max-width: 760px) {
     .mp-main {
-        padding: 10px;
+        padding: 12px;
     }
 
     .mp-shell {
-        border-radius: 18px;
-        padding: 14px;
+        border-radius: 22px;
+        padding: 24px 18px;
     }
 
     .mp-grid-2 {
@@ -499,9 +880,13 @@
     .mp-top-row {
         flex-direction: column;
     }
-    
+
     .mp-mode-row {
         flex-direction: column;
+    }
+
+    .mp-mode-card {
+        min-width: unset;
     }
 
     .mp-home-link {
@@ -525,6 +910,14 @@
     }
 
     .mp-success-actions {
+        flex-direction: column;
+    }
+
+    .mp-camera-actions {
+        flex-direction: column;
+    }
+
+    .mp-type-switch {
         flex-direction: column;
     }
 }

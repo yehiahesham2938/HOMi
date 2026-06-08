@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { X, MapPin, DollarSign, Users, Calendar, Info } from 'lucide-react';
+import { X, MapPin, DollarSign, Users, Calendar, Info, Home } from 'lucide-react';
+import '../pages/RoommateMatching.css';
 
 interface CreateRequestModalProps {
     type: 'SEARCH_APARTMENT' | 'SEARCH_ROOMMATE';
+    activeContracts?: Array<{ id: string; property?: { title: string; address: string } }>;
     activeContractId?: string | null;
     onClose: () => void;
     onSubmit: (data: any) => void;
 }
 
-const CreateRequestModal: React.FC<CreateRequestModalProps> = ({ type, activeContractId, onClose, onSubmit }) => {
+const CreateRequestModal: React.FC<CreateRequestModalProps> = ({ type, activeContracts = [], activeContractId, onClose, onSubmit }) => {
     const [formData, setFormData] = useState({
         preferred_city: 'Cairo',
         preferred_area: '',
@@ -18,7 +20,7 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({ type, activeCon
         preferred_move_in_date: '',
         additional_note: '',
         max_occupants: 1,
-        contract_id: activeContractId || null
+        contract_id: activeContractId || (activeContracts.length > 0 ? activeContracts[0].id : null)
     });
 
     const isApartmentSearch = type === 'SEARCH_APARTMENT';
@@ -39,143 +41,135 @@ const CreateRequestModal: React.FC<CreateRequestModalProps> = ({ type, activeCon
     };
 
     return (
-        <div 
-            className="fixed inset-0 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-fade-in"
-            style={{ paddingLeft: 'var(--sidebar-width, 0)', zIndex: 9999 }}
-        >
-            <div className="bg-white rounded-[2rem] w-full max-w-xl shadow-2xl animate-slide-up flex flex-col" style={{ maxHeight: '90vh' }}>
-                {/* Modal Header */}
-                <div className="bg-blue-600 text-white relative shrink-0" style={{ padding: '24px 32px', borderRadius: '2rem 2rem 0 0' }}>
-                    <button onClick={onClose} className="absolute p-2 hover:bg-white/20 rounded-full transition-colors" style={{ top: '20px', right: '24px' }}>
-                        <X size={24} />
+        <div className="rm-modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+            <div className="rm-modal">
+                {/* Header */}
+                <div className="rm-modal-header">
+                    <button className="rm-modal-close" onClick={onClose}>
+                        <X size={20} />
                     </button>
-                    <h2 className="text-2xl font-bold flex items-center gap-3" style={{ marginBottom: '4px' }}>
-                        {isApartmentSearch ? <MapPin size={28} /> : <Home size={28} />}
+                    <h2>
+                        {isApartmentSearch ? <MapPin size={22} /> : <Home size={22} />}
                         {isApartmentSearch ? 'Find a Place to Share' : 'Find a Roommate'}
                     </h2>
-                    <p className="text-blue-100 text-sm">
-                        {isApartmentSearch ? 'Set your preferences to find the perfect roommate with a contract.' : 'Find someone compatible to join you in your current place.'}
+                    <p>
+                        {isApartmentSearch
+                            ? 'Set your preferences to find the perfect roommate with a contract.'
+                            : 'Find someone compatible to join you in your current place.'}
                     </p>
                 </div>
-                
-                {/* Scrollable Form Body */}
-                <div className="overflow-y-auto custom-scrollbar">
 
-                <form onSubmit={handleSubmit} style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                    {isApartmentSearch ? (
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                    <MapPin size={16} className="text-blue-600" /> City
-                                </label>
-                                <select 
-                                    className="bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                                    style={{ width: '100%', padding: '12px' }}
-                                    value={formData.preferred_city}
-                                    onChange={(e) => setFormData({...formData, preferred_city: e.target.value})}
+                {/* Body */}
+                <div className="rm-modal-body">
+                    <form className="rm-form" onSubmit={handleSubmit}>
+
+                        {isApartmentSearch ? (
+                            <div className="rm-field-row">
+                                <div className="rm-field">
+                                    <label><MapPin size={14} /> City</label>
+                                    <select
+                                        value={formData.preferred_city}
+                                        onChange={(e) => setFormData({...formData, preferred_city: e.target.value})}
+                                    >
+                                        <option value="Cairo">Cairo</option>
+                                        <option value="Giza">Giza</option>
+                                        <option value="Alexandria">Alexandria</option>
+                                    </select>
+                                </div>
+                                <div className="rm-field">
+                                    <label>Area</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Nasr City"
+                                        value={formData.preferred_area}
+                                        onChange={(e) => setFormData({...formData, preferred_area: e.target.value})}
+                                        required
+                                    />
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="rm-field">
+                                <label><Home size={14} /> Select Apartment</label>
+                                {activeContracts.length > 0 ? (
+                                    <select
+                                        value={formData.contract_id || ''}
+                                        onChange={(e) => setFormData({...formData, contract_id: e.target.value})}
+                                        required
+                                    >
+                                        {activeContracts.map(c => (
+                                            <option key={c.id} value={c.id}>
+                                                {c.property?.title || 'Apartment'} - {c.property?.address || 'Unknown address'}
+                                            </option>
+                                        ))}
+                                    </select>
+                                ) : (
+                                    <div className="rm-info-box" style={{ color: '#ef4444', backgroundColor: '#fef2f2', borderColor: '#fecaca' }}>
+                                        <Info size={20} color="#ef4444" />
+                                        <span>You don't have any active contracts to list for roommate matching.</span>
+                                    </div>
+                                )}
+                                <div className="rm-info-box" style={{ marginTop: '10px' }}>
+                                    <Info size={20} />
+                                    <span>We'll use this active contract's location and rent details for matching.</span>
+                                </div>
+                            </div>
+                        )}
+
+                        {isApartmentSearch && (
+                            <div className="rm-field">
+                                <label><DollarSign size={14} /> Monthly Budget Range (EGP)</label>
+                                <div className="rm-field-row">
+                                    <input
+                                        type="number"
+                                        placeholder="Min"
+                                        value={formData.budget_min || ''}
+                                        onChange={(e) => setFormData({...formData, budget_min: Number(e.target.value)})}
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="Max"
+                                        value={formData.budget_max || ''}
+                                        onChange={(e) => setFormData({...formData, budget_max: Number(e.target.value)})}
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="rm-field-row">
+                            <div className="rm-field">
+                                <label><Users size={14} /> Roommate Gender</label>
+                                <select
+                                    value={formData.preferred_gender}
+                                    onChange={(e) => setFormData({...formData, preferred_gender: e.target.value})}
                                 >
-                                    <option value="Cairo">Cairo</option>
-                                    <option value="Giza">Giza</option>
-                                    <option value="Alexandria">Alexandria</option>
+                                    <option value="ANY">Any</option>
+                                    <option value="MALE">Male only</option>
+                                    <option value="FEMALE">Female only</option>
                                 </select>
                             </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                <label className="text-sm font-semibold text-gray-700">Area</label>
-                                <input 
-                                    type="text" 
-                                    placeholder="e.g. Nasr City"
-                                    className="bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                                    style={{ width: '100%', padding: '12px' }}
-                                    value={formData.preferred_area}
-                                    onChange={(e) => setFormData({...formData, preferred_area: e.target.value})}
-                                    required
+                            <div className="rm-field">
+                                <label><Calendar size={14} /> Move-in Date</label>
+                                <input
+                                    type="date"
+                                    value={formData.preferred_move_in_date}
+                                    onChange={(e) => setFormData({...formData, preferred_move_in_date: e.target.value})}
                                 />
                             </div>
                         </div>
-                    ) : (
-                        <div className="bg-blue-50 rounded-2xl flex items-center border border-blue-100" style={{ padding: '16px', gap: '12px' }}>
-                            <Info className="text-blue-600 shrink-0" size={24} />
-                            <p className="text-sm text-blue-800 font-medium">
-                                We'll use your current active contract location and rent details for matching.
-                            </p>
-                        </div>
-                    )}
 
-                    {isApartmentSearch && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                <DollarSign size={16} className="text-blue-600" /> Monthly Budget Range (EGP)
-                            </label>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                                <input 
-                                    type="number" 
-                                    placeholder="Min"
-                                    className="bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                                    style={{ width: '100%', padding: '12px' }}
-                                    value={formData.budget_min || ''}
-                                    onChange={(e) => setFormData({...formData, budget_min: Number(e.target.value)})}
-                                />
-                                <input 
-                                    type="number" 
-                                    placeholder="Max"
-                                    className="bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                                    style={{ width: '100%', padding: '12px' }}
-                                    value={formData.budget_max || ''}
-                                    onChange={(e) => setFormData({...formData, budget_max: Number(e.target.value)})}
-                                />
-                            </div>
-                        </div>
-                    )}
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                <Users size={16} className="text-blue-600" /> Roommate Gender
-                            </label>
-                            <select 
-                                className="bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                                style={{ width: '100%', padding: '12px' }}
-                                value={formData.preferred_gender}
-                                onChange={(e) => setFormData({...formData, preferred_gender: e.target.value})}
-                            >
-                                <option value="ANY">Any</option>
-                                <option value="MALE">Male only</option>
-                                <option value="FEMALE">Female only</option>
-                            </select>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                <Calendar size={16} className="text-blue-600" /> Move-in Date
-                            </label>
-                            <input 
-                                type="date" 
-                                className="bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                                style={{ width: '100%', padding: '12px' }}
-                                value={formData.preferred_move_in_date}
-                                onChange={(e) => setFormData({...formData, preferred_move_in_date: e.target.value})}
+                        <div className="rm-field">
+                            <label>Additional Notes</label>
+                            <textarea
+                                placeholder="Tell potential roommates something about yourself or your preferences..."
+                                value={formData.additional_note}
+                                onChange={(e) => setFormData({...formData, additional_note: e.target.value})}
                             />
                         </div>
-                    </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <label className="text-sm font-semibold text-gray-700">Additional Notes</label>
-                        <textarea 
-                            placeholder="Tell potential roommates something about yourself or your preferences..."
-                            className="bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none h-24 resize-none transition-all"
-                            style={{ width: '100%', padding: '12px' }}
-                            value={formData.additional_note}
-                            onChange={(e) => setFormData({...formData, additional_note: e.target.value})}
-                        ></textarea>
-                    </div>
-
-                    <button 
-                        type="submit"
-                        className="bg-blue-600 text-white rounded-2xl font-bold text-lg hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/30 flex justify-center items-center gap-2"
-                        style={{ width: '100%', padding: '16px', marginTop: '16px', flexShrink: 0 }}
-                    >
-                        Start Matching
-                    </button>
-                </form>
+                        <button type="submit" className="rm-submit-btn">
+                            Start Matching
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

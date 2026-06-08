@@ -62,6 +62,14 @@ export interface RoommateMatch {
             gender: string;
         };
     };
+    request?: {
+        preferred_city: string | null;
+        preferred_area: string | null;
+    };
+    matchedRequest?: {
+        preferred_city: string | null;
+        preferred_area: string | null;
+    };
 }
 
 export interface EligibilityResponse {

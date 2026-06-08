@@ -1,6 +1,7 @@
 import React from 'react';
 import type { RoommateMatch } from '../types/roommateMatchingTypes';
-import { MapPin, Check, X, ShieldCheck, Zap, User } from 'lucide-react';
+import { MapPin, Check, Zap, User, ShieldCheck } from 'lucide-react';
+import '../pages/RoommateMatching.css';
 
 interface MatchCardProps {
     match: RoommateMatch;
@@ -11,104 +12,85 @@ interface MatchCardProps {
 
 const MatchCard: React.FC<MatchCardProps> = ({ match, currentUserId, onAccept, onDecline }) => {
     const isAccepted = match.status === 'ACCEPTED';
-    const otherUser = match.request1?.user_id === currentUserId ? match.request2?.user : match.request1?.user;
+    const otherUser = match.requester_id === currentUserId ? match.matchedUser : match.requester;
+    const otherRequest = match.requester_id === currentUserId ? match.matchedRequest : match.request;
+    const locationCity = otherRequest?.preferred_city || 'Cairo';
+    const locationArea = otherRequest?.preferred_area || '';
+    const displayLocation = locationArea ? `${locationArea}, ${locationCity}` : locationCity;
     const compatibility = Math.round(match.compatibility_score);
+    const currentUserAction = match.requester_id === currentUserId ? match.requester_action : match.matched_user_action;
 
-    // Dynamic color based on compatibility
-    const getScoreColor = (score: number) => {
-        if (score >= 80) return 'text-emerald-500 bg-emerald-50 border-emerald-100';
-        if (score >= 60) return 'text-homi-500 bg-homi-50 border-homi-100';
-        return 'text-amber-500 bg-amber-50 border-amber-100';
-    };
-
-    const scoreStyle = getScoreColor(compatibility);
+    const scoreClass = compatibility >= 80 ? 'rm-score-high' : compatibility >= 60 ? 'rm-score-mid' : 'rm-score-low';
 
     return (
-        <div className="group bg-white rounded-[2.5rem] shadow-xl shadow-gray-100 border border-gray-100 overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-homi/10 hover:-translate-y-2">
-            {/* Compatibility Header */}
-            <div className="relative h-32 bg-gradient-to-br from-homi-500 via-homi-600 to-purple-600 p-6 flex justify-between items-start">
-                <div className={`px-4 py-2 rounded-2xl border backdrop-blur-md flex items-center gap-2 font-bold shadow-lg ${scoreStyle}`}>
-                    <Zap size={16} fill="currentColor" />
+        <div className="rm-card">
+            {/* Gradient Header */}
+            <div className="rm-card-header">
+                <div className={`rm-score-badge ${scoreClass}`}>
+                    <Zap size={14} fill="currentColor" />
                     {compatibility}% Match
                 </div>
-                
                 {match.status === 'PENDING' && (
-                    <div className="bg-white/20 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full border border-white/30">
-                        New Potential Match
-                    </div>
+                    <span className="rm-new-pill">New</span>
                 )}
             </div>
 
-            {/* User Info */}
-            <div className="px-8 pb-8 -mt-12 relative z-10">
-                <div className="flex justify-center mb-4">
-                    <div className="w-24 h-24 rounded-[2rem] bg-white p-1 shadow-xl shadow-gray-200">
-                        <div className="w-full h-full rounded-[1.75rem] bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-50">
-                            {otherUser?.profile?.avatar_url ? (
-                                <img src={otherUser.profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-                            ) : (
-                                <User size={40} className="text-gray-300" />
-                            )}
-                        </div>
+            {/* Body */}
+            <div className="rm-card-body">
+                {/* Avatar */}
+                <div className="rm-avatar-wrap">
+                    <div className="rm-avatar">
+                        {otherUser?.profile?.avatar_url ? (
+                            <img src={otherUser.profile.avatar_url} alt="Profile" />
+                        ) : (
+                            <User size={32} color="#cbd5e1" />
+                        )}
                     </div>
                 </div>
 
-                <div className="text-center mb-6">
-                    <h3 className="text-2xl font-extrabold text-gray-900 mb-1">
-                        {otherUser?.profile?.first_name || 'Homi User'}
-                    </h3>
-                    <div className="flex items-center justify-center gap-1 text-gray-500 font-medium text-sm">
-                        <MapPin size={14} className="text-homi-500" />
-                        Cairo, Egypt
+                {/* Name */}
+                <div className="rm-card-name">
+                    <h3>{otherUser?.profile?.first_name || 'HOMi User'}</h3>
+                    <div className="rm-card-location">
+                        <MapPin size={13} /> {displayLocation}
                     </div>
                 </div>
 
-                {/* Compatibility Reasons */}
-                <div className="bg-gray-50/50 rounded-2xl p-4 mb-6 border border-gray-100">
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 text-left">Why you'll match</p>
-                    <p className="text-sm text-gray-600 leading-relaxed italic text-left">
-                        "{match.compatibility_reasons || 'Compatible habits and lifestyle preferences.'}"
-                    </p>
+                {/* Reason */}
+                <div className="rm-card-reason">
+                    <div className="label">Why you'll match</div>
+                    <div className="text">
+                        "{match.ai_explanation || 'Compatible habits and lifestyle preferences.'}"
+                    </div>
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-3">
-                    {match.status === 'PENDING' ? (
+                <div className="rm-card-actions">
+                    {match.status === 'PENDING' && currentUserAction === 'NONE' ? (
                         <>
-                            <button
-                                onClick={() => onDecline(match.id)}
-                                className="flex-1 py-4 bg-gray-50 text-gray-500 rounded-2xl font-bold hover:bg-red-50 hover:text-red-500 transition-all border border-transparent hover:border-red-100"
-                            >
+                            <button className="rm-btn-skip" onClick={() => onDecline(match.id)}>
                                 Skip
                             </button>
-                            <button
-                                onClick={() => onAccept(match.id)}
-                                className="flex-[2] py-4 bg-homi-500 text-white rounded-2xl font-bold hover:bg-homi-600 transition-all shadow-lg shadow-homi/20 flex items-center justify-center gap-2"
-                            >
-                                <Check size={20} />
-                                Connect
+                            <button className="rm-btn-connect" onClick={() => onAccept(match.id)}>
+                                <Check size={18} /> Connect
                             </button>
                         </>
+                    ) : match.status === 'PENDING' && currentUserAction === 'ACCEPTED' ? (
+                        <div className="rm-status-result" style={{ background: '#f1f5f9', color: '#64748b' }}>
+                            Waiting for response...
+                        </div>
                     ) : (
-                        <div className={`w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 ${
-                            isAccepted ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-gray-100 text-gray-400'
-                        }`}>
+                        <div className={`rm-status-result ${isAccepted ? 'rm-status-accepted' : 'rm-status-declined'}`}>
                             {isAccepted ? (
-                                <>
-                                    <ShieldCheck size={20} />
-                                    Mutual Match!
-                                </>
+                                <><ShieldCheck size={18} /> Mutual Match!</>
                             ) : (
                                 'Declined'
                             )}
                         </div>
                     )}
                 </div>
-                
                 {isAccepted && (
-                    <p className="mt-4 text-center text-xs text-emerald-600 font-medium animate-pulse">
-                        Check your messages to connect
-                    </p>
+                    <p className="rm-mutual-hint">Check your messages to connect</p>
                 )}
             </div>
         </div>

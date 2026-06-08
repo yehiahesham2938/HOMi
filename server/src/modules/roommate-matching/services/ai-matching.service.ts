@@ -4,7 +4,7 @@ import { env } from '../../../config/env.js';
 export class AIMatchingService {
     private static genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
     private static model = AIMatchingService.genAI.getGenerativeModel({ 
-        model: env.GEMINI_MODEL_NAME || 'gemini-1.5-flash',
+        model: env.GEMINI_MODEL_NAME || 'gemini-2.5-flash',
         generationConfig: { responseMimeType: "application/json" }
     });
 

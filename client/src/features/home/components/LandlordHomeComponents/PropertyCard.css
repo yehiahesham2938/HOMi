@@ -300,11 +300,8 @@
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.prop-card-container:hover .prop-action-icon {
-  background: var(--primary);
-  color: white;
-  transform: scale(1.05) rotate(45deg);
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+.prop-action-icon:hover {
+  transform: scale(1.25);
 }
 
 @keyframes gentle-pulse {

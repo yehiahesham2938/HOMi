@@ -223,6 +223,11 @@
     transition: 0.2s;
 }
 
+.selection-card.locked {
+    cursor: not-allowed;
+    opacity: 0.75;
+}
+
 .selection-card input { display: none; }
 
 .indicator {

@@ -20,14 +20,14 @@ export interface LeaseTerminationRequestAttributes {
 export type LeaseTerminationRequestCreationAttributes = Optional<LeaseTerminationRequestAttributes, 'id' | 'status' | 'created_at' | 'updated_at'>;
 
 export class LeaseTerminationRequest extends Model<LeaseTerminationRequestAttributes, LeaseTerminationRequestCreationAttributes> implements LeaseTerminationRequestAttributes {
-    public id!: string;
-    public contract_id!: string;
-    public requester_id!: string;
-    public reason!: string;
-    public status!: LeaseTerminationStatus;
+    declare id: string;
+    declare contract_id: string;
+    declare requester_id: string;
+    declare reason: string;
+    declare status: LeaseTerminationStatus;
 
-    public readonly created_at!: Date;
-    public readonly updated_at!: Date;
+    declare created_at: Date;
+    declare updated_at: Date;
 }
 
 LeaseTerminationRequest.init(

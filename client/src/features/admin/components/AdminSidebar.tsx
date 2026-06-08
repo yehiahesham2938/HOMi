@@ -17,6 +17,7 @@ const AdminSidebar = () => {
 
     const usersOpen = location.pathname.startsWith('/admin/user-management')
         || location.pathname.startsWith('/admin/user-reports')
+        || location.pathname.startsWith('/admin/tenant-reports')
         || location.pathname.startsWith('/admin/support-inbox');
     const propertiesOpen = location.pathname.startsWith('/admin/property-approvals')
         || location.pathname.startsWith('/admin/properties');
@@ -52,7 +53,8 @@ const AdminSidebar = () => {
                     </summary>
                     <div className="admin-nav-sub">
                         <NavLink to="/admin/user-management"><FiUsers /> User Management</NavLink>
-                        <NavLink to="/admin/user-reports"><FiAlertTriangle /> User Reports</NavLink>
+                        <NavLink to="/admin/user-reports"><FiAlertTriangle /> Listing Reports</NavLink>
+                        <NavLink to="/admin/tenant-reports"><FiAlertTriangle /> Tenant Reports</NavLink>
                         <NavLink to="/admin/support-inbox"><FiMessageCircle /> Help Center</NavLink>
                     </div>
                 </details>

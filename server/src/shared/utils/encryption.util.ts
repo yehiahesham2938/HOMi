@@ -86,6 +86,19 @@ export function generateSecureToken(): { token: string; hashedToken: string } {
 }
 
 /**
+ * Generates a numeric OTP of specified length.
+ * @returns Object containing the plain OTP and its hashed version
+ */
+export function generateNumericOTP(length = 6): { otp: string; hashedOtp: string } {
+    let otp = '';
+    for (let i = 0; i < length; i++) {
+        otp += crypto.randomInt(0, 10).toString();
+    }
+    const hashedOtp = hashToken(otp);
+    return { otp, hashedOtp };
+}
+
+/**
  * Hashes a token using SHA-256.
  * @param token - The token to hash
  * @returns Hashed token

@@ -321,12 +321,10 @@ export const UpdateProfileSchema = z.object({
 export type UpdateProfileInput = z.infer<typeof UpdateProfileSchema>;
 
 /**
- * Verify Email Token Schema
+ * Verify Email OTP Schema
  */
 export const VerifyEmailSchema = z.object({
-    token: z
-        .string()
-        .length(64, 'Invalid verification token format'),
+    otp: z.string().length(6, 'OTP must be exactly 6 digits').regex(/^\d+$/, 'OTP must contain only numbers'),
 });
 
 export type VerifyEmailInput = z.infer<typeof VerifyEmailSchema>;

@@ -314,6 +314,41 @@ class AdminController {
             next(error);
         }
     }
+
+    async getTenantReports(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const reports = await adminService.getTenantReports();
+            res.status(200).json({ success: true, data: reports });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async warnTenantFromReport(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const adminId = (req as any).user?.userId;
+            const { reportId } = req.params;
+            const { message } = req.body;
+            if (!message?.trim()) throw new AdminError('Message is required', 400);
+            await adminService.warnTenantFromReport(reportId as string, adminId, message);
+            res.status(200).json({ success: true, message: 'Warning sent successfully' });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async banTenantFromReport(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const adminId = (req as any).user?.userId;
+            const { reportId } = req.params;
+            const { reason } = req.body;
+            if (!reason?.trim()) throw new AdminError('Reason is required', 400);
+            await adminService.banTenantFromReport(reportId as string, adminId, reason);
+            res.status(200).json({ success: true, message: 'Tenant banned successfully' });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 export const adminController = new AdminController();

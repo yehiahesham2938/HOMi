@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import {
   FaHome, FaBuilding,
   FaTools, FaCreditCard, FaEnvelope,
@@ -71,16 +71,16 @@ const Sidebar = () => {
       {/* 2. Navigation */}
       <nav className="sidebar-nav">
         <ul>
-          <li><a href="/landlord-home" className={location.pathname === "/landlord-home" ? "active" : ""}><FaHome /> <span>{t('sidebar.home')}</span></a></li>
-          <li><a href="/my-properties" className={location.pathname === "/my-properties" ? "active" : ""}><FaBuilding /> <span>{t('sidebar.myProperties')}</span></a></li>
-          <li><a href="/rental-requests" className={location.pathname === "/rental-requests" ? "active" : ""}><FaInbox /> <span>{t('sidebar.rentalRequests')}</span></a></li>
+          <li><Link to="/landlord-home" className={location.pathname === "/landlord-home" ? "active" : ""}><FaHome /> <span>{t('sidebar.home')}</span></Link></li>
+          <li><Link to="/my-properties" className={location.pathname === "/my-properties" ? "active" : ""}><FaBuilding /> <span>{t('sidebar.myProperties')}</span></Link></li>
+          <li><Link to="/rental-requests" className={location.pathname === "/rental-requests" ? "active" : ""}><FaInbox /> <span>{t('sidebar.rentalRequests')}</span></Link></li>
 
           <div className="nav-divider">{t('sidebar.management')}</div>
 
-          <li><a href="/landlord-maintenance" className={location.pathname === "/landlord-maintenance" ? "active" : ""}><FaTools /> <span>{t('sidebar.maintenance')}</span></a></li>
-          <li><a href="/landlord-payment" className={location.pathname === "/landlord-payment" ? "active" : ""}><FaCreditCard /> <span>{t('sidebar.payments')}</span></a></li>
-          <li><a href="/landlord-contracts" className={location.pathname === "/landlord-contracts" ? "active" : ""}><FaSignature /> <span>{t('sidebar.contracts')}</span></a></li>
-          <li><a href="/messages" className={location.pathname === "/messages" ? "active" : ""}><FaEnvelope /> <span className="badge-wrap">{t('sidebar.messages')} {hasMessagingUnread ? <em className="notif-dot" aria-hidden /> : null}</span></a></li>
+          <li><Link to="/landlord-maintenance" className={location.pathname === "/landlord-maintenance" ? "active" : ""}><FaTools /> <span>{t('sidebar.maintenance')}</span></Link></li>
+          <li><Link to="/landlord-payment" className={location.pathname === "/landlord-payment" ? "active" : ""}><FaCreditCard /> <span>{t('sidebar.payments')}</span></Link></li>
+          <li><Link to="/landlord-contracts" className={location.pathname === "/landlord-contracts" ? "active" : ""}><FaSignature /> <span>{t('sidebar.contracts')}</span></Link></li>
+          <li><Link to="/messages" className={location.pathname === "/messages" ? "active" : ""}><FaEnvelope /> <span className="badge-wrap">{t('sidebar.messages')} {hasMessagingUnread ? <em className="notif-dot" aria-hidden /> : null}</span></Link></li>
 
         </ul>
       </nav>

@@ -31,16 +31,16 @@ export interface TenantReportAttributes {
 export type TenantReportCreationAttributes = Optional<TenantReportAttributes, 'id' | 'status' | 'created_at' | 'updated_at'>;
 
 export class TenantReport extends Model<TenantReportAttributes, TenantReportCreationAttributes> implements TenantReportAttributes {
-    public id!: string;
-    public contract_id!: string;
-    public reporter_id!: string;
-    public tenant_id!: string;
-    public reason!: TenantReportReason;
-    public details!: string;
-    public status!: TenantReportStatus;
+    declare id: string;
+    declare contract_id: string;
+    declare reporter_id: string;
+    declare tenant_id: string;
+    declare reason: TenantReportReason;
+    declare details: string;
+    declare status: TenantReportStatus;
 
-    public readonly created_at!: Date;
-    public readonly updated_at!: Date;
+    declare created_at: Date;
+    declare updated_at: Date;
 }
 
 TenantReport.init(

@@ -9,6 +9,9 @@ import { Amenity } from '../../properties/models/Amenity.js';
 import { HouseRule } from '../../properties/models/HouseRule.js';
 import { PropertyReport, PropertyReportStatus } from '../../properties/models/PropertyReport.js';
 import { Contract, ContractStatus } from '../../contracts/models/Contract.js';
+import { TenantReport, TenantReportStatus } from '../../contracts/models/TenantReport.js';
+import { emailService } from '../../../shared/services/email.service.js';
+import { Notification } from '../../notifications/models/Notification.js';
 import { Profile } from '../../auth/models/Profile.js';
 import { ActivityLog } from '../models/ActivityLog.js';
 import type {
@@ -1074,6 +1077,108 @@ class AdminService {
                     name: p.landlord.profile ? `${p.landlord.profile.first_name} ${p.landlord.profile.last_name}`.trim() : 'N/A',
                 } : null,
             };
+        });
+    }
+
+    async getTenantReports(): Promise<any[]> {
+        const { PropertyImage } = await import('../../properties/models/PropertyImage.js');
+
+        const reports = await TenantReport.findAll({
+            include: [
+                {
+                    model: Contract,
+                    as: 'contract',
+                    include: [
+                        {
+                            model: Property,
+                            as: 'property',
+                            attributes: ['id', 'title', 'address', 'monthly_price', 'type', 'status', 'furnishing', 'description', 'target_tenant', 'created_at'],
+                            include: [
+                                {
+                                    model: PropertyImage,
+                                    as: 'images',
+                                    attributes: [
+                                        'id',
+                                        'is_main',
+                                        [
+                                            Sequelize.literal(`CASE WHEN "contract->property->images"."image_url" LIKE 'data:image%' THEN '/api/properties/images/' || "contract->property->images"."id" ELSE "contract->property->images"."image_url" END`),
+                                            'image_url'
+                                        ]
+                                    ],
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    model: User,
+                    as: 'reporter',
+                    attributes: ['id', 'email'],
+                    include: [{ model: Profile, as: 'profile', attributes: ['first_name', 'last_name', 'avatar_url', 'phone_number', 'bio'] }],
+                },
+                {
+                    model: User,
+                    as: 'reportedTenant',
+                    attributes: ['id', 'email'],
+                    include: [{ model: Profile, as: 'profile', attributes: ['first_name', 'last_name', 'avatar_url', 'phone_number', 'bio'] }],
+                }
+            ],
+            order: [['created_at', 'DESC']]
+        });
+        return reports;
+    }
+
+    async warnTenantFromReport(reportId: string, adminId: string, messageText: string): Promise<void> {
+        const report = await TenantReport.findByPk(reportId, {
+            include: [{ model: User, as: 'reportedTenant' }]
+        });
+        if (!report) throw new AdminError('Report not found', 404);
+        
+        const tenant = (report as any).reportedTenant as User;
+        
+        await Notification.create({
+            user_id: tenant.id,
+            title: 'Account Warning',
+            body: `You have received an official warning regarding a tenancy report. Admin message: ${messageText}`,
+            type: 'SYSTEM',
+            is_read: false,
+        } as any);
+
+        await emailService.sendTenantWarningEmail(tenant.email, messageText);
+        await report.update({ status: TenantReportStatus.ACTIONED });
+
+        await activityLogService.log({
+            actor: { userId: adminId, role: 'ADMIN' },
+            action: 'TENANT_WARNED',
+            entityType: 'USER',
+            entityId: tenant.id,
+            description: `Admin sent warning to tenant ${tenant.email} for report ${reportId}.`,
+        });
+    }
+
+    async banTenantFromReport(reportId: string, adminId: string, reason: string): Promise<void> {
+        const report = await TenantReport.findByPk(reportId, {
+            include: [{ model: User, as: 'reportedTenant' }]
+        });
+        if (!report) throw new AdminError('Report not found', 404);
+
+        const tenant = (report as any).reportedTenant as User;
+
+        await this.banUserForAdmin(tenant.id, adminId, {
+            banUntil: null,
+            reason: 'Tenancy Violation',
+            message: reason
+        });
+
+        await emailService.sendTenantBanEmail(tenant.email, reason);
+        await report.update({ status: TenantReportStatus.ACTIONED });
+
+        await activityLogService.log({
+            actor: { userId: adminId, role: 'ADMIN' },
+            action: 'TENANT_BANNED',
+            entityType: 'USER',
+            entityId: tenant.id,
+            description: `Admin banned tenant ${tenant.email} based on report ${reportId}.`,
         });
     }
 }

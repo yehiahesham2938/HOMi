@@ -75,7 +75,8 @@ const ManagePropertyModal: React.FC<ManagePropertyModalProps> = ({ property, onC
   const initialStatus = useMemo(() => normalizeUiStatus(property.status), [property.status]);
   const isPendingApproval = initialStatus === 'pending_approval';
   const isRejected = initialStatus === 'rejected';
-  const isLocked = isPendingApproval || isRejected;
+  const isRented = initialStatus === 'rented';
+  const isLocked = isPendingApproval || isRejected || isRented;
 
   const initialState = useMemo(() => ({
     name: property.name || '',
@@ -294,7 +295,9 @@ const ManagePropertyModal: React.FC<ManagePropertyModalProps> = ({ property, onC
                 <p style={{ marginTop: 8, color: '#b91c1c', fontWeight: 700 }}>
                   {isPendingApproval
                     ? t('myProperties.lockedPendingApproval')
-                    : t('myProperties.lockedRejected')}
+                    : isRejected
+                      ? t('myProperties.lockedRejected')
+                      : 'Property is rented and cannot be edited.'}
                 </p>
               )}
             </div>
@@ -338,6 +341,9 @@ const ManagePropertyModal: React.FC<ManagePropertyModalProps> = ({ property, onC
                       >
                         <option value="draft">{t('myProperties.status.draft')}</option>
                         <option value="available">{t('myProperties.status.available')}</option>
+                        {formData.status === 'rented' && <option value="rented">Rented</option>}
+                        {formData.status === 'pending_approval' && <option value="pending_approval">Pending Approval</option>}
+                        {formData.status === 'rejected' && <option value="rejected">Rejected</option>}
                       </select>
                     </div>
                     <div className="manage-field">
@@ -427,7 +433,7 @@ const ManagePropertyModal: React.FC<ManagePropertyModalProps> = ({ property, onC
                     <h4 className="section-subtitle">{t('myProperties.labels.coreAmenities')}</h4>
                     <div className="selection-grid">
                         {amenitiesOptions.map(perk => (
-                          <label key={perk} className="selection-card">
+                          <label key={perk} className={`selection-card ${isLocked ? 'locked' : ''}`}>
                             <input
                               type="checkbox"
                               checked={isSelected(formData.amenities || [], perk)}
@@ -445,7 +451,7 @@ const ManagePropertyModal: React.FC<ManagePropertyModalProps> = ({ property, onC
                     <h4 className="section-subtitle">{t('myProperties.labels.houseRules')}</h4>
                     <div className="selection-grid">
                         {rulesOptions.map(rule => (
-                          <label key={rule} className="selection-card">
+                          <label key={rule} className={`selection-card ${isLocked ? 'locked' : ''}`}>
                             <input
                               type="checkbox"
                               checked={isSelected(formData.houseRules || [], rule)}
@@ -474,19 +480,26 @@ const ManagePropertyModal: React.FC<ManagePropertyModalProps> = ({ property, onC
                         property.images.map((img: any, idx: number) => (
                            <div className="media-card" key={img.id || idx}>
                              <img src={img.image_url || img.imageUrl} alt="Property" />
-                             <div className="remove-overlay"><FaTrashAlt /></div>
+                             {!isLocked && <div className="remove-overlay"><FaTrashAlt /></div>}
                            </div>
                         ))
+                      ) : property.imageUrl ? (
+                        <div className="media-card">
+                           <img src={property.imageUrl} alt="Property" />
+                           {!isLocked && <div className="remove-overlay"><FaTrashAlt /></div>}
+                        </div>
                       ) : (
                         <div className="media-card">
                            <img src="/rentblue.jpg" alt="Property" />
-                           <div className="remove-overlay"><FaTrashAlt /></div>
+                           {!isLocked && <div className="remove-overlay"><FaTrashAlt /></div>}
                         </div>
                       )}
-                      <div className="add-media-btn">
-                        <FaImages size={24} />
-                        <span>{t('myProperties.labels.uploadNew')}</span>
-                      </div>
+                      {!isLocked && (
+                        <div className="add-media-btn">
+                          <FaImages size={24} />
+                          <span>{t('myProperties.labels.uploadNew')}</span>
+                        </div>
+                      )}
                    </div>
                 </div>
               </div>

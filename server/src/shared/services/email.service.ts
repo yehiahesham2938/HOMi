@@ -321,22 +321,24 @@ class EmailService {
     /**
      * Send email verification email
      */
-    async sendVerificationEmail(email: string, token: string): Promise<boolean> {
-        const verificationUrl = `${env.CLIENT_URL}/verify-email?token=${encodeURIComponent(token)}`;
-
-        console.log('📧 [EMAIL SERVICE] Verification link:', verificationUrl);
+    async sendVerificationEmail(email: string, otp: string): Promise<boolean> {
+        console.log('📧 [EMAIL SERVICE] Verification OTP:', otp);
 
         return this.sendEmail(email, 'Verify Your Email - HOMi', {
             title: 'Welcome to HOMi! 🏠',
             message: `
                 Thank you for joining HOMi! We're excited to have you on board.
                 <br><br>
-                To complete your registration and unlock all features, please verify your email address by clicking the button below.
+                To complete your registration and unlock all features, please use the following 6-digit OTP to verify your email address.
                 <br><br>
-                This verification link will expire in <strong>24 hours</strong>.
+                <div style="font-size: 32px; font-weight: bold; letter-spacing: 5px; text-align: center; margin: 20px 0; color: #4F46E5;">
+                    ${otp}
+                </div>
+                <br>
+                This verification OTP will expire in <strong>10 minutes</strong>.
             `,
             buttonText: 'Verify My Email',
-            buttonUrl: verificationUrl,
+            buttonUrl: `${env.CLIENT_URL}/verify-email`,
             footer: "If you didn't create an account with HOMi, you can safely ignore this email.",
         });
     }
@@ -387,6 +389,44 @@ class EmailService {
             `,
             buttonText: 'Get Started',
             buttonUrl: env.CLIENT_URL,
+        });
+    }
+
+    /**
+     * Send Tenant Warning Email
+     */
+    async sendTenantWarningEmail(email: string, messageText: string): Promise<boolean> {
+        return this.sendEmail(email, 'Important: Account Warning from Administration', {
+            title: 'Account Warning',
+            message: `
+                We have received a report regarding your tenancy and have issued an official warning.
+                <br><br>
+                <strong>Admin Message:</strong><br>
+                ${messageText}
+                <br><br>
+                Please ensure you adhere to the platform rules and your lease agreement. Repeated violations may result in account suspension.
+            `,
+            buttonText: 'Login to HOMi',
+            buttonUrl: env.CLIENT_URL,
+        });
+    }
+
+    /**
+     * Send Tenant Ban Email
+     */
+    async sendTenantBanEmail(email: string, reason: string): Promise<boolean> {
+        return this.sendEmail(email, 'Account Suspended', {
+            title: 'Account Suspended',
+            message: `
+                Your account on HOMi has been suspended due to violations of our policies or lease agreements.
+                <br><br>
+                <strong>Reason:</strong><br>
+                ${reason}
+                <br><br>
+                If you believe this was in error, please contact our support team immediately.
+            `,
+            buttonText: 'Contact Support',
+            buttonUrl: `${env.CLIENT_URL}/get-help`,
         });
     }
 }

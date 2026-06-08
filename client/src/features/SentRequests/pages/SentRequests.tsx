@@ -6,6 +6,7 @@ import Header from '../../../components/global/header';
 import Sidebar from '../../../components/global/Tenant/sidebar';
 import Footer from '../../../components/global/footer';
 import { rentalRequestService, type MyRentalRequest, type RentalRequestStatus } from '../../../services/rental-request.service';
+import Loader from '../../../components/global/Loader';
 import './SentRequests.css';
 
 const STATUS_CONFIG: Record<RentalRequestStatus, {
@@ -150,12 +151,9 @@ const SentRequests: React.FC = () => {
                         ))}
                     </div>
 
-                    {/* ── Loading ── */}
+                    {/* 🔹 Loading 🔹 */}
                     {loading && (
-                        <div className="sent-loading">
-                            <div className="sent-spinner" />
-                            <p>Loading your requests…</p>
-                        </div>
+                        <Loader text="Loading your requests..." />
                     )}
 
                     {/* ── Error ── */}

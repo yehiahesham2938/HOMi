@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import Header from '../../../components/global/header';
-import Sidebar from '../../../components/global/Landlord/sidebar';
-import Footer from '../../../components/global/footer';
+
 import PropertyCard from '../components/LandlordHomeComponents/PropertyCard';
 import AddPropertyCard from '../components/LandlordHomeComponents/AddPropertyCard';
 import Notifications from '../components/LandlordHomeComponents/Notifications';
@@ -12,6 +10,7 @@ import OptimizeListingModal from '../components/LandlordHomeComponents/optimizeL
 import { FiPlus, FiHome, FiCamera, FiBookOpen, FiCreditCard, FiStar, FiZap, FiMessageSquare } from 'react-icons/fi';
 import authService from '../../../services/auth.service';
 import propertyService from '../../../services/property.service';
+import Loader from '../../../components/global/Loader';
 import type { PropertyResponse } from '../../../services/property.service';
 import contractService, { type LandlordContract } from '../../../services/contract.service';
 import './LandlordHome.css';
@@ -100,22 +99,15 @@ const LandlordHome = () => {
       tenantName,
       paymentStatus: computedStatus === 'rented' ? 'Paid' : 'Pending',
       activeContract,
-      securityDeposit: prop.securityDeposit,
+      images: prop.images,
     };
   });
 
   return (
     <>
-      <div className="landlord-layout">
-        <Sidebar />
-        <div className="main-content">
-          <Header />
-
           <main className="dashboard-container">
             {isLoading ? (
-              <div className="loading-state" style={{ textAlign: 'center', padding: '2rem' }}>
-                {t('landlordHome.loadingHomePage')}
-              </div>
+              <Loader text={t('landlordHome.loadingHomePage')} />
             ) : hasData ? (
               /* =========================================
                  PREMIUM POPULATED STATE (Dashboard)
@@ -178,6 +170,7 @@ const LandlordHome = () => {
                         paymentStatus={prop.paymentStatus}
                         activeContract={prop.activeContract}
                         securityDeposit={prop.securityDeposit}
+                        images={prop.images}
                       />
                     ))}
                   </div>
@@ -293,19 +286,11 @@ const LandlordHome = () => {
                         </li>
                       </ul>
                     </div>
-
                   </aside>
                 </div>
               </div>
             )}
           </main>
-          <Footer />
-        </div>
-      </div>
-
-      {/* ==================================================
-          MODALS WRAPPED OUTSIDE THE MAIN LAYOUT CONTAINER 
-          ================================================== */}
 
       {isOptimizeModalOpen && (
         <OptimizeListingModal onClose={() => setIsOptimizeModalOpen(false)} />

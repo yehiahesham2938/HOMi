@@ -447,30 +447,27 @@ class AuthService {
     }
 
     /**
-     * Verify email with token
+     * Verify email with OTP
      */
-    async verifyEmail(token: string): Promise<EmailVerificationResponse> {
-        const t = typeof token === 'string' ? token.trim() : String(token).trim();
-        if (!t) {
-            return Promise.reject(new Error('Verification token is required'));
+    async verifyEmail(otp: string): Promise<EmailVerificationResponse> {
+        const o = typeof otp === 'string' ? otp.trim() : String(otp).trim();
+        if (!o) {
+            return Promise.reject(new Error('OTP is required'));
         }
 
-        const existing = verifyEmailInFlight.get(t);
+        const existing = verifyEmailInFlight.get(o);
         if (existing) {
             return existing;
         }
 
         const request = apiClient
-            .get<EmailVerificationResponse>('/auth/verify-email', {
-                params: { token: t },
-                headers: { Accept: 'application/json' },
-            })
+            .post<EmailVerificationResponse>('/auth/verify-email', { otp: o })
             .then((response) => response.data)
             .finally(() => {
-                verifyEmailInFlight.delete(t);
+                verifyEmailInFlight.delete(o);
             });
 
-        verifyEmailInFlight.set(t, request);
+        verifyEmailInFlight.set(o, request);
         return request;
     }
 

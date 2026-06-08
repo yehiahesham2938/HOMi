@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import Header from '../../../components/global/header';
-import Sidebar from '../../../components/global/Landlord/sidebar';
-import Footer from '../../../components/global/footer';
 import DetailedPropertyCard from '../components/DetailedPropertyCard';
-import { FiPlus, FiHome } from 'react-icons/fi'; // Icons for the button
+import { FiPlus, FiHome } from 'react-icons/fi';
 import propertyService from '../../../services/property.service';
 import authService from '../../../services/auth.service';
+import Loader from '../../../components/global/Loader';
 import './MyProperties.css';
 import type { LandlordPropertyRow } from '../components/DetailedPropertyCard';
 
@@ -98,25 +96,13 @@ const MyProperties = () => {
   const hasData = properties.length > 0;
 
   if (loading) {
-     return (
-       <div className="landlord-layout">
-         <Sidebar />
-         <div className="main-content">
-           <Header />
-           <main className="my-properties-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-             <p>{t('myProperties.loadingProperties')}</p>
-           </main>
-           <Footer />
-         </div>
-       </div>
-     );
+    return (
+      <Loader text={t('myProperties.loading')} />
+    );
   }
 
   return (
-    <div className="landlord-layout" dir="ltr">
-      <Sidebar />
-      <div className="main-content">
-        <Header />
+    <>
         <main className="my-properties-container">
           
           <div className="my-props-header">
@@ -158,9 +144,7 @@ const MyProperties = () => {
           )}
 
         </main>
-        <Footer />
-      </div>
-    </div>
+    </>
   );
 };
 

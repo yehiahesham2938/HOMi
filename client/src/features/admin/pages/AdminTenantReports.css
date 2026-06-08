@@ -1,0 +1,666 @@
+.tenant-reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+.tenant-report-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tenant-report-card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+
+.tenant-report-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+}
+
+.tenant-report-head small {
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.tenant-report-head h3 {
+    margin: 0.25rem 0 0;
+    font-size: 1.05rem;
+    color: var(--text-primary);
+}
+
+
+
+.tenant-report-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.clickable-box {
+    background: var(--bg-main);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.clickable-box:hover {
+    border-color: var(--primary-color);
+    background: rgba(14, 165, 233, 0.03);
+}
+
+.ext-icon {
+    position: absolute;
+    top: 0.8rem;
+    right: 0.8rem;
+    color: var(--text-secondary);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.clickable-box:hover .ext-icon {
+    opacity: 1;
+}
+
+.tenant-report-property img {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.prop-details strong {
+    display: block;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    margin-bottom: 0.1rem;
+}
+
+.prop-details p {
+    margin: 0 0 0.2rem 0;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.prop-details span {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.tenant-report-users {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+}
+
+.tenant-user-box {
+    padding: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+}
+
+.tenant-user-box.is-tenant {
+    border-left: 3px solid var(--error-color);
+}
+
+.tenant-user-box small {
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.tenant-user-box p {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    word-break: break-all;
+}
+
+.avatar-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    color: var(--text-secondary);
+}
+
+.avatar-circle.sm {
+    width: 44px;
+    height: 44px;
+}
+
+.avatar-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.tenant-report-reason {
+    background: rgba(255, 60, 60, 0.05);
+    padding: 1rem;
+    border-radius: 10px;
+    border-left: 3px solid var(--error-color);
+    margin-top: 0.5rem;
+}
+
+.tenant-report-reason strong {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: var(--error-color);
+    margin-bottom: 0.5rem;
+}
+
+.report-details-text {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.tenant-report-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.tenant-report-actions button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.7rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.warn-btn {
+    background: rgba(255, 152, 0, 0.1);
+    color: #f57c00;
+}
+
+.warn-btn:hover {
+    background: rgba(255, 152, 0, 0.2);
+}
+
+.danger-btn {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--error-color);
+}
+
+.danger-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+.cancel-btn {
+    background: var(--bg-main);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color) !important;
+}
+
+.cancel-btn:hover {
+    background: var(--border-color);
+}
+
+
+/* Modal Overrides for specific pages */
+.tenant-report-action-modal {
+    background: #ffffff; /* Forced white to fix transparent issue */
+    padding: 2rem;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 550px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.modal-header-flex h2, .modal-header-flex h3 {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.close-btn:hover {
+    background: rgba(0,0,0,0.05);
+    color: var(--text-primary);
+}
+
+.action-target-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg-main);
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.action-target-info strong {
+    display: block;
+    font-size: 1.05rem;
+    color: var(--text-primary);
+}
+
+.action-target-info p {
+    margin: 0.2rem 0 0 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.row-group {
+    flex-direction: row;
+    gap: 1rem;
+}
+
+.row-group .col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.form-group textarea, .form-group select, .form-group input {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-main);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.95rem;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.form-group textarea:focus, .form-group select:focus, .form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.tenant-report-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.tenant-report-modal-actions button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+/* User Inspect Modal */
+.inspect-user-modal {
+    background: #ffffff; /* Forced white */
+    padding: 2rem;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+.inspect-user-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.inspect-avatar-large {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    border: 4px solid var(--bg-main);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.inspect-avatar-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+}
+
+.inspect-info h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+}
+
+.inspect-email {
+    margin: 0 0 0.5rem;
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.inspect-id {
+    display: inline-block;
+    background: var(--bg-main);
+    padding: 0.3rem 0.8rem;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-family: monospace;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.inspect-meta {
+    width: 100%;
+    text-align: left;
+    background: var(--bg-main);
+    padding: 1.25rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.inspect-meta p {
+    margin: 0 0 0.8rem;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.inspect-meta p:last-child {
+    margin: 0;
+}
+
+.inspect-meta strong {
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+/* Property Inspect Modal */
+.inspect-property-modal {
+    background: #ffffff; /* Forced white */
+    padding: 2rem;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.prop-modal-cover {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.prop-modal-info h2 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+}
+
+.prop-modal-address {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin: 0 0 1.5rem 0;
+}
+
+.prop-modal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.pm-stat {
+    background: var(--bg-main, #f8fafc);
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.pm-stat small {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.pm-stat strong {
+    color: var(--text-primary);
+    font-size: 1.05rem;
+}
+
+.prop-modal-desc {
+    background: var(--bg-main, #f8fafc);
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+}
+
+.prop-modal-desc small {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.prop-modal-desc p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+}
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(8px);
+    display: grid;
+    place-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+/* Admin Toolbar (Tabs & Filters) */
+.admin-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: var(--bg-main, #f8fafc);
+    border-bottom: 1px solid var(--border-color);
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.toolbar-tabs {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.toolbar-tabs button {
+    background: transparent;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.toolbar-tabs button:hover {
+    color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.toolbar-tabs button.active {
+    background: var(--primary-color, #2563eb);
+    color: white;
+}
+
+.toolbar-actions {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-box input {
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    min-width: 250px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    background: #ffffff;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: var(--primary-color, #2563eb);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.toolbar-actions select {
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    background: #ffffff;
+    cursor: pointer;
+}
+
+.toolbar-actions select:focus {
+    outline: none;
+    border-color: var(--primary-color, #2563eb);
+}
+
+/* Status Badges */
+.report-status-badge {
+    padding: 0.4rem 1rem;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+.status-open {
+    background: rgba(245, 158, 11, 0.15);
+    color: #d97706;
+}
+
+.status-reviewed {
+    background: rgba(59, 130, 246, 0.15);
+    color: #2563eb;
+}
+
+.status-actioned {
+    background: rgba(16, 185, 129, 0.15);
+    color: #059669;
+}
+
+.status-dismissed {
+    background: rgba(100, 116, 139, 0.15);
+    color: #475569;
+}

@@ -1,20 +1,18 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import Header from '../../../components/global/header';
-import Sidebar from '../../../components/global/Landlord/sidebar';
-import Footer from '../../../components/global/footer';
 import RequestCard from '../components/RequestCard';
 import StatsOverview from '../components/StatsOverview';
 import FilterTabs from '../components/FilterTabs';
 import { FaInbox } from 'react-icons/fa'; // Added for the empty state
-import rentalRequestService from '../../../services/rental-request.service';
-import type { LandlordRentalRequest } from '../../../services/rental-request.service';
+import rentalRequestService, { type LandlordRentalRequest } from '../../../services/rental-request.service';
+import Loader from '../../../components/global/Loader';
 import './RentalRequests.css';
 
 const RentalRequests: React.FC = () => {
     const { t, i18n } = useTranslation();
     const [activeTab, setActiveTab] = useState('pending');
     const [requests, setRequests] = useState<LandlordRentalRequest[]>([]);
+    const [loading, setLoading] = useState(true);
 
     const formatDate = (date?: string) => {
         if (!date) return t('rentalRequests.flexible', { defaultValue: 'Flexible' });
@@ -24,10 +22,13 @@ const RentalRequests: React.FC = () => {
 
     const refreshRequests = useCallback(async () => {
         try {
+            setLoading(true);
             const response = await rentalRequestService.getLandlordRequests();
             setRequests(response.data || []);
         } catch {
             setRequests([]);
+        } finally {
+            setLoading(false);
         }
     }, []);
 
@@ -92,11 +93,8 @@ const RentalRequests: React.FC = () => {
     }, [activeTab, mappedRequests]);
 
     return (
-        <div className="layout-wrapper" dir="ltr">
-            <Sidebar />
-            <div className="main-content">
-                <Header />
-                <main className="rental-requests-page">
+        <>
+            <main className="rental-requests-page">
                     <header className="page-intro">
                         <div className="intro-text">
                             <h1>{t('rentalRequests.requests')}</h1>
@@ -108,7 +106,9 @@ const RentalRequests: React.FC = () => {
                     <FilterTabs activeTab={activeTab} setActiveTab={setActiveTab} counts={tabCounts} />
 
                     {/* Conditional Rendering for Empty State vs Grid */}
-                    {currentRequests.length > 0 ? (
+                    {loading ? (
+                        <Loader text="Loading requests..." />
+                    ) : currentRequests.length > 0 ? (
                         <div className="rental-requests-grid">
                             {currentRequests.map(req => (
                                 <RequestCard key={req.id} data={req} onStatusChange={refreshRequests} />
@@ -124,10 +124,8 @@ const RentalRequests: React.FC = () => {
                         </div>
                     )}
 
-                </main>
-                <Footer />
-            </div>
-        </div>
+            </main>
+        </>
     );
 };
 

@@ -1,7 +1,4 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import Header from '../../../../components/global/header';
-import Footer from '../../../../components/global/footer';
-import Sidebar from '../../../../components/global/Landlord/sidebar';
 import LiveTrackingModal from '../components/LiveTrackingModal';
 import './LandlordMaintenance.css';
 import {
@@ -12,6 +9,7 @@ import maintenanceService, {
     type MaintenanceRequest,
 } from '../../../../services/maintenance.service';
 import socketService from '../../../../services/socket.service';
+import Loader from '../../../../components/global/Loader';
 
 function statusBadge(status: MaintenanceRequest['status']) {
     switch (status) {
@@ -75,13 +73,8 @@ const LandlordMaintenance: React.FC = () => {
     }, [requests]);
 
     return (
-        <div className="landlord-maintenance-hub-wrapper">
-            <div className="landlord-maintenance-layout">
-                <Sidebar />
-                <div className="landlord-maintenance-content">
-                    <Header />
-
-                    <main className="maintenance-main-container">
+        <>
+            <main className="maintenance-main-container">
                         <header className="maintenance-hero">
                             <div className="hero-glass-mesh"></div>
                             <div className="hero-text">
@@ -142,7 +135,7 @@ const LandlordMaintenance: React.FC = () => {
                             </div>
 
                             {loading ? (
-                                <div className="empty-state-container"><h3>Loading…</h3></div>
+                                <Loader text="Loading maintenance data..." />
                             ) : requests.length === 0 ? (
                                 <div className="empty-state-container">
                                     <div className="empty-state-icon-box"><FaTools /></div>
@@ -353,10 +346,7 @@ const LandlordMaintenance: React.FC = () => {
                         />
                     )}
 
-                    <Footer />
-                </div>
-            </div>
-        </div>
+        </>
     );
 };
 

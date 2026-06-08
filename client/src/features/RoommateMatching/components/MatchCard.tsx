@@ -1,96 +1,66 @@
 import React from 'react';
-import type { RoommateMatch } from '../types/roommateMatchingTypes';
-import { MapPin, Check, Zap, User, ShieldCheck } from 'lucide-react';
-import '../pages/RoommateMatching.css';
+import { MapPin, CheckCircle2, Search, MessageSquare, Check, UserPlus, Sparkles } from 'lucide-react';
+import Avatar from './Avatar';
+import Ring from './Ring';
+import { HabitBars, HabitTags } from './HabitDisplays';
+import type { SmartCandidate, WishMatch, LifestyleHabits, ConnStatus } from '../types/roommateMatchingTypes';
 
 interface MatchCardProps {
-    match: RoommateMatch;
-    currentUserId: string;
-    onAccept: (id: string) => void;
-    onDecline: (id: string) => void;
+    cand: SmartCandidate | WishMatch;
+    youHabits: LifestyleHabits;
+    conn: ConnStatus;
+    onConnect: (cand: SmartCandidate | WishMatch) => void;
+    onView: (cand: SmartCandidate | WishMatch) => void;
+    wish?: boolean;
 }
 
-const MatchCard: React.FC<MatchCardProps> = ({ match, currentUserId, onAccept, onDecline }) => {
-    const isAccepted = match.status === 'ACCEPTED';
-    const otherUser = match.requester_id === currentUserId ? match.matchedUser : match.requester;
-    const otherRequest = match.requester_id === currentUserId ? match.matchedRequest : match.request;
-    const locationCity = otherRequest?.preferred_city || 'Cairo';
-    const locationArea = otherRequest?.preferred_area || '';
-    const displayLocation = locationArea ? `${locationArea}, ${locationCity}` : locationCity;
-    const compatibility = Math.round(match.compatibility_score);
-    const currentUserAction = match.requester_id === currentUserId ? match.requester_action : match.matched_user_action;
-
-    const scoreClass = compatibility >= 80 ? 'rm-score-high' : compatibility >= 60 ? 'rm-score-mid' : 'rm-score-low';
+const MatchCard: React.FC<MatchCardProps> = ({ cand, youHabits, conn, onConnect, onView, wish = false }) => {
+    const sent = conn === 'sent';
+    const mutual = conn === 'mutual';
+    const wishReason = (cand as WishMatch).reason;
 
     return (
-        <div className="rm-card">
-            {/* Gradient Header */}
-            <div className="rm-card-header">
-                <div className={`rm-score-badge ${scoreClass}`}>
-                    <Zap size={14} fill="currentColor" />
-                    {compatibility}% Match
+        <div className={'mcard' + (wish ? ' wishful' : '')}>
+            <div className="mcard-top">
+                <Avatar name={cand.name} avatar={cand.avatar} size={62} radius={16} className="mc-ava" />
+                <div className="mc-id">
+                    <h3>
+                        {cand.name}
+                        {cand.verified && <span className="vf" title="Verified"><CheckCircle2 size={15} /></span>}
+                    </h3>
+                    <div className="mc-meta">
+                        {cand.area && <span className="mp"><MapPin size={13} color="#197cf8" />{cand.area}</span>}
+                        {cand.age != null && <><span>·</span><span>{cand.age}</span></>}
+                    </div>
                 </div>
-                {match.status === 'PENDING' && (
-                    <span className="rm-new-pill">New</span>
-                )}
+                <Ring pct={cand.score} />
             </div>
-
-            {/* Body */}
-            <div className="rm-card-body">
-                {/* Avatar */}
-                <div className="rm-avatar-wrap">
-                    <div className="rm-avatar">
-                        {otherUser?.profile?.avatar_url ? (
-                            <img src={otherUser.profile.avatar_url} alt="Profile" />
-                        ) : (
-                            <User size={32} color="#cbd5e1" />
-                        )}
+            <div className="mc-body">
+                {wish && wishReason ? (
+                    <div className="mc-reason">
+                        <div className="lab"><Sparkles size={13} />Why HOMI Wish picked them</div>
+                        <p>{wishReason}</p>
                     </div>
-                </div>
-
-                {/* Name */}
-                <div className="rm-card-name">
-                    <h3>{otherUser?.profile?.first_name || 'HOMi User'}</h3>
-                    <div className="rm-card-location">
-                        <MapPin size={13} /> {displayLocation}
-                    </div>
-                </div>
-
-                {/* Reason */}
-                <div className="rm-card-reason">
-                    <div className="label">Why you'll match</div>
-                    <div className="text">
-                        "{match.ai_explanation || 'Compatible habits and lifestyle preferences.'}"
-                    </div>
-                </div>
-
-                {/* Actions */}
-                <div className="rm-card-actions">
-                    {match.status === 'PENDING' && currentUserAction === 'NONE' ? (
-                        <>
-                            <button className="rm-btn-skip" onClick={() => onDecline(match.id)}>
-                                Skip
-                            </button>
-                            <button className="rm-btn-connect" onClick={() => onAccept(match.id)}>
-                                <Check size={18} /> Connect
-                            </button>
-                        </>
-                    ) : match.status === 'PENDING' && currentUserAction === 'ACCEPTED' ? (
-                        <div className="rm-status-result" style={{ background: '#f1f5f9', color: '#64748b' }}>
-                            Waiting for response...
-                        </div>
+                ) : (
+                    <HabitBars top={cand.top} />
+                )}
+                <HabitTags habits={cand.habits} youHabits={youHabits} max={4} />
+                <div className="mc-act">
+                    <button className="mc-skip" title="View profile" onClick={() => onView(cand)}><Search size={17} /></button>
+                    {mutual ? (
+                        <button className="mc-sent mc-chat"><MessageSquare size={15} />Message</button>
+                    ) : sent ? (
+                        <button className="mc-sent"><Check size={15} />Request sent</button>
                     ) : (
-                        <div className={`rm-status-result ${isAccepted ? 'rm-status-accepted' : 'rm-status-declined'}`}>
-                            {isAccepted ? (
-                                <><ShieldCheck size={18} /> Mutual Match!</>
-                            ) : (
-                                'Declined'
-                            )}
-                        </div>
+                        <button className={'btn ' + (wish ? 'btn-wish' : 'btn-primary')} onClick={() => onConnect(cand)}>
+                            <UserPlus size={16} />Connect
+                        </button>
                     )}
                 </div>
-                {isAccepted && (
-                    <p className="rm-mutual-hint">Check your messages to connect</p>
+                {mutual && (
+                    <div style={{ textAlign: 'center', fontSize: 11.5, color: '#059669', fontWeight: 600, marginTop: -4 }}>
+                        <Check size={12} /> You matched — say hi!
+                    </div>
                 )}
             </div>
         </div>

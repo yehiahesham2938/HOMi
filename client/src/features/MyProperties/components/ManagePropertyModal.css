@@ -576,3 +576,23 @@ input:checked + .toggle-slider:before {
     100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
 }
 
+
+/* Fix for disabled elements looking editable on hover */
+.manage-field.has-error .m-input:disabled,
+.manage-field.has-error .m-textarea:disabled,
+.price-input-wrapper.has-error input:disabled,
+.m-input:disabled, 
+.m-select:disabled, 
+.m-textarea:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+    cursor: not-allowed !important;
+    pointer-events: none;
+}
+
+.selection-card.locked:hover,
+.selection-card.locked * {
+    cursor: not-allowed !important;
+    pointer-events: none;
+}

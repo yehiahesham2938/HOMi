@@ -365,6 +365,7 @@
   background: var(--blue-light);
   padding: 0.3rem 0.9rem;
   border-radius: 50px;
+  margin-top: -15px;
 }
 
 .section-title {
@@ -376,6 +377,7 @@
   color: var(--gray-900);
   margin-bottom: 1rem;
   margin-left: 00px;
+
 }
 
 .section-desc {
@@ -387,8 +389,10 @@
 }
 
 .guest-section-header {
-  text-align: center;
+  text-align: left;
   padding: 5rem 5% 3rem;
+  height: 50px;
+  margin-top: -30px;
 }
 
 /* ── REVEAL ── */
@@ -1512,6 +1516,7 @@
 .steps-section {
   background: #ffffff;
   padding: 0 0 6rem;
+  margin-top: -33px;
 }
 
 .steps-tabs-bar {

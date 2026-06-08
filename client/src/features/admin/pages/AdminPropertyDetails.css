@@ -1,0 +1,352 @@
+/* Admin Property Details Styles */
+
+.properties-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+.properties-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.properties-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    color: #64748b;
+    text-align: center;
+    gap: 0.75rem;
+}
+
+.properties-empty h4 {
+    font-size: 1.125rem;
+    color: #1e293b;
+    margin: 0;
+}
+
+.properties-empty p {
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.properties-grid-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.property-item-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.property-item-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+}
+
+.card-thumb {
+    position: relative;
+    height: 180px;
+    background: #cbd5e1;
+}
+
+.card-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.status-badge {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.status-available {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+}
+
+.status-rented {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+}
+
+.status-pending-app {
+    background: #fffbeb;
+    color: #d97706;
+    border: 1px solid #fde68a;
+}
+
+.status-rejected {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.status-draft {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+
+.card-details {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex-grow: 1;
+}
+
+.card-details h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-details .address {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: #64748b;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.price-type {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.price-type .price {
+    font-size: 1.05rem;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.type-tag {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 0.125rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.landlord-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: #475569;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 0.75rem;
+}
+
+.landlord-info .icon {
+    color: #94a3b8;
+}
+
+.detail-action-btn {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    transition: all 0.2s;
+    margin-top: auto;
+}
+
+.detail-action-btn:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+/* Modal inspector styling */
+.property-inspect-modal {
+    max-width: 600px;
+    width: 90%;
+    animation: zoomIn 0.25s ease-out;
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.inspect-modal-body {
+    display: flex;
+    flex-direction: column;
+    max-height: 75vh;
+    overflow-y: auto;
+}
+
+.modal-preview-section {
+    width: 100%;
+    height: 240px;
+    background: #e2e8f0;
+}
+
+.inspect-preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.inspect-details-section {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.inspect-details-section h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #0f172a;
+}
+
+.inspect-address {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-top: -0.75rem;
+}
+
+.inspect-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.meta-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.meta-box .icon {
+    font-size: 1.25rem;
+    color: #2b7fff;
+}
+
+.meta-box div {
+    display: flex;
+    flex-direction: column;
+}
+
+.meta-box div span {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.meta-box div strong {
+    font-size: 0.95rem;
+    color: #0f172a;
+}
+
+.inspect-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.inspect-section h4 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #475569;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 0.375rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.landlord-card-detail {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.landlord-card-detail strong {
+    font-size: 0.9rem;
+    color: #0f172a;
+}
+
+.landlord-card-detail p {
+    font-size: 0.8125rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.uid-label {
+    align-self: flex-start;
+    background: #e2e8f0;
+    color: #475569;
+    font-size: 0.7rem;
+    padding: 0.125rem 0.375rem;
+    border-radius: 4px;
+    margin-top: 0.25rem;
+}
+
+.timeline-detail-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #475569;
+}
+
+.timeline-detail-list p {
+    margin: 0;
+}

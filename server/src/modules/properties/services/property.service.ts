@@ -341,9 +341,9 @@ class PropertyService {
         };
 
         if (lat !== undefined && lng !== undefined && radiusKm !== undefined) {
-             const haversine = `(6371 * acos(cos(radians(${lat})) * cos(radians("detailedLocation"."location_lat")) * cos(radians("detailedLocation"."location_long") - radians(${lng})) + sin(radians(${lat})) * sin(radians("detailedLocation"."location_lat"))))`;
-             detailedLocationInclude.where = Sequelize.where(Sequelize.literal(haversine), '<=', radiusKm);
-             detailedLocationInclude.required = true;
+            const haversine = `(6371 * acos(cos(radians(${lat})) * cos(radians("detailedLocation"."location_lat")) * cos(radians("detailedLocation"."location_long") - radians(${lng})) + sin(radians(${lat})) * sin(radians("detailedLocation"."location_lat"))))`;
+            detailedLocationInclude.where = Sequelize.where(Sequelize.literal(haversine), '<=', radiusKm);
+            detailedLocationInclude.required = true;
         }
 
         const offset = (page - 1) * limit;
@@ -354,7 +354,15 @@ class PropertyService {
                 {
                     model: PropertyImage,
                     as: 'images',
-                    attributes: ['id', 'property_id', 'image_url', 'is_main'],
+                    attributes: [
+                        'id',
+                        'property_id',
+                        'is_main',
+                        [
+                            Sequelize.literal(`CASE WHEN "images"."image_url" LIKE 'data:image%' THEN '/api/properties/images/' || "images"."id" ELSE "images"."image_url" END`),
+                            'image_url'
+                        ]
+                    ],
                 },
                 {
                     model: Amenity,
@@ -429,7 +437,15 @@ class PropertyService {
                 {
                     model: PropertyImage,
                     as: 'images',
-                    attributes: ['id', 'property_id', 'image_url', 'is_main'],
+                    attributes: [
+                        'id',
+                        'property_id',
+                        'is_main',
+                        [
+                            Sequelize.literal(`CASE WHEN "images"."image_url" LIKE 'data:image%' THEN '/api/properties/images/' || "images"."id" ELSE "images"."image_url" END`),
+                            'image_url'
+                        ]
+                    ],
                 },
                 {
                     model: Amenity,

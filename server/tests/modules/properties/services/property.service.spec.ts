@@ -11,10 +11,10 @@ import {
 } from '../../../../src/modules/properties/models/index.js';
 import { User } from '../../../../src/modules/auth/models/User.js';
 import { propertyService, PropertyError } from '../../../../src/modules/properties/services/property.service.js';
-import type { 
-    CreatePropertyRequest, 
-    UpdatePropertyRequest, 
-    PropertyQuery 
+import type {
+    CreatePropertyRequest,
+    UpdatePropertyRequest,
+    PropertyQuery
 } from '../../../../src/modules/properties/interfaces/property.interfaces.js';
 
 vi.mock('../../../../src/modules/properties/models/index.js', () => ({
@@ -39,9 +39,7 @@ vi.mock('../../../../src/modules/properties/models/index.js', () => ({
     },
 }));
 
-vi.mock('../../../../src/modules/auth/models/User.js', () => ({
-    User: { findByPk: vi.fn() },
-}));
+
 
 /**
  * Creates a mock Sequelize model instance.
@@ -75,41 +73,41 @@ describe('PropertyService', () => {
 
     describe('createProperty', () => {
         const input: CreatePropertyRequest = {
-            title: 'Test', 
-            description: 'Desc', 
-            monthly_price: 1000, 
+            title: 'Test',
+            description: 'Desc',
+            monthly_price: 1000,
             security_deposit: 500,
-            address: '123 St', 
-            furnishing: 'Fully', 
+            address: '123 St',
+            furnishing: 'Fully',
             availability_date: '2025-01-01',
             specifications: { bedrooms: 1, bathrooms: 1, area_sqft: 500 },
-            detailed_location: { 
-                city: 'City', area: 'Area', street_name: 'St', building_number: '1', 
-                floor: 1, unit_apt: '1', location_lat: 0, location_long: 0 
+            detailed_location: {
+                city: 'City', area: 'Area', street_name: 'St', building_number: '1',
+                floor: 1, unit_apt: '1', location_lat: 0, location_long: 0
             },
             images: [{ image_url: 'url', is_main: true }],
             ownership_documents: [],
         };
 
         it('throws when user not found', async () => {
-            vi.mocked(User.findByPk).mockResolvedValue(null);
+            vi.spyOn(User, 'findByPk').mockResolvedValue(null);
             await expect(propertyService.createProperty(uid, input)).rejects.toThrow(PropertyError);
             expect(mockTx.rollback).toHaveBeenCalled();
         });
 
         it('throws when not a landlord', async () => {
-            vi.mocked(User.findByPk).mockResolvedValue({ id: uid, role: 'TENANT' } as any);
+            vi.spyOn(User, 'findByPk').mockResolvedValue({ id: uid, role: 'TENANT' } as any);
             await expect(propertyService.createProperty(uid, input)).rejects.toMatchObject({ code: 'FORBIDDEN' });
         });
 
         it('throws on invalid amenities', async () => {
-            vi.mocked(User.findByPk).mockResolvedValue({ id: uid, role: 'LANDLORD' } as any);
+            vi.spyOn(User, 'findByPk').mockResolvedValue({ id: uid, role: 'LANDLORD' } as any);
             vi.mocked(Amenity.findAll).mockResolvedValue([]);
             await expect(propertyService.createProperty(uid, { ...input, amenity_names: ['Wifi'] })).rejects.toMatchObject({ code: 'INVALID_AMENITY_NAMES' });
         });
 
         it('creates property successfully', async () => {
-            vi.mocked(User.findByPk).mockResolvedValue({ id: uid, role: 'LANDLORD' } as any);
+            vi.spyOn(User, 'findByPk').mockResolvedValue({ id: uid, role: 'LANDLORD' } as any);
             vi.mocked(Amenity.findAll).mockResolvedValue([{ id: 'a1', name: 'Wifi' }] as any);
             vi.mocked(HouseRule.findAll).mockResolvedValue([]);
             const prop = sequelizeMock({ id: pid, landlord_id: uid, title: 'Test' });
@@ -132,9 +130,9 @@ describe('PropertyService', () => {
         });
 
         it('returns formatted property', async () => {
-            const prop = sequelizeMock({ 
-                id: pid, landlord_id: uid, title: 'Test', images: [], amenities: [], houseRules: [], 
-                specifications: { area_sqft: 100 }, detailedLocation: { city: 'City' } 
+            const prop = sequelizeMock({
+                id: pid, landlord_id: uid, title: 'Test', images: [], amenities: [], houseRules: [],
+                specifications: { area_sqft: 100 }, detailedLocation: { city: 'City' }
             });
             vi.mocked(Property.findByPk).mockResolvedValue(prop as any);
             const res = await propertyService.getPropertyById(pid);
@@ -153,7 +151,7 @@ describe('PropertyService', () => {
             const res = await propertyService.getAllProperties(query);
             expect(res.properties).toHaveLength(1);
             expect(res.pagination.page).toBe(2);
-            
+
             const calls = vi.mocked(Property.findAndCountAll).mock.calls;
             const args = calls[0]![0];
             expect(args?.offset).toBe(5);
@@ -193,7 +191,7 @@ describe('PropertyService', () => {
             vi.mocked(PropertyDetailedLocation.findOne).mockResolvedValue(null);
             vi.mocked(PropertyImage.bulkCreate).mockResolvedValue([{ id: 'i1' }] as any);
 
-            const input: UpdatePropertyRequest = { 
+            const input: UpdatePropertyRequest = {
                 specifications: { bedrooms: 5 },
                 images: [{ image_url: 'u', is_main: true }]
             };

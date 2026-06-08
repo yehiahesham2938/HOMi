@@ -1,4 +1,4 @@
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 import {
     RentalRequest,
     RentalRequestStatus,
@@ -242,7 +242,14 @@ class RentalRequestService {
                         {
                             model: PropertyImage,
                             as: 'images',
-                            attributes: ['id', 'image_url', 'is_main']
+                            attributes: [
+                                'id',
+                                'is_main',
+                                [
+                                    Sequelize.literal(`CASE WHEN "property->images"."image_url" LIKE 'data:image%' THEN '/api/properties/images/' || "property->images"."id" ELSE "property->images"."image_url" END`),
+                                    'image_url'
+                                ]
+                            ]
                         },
                         {
                             model: PropertySpecifications,

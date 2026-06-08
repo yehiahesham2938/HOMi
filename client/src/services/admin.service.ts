@@ -342,6 +342,61 @@ class AdminService {
         );
         return response.data;
     }
+
+    async getAllContracts() {
+        const response = await apiClient.get<{ success: boolean; data: AdminContractItem[] }>('/admin/contracts');
+        return response.data.data;
+    }
+
+    async getAllProperties() {
+        const response = await apiClient.get<{ success: boolean; data: AdminPropertyListItem[] }>('/admin/properties');
+        return response.data.data;
+    }
+}
+
+export interface AdminContractItem {
+    id: string;
+    contractId: string;
+    leaseId: string | null;
+    status: string;
+    rentAmount: number;
+    securityDeposit: number;
+    moveInDate: string;
+    leaseDurationMonths: number;
+    paymentStatus: string;
+    createdAt: string;
+    property: {
+        id: string;
+        title: string;
+        address: string;
+    } | null;
+    landlord: {
+        id: string;
+        email: string;
+        name: string;
+    } | null;
+    tenant: {
+        id: string;
+        email: string;
+        name: string;
+    } | null;
+}
+
+export interface AdminPropertyListItem {
+    id: string;
+    title: string;
+    address: string;
+    monthlyPrice: number;
+    status: string;
+    type: string | null;
+    furnishing: string | null;
+    createdAt: string;
+    thumbnailUrl: string | null;
+    landlord: {
+        id: string;
+        email: string;
+        name: string;
+    } | null;
 }
 
 export const adminService = new AdminService();

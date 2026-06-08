@@ -1,4 +1,4 @@
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 import { User } from '../../auth/models/User.js';
 import { Property, PropertyStatus } from '../../properties/models/Property.js';
 import { PropertyOwnershipDoc } from '../../properties/models/PropertyOwnershipDoc.js';
@@ -142,12 +142,25 @@ class AdminService {
                 {
                     model: PropertyImage,
                     as: 'images',
-                    attributes: ['id', 'image_url', 'is_main'],
+                    attributes: [
+                        'id',
+                        'is_main',
+                        [
+                            Sequelize.literal(`CASE WHEN "images"."image_url" LIKE 'data:image%' THEN '/api/properties/images/' || "images"."id" ELSE "images"."image_url" END`),
+                            'image_url'
+                        ]
+                    ],
                 },
                 {
                     model: PropertyOwnershipDoc,
                     as: 'ownershipDocs',
-                    attributes: ['id', 'document_url'],
+                    attributes: [
+                        'id',
+                        [
+                            Sequelize.literal(`CASE WHEN "ownershipDocs"."document_url" LIKE 'data:%' THEN '/api/properties/documents/' || "ownershipDocs"."id" ELSE "ownershipDocs"."document_url" END`),
+                            'document_url'
+                        ]
+                    ],
                 },
                 {
                     model: PropertySpecifications,
@@ -193,12 +206,12 @@ class AdminService {
                     : new Date(String(property.created_at)),
             landlord: property.landlord
                 ? {
-                      id: String(property.landlord.id),
-                      email: property.landlord.email,
-                      firstName: property.landlord.profile?.first_name,
-                      lastName: property.landlord.profile?.last_name,
-                      phone: property.landlord.profile?.phone_number,
-                  }
+                    id: String(property.landlord.id),
+                    email: property.landlord.email,
+                    firstName: property.landlord.profile?.first_name,
+                    lastName: property.landlord.profile?.last_name,
+                    phone: property.landlord.profile?.phone_number,
+                }
                 : null,
             ownershipDocs: (property as any).ownershipDocs?.map((doc: any) => ({
                 id: String(doc.id),
@@ -206,22 +219,22 @@ class AdminService {
             })) || [],
             specifications: (property as any).specifications
                 ? {
-                      bedrooms: (property as any).specifications.bedrooms,
-                      bathrooms: (property as any).specifications.bathrooms,
-                      areaSqft: Number((property as any).specifications.area_sqft),
-                  }
+                    bedrooms: (property as any).specifications.bedrooms,
+                    bathrooms: (property as any).specifications.bathrooms,
+                    areaSqft: Number((property as any).specifications.area_sqft),
+                }
                 : null,
             detailedLocation: (property as any).detailedLocation
                 ? {
-                      floor: (property as any).detailedLocation.floor,
-                      city: (property as any).detailedLocation.city,
-                      area: (property as any).detailedLocation.area,
-                      streetName: (property as any).detailedLocation.street_name,
-                      buildingNumber: (property as any).detailedLocation.building_number,
-                      unitApt: (property as any).detailedLocation.unit_apt,
-                      locationLat: (property as any).detailedLocation.location_lat,
-                      locationLong: (property as any).detailedLocation.location_long,
-                  }
+                    floor: (property as any).detailedLocation.floor,
+                    city: (property as any).detailedLocation.city,
+                    area: (property as any).detailedLocation.area,
+                    streetName: (property as any).detailedLocation.street_name,
+                    buildingNumber: (property as any).detailedLocation.building_number,
+                    unitApt: (property as any).detailedLocation.unit_apt,
+                    locationLat: (property as any).detailedLocation.location_lat,
+                    locationLong: (property as any).detailedLocation.location_long,
+                }
                 : null,
             images: (property as any).images?.map((img: any) => ({
                 id: String(img.id),
@@ -325,48 +338,48 @@ class AdminService {
         });
 
         return reports.map((report) => {
-                const property = (report as any).property;
-                const mainImage = property?.images?.find((img: any) => img.is_main)?.image_url;
-                const fallbackImage = property?.images?.[0]?.image_url ?? null;
-                const snapshotLandlord = report.snapshot_landlord_name || report.snapshot_landlord_email
-                    ? {
-                        id: property?.landlord?.id || 'deleted-landlord',
-                        email: report.snapshot_landlord_email || property?.landlord?.email || 'unknown',
-                        firstName: report.snapshot_landlord_name?.split(' ')?.[0] || property?.landlord?.profile?.first_name,
-                        lastName: report.snapshot_landlord_name?.split(' ')?.slice(1).join(' ') || property?.landlord?.profile?.last_name,
-                    }
-                    : null;
-                return {
-                    id: report.id,
-                    reason: report.reason,
-                    details: report.details,
-                    status: report.status as 'OPEN' | 'REVIEWED' | 'ACTIONED',
-                    createdAt: report.created_at,
-                    property: {
-                        id: property?.id || report.property_id,
-                        title: report.snapshot_property_title || property?.title || 'Deleted listing',
-                        address: report.snapshot_property_address || property?.address || 'Address unavailable',
-                        monthlyPrice: Number(report.snapshot_property_monthly_price ?? property?.monthly_price ?? 0),
-                        thumbnailUrl: report.snapshot_property_thumbnail_url || mainImage || fallbackImage,
-                        landlord: snapshotLandlord || (property?.landlord
-                            ? {
-                                id: property.landlord.id,
-                                email: property.landlord.email,
-                                firstName: property.landlord.profile?.first_name,
-                                lastName: property.landlord.profile?.last_name,
-                            }
-                            : null),
-                    },
-                    reporter: (report as any).reporter
+            const property = (report as any).property;
+            const mainImage = property?.images?.find((img: any) => img.is_main)?.image_url;
+            const fallbackImage = property?.images?.[0]?.image_url ?? null;
+            const snapshotLandlord = report.snapshot_landlord_name || report.snapshot_landlord_email
+                ? {
+                    id: property?.landlord?.id || 'deleted-landlord',
+                    email: report.snapshot_landlord_email || property?.landlord?.email || 'unknown',
+                    firstName: report.snapshot_landlord_name?.split(' ')?.[0] || property?.landlord?.profile?.first_name,
+                    lastName: report.snapshot_landlord_name?.split(' ')?.slice(1).join(' ') || property?.landlord?.profile?.last_name,
+                }
+                : null;
+            return {
+                id: report.id,
+                reason: report.reason,
+                details: report.details,
+                status: report.status as 'OPEN' | 'REVIEWED' | 'ACTIONED',
+                createdAt: report.created_at,
+                property: {
+                    id: property?.id || report.property_id,
+                    title: report.snapshot_property_title || property?.title || 'Deleted listing',
+                    address: report.snapshot_property_address || property?.address || 'Address unavailable',
+                    monthlyPrice: Number(report.snapshot_property_monthly_price ?? property?.monthly_price ?? 0),
+                    thumbnailUrl: report.snapshot_property_thumbnail_url || mainImage || fallbackImage,
+                    landlord: snapshotLandlord || (property?.landlord
                         ? {
-                            id: (report as any).reporter.id,
-                            email: (report as any).reporter.email,
-                            firstName: (report as any).reporter.profile?.first_name,
-                            lastName: (report as any).reporter.profile?.last_name,
+                            id: property.landlord.id,
+                            email: property.landlord.email,
+                            firstName: property.landlord.profile?.first_name,
+                            lastName: property.landlord.profile?.last_name,
                         }
-                        : null,
-                };
-            });
+                        : null),
+                },
+                reporter: (report as any).reporter
+                    ? {
+                        id: (report as any).reporter.id,
+                        email: (report as any).reporter.email,
+                        firstName: (report as any).reporter.profile?.first_name,
+                        lastName: (report as any).reporter.profile?.last_name,
+                    }
+                    : null,
+            };
+        });
     }
 
     async removeListingFromReport(reportId: string, adminId: string): Promise<{ reportId: string; propertyId: string }> {
@@ -942,6 +955,125 @@ class AdminService {
             rejection_reason: rejectionReason || 'Rejected by admin',
             reviewed_by_admin_id: adminId,
             reviewed_at: new Date(),
+        });
+    }
+
+    async getAllContracts(): Promise<any[]> {
+        const contracts = await Contract.findAll({
+            include: [
+                {
+                    model: Property,
+                    as: 'property',
+                    attributes: ['id', 'title', 'address'],
+                },
+                {
+                    model: User,
+                    as: 'landlord',
+                    attributes: ['id', 'email'],
+                    include: [
+                        {
+                            model: Profile,
+                            as: 'profile',
+                            attributes: ['first_name', 'last_name'],
+                        },
+                    ],
+                },
+                {
+                    model: User,
+                    as: 'tenant',
+                    attributes: ['id', 'email'],
+                    include: [
+                        {
+                            model: Profile,
+                            as: 'profile',
+                            attributes: ['first_name', 'last_name'],
+                        },
+                    ],
+                },
+            ],
+            order: [['created_at', 'DESC']],
+        });
+
+        return contracts.map((c) => ({
+            id: c.id,
+            contractId: c.contract_id,
+            leaseId: c.lease_id,
+            status: c.status,
+            rentAmount: Number(c.rent_amount || 0),
+            securityDeposit: Number(c.security_deposit || 0),
+            moveInDate: c.move_in_date,
+            leaseDurationMonths: c.lease_duration_months,
+            paymentStatus: c.payment_status,
+            createdAt: c.created_at,
+            property: c.property ? {
+                id: c.property.id,
+                title: c.property.title,
+                address: c.property.address,
+            } : null,
+            landlord: c.landlord ? {
+                id: c.landlord.id,
+                email: c.landlord.email,
+                name: c.landlord.profile ? `${c.landlord.profile.first_name} ${c.landlord.profile.last_name}`.trim() : 'N/A',
+            } : null,
+            tenant: c.tenant ? {
+                id: c.tenant.id,
+                email: c.tenant.email,
+                name: c.tenant.profile ? `${c.tenant.profile.first_name} ${c.tenant.profile.last_name}`.trim() : 'N/A',
+            } : null,
+        }));
+    }
+
+    async getAllPropertiesForAdmin(): Promise<any[]> {
+        const { PropertyImage } = await import('../../properties/models/PropertyImage.js');
+
+        const properties = await Property.findAll({
+            include: [
+                {
+                    model: User,
+                    as: 'landlord',
+                    attributes: ['id', 'email'],
+                    include: [
+                        {
+                            model: Profile,
+                            as: 'profile',
+                            attributes: ['first_name', 'last_name'],
+                        },
+                    ],
+                },
+                {
+                    model: PropertyImage,
+                    as: 'images',
+                    attributes: [
+                        'id',
+                        'is_main',
+                        [
+                            Sequelize.literal(`CASE WHEN "images"."image_url" LIKE 'data:image%' THEN '/api/properties/images/' || "images"."id" ELSE "images"."image_url" END`),
+                            'image_url'
+                        ]
+                    ],
+                },
+            ],
+            order: [['created_at', 'DESC']],
+        });
+
+        return properties.map((p) => {
+            const mainImg = p.images?.find(img => img.is_main)?.image_url || p.images?.[0]?.image_url || null;
+            return {
+                id: p.id,
+                title: p.title,
+                address: p.address,
+                monthlyPrice: Number(p.monthly_price),
+                status: p.status,
+                type: p.type,
+                furnishing: p.furnishing,
+                createdAt: p.created_at,
+                thumbnailUrl: mainImg,
+                landlord: p.landlord ? {
+                    id: p.landlord.id,
+                    email: p.landlord.email,
+                    name: p.landlord.profile ? `${p.landlord.profile.first_name} ${p.landlord.profile.last_name}`.trim() : 'N/A',
+                } : null,
+            };
         });
     }
 }

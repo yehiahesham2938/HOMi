@@ -5,6 +5,7 @@ import { Contract } from '../../contracts/models/Contract.js';
 import { Op } from 'sequelize';
 import { AIMatchingService } from './ai-matching.service.js';
 import { PropertyDetailedLocation } from '../../properties/models/PropertyDetailedLocation.js';
+import { Property } from '../../properties/models/Property.js';
 import { notificationService } from '../../notifications/services/notification.service.js';
 import { messageService } from '../../messages/services/message.service.js';
 import { NotificationType } from '../../notifications/models/Notification.js';
@@ -177,6 +178,16 @@ export class RoommateMatchingService {
                     as: 'matchedUser',
                     attributes: ['id'],
                     include: [{ model: Profile, as: 'profile', attributes: ['first_name', 'last_name', 'avatar_url', 'gender'] }]
+                },
+                {
+                    model: RoommateRequest,
+                    as: 'request',
+                    attributes: ['preferred_city', 'preferred_area']
+                },
+                {
+                    model: RoommateRequest,
+                    as: 'matchedRequest',
+                    attributes: ['preferred_city', 'preferred_area']
                 }
             ],
             order: [['compatibility_score', 'DESC']]
@@ -287,7 +298,7 @@ export class RoommateMatchingService {
             where: { id: requestId, user_id: userId, status: RoommateRequestStatus.ACTIVE },
             include: [
                 { model: User, as: 'user', include: [{ model: Profile, as: 'profile' }, { model: Habit, as: 'habits' }] },
-                { model: Contract, as: 'contract', include: [{ model: PropertyDetailedLocation, as: 'detailedLocation' }] }
+                { model: Contract, as: 'contract', include: [{ model: Property, as: 'property', include: [{ model: PropertyDetailedLocation, as: 'detailedLocation' }] }] }
             ]
         });
 
@@ -304,9 +315,9 @@ export class RoommateMatchingService {
         let searchCity = myRequest.preferred_city;
         let searchArea = myRequest.preferred_area;
 
-        if (myRequest.type === RoommateRequestType.SEARCH_ROOMMATE && myRequest.contract?.detailedLocation) {
-            searchCity = myRequest.contract.detailedLocation.city;
-            searchArea = myRequest.contract.detailedLocation.area;
+        if (myRequest.type === RoommateRequestType.SEARCH_ROOMMATE && myRequest.contract?.property?.detailedLocation) {
+            searchCity = myRequest.contract.property.detailedLocation.city;
+            searchArea = myRequest.contract.property.detailedLocation.area;
         }
 
         const candidates = await RoommateRequest.findAll({
@@ -319,7 +330,7 @@ export class RoommateMatchingService {
             },
             include: [
                 { model: User, as: 'user', include: [{ model: Profile, as: 'profile' }, { model: Habit, as: 'habits' }] },
-                { model: Contract, as: 'contract', include: [{ model: PropertyDetailedLocation, as: 'detailedLocation' }] }
+                { model: Contract, as: 'contract', include: [{ model: Property, as: 'property', include: [{ model: PropertyDetailedLocation, as: 'detailedLocation' }] }] }
             ],
             limit: 20 // Cap for AI costs
         });
@@ -386,8 +397,8 @@ export class RoommateMatchingService {
         let budgetMax = request.budget_max;
 
         if (request.type === RoommateRequestType.SEARCH_ROOMMATE && request.contract) {
-            city = request.contract.detailedLocation?.city || null;
-            area = request.contract.detailedLocation?.area || null;
+            city = request.contract.property?.detailedLocation?.city || null;
+            area = request.contract.property?.detailedLocation?.area || null;
             budgetMin = Number(request.contract.rent_amount) || null;
             budgetMax = budgetMin;
         }

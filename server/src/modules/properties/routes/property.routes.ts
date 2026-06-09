@@ -317,6 +317,16 @@ router.get(
 );
 
 /**
+ * GET /api/properties/images/:imageId
+ * Serve a raw base64 property image by its DB record ID.
+ * This route MUST appear before /:id to avoid "images" being matched as a property UUID.
+ */
+router.get(
+    '/images/:imageId',
+    propertyController.getImage.bind(propertyController)
+);
+
+/**
  * @swagger
  * /properties/{id}:
  *   get:

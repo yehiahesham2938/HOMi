@@ -20,7 +20,7 @@ export interface LeaseContract {
     landlord: string;
     amount: number;
     deposit: number;
-    status: 'PENDING_LANDLORD' | 'PENDING_TENANT' | 'ACTIVE' | 'EXPIRED';
+    status: 'PENDING_LANDLORD' | 'PENDING_TENANT' | 'ACTIVE' | 'EXPIRED' | 'TERMINATED';
     startDate: string;
     duration: string;
     rentDueDate: string;
@@ -77,9 +77,8 @@ const LandlordContract: React.FC = () => {
             landlord: `${contract.landlord?.firstName || ''} ${contract.landlord?.lastName || ''}`.trim() || 'Landlord',
             amount: contract.rentAmount || 0,
             deposit: contract.securityDeposit || 0,
-            status: (contract.status === 'TERMINATED' ? 'EXPIRED' :
-                contract.status === 'PENDING_PAYMENT' ? 'PENDING_TENANT' :
-                    contract.status) as LeaseContract['status'],
+            status: (contract.status === 'PENDING_PAYMENT' ? 'PENDING_TENANT' :
+                contract.status) as LeaseContract['status'],
             startDate: formatDate(contract.moveInDate),
             duration: `${contract.leaseDurationMonths} Months`,
             rentDueDate: contract.rentDueDate || '1ST_OF_MONTH',
@@ -126,11 +125,12 @@ const LandlordContract: React.FC = () => {
     const hasContracts = contracts.length > 0;
 
     const getStatusInfo = (status: LeaseContract['status']) => {
-        const map = {
+        const map: Record<LeaseContract['status'], { label: string; color: string }> = {
             PENDING_LANDLORD: { label: t('landlordContract.pendingSignature'), color: 'blue' },
             PENDING_TENANT: { label: t('landlordContract.pendingTenant'), color: 'yellow' },
             ACTIVE: { label: t('landlordContract.activeLease'), color: 'green' },
             EXPIRED: { label: t('landlordContract.expired'), color: 'gray' },
+            TERMINATED: { label: 'Terminated', color: 'red' },
         };
         return map[status] || { label: 'Unknown', color: 'gray' };
     };

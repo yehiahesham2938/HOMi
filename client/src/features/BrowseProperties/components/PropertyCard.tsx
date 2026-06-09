@@ -19,6 +19,7 @@ interface PropertyCardProps {
         ownerImage?: string;
         ownerVerified?: boolean;
         status?: string;
+        availableDate?: string;
     };
     onOpenDetails: () => void;
     isSaved?: boolean;
@@ -69,6 +70,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                     <div className="prop-location-dot"></div>
                     {property.address}
                 </div>
+                {property.availableDate && (
+                    <div className="prop-availability" style={{ fontSize: '0.8rem', color: '#2563eb', fontWeight: '700', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span>📅 Available: {property.availableDate}</span>
+                    </div>
+                )}
                 <div className="prop-specs">
                     <div className="prop-spec">
                         <strong>{property.beds}</strong>Beds

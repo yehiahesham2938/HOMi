@@ -11,7 +11,7 @@ import contractService, { type LandlordContract as ContractApi } from '../../../
 import { normalizeSignatureUrl } from '../../../shared/utils/signatureUrl';
 import './Contract.css';
 
-export type ContractStatus = 'PENDING_TENANT' | 'PENDING_PAYMENT' | 'ACTIVE' | 'EXPIRED' | 'TERMINATED';
+export type ContractStatus = 'PENDING_TENANT' | 'PENDING_PAYMENT' | 'ACTIVE' | 'EXPIRED';
 
 export interface LeaseContract {
     id: string;
@@ -66,8 +66,7 @@ const Contract: React.FC = () => {
 
     const mapStatus = (status: ContractApi['status']): ContractStatus => {
         if (status === 'ACTIVE') return 'ACTIVE';
-        if (status === 'TERMINATED') return 'TERMINATED';
-        if (status === 'EXPIRED') return 'EXPIRED';
+        if (status === 'TERMINATED' || status === 'EXPIRED') return 'EXPIRED';
         if (status === 'PENDING_PAYMENT') return 'PENDING_PAYMENT';
         return 'PENDING_TENANT';
     };
@@ -112,7 +111,7 @@ const Contract: React.FC = () => {
             const response = await contractService.getTenantContracts({ page: 1, limit: 50 });
             const mapped = (response.data || [])
                 .map(mapContract)
-                .filter((c) => c.status === 'PENDING_TENANT' || c.status === 'PENDING_PAYMENT' || c.status === 'ACTIVE' || c.status === 'EXPIRED' || c.status === 'TERMINATED');
+                .filter((c) => c.status === 'PENDING_TENANT' || c.status === 'PENDING_PAYMENT' || c.status === 'ACTIVE' || c.status === 'EXPIRED');
             setContracts(mapped);
         } catch {
             setContracts([]);
@@ -134,12 +133,11 @@ const Contract: React.FC = () => {
     const hasContracts = contracts.length > 0;
 
     const getStatusInfo = (status: ContractStatus) => {
-        const map: Record<ContractStatus, { label: string; color: string }> = {
+        const map = {
             PENDING_TENANT: { label: t('tenantContract.pendingSignature'), color: 'blue' },
             PENDING_PAYMENT: { label: t('tenantContract.pendingPayment'), color: 'yellow' },
             ACTIVE: { label: t('tenantContract.activeLease'), color: 'green' },
             EXPIRED: { label: t('tenantContract.leaseEnded'), color: 'gray' },
-            TERMINATED: { label: 'Terminated', color: 'red' },
         };
         return map[status];
     };
@@ -176,15 +174,9 @@ const Contract: React.FC = () => {
                                             <div className="meta-item"><Clock size={14} /> {t('tenantContract.starts')} {contract.startDate}</div>
                                         </div>
                                         <div className="tenant-card-footer">
-                                            <div className="tenant-footer-amounts">
-                                                <div className="price-info">
-                                                    <span className="label">{t('tenantContract.monthlyRent')}</span>
-                                                    <span className="value">${contract.amount}</span>
-                                                </div>
-                                                <div className="price-info">
-                                                    <span className="label">Security Deposit</span>
-                                                    <span className="value deposit-value">${contract.deposit}</span>
-                                                </div>
+                                            <div className="price-info">
+                                                <span className="label">{t('tenantContract.monthlyRent')}</span>
+                                                <span className="value">${contract.amount}</span>
                                             </div>
                                             <button
                                                 className="btn-view-contract"
@@ -202,9 +194,7 @@ const Contract: React.FC = () => {
                                                     ? t('tenantContract.payNow')
                                                     : contract.status === 'EXPIRED'
                                                         ? t('tenantContract.settleDues')
-                                                        : contract.status === 'TERMINATED'
-                                                            ? 'View Details'
-                                                            : t('tenantContract.viewDetails')}
+                                                        : t('tenantContract.viewDetails')}
                                                 <ChevronRight size={16} />
                                             </button>
                                         </div>

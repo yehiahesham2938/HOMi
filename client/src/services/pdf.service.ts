@@ -8,11 +8,9 @@ export interface PDFContractData {
     propertyAddress: string;
     propertyType: string;
     landlord: string;
-    landlordNameAr?: string;   // Arabic name for the landlord (used in AR PDF)
     landlordNationalId?: string;
     landlordAddress?: string;
     tenant: string;
-    tenantNameAr?: string;     // Arabic name for the tenant (used in AR PDF)
     tenantNationalId?: string;
     tenantAddress?: string;
     startDate: string;
@@ -267,14 +265,14 @@ class PDFService {
         const formatDurationAr = (durationStr: string | undefined | null) => {
             if (!durationStr) return '—';
             if (!isAr) return durationStr;
-            
+
             const numMatch = durationStr.match(/\d+/);
             if (!numMatch) return durationStr;
-            
+
             const n = parseInt(numMatch[0]);
             const isMonth = durationStr.toLowerCase().includes('month');
             const isYear = durationStr.toLowerCase().includes('year');
-            
+
             if (isMonth) {
                 if (n === 1) return 'شهر واحد';
                 if (n === 2) return 'شهرين';
@@ -333,13 +331,13 @@ class PDFService {
                 <div class="data-grid">
                     <div class="party-card">
                         <span class="data-label">${t.lessor}</span>
-                        <span class="data-value" style="font-size: 15px; font-weight: bold;">${isAr ? (data.landlordNameAr || data.landlord) : data.landlord}</span><br/>
+                        <span class="data-value" style="font-size: 15px; font-weight: bold;">${data.landlord}</span><br/>
                         <span class="data-label" style="margin-top: 8px;">${t.id}:</span> <span class="data-value">${toArNum(data.landlordNationalId)}</span><br/>
                         <span class="data-label">${t.address}:</span> <span class="data-value">${data.landlordAddress || '—'}</span>
                     </div>
                     <div class="party-card">
                         <span class="data-label">${t.lessee}</span>
-                        <span class="data-value" style="font-size: 15px; font-weight: bold;">${isAr ? (data.tenantNameAr || data.tenant) : data.tenant}</span><br/>
+                        <span class="data-value" style="font-size: 15px; font-weight: bold;">${data.tenant}</span><br/>
                         <span class="data-label" style="margin-top: 8px;">${t.id}:</span> <span class="data-value">${toArNum(data.tenantNationalId)}</span><br/>
                         <span class="data-label">${t.address}:</span> <span class="data-value">${data.tenantAddress || '—'}</span>
                     </div>

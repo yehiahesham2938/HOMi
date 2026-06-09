@@ -26,10 +26,6 @@ import {
     SearchX,
     CalendarX,
     ArrowLeft,
-    Lock,
-    Search,
-    Building2,
-    Filter,
 } from 'lucide-react';
 import './TenantPayment.css';
 import CreditCardModal from '../components/CreditCardModal';
@@ -49,7 +45,7 @@ import {
     getRentInstallmentStats,
 } from '../utils/rentSchedule';
 
-type TabType = 'overview' | 'upcoming' | 'history' | 'topup' | 'methods' | 'pending' | 'receipt' | 'deposits';
+type TabType = 'overview' | 'upcoming' | 'history' | 'topup' | 'methods' | 'pending' | 'receipt';
 
 const formatMoney = (amount: number): string =>
     `$${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -82,7 +78,6 @@ const TenantPayment: React.FC = () => {
     const [paymentHistory, setPaymentHistory] = useState<TenantPaymentHistoryItem[]>([]);
     const [savedMethods, setSavedMethods] = useState<SavedPaymentMethod[]>([]);
     const [walletBalance, setWalletBalance] = useState(0);
-    const [depositSearchTerm, setDepositSearchTerm] = useState('');
 
     const [installmentsTarget, setInstallmentsTarget] = useState<{ contractId: string; title: string } | null>(null);
 
@@ -334,31 +329,6 @@ const TenantPayment: React.FC = () => {
     const hasUpcomingPayments = activeContracts.length > 0 || Boolean(pendingPaymentContract);
     const hasPaymentHistory = paymentHistory.length > 0;
     const hasPendingRequests = tenantRequests.some((r) => r.status === 'APPROVED' || r.status === 'PENDING');
-
-    const tenantDeposits = useMemo(() => {
-        return tenantContracts
-            .filter((c) => Number(c.securityDeposit ?? c.property?.securityDeposit ?? 0) > 0)
-            .map((c) => {
-                const propertyTitle = c.property?.title || 'Property';
-                const amount = Number(c.securityDeposit ?? c.property?.securityDeposit ?? 0);
-                const date = c.moveInDate || c.createdAt;
-
-                let status: 'HELD' | 'REFUNDED' | 'FORFEITED' | 'PENDING' = 'PENDING';
-                if (c.status === 'ACTIVE') status = 'HELD';
-                else if (c.status === 'EXPIRED') status = 'REFUNDED';
-                else if (c.status === 'TERMINATED') status = 'FORFEITED';
-                else if (c.status === 'PENDING_PAYMENT') status = 'PENDING';
-
-                return { id: c.id, propertyTitle, amount, status, date };
-            })
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    }, [tenantContracts]);
-
-    const filteredTenantDeposits = useMemo(() => {
-        const q = depositSearchTerm.trim().toLowerCase();
-        if (!q) return tenantDeposits;
-        return tenantDeposits.filter((item) => item.propertyTitle.toLowerCase().includes(q));
-    }, [tenantDeposits, depositSearchTerm]);
 
     const getNextDueDateLabel = (): string => {
         if (!nextUnpaidRent) return 'No active lease';
@@ -991,83 +961,6 @@ const TenantPayment: React.FC = () => {
         </div>
     );
 
-    const renderDeposits = () => {
-        if (tenantDeposits.length === 0) {
-            return (
-                <div className="tab-viewport animate-fade-up">
-                    <div className="empty-state">
-                        <div className="empty-icon"><Lock size={32} /></div>
-                        <h4>No Security Deposits</h4>
-                        <p>Security deposits from your lease agreements will appear here, showing their current escrow status.</p>
-                    </div>
-                </div>
-            );
-        }
-
-        return (
-            <div className="tab-viewport animate-fade-up">
-                <div className="table-controls">
-                    <div className="search-box">
-                        <Search size={18} />
-                        <input
-                            type="text"
-                            placeholder="Search property..."
-                            value={depositSearchTerm}
-                            onChange={(e) => setDepositSearchTerm(e.target.value)}
-                        />
-                    </div>
-                    <button className="btn-filter"><Filter size={16} /> Filter</button>
-                </div>
-                <div className="table-wrapper">
-                    <table className="modern-table">
-                        <thead>
-                            <tr>
-                                <th>Property</th>
-                                <th>Deposit Amount</th>
-                                <th>Lease Start Date</th>
-                                <th>Escrow Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredTenantDeposits.map((item) => {
-                                let badgeClass = 'pill';
-                                let badgeStyle: React.CSSProperties = {};
-                                let statusText = 'Awaiting Payment';
-                                if (item.status === 'HELD') {
-                                    badgeStyle = { background: '#eff6ff', color: '#1d4ed8', borderRadius: '6px', padding: '3px 10px', fontSize: '12px', fontWeight: 700 };
-                                    statusText = 'Held in Escrow';
-                                } else if (item.status === 'REFUNDED') {
-                                    badgeStyle = { background: '#e6fcf5', color: '#0ca678', borderRadius: '6px', padding: '3px 10px', fontSize: '12px', fontWeight: 700 };
-                                    statusText = 'Returned to You';
-                                } else if (item.status === 'FORFEITED') {
-                                    badgeStyle = { background: '#fef2f2', color: '#dc2626', borderRadius: '6px', padding: '3px 10px', fontSize: '12px', fontWeight: 700 };
-                                    statusText = 'Forfeited to Landlord';
-                                } else {
-                                    badgeStyle = { background: '#fffbeb', color: '#92400e', borderRadius: '6px', padding: '3px 10px', fontSize: '12px', fontWeight: 700 };
-                                    statusText = 'Awaiting Payment';
-                                }
-
-                                return (
-                                    <tr key={item.id}>
-                                        <td>
-                                            <div className="prop-cell" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                <Building2 size={14} style={{ flexShrink: 0 }} />
-                                                <span>{item.propertyTitle}</span>
-                                            </div>
-                                        </td>
-                                        <td className="font-medium">{formatMoney(item.amount)}</td>
-                                        <td>{formatLongDate(item.date)}</td>
-                                        <td><span className={badgeClass} style={badgeStyle}>{statusText}</span></td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        );
-    };
-
     const renderMethods = () => (
         <div className="tab-viewport animate-fade-in">
             <div className="methods-viewport">
@@ -1179,7 +1072,6 @@ const TenantPayment: React.FC = () => {
                 {activeTab === 'overview' && renderOverview()}
                 {activeTab === 'upcoming' && renderUpcoming()}
                 {activeTab === 'history' && renderHistory()}
-                {activeTab === 'deposits' && renderDeposits()}
                 {activeTab === 'topup' && renderTopUp()}
                 {activeTab === 'methods' && renderMethods()}
                 {activeTab === 'pending' && renderPending()}
@@ -1206,7 +1098,6 @@ const TenantPayment: React.FC = () => {
                                 { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={16} /> },
                                 { id: 'upcoming', label: 'Upcoming', icon: <CalendarClock size={16} /> },
                                 { id: 'history', label: 'History', icon: <History size={16} /> },
-                                { id: 'deposits', label: 'Deposits', icon: <Lock size={16} /> },
                                 { id: 'topup', label: 'Top Up', icon: <Wallet size={16} /> },
                                 { id: 'methods', label: 'Methods', icon: <CreditCard size={16} /> },
                                 { id: 'pending', label: 'Requests', icon: <FileSearch size={16} /> },

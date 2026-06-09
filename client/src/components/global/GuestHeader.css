@@ -218,3 +218,20 @@
     display: block !important;
   }
 }
+
+@media (max-width: 576px) {
+  .guest-nav .nav-container {
+    padding: 10px 12px !important;
+    gap: 8px !important;
+  }
+  .guest-nav .logo-image {
+    height: 40px !important;
+  }
+  .guest-nav .lang-toggle-btn {
+    padding: 5px 10px !important;
+    font-size: 0.78rem !important;
+  }
+  .guest-nav .back-home-link {
+    padding: 6px !important;
+  }
+}

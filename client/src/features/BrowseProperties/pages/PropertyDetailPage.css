@@ -21,8 +21,12 @@
     max-width: 1400px;
     margin: 0 auto;
     width: 100%;
-    margin-left: 330px;
+    margin-left: 0;
     box-sizing: border-box;
+}
+
+.sidebar ~ .property-detail-page-content {
+    margin-left: 330px;
 }
 
 /* Breadcrumb Navigation */
@@ -1328,5 +1332,179 @@
 
     .nav-arrow.right {
         right: -16px;
+    }
+}
+
+/* --- Mobile Responsive Overrides --- */
+
+@media (max-width: 1080px) {
+    .property-page-layout-grid {
+        grid-template-columns: 1fr;
+        gap: 16px !important;
+    }
+}
+
+@media (max-width: 1024px) {
+    .property-detail-page-content {
+        margin-left: 0 !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .property-detail-page-content {
+        padding: 16px 12px !important;
+    }
+
+    .details-left-scroll,
+    .details-inner-card {
+        gap: 14px !important;
+    }
+
+    .detail-main-info-card,
+    .overview-block-section,
+    .preferences-chips-section,
+    .interactive-map-listing-section,
+    .maintenance-responsibilities-block {
+        padding: 16px 14px !important;
+        border-radius: 14px !important;
+    }
+
+    .detail-main-info-card {
+        gap: 14px !important;
+    }
+
+    .property-gallery-grid-main {
+        aspect-ratio: 1.8 !important;
+        border-radius: 16px !important;
+    }
+
+    .availability-highlight-strip {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 6px !important;
+        padding: 10px 14px !important;
+        margin-bottom: 12px !important;
+    }
+    
+    .availability-highlight-strip .urgency-label {
+        align-self: flex-start !important;
+        font-size: 0.68rem !important;
+    }
+
+    .listing-main-header {
+        margin-bottom: 12px !important;
+    }
+
+    .listing-main-header h1 {
+        font-size: 1.2rem !important;
+    }
+
+    .address-link-row {
+        font-size: 0.8rem !important;
+    }
+
+    .specifications-strip-row {
+        margin-top: 12px !important;
+        gap: 8px !important;
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    .spec-tile {
+        padding: 10px !important;
+        gap: 8px !important;
+        border-radius: 10px !important;
+    }
+
+    .spec-tile svg {
+        font-size: 1.15rem !important;
+    }
+
+    .spec-tile .value {
+        font-size: 0.88rem !important;
+    }
+
+    .spec-tile .label {
+        font-size: 0.68rem !important;
+    }
+
+    /* Price card adjustments */
+    .sticky-price-card {
+        padding: 16px 14px !important;
+        border-radius: 16px !important;
+        gap: 12px !important;
+    }
+
+    .price-bold .val {
+        font-size: 1.5rem !important;
+    }
+
+    .price-bold .currency {
+        font-size: 1.1rem !important;
+    }
+
+    .price-bold .freq {
+        font-size: 0.82rem !important;
+    }
+
+    .security-dep-box {
+        font-size: 0.72rem !important;
+    }
+
+    /* Stack pricing section buttons */
+    .quick-application-actions,
+    .secondary-cta-flex-row,
+    .share-and-save-row {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+    }
+
+    .primary-cta-action-btn {
+        padding: 10px !important;
+        font-size: 0.85rem !important;
+        border-radius: 10px !important;
+    }
+
+    .secondary-action-outline-btn {
+        padding: 8px !important;
+        font-size: 0.75rem !important;
+        border-radius: 8px !important;
+    }
+
+    .social-like-action-btn,
+    .social-share-action-btn {
+        padding: 8px !important;
+        font-size: 0.72rem !important;
+        border-radius: 8px !important;
+    }
+
+    .owner-profile-card {
+        gap: 10px !important;
+    }
+
+    .owner-avatar-wrapper {
+        width: 36px !important;
+        height: 36px !important;
+    }
+
+    .owner-name-bold {
+        font-size: 0.82rem !important;
+    }
+
+    .owner-status {
+        font-size: 0.68rem !important;
+    }
+
+    .chat-owner-trigger {
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 10px !important;
+    }
+}
+
+@media (max-width: 520px) {
+    .report-modal-box,
+    .cancel-prompt-modal-box {
+        width: 92vw !important;
+        padding: 20px 16px !important;
     }
 }

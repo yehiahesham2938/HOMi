@@ -25,11 +25,11 @@ interface PropertyCardProps {
     onToggleSave?: (propertyId: string | number) => void;
 }
 
-const PropertyCard: React.FC<PropertyCardProps> = ({ 
-    property, 
-    onOpenDetails, 
-    isSaved = false, 
-    onToggleSave 
+const PropertyCard: React.FC<PropertyCardProps> = ({
+    property,
+    onOpenDetails,
+    isSaved = false,
+    onToggleSave
 }) => {
     const isFeatured = property.tags && property.tags.some(t => t.toLowerCase() === 'featured' || t.toLowerCase() === '⭐ featured');
     const isRented = property.status?.toUpperCase() === 'RENTED';
@@ -51,7 +51,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         >
             <div className="prop-img">
                 <img src={property.image} alt={property.title} loading="lazy" />
-                <span className={`prop-badge ${badgeClass}`}>{badge}</span>
                 <button
                     className={`prop-save ${isSaved ? 'saved' : ''}`}
                     onClick={handleWishlistToggle}

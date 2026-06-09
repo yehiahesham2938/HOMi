@@ -20,6 +20,8 @@ import { normalizeSignatureUrl } from '../../../shared/utils/signatureUrl';
 
 const ActiveLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
     const { t } = useTranslation();
+    const landlordNameAr = contract.landlordEmail ? (localStorage.getItem('arabicName_email_' + contract.landlordEmail) || undefined) : undefined;
+    const tenantNameAr = contract.tenantEmail ? (localStorage.getItem('arabicName_email_' + contract.tenantEmail) || undefined) : undefined;
     const [previewLang, setPreviewLang] = React.useState<'en' | 'ar' | null>(null);
     const [currentPreviewPage, setCurrentPreviewPage] = React.useState(1);
     const [recentReceipt, setRecentReceipt] = React.useState<TenantPaymentHistoryItem | null>(null);
@@ -55,9 +57,11 @@ const ActiveLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
             propertyAddress: contract.propertyAddress,
             propertyType: contract.propertyType,
             landlord: contract.landlord,
+            landlordNameAr,
             landlordNationalId: contract.landlordNationalId,
             landlordAddress: contract.landlordAddress || 'Cairo, Egypt',
             tenant: contract.tenant,
+            tenantNameAr,
             tenantNationalId: contract.tenantNationalId,
             tenantAddress: contract.tenantAddress || contract.propertyAddress,
             startDate: contract.startDate,
@@ -351,13 +355,13 @@ const ActiveLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
                                             <div className="pdf-data-grid">
                                                 <div className="pdf-party-card">
                                                     <span className="pdf-data-label">{previewLang === 'en' ? 'Lessor (Landlord)' : 'المؤجر (الطرف الأول)'}</span>
-                                                    <span className="pdf-data-value" style={{ fontWeight: 'bold' }}>{contract.landlord}</span><br/>
+                                                    <span className="pdf-data-value" style={{ fontWeight: 'bold' }}>{previewLang === 'ar' ? (landlordNameAr || contract.landlord) : contract.landlord}</span><br/>
                                                     <span className="pdf-data-label" style={{ marginTop: '8px' }}>{previewLang === 'en' ? 'National ID' : 'الرقم القومي'}:</span> <span className="pdf-data-value">{toArNum(contract.landlordNationalId)}</span><br/>
                                                     <span className="pdf-data-label">{previewLang === 'en' ? 'Primary Address' : 'العنوان الحالي'}:</span> <span className="pdf-data-value">{contract.landlordAddress || '—'}</span>
                                                 </div>
                                                 <div className="pdf-party-card">
                                                     <span className="pdf-data-label">{previewLang === 'en' ? 'Lessee (Tenant)' : 'المستأجر (الطرف الثاني)'}</span>
-                                                    <span className="pdf-data-value" style={{ fontWeight: 'bold' }}>{contract.tenant}</span><br/>
+                                                    <span className="pdf-data-value" style={{ fontWeight: 'bold' }}>{previewLang === 'ar' ? (tenantNameAr || contract.tenant) : contract.tenant}</span><br/>
                                                     <span className="pdf-data-label" style={{ marginTop: '8px' }}>{previewLang === 'en' ? 'National ID' : 'الرقم القومي'}:</span> <span className="pdf-data-value">{toArNum(contract.tenantNationalId)}</span><br/>
                                                     <span className="pdf-data-label">{previewLang === 'en' ? 'Primary Address' : 'العنوان الحالي'}:</span> <span className="pdf-data-value">{contract.tenantAddress || contract.propertyAddress}</span>
                                                 </div>

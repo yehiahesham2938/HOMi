@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import Header from '../../../../../components/global/header';
 import Footer from '../../../../../components/global/footer';
 import MaintenanceSideBar from '../../SideBar/MaintenanceSideBar';
@@ -25,6 +26,7 @@ function urgencyToCard(u: MaintenanceRequest['urgency']): 'Low' | 'Medium' | 'Hi
 }
 
 const AvailableJobs: React.FC = () => {
+    const { t } = useTranslation();
     const [jobs, setJobs] = useState<MaintenanceRequest[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -114,7 +116,7 @@ const AvailableJobs: React.FC = () => {
                                     <select value={category} onChange={(e) => setCategory(e.target.value)}>
                                         <option value="All">All categories</option>
                                         {MAINTENANCE_CATEGORIES.map((c) => (
-                                            <option key={c} value={c}>{c}</option>
+                                            <option key={c} value={c}>{t('myProperties.maintenanceTypes.' + c, c)}</option>
                                         ))}
                                     </select>
                                 </div>

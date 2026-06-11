@@ -1,5 +1,6 @@
 // client/src/features/BrowseProperties/pages/PropertyDetailPage.tsx
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { 
     FaBed, FaBath, FaRulerCombined, FaMapMarkerAlt, FaHeart, FaShareAlt, 
@@ -104,6 +105,7 @@ function availabilityRibbon(property: PropertyUI): { label: string; dateLine: st
 }
 
 const PropertyDetailPage: React.FC = () => {
+    const { t } = useTranslation();
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const location = useLocation();
@@ -614,7 +616,7 @@ const PropertyDetailPage: React.FC = () => {
                                             {maintenanceResponsibilities.length > 0 ? (
                                                 maintenanceResponsibilities.map((item, index) => (
                                                     <div className="resp-grid-row" key={index}>
-                                                        <span className="area-title">{item.area}</span>
+                                                        <span className="area-title">{t('myProperties.maintenanceTypes.' + item.area, item.area)}</span>
                                                         <span className={`resp-badge ${item.responsible_party.toLowerCase()}`}>
                                                             {item.responsible_party === 'LANDLORD' ? 'Landlord' : 'Tenant'}
                                                         </span>

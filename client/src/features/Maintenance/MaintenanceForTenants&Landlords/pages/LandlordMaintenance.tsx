@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import Header from '../../../../components/global/header';
 import Footer from '../../../../components/global/footer';
 import Sidebar from '../../../../components/global/Landlord/sidebar';
@@ -30,6 +31,7 @@ function statusBadge(status: MaintenanceRequest['status']) {
 }
 
 const LandlordMaintenance: React.FC = () => {
+    const { t } = useTranslation();
     const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -231,7 +233,7 @@ const LandlordMaintenance: React.FC = () => {
                                                 {selected.urgency}
                                             </span>
                                             <span className="modal-category-badge">
-                                                {selected.category}
+                                                {t('myProperties.maintenanceTypes.' + selected.category, selected.category)}
                                             </span>
                                         </div>
                                     </div>

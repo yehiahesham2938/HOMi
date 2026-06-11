@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import './DetailedJobModal.css';
 import { 
     FaTimes, FaMapMarkerAlt, FaCalendarAlt, FaUser, FaTag, 
@@ -27,6 +28,7 @@ interface DetailedJobModalProps {
 }
 
 const DetailedJobModal: React.FC<DetailedJobModalProps> = ({ isOpen, onClose, job }) => {
+    const { t } = useTranslation();
     if (!isOpen || !job) return null;
 
     const getStatusTheme = () => {
@@ -62,7 +64,7 @@ const DetailedJobModal: React.FC<DetailedJobModalProps> = ({ isOpen, onClose, jo
                         <div className="grid-left-col">
                             <section className="detail-section">
                                 <label className="section-label"><FaTag /> Issue Category</label>
-                                <h3 className="category-title">{job.issueType}</h3>
+                                <h3 className="category-title">{t('myProperties.maintenanceTypes.' + job.issueType, job.issueType)}</h3>
                             </section>
 
                             <section className="detail-section">

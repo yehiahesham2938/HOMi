@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     FaTimes, FaTag, FaAlignLeft, FaDollarSign, FaImage,
     FaExclamationCircle, FaUpload, FaCheckCircle, FaTrash, FaWallet,
@@ -45,7 +46,8 @@ const DetailedIssueModal: React.FC<DetailedIssueModalProps> = ({
     isViewOnly = false,
     initialData = null
 }) => {
-    const [category, setCategory] = useState<string>('Plumbing');
+    const { t } = useTranslation();
+    const [category, setCategory] = useState<string>('plumbing');
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [budget, setBudget] = useState('');
@@ -58,6 +60,7 @@ const DetailedIssueModal: React.FC<DetailedIssueModalProps> = ({
 
     const [context, setContext] = useState<TenantMaintenanceContext | null>(null);
     const [loadingContext, setLoadingContext] = useState(false);
+    const activeRentals = context?.activeRentals;
 
     // Fetch tenant context (active property + wallet) when opening for posting
     useEffect(() => {
@@ -103,7 +106,7 @@ const DetailedIssueModal: React.FC<DetailedIssueModalProps> = ({
             setUrgency(initialData.urgency);
             setImagesBase64(initialData.images ?? []);
         } else {
-            setCategory('Plumbing');
+            setCategory('plumbing');
             setTitle('');
             setDescription('');
             setBudget('');
@@ -262,7 +265,7 @@ const DetailedIssueModal: React.FC<DetailedIssueModalProps> = ({
                             </div>
                         )}
 
-                        {!isViewOnly && context?.activeRentals?.length > 1 && (
+                        {!isViewOnly && activeRentals && activeRentals.length > 1 && (
                             <div className="form-group" style={{ marginBottom: '1rem' }}>
                                 <label><FaHome /> Select Property to Maintain</label>
                                 <select
@@ -270,7 +273,7 @@ const DetailedIssueModal: React.FC<DetailedIssueModalProps> = ({
                                     onChange={(e) => {
                                         const nextContractId = e.target.value;
                                         setSelectedContractId(nextContractId);
-                                        const chosen = context.activeRentals.find((r) => r.contractId === nextContractId);
+                                        const chosen = activeRentals.find((r) => r.contractId === nextContractId);
                                         if (chosen) {
                                             setContext((prev) => prev ? {
                                                 ...prev,
@@ -282,7 +285,7 @@ const DetailedIssueModal: React.FC<DetailedIssueModalProps> = ({
                                     }}
                                     disabled={loadingContext}
                                 >
-                                    {context.activeRentals.map((r) => (
+                                    {activeRentals.map((r) => (
                                         <option key={r.contractId} value={r.contractId}>
                                             {r.property.title} - {r.property.address}
                                         </option>
@@ -302,7 +305,7 @@ const DetailedIssueModal: React.FC<DetailedIssueModalProps> = ({
                             <div className="form-group">
                                 <label><FaTag /> Category</label>
                                 <select value={category} onChange={(e) => setCategory(e.target.value)} required disabled={isViewOnly}>
-                                    {CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+                                    {CATEGORIES.map((cat) => <option key={cat} value={cat}>{t('myProperties.maintenanceTypes.' + cat, cat)}</option>)}
                                 </select>
                             </div>
 

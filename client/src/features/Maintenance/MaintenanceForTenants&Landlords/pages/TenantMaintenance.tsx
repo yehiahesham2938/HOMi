@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import Header from '../../../../components/global/header';
 import Footer from '../../../../components/global/footer';
@@ -14,7 +15,7 @@ import {
     FaPlus, FaSearch, FaFilter, FaTools, FaCalendarCheck,
     FaHammer, FaBolt, FaCheckCircle, FaClock, FaTimesCircle,
     FaChevronRight, FaMapMarkerAlt, FaUsers,
-    FaTint, FaSnowflake, FaLeaf, FaPaintRoller, FaWrench, FaTrashAlt
+    FaTint, FaSnowflake, FaLeaf, FaPaintRoller, FaWrench, FaTrashAlt, FaShieldAlt
 } from 'react-icons/fa';
 import maintenanceService, {
     type BrowseProvider,
@@ -39,18 +40,24 @@ function statusColor(status: MaintenanceRequest['status']) {
 }
 
 function getCategoryIcon(category: string) {
-    switch (category) {
-        case 'Plumbing': return <FaTint className="type-icon-inner color-plumbing" />;
-        case 'Electrical': return <FaBolt className="type-icon-inner color-electrical" />;
-        case 'Painting': return <FaPaintRoller className="type-icon-inner color-painting" />;
-        case 'AC Service': return <FaSnowflake className="type-icon-inner color-ac" />;
-        case 'Gardening': return <FaLeaf className="type-icon-inner color-gardening" />;
-        case 'Flooring': return <FaWrench className="type-icon-inner color-flooring" />;
+    const cat = String(category || '').toLowerCase();
+    switch (cat) {
+        case 'plumbing': return <FaTint className="type-icon-inner color-plumbing" />;
+        case 'electrical': return <FaBolt className="type-icon-inner color-electrical" />;
+        case 'hvac': return <FaSnowflake className="type-icon-inner color-ac" />;
+        case 'exterior': return <FaLeaf className="type-icon-inner color-gardening" />;
+        case 'structural': return <FaHammer className="type-icon-inner color-other" />;
+        case 'appliances': return <FaWrench className="type-icon-inner color-other" />;
+        case 'utilities': return <FaBolt className="type-icon-inner color-other" />;
+        case 'pest': return <FaLeaf className="type-icon-inner color-other" />;
+        case 'common': return <FaUsers className="type-icon-inner color-other" />;
+        case 'security': return <FaShieldAlt className="type-icon-inner color-other" />;
         default: return <FaHammer className="type-icon-inner color-other" />;
     }
 }
 
 const TenantMaintenance: React.FC = () => {
+    const { t } = useTranslation();
     const [searchParams] = useSearchParams();
     const initialTab = (searchParams.get('tab') as 'post' | 'browse' | 'active') || 'post';
     const [activeTab, setActiveTab] = useState<'post' | 'browse' | 'active'>(initialTab);
@@ -227,7 +234,7 @@ const TenantMaintenance: React.FC = () => {
                                         <div className={`type-icon-wrapper bg-${urgencyClass}`}>
                                             {getCategoryIcon(req.category)}
                                         </div>
-                                        <span className="category-text">{req.category}</span>
+                                        <span className="category-text">{t('myProperties.maintenanceTypes.' + req.category, req.category)}</span>
                                     </div>
                                     <h3 className="post-title-text">{req.title}</h3>
                                     <p className="post-description">{req.description}</p>
@@ -318,7 +325,7 @@ const TenantMaintenance: React.FC = () => {
                     >
                         <option value="All">All Categories</option>
                         {MAINTENANCE_CATEGORIES.map((c) => (
-                            <option key={c} value={c}>{c}</option>
+                            <option key={c} value={c}>{t('myProperties.maintenanceTypes.' + c, c)}</option>
                         ))}
                     </select>
                 </div>

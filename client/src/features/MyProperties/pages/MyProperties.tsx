@@ -81,7 +81,8 @@ const MyProperties = () => {
                 houseRules: prop.houseRules.map(r => r.name),
                 activeContract: activeContract || null,
                 onUpdate: fetchProperties,
-                securityDeposit: prop.securityDeposit
+                securityDeposit: prop.securityDeposit,
+                maintenanceResponsibilities: prop.maintenanceResponsibilities || []
               };
             });
             setProperties(mappedProperties);

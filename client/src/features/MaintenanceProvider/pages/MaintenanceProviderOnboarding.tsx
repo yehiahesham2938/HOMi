@@ -361,17 +361,34 @@ const MaintenanceProviderOnboarding = () => {
     );
 
     const categoryLabel = (value: string) => {
-        if (!isArabic) return value;
-        const map: Record<string, string> = {
-            Plumbing: 'السباكة',
-            Electrical: 'الكهرباء',
-            Painting: 'الدهانات',
-            'AC Service': 'تكييف',
-            Gardening: 'الحدائق',
-            Flooring: 'الأرضيات',
-            Other: 'أخرى',
+        const mapEn: Record<string, string> = {
+            structural: 'Structural Repairs',
+            appliances: 'Interior Appliances',
+            utilities: 'Utility Bills',
+            plumbing: 'Plumbing',
+            electrical: 'Electrical',
+            hvac: 'HVAC/Air',
+            pest: 'Pest Control',
+            exterior: 'Exterior Maintenance',
+            common: 'Common Areas',
+            security: 'Security Systems',
+            other: 'Other'
         };
-        return map[value] || value;
+        const mapAr: Record<string, string> = {
+            structural: 'الإصلاحات الهيكلية',
+            appliances: 'الأجهزة الداخلية',
+            utilities: 'فواتير المرافق',
+            plumbing: 'السباكة',
+            electrical: 'الكهرباء',
+            hvac: 'التكييف والتهوية',
+            pest: 'مكافحة الحشرات',
+            exterior: 'صيانة الساحة الخارجية',
+            common: 'المناطق المشتركة',
+            security: 'أنظمة الأمن',
+            other: 'أخرى'
+        };
+        const activeMap = isArabic ? mapAr : mapEn;
+        return activeMap[value] || value;
     };
 
     const stepTitles = providerType === 'INDIVIDUAL'
@@ -427,7 +444,7 @@ const MaintenanceProviderOnboarding = () => {
                     showValidationIssue(t.basicError);
                     return;
                 }
-                if (applyForm.category === 'Other' && !normalizeCategory(customIndividualCategory)) {
+                if (applyForm.category === 'other' && !normalizeCategory(customIndividualCategory)) {
                     showValidationIssue(t.basicError);
                     return;
                 }
@@ -576,7 +593,7 @@ const MaintenanceProviderOnboarding = () => {
                 businessName: providerType === 'CENTER' ? applyForm.businessName.trim() : undefined,
                 category: providerType === 'CENTER'
                     ? selectedCenterCategories[0]
-                    : (applyForm.category === 'Other'
+                    : (applyForm.category === 'other'
                         ? normalizeCategory(customIndividualCategory)
                         : applyForm.category.trim()),
                 categories: providerType === 'CENTER' ? selectedCenterCategories : undefined,
@@ -709,7 +726,7 @@ const MaintenanceProviderOnboarding = () => {
                                                 <option value="">{t.mainCategory}</option>
                                                 {providerCategoryOptions.map((item) => <option key={item} value={item}>{categoryLabel(item)}</option>)}
                                             </select>
-                                            {applyForm.category === 'Other' && (
+                                            {applyForm.category === 'other' && (
                                                 <input
                                                     placeholder={t.customCategoryPlaceholder}
                                                     value={customIndividualCategory}

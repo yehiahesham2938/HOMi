@@ -457,7 +457,7 @@ const ContractDetailView: React.FC<Props> = ({ contract, isReadOnly = false, onU
                                     {maintenanceResponsibilities.length > 0 ? (
                                         maintenanceResponsibilities.map((item, idx) => (
                                             <div key={`${item.area}-${idx}`} className="resp-row">
-                                                <span>{item.area}</span>
+                                                <span>{t('myProperties.maintenanceTypes.' + item.area, item.area)}</span>
                                                 <span className={`owner-badge ${item.responsible_party === 'LANDLORD' ? 'landlord' : 'tenant'}`}>
                                                     {item.responsible_party === 'LANDLORD' ? t('landlordContract.landlordBadge') : t('landlordContract.tenantBadge')}
                                                 </span>

@@ -76,12 +76,24 @@ export class MaintenanceError extends Error {
 // stores responsibilities against `MaintenanceArea`. This map normalises one
 // to the other so we can check whether a category falls on the landlord.
 const CATEGORY_TO_CONTRACT_AREAS: Record<string, string[]> = {
-    Plumbing: ['Plumbing'],
-    Electrical: ['Electrical'],
-    Painting: ['Interior Appliances', 'Structural Repairs', 'Exterior Maintenance'],
-    'AC Service': ['HVAC / Air Conditioning'],
-    Gardening: ['Exterior Maintenance', 'Common Areas'],
-    Flooring: ['Structural Repairs', 'Interior Appliances'],
+    structural: ['structural'],
+    appliances: ['appliances'],
+    utilities: ['utilities'],
+    plumbing: ['plumbing'],
+    electrical: ['electrical'],
+    hvac: ['hvac'],
+    pest: ['pest'],
+    exterior: ['exterior'],
+    common: ['common'],
+    security: ['security'],
+    other: [],
+    // Keep backwards compatibility for old categories
+    Plumbing: ['plumbing'],
+    Electrical: ['electrical'],
+    Painting: ['appliances', 'structural', 'exterior'],
+    'AC Service': ['hvac'],
+    Gardening: ['exterior', 'common'],
+    Flooring: ['structural', 'appliances'],
     Other: [],
 };
 

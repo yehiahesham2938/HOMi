@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../../../../components/global/header';
 import Footer from '../../../../../components/global/footer';
@@ -28,6 +29,7 @@ function timeAgo(iso: string): string {
 }
 
 const MaintenanceHome: React.FC = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const cached = authService.getCurrentUser?.();
     const firstName = cached?.user?.firstName ?? 'there';
@@ -146,7 +148,7 @@ const MaintenanceHome: React.FC = () => {
                                                             <h4>{job.title}</h4>
                                                             <div className="job-meta">
                                                                 <span><FaMapMarkerAlt /> {job.property?.address ?? '—'}</span>
-                                                                <span>{job.category}</span>
+                                                                <span>{t('myProperties.maintenanceTypes.' + job.category, job.category)}</span>
                                                                 <span>{timeAgo(job.createdAt)}</span>
                                                                 {job.urgency === 'CRITICAL' && (
                                                                     <span style={{ color: '#ef4444', fontWeight: 600 }}>Critical</span>
@@ -186,7 +188,7 @@ const MaintenanceHome: React.FC = () => {
                                                             <h4>{job.title}</h4>
                                                             <div className="job-meta">
                                                                 <span><FaMapMarkerAlt /> {job.property?.address ?? '—'}</span>
-                                                                <span>{job.category}</span>
+                                                                <span>{t('myProperties.maintenanceTypes.' + job.category, job.category)}</span>
                                                                 <span>{job.tenant ? `${job.tenant.firstName} ${job.tenant.lastName}` : ''}</span>
                                                             </div>
                                                         </div>

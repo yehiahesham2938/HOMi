@@ -177,6 +177,26 @@ const AddPropertyPage: React.FC = () => {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [selectedHouseRules, setSelectedHouseRules] = useState<string[]>([]);
 
+  // Custom amenity / rule input state
+  const [customAmenity, setCustomAmenity] = useState('');
+  const [customRule, setCustomRule] = useState('');
+
+  const addCustomAmenity = () => {
+    const val = customAmenity.trim();
+    if (val && !selectedAmenities.includes(val) && !amenitiesList.includes(val)) {
+      setSelectedAmenities(prev => [...prev, val]);
+    }
+    setCustomAmenity('');
+  };
+
+  const addCustomRule = () => {
+    const val = customRule.trim();
+    if (val && !selectedHouseRules.includes(val) && !houseRules.includes(val)) {
+      setSelectedHouseRules(prev => [...prev, val]);
+    }
+    setCustomRule('');
+  };
+
   const uniqueValues = (values: string[]) => [...new Set(values.map((value) => value.trim()).filter(Boolean))];
 
   useEffect(() => {
@@ -704,81 +724,90 @@ const AddPropertyPage: React.FC = () => {
                             <div className="spec-item"><span className="sqft-label">{t('Area (sqft)')}</span><input type="number" placeholder={t('guestHome.area')} value={sqft} onChange={(e) => setSqft(e.target.value)} /></div>
                           </div>
 
-                          <div className="photo-upload-section">
-                            <label className="upload-section-title"><FaImage className="section-label-icon" /> {t('myProperties.labels.propertyGallery')} <span className="limit-hint">(Max 5)</span></label>
-                            <div className="upload-grid">
-                              <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                onChange={handleFilesSelected}
-                                style={{ display: 'none' }}
-                              />
-                              <button type="button" className="upload-placeholder" onClick={handleUploadClick}>
-                                <FaCloudUploadAlt className="upload-cloud-icon" />
-                                <span>{t('myProperties.labels.uploadNew')}</span>
-                              </button>
-                              {uploadedImages.map((img, index) => (
-                                <div key={`property-img-${index}`} className="upload-attachment-tile">
-                                  <div className="uploaded-photo-slot-inner">
-                                    <img src={img} alt={`Property ${index + 1}`} />
-                                  </div>
-                                  <button
-                                    type="button"
-                                    className="upload-attachment-remove"
-                                    onClick={() => removeUploadedImage(index)}
-                                    aria-label={`Remove property photo ${index + 1}`}
-                                  >
-                                    <FaTimes aria-hidden />
-                                  </button>
-                                </div>
-                              ))}
-                              {Array.from({ length: Math.max(0, 4 - uploadedImages.length) }).map((_, i) => (
-                                <div key={`empty-${i}`} className="empty-photo-slot"></div>
-                              ))}
+                          {/* ── Property Photos ─────────────────────────────── */}
+                          <div className="upload-block">
+                            <div className="upload-block-header">
+                              <FaImage className="upload-block-icon" />
+                              <div>
+                                <div className="upload-block-title">{t('myProperties.labels.propertyGallery')} <span className="limit-hint">(Max 5)</span></div>
+                                <div className="upload-block-desc">Upload high-quality photos of the property. The first image will be the cover.</div>
+                              </div>
                             </div>
+                            <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleFilesSelected} style={{ display: 'none' }} />
+                            {/* Hero drop zone */}
+                            <button
+                              type="button"
+                              className={`upload-hero-zone ${uploadedImages.length >= 5 ? 'upload-hero-zone--full' : ''}`}
+                              onClick={handleUploadClick}
+                              disabled={uploadedImages.length >= 5}
+                            >
+                              <FaCloudUploadAlt className="upload-hero-icon" />
+                              <span className="upload-hero-label">
+                                {uploadedImages.length >= 5 ? 'Maximum photos reached' : 'Click to upload photos'}
+                              </span>
+                              <span className="upload-hero-sub">
+                                {uploadedImages.length} / 5 uploaded
+                              </span>
+                            </button>
+                            {/* Thumbnail strip */}
+                            {uploadedImages.length > 0 && (
+                              <div className="upload-thumb-strip">
+                                {uploadedImages.map((img, index) => (
+                                  <div key={`property-img-${index}`} className="upload-thumb-tile">
+                                    {index === 0 && <span className="upload-thumb-badge">Cover</span>}
+                                    <img src={img} alt={`Property ${index + 1}`} />
+                                    <button
+                                      type="button"
+                                      className="upload-attachment-remove"
+                                      onClick={() => removeUploadedImage(index)}
+                                      aria-label={`Remove photo ${index + 1}`}
+                                    >
+                                      <FaTimes aria-hidden />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
 
-                          {/* Legal Ownership Documents Upload */}
-                          <div className="photo-upload-section" style={{ marginTop: '24px' }}>
-                            <label className="upload-section-title"><FaShieldAlt className="section-label-icon" /> {t('landlordHomeComponents.ownershipDocs', { defaultValue: 'Legal Ownership Documents' })} <span className="limit-hint">(Max 3)</span></label>
-                            <p className="upload-section-desc">
-                              {t('landlordHomeComponents.docsInstruction', { defaultValue: 'Upload files (PDFs/Images) proving your ownership. These are required for Admin verification.' })}
-                            </p>
-                            <div className="upload-grid">
-                              <input
-                                ref={docInputRef}
-                                type="file"
-                                accept="image/*,application/pdf"
-                                multiple
-                                onChange={handleDocsSelected}
-                                style={{ display: 'none' }}
-                              />
-                              <button type="button" className="upload-placeholder" onClick={handleDocUploadClick}>
-                                <FaCloudUploadAlt className="upload-cloud-icon" />
-                                <span>{t('myProperties.labels.uploadNew')} Docs</span>
+                          {/* ── Ownership Documents ──────────────────────────── */}
+                          <div className="upload-block">
+                            <div className="upload-block-header">
+                              <FaShieldAlt className="upload-block-icon" />
+                              <div>
+                                <div className="upload-block-title">{t('landlordHomeComponents.ownershipDocs', { defaultValue: 'Legal Ownership Documents' })} <span className="limit-hint">(Max 3)</span></div>
+                                <div className="upload-block-desc">{t('landlordHomeComponents.docsInstruction', { defaultValue: 'Upload PDFs or images proving ownership. Required for admin verification.' })}</div>
+                              </div>
+                            </div>
+                            <input ref={docInputRef} type="file" accept="image/*,application/pdf" multiple onChange={handleDocsSelected} style={{ display: 'none' }} />
+                            <div className="upload-docs-row">
+                              <button
+                                type="button"
+                                className={`upload-doc-zone ${uploadedDocuments.length >= 3 ? 'upload-hero-zone--full' : ''}`}
+                                onClick={handleDocUploadClick}
+                                disabled={uploadedDocuments.length >= 3}
+                              >
+                                <FaCloudUploadAlt className="upload-hero-icon" />
+                                <span className="upload-hero-label">
+                                  {uploadedDocuments.length >= 3 ? 'Maximum docs reached' : 'Upload Document'}
+                                </span>
+                                <span className="upload-hero-sub">{uploadedDocuments.length} / 3 uploaded</span>
                               </button>
                               {uploadedDocuments.map((doc, index) => (
-                                <div key={`ownership-doc-${index}`} className="upload-attachment-tile">
-                                  <div className="uploaded-photo-slot-inner uploaded-doc-preview">
-                                    <span className="uploaded-doc-preview-text">
-                                      {doc.startsWith('data:application/pdf') ? 'PDF' : doc.startsWith('data:image') ? 'Image' : 'File'}
-                                    </span>
-                                    <span className="uploaded-doc-preview-snippet">{doc.substring(0, 24)}…</span>
+                                <div key={`ownership-doc-${index}`} className="upload-doc-tile">
+                                  <div className="upload-doc-type-badge">
+                                    {doc.startsWith('data:application/pdf') ? '📄 PDF' : '🖼️ Image'}
                                   </div>
+                                  <span className="upload-doc-label">Document {index + 1}</span>
                                   <button
                                     type="button"
                                     className="upload-attachment-remove"
                                     onClick={() => removeUploadedDocument(index)}
-                                    aria-label={`Remove ownership document ${index + 1}`}
+                                    aria-label={`Remove document ${index + 1}`}
                                   >
                                     <FaTimes aria-hidden />
                                   </button>
                                 </div>
-                              ))}
-                              {Array.from({ length: Math.max(0, 3 - uploadedDocuments.length) }).map((_, i) => (
-                                <div key={`empty-doc-${i}`} className="empty-photo-slot"></div>
                               ))}
                             </div>
                           </div>
@@ -942,6 +971,29 @@ const AddPropertyPage: React.FC = () => {
                                     {item}
                                   </button>
                                 ))}
+                                {/* Custom amenities added by landlord */}
+                                {selectedAmenities.filter(a => !amenitiesList.includes(a)).map(item => (
+                                  <button
+                                    type="button"
+                                    key={item}
+                                    className="chip active chip-custom"
+                                    onClick={() => setSelectedAmenities(prev => prev.filter(a => a !== item))}
+                                  >
+                                    {item} <FaTimes style={{ marginLeft: 4, fontSize: '0.65rem' }} />
+                                  </button>
+                                ))}
+                              </div>
+                              <div className="custom-chip-adder">
+                                <input
+                                  type="text"
+                                  value={customAmenity}
+                                  onChange={e => setCustomAmenity(e.target.value)}
+                                  onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addCustomAmenity())}
+                                  placeholder="Add a custom amenity (e.g. Rooftop Access, Concierge)..."
+                                />
+                                <button type="button" onClick={addCustomAmenity}>
+                                  <FaTools style={{ marginRight: 4 }} /> Add
+                                </button>
                               </div>
                             </div>
 
@@ -958,6 +1010,29 @@ const AddPropertyPage: React.FC = () => {
                                     {item}
                                   </button>
                                 ))}
+                                {/* Custom rules added by landlord */}
+                                {selectedHouseRules.filter(r => !houseRules.includes(r)).map(item => (
+                                  <button
+                                    type="button"
+                                    key={item}
+                                    className="chip active chip-custom"
+                                    onClick={() => setSelectedHouseRules(prev => prev.filter(r => r !== item))}
+                                  >
+                                    {item} <FaTimes style={{ marginLeft: 4, fontSize: '0.65rem' }} />
+                                  </button>
+                                ))}
+                              </div>
+                              <div className="custom-chip-adder">
+                                <input
+                                  type="text"
+                                  value={customRule}
+                                  onChange={e => setCustomRule(e.target.value)}
+                                  onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addCustomRule())}
+                                  placeholder="Add a custom rule (e.g. No Loud Music After 11PM)..."
+                                />
+                                <button type="button" onClick={addCustomRule}>
+                                  <FaTools style={{ marginRight: 4 }} /> Add
+                                </button>
                               </div>
                             </div>
                           </div>

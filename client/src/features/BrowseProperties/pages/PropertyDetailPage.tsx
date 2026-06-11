@@ -118,7 +118,7 @@ const PropertyDetailPage: React.FC = () => {
     const isUserGuest = !authService.isAuthenticated();
     const isLandlord = currentUser?.user?.role === 'LANDLORD';
     const isTenant = currentUser?.user?.role === 'TENANT';
-    const openedFromGuest = isUserGuest || !!(location.state as { openedFromGuest?: boolean })?.openedFromGuest;
+    const openedFromGuest = !!(location.state as { openedFromGuest?: boolean })?.openedFromGuest;
 
     // Heart state
     const [isSaved, setIsSaved] = useState(false);
@@ -458,7 +458,7 @@ const PropertyDetailPage: React.FC = () => {
         <div className="property-detail-page-wrapper">
             {isUserGuest ? <GuestHeader showBackToHome={true} /> : <Header />}
             <div className="property-detail-page-body">
-                {isLandlord ? <LandlordSidebar /> : isTenant ? <TenantSidebar /> : null}
+                {!isUserGuest && (isLandlord ? <LandlordSidebar /> : isTenant ? <TenantSidebar /> : null)}
                 
                 <div className="property-detail-page-content">
                     {/* BREADCRUMB & BACK NAVIGATION */}

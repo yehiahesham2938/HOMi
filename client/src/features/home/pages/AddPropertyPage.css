@@ -468,163 +468,286 @@
   text-align: center;
 }
 
-/* Upload Gallery Areas */
-.add-property-hub-wrapper .photo-upload-section {
+/* ── Redesigned Upload Blocks ─────────────────────────── */
+.add-property-hub-wrapper .upload-block {
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.add-property-hub-wrapper .upload-block-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.add-property-hub-wrapper .upload-block-icon {
+  font-size: 1.4rem;
+  color: var(--primary);
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.add-property-hub-wrapper .upload-block-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-main);
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.add-property-hub-wrapper .upload-block-desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+/* Hero upload zone (full-width clickable area) */
+.add-property-hub-wrapper .upload-hero-zone {
+  width: 100%;
+  border: 2px dashed #cbd5e1;
+  background: white;
+  border-radius: 18px;
+  padding: 2rem;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  margin-bottom: 1rem;
 }
 
-.add-property-hub-wrapper .upload-section-title {
-  font-size: 0.9rem;
+.add-property-hub-wrapper .upload-hero-zone:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: var(--primary-glow);
+}
+
+.add-property-hub-wrapper .upload-hero-zone--full {
+  border-color: var(--success);
+  background: var(--success-bg);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.add-property-hub-wrapper .upload-hero-icon {
+  font-size: 2.2rem;
+  color: var(--text-light);
+  transition: color 0.2s;
+}
+
+.add-property-hub-wrapper .upload-hero-zone:hover:not(:disabled) .upload-hero-icon {
+  color: var(--primary);
+}
+
+.add-property-hub-wrapper .upload-hero-label {
+  font-size: 0.95rem;
   font-weight: 800;
-  color: var(--text-main);
+  color: var(--text-muted);
+}
+
+.add-property-hub-wrapper .upload-hero-sub {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-light);
+  background: #e2e8f0;
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+/* Thumbnail strip under hero zone */
+.add-property-hub-wrapper .upload-thumb-strip {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.add-property-hub-wrapper .upload-thumb-tile {
+  position: relative;
+  width: 100px;
+  height: 90px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+
+.add-property-hub-wrapper .upload-thumb-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.add-property-hub-wrapper .upload-thumb-badge {
+  position: absolute;
+  top: 4px;
+  left: 5px;
+  background: var(--primary);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 900;
+  padding: 2px 6px;
+  border-radius: 6px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 6px;
+  z-index: 2;
+}
+
+/* Document upload zone + tiles */
+.add-property-hub-wrapper .upload-docs-row {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.add-property-hub-wrapper .section-label-icon {
-  color: var(--primary);
-  font-size: 1.1rem;
-}
-
-.add-property-hub-wrapper .limit-hint {
-  color: var(--text-light);
-  font-size: 0.75rem;
-  text-transform: none;
-  letter-spacing: 0;
-  font-weight: 600;
-}
-
-.add-property-hub-wrapper .upload-section-desc {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin: 0 0 1rem 0;
-}
-
-.add-property-hub-wrapper .upload-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
   gap: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
 }
 
-.add-property-hub-wrapper .upload-placeholder {
-  border: 2px dashed #cbd5e1;
-  background: #f8fafc;
-  border-radius: 20px;
+.add-property-hub-wrapper .upload-doc-zone {
+  flex-shrink: 0;
+  width: 130px;
   height: 110px;
+  border: 2px dashed #cbd5e1;
+  background: white;
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 6px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  padding: 10px;
+  transition: all 0.25s ease;
+  padding: 12px;
+  box-sizing: border-box;
 }
 
-.add-property-hub-wrapper .upload-placeholder:hover {
+.add-property-hub-wrapper .upload-doc-zone:hover:not(:disabled) {
   border-color: var(--primary);
   background: var(--primary-glow);
 }
 
-.add-property-hub-wrapper .upload-cloud-icon {
-  font-size: 1.6rem;
-  color: var(--text-light);
-}
-
-.add-property-hub-wrapper .upload-placeholder:hover .upload-cloud-icon {
+.add-property-hub-wrapper .upload-doc-zone:hover:not(:disabled) .upload-hero-icon {
   color: var(--primary);
 }
 
-.add-property-hub-wrapper .upload-placeholder span {
-  font-size: 0.72rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  text-align: center;
-  line-height: 1.2;
-}
-
-.add-property-hub-wrapper .upload-attachment-tile {
+.add-property-hub-wrapper .upload-doc-tile {
   position: relative;
-  border-radius: 20px;
+  width: 130px;
   height: 110px;
-  border: 1px solid var(--border-color);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-}
-
-.add-property-hub-wrapper .uploaded-photo-slot-inner {
-  width: 100%;
-  height: 100%;
-}
-
-.add-property-hub-wrapper .uploaded-photo-slot-inner img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.add-property-hub-wrapper .uploaded-doc-preview {
-  background: #f1f5f9;
+  border-radius: 16px;
+  border: 1.5px solid var(--border-color);
+  background: white;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  text-align: center;
+  gap: 6px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
 }
 
-.add-property-hub-wrapper .uploaded-doc-preview-text {
-  font-size: 0.8rem;
-  font-weight: 900;
-  text-transform: uppercase;
+.add-property-hub-wrapper .upload-doc-type-badge {
+  font-size: 1rem;
+  font-weight: 800;
   color: var(--primary);
   background: var(--primary-glow);
-  padding: 2px 8px;
-  border-radius: 6px;
-  margin-bottom: 4px;
+  padding: 4px 10px;
+  border-radius: 8px;
 }
 
-.add-property-hub-wrapper .uploaded-doc-preview-snippet {
-  font-size: 0.68rem;
+.add-property-hub-wrapper .upload-doc-label {
+  font-size: 0.72rem;
+  font-weight: 700;
   color: var(--text-muted);
-  word-break: break-all;
-  display: block;
 }
 
+.add-property-hub-wrapper .custom-chip-adder {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 1rem;
+}
+
+.add-property-hub-wrapper .chip-custom {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 50px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+/* Remove button on thumb/doc tiles */
 .add-property-hub-wrapper .upload-attachment-remove {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  background: rgba(15, 23, 42, 0.7);
+  top: 5px;
+  right: 5px;
+  background: rgba(15, 23, 42, 0.72);
   backdrop-filter: blur(4px);
   border: none;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   cursor: pointer;
   transition: background 0.2s ease;
+  z-index: 3;
 }
 
 .add-property-hub-wrapper .upload-attachment-remove:hover {
   background: rgba(239, 68, 68, 0.9);
 }
 
-.add-property-hub-wrapper .empty-photo-slot {
-  border: 1px solid var(--border-color);
-  border-radius: 20px;
-  background: rgba(241, 245, 249, 0.3);
-  height: 110px;
+/* Custom chip adder input + button */
+.add-property-hub-wrapper .custom-chip-adder input {
+  flex: 1;
+  padding: 0.7rem 1rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--border-color);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-main);
+  background: white;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.add-property-hub-wrapper .custom-chip-adder input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.add-property-hub-wrapper .custom-chip-adder button {
+  flex-shrink: 0;
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.7rem 1.2rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.2s ease;
+}
+
+.add-property-hub-wrapper .custom-chip-adder button:hover {
+  background: var(--primary-hover);
 }
 
 /* Map Picker Container */

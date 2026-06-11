@@ -1,161 +1,417 @@
-/* client\src\features\admin\pages\adminLogin.css */
+/* adminLogin.css — clean, on-brand admin portal login */
 
-.admin-login-container {
-    height: 100vh;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+/* ── Layout ────────────────────────────────────────────────── */
+.al-root {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(circle at center, #0f172a 0%, #090d16 100%);
-    font-family: inherit;
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #f8fafc;
     position: relative;
     overflow: hidden;
 }
 
-/* Accent light glow shapes */
-.admin-login-container::before {
-    content: "";
-    position: absolute;
-    width: 450px;
-    height: 450px;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+/* Subtle top-right glow that echoes the blue primary */
+.al-bg-accent {
+    position: fixed;
+    top: -200px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 65%);
     pointer-events: none;
+    z-index: 0;
+}
+
+/* ── Left branding column ──────────────────────────────────── */
+.al-left {
+    position: relative;
     z-index: 1;
-}
-
-.admin-login-box {
-    background: rgba(30, 41, 59, 0.7);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    padding: 48px 40px;
-    border-radius: 24px;
-    width: 100%;
-    max-width: 400px;
+    width: 48%;
+    background: #0f172a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3.5rem;
     box-sizing: border-box;
-    box-shadow: 
-        0 25px 50px -12px rgba(0, 0, 0, 0.5),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    z-index: 2;
-    animation: loginFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    /* very subtle inner gradient to add depth */
+    background-image: linear-gradient(135deg, #0f172a 60%, #1a2540 100%);
 }
 
-@keyframes loginFadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+/* Decorative lines in the background */
+.al-left::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(59, 130, 246, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
 }
 
-.admin-login-header {
-    text-align: center;
-    margin-bottom: 32px;
+.al-left-inner {
+    position: relative;
+    max-width: 440px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
 }
 
-.admin-login-header h2 {
-    color: #ffffff;
-    font-size: 1.8rem;
+/* Logo */
+.al-logo {
+    display: flex;
+    align-items: center;
+}
+
+.al-logo-image {
+    height: 130px;
+    width: auto;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    opacity: 0.95;
+    transition: opacity 0.2s ease;
+    margin-left: -30px;
+}
+
+.al-logo-image:hover {
+    opacity: 1;
+}
+
+/* Headline */
+.al-left-text h1 {
+    font-size: 3rem;
     font-weight: 900;
-    margin: 0 0 8px;
-    letter-spacing: -0.5px;
+    color: #ffffff;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    margin: 0 0 1rem;
 }
 
-.admin-login-header span {
-    color: #38bdf8;
-    background: linear-gradient(90deg, #60a5fa, #38bdf8);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+.al-left-text h1 span {
+    color: #3b82f6;
 }
 
-.admin-login-header p {
+.al-left-text p {
     color: #64748b;
+    font-size: 0.95rem;
+    line-height: 1.7;
     margin: 0;
-    font-size: 0.72rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
+    max-width: 380px;
 }
 
-.admin-error-message {
-    background: rgba(239, 68, 68, 0.15);
-    color: #fca5a5;
-    padding: 12px 16px;
+/* Feature list */
+.al-feature-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 2rem;
+}
+
+.al-feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #94a3b8;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.al-feature-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #3b82f6;
+    flex-shrink: 0;
+    opacity: 0.8;
+}
+
+/* ── Right form column ─────────────────────────────────────── */
+.al-right {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    box-sizing: border-box;
+}
+
+/* Card */
+.al-card {
+    width: 100%;
+    max-width: 420px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 24px;
+    padding: 2.5rem;
+    box-shadow:
+        0 4px 6px -1px rgba(15, 23, 42, 0.04),
+        0 20px 50px -10px rgba(15, 23, 42, 0.08);
+    animation: cardIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    box-sizing: border-box;
+}
+
+@keyframes cardIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Card header */
+.al-card-header {
+    margin-bottom: 2rem;
+}
+
+.al-shield-icon {
+    width: 48px;
+    height: 48px;
+    background: #eff6ff;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2563eb;
+    margin-bottom: 1.25rem;
+    border: 1px solid #dbeafe;
+}
+
+.al-card-header h2 {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.4rem;
+}
+
+.al-card-header p {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+/* Error */
+.al-error {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 0.8rem 1rem;
     border-radius: 12px;
-    margin-bottom: 24px;
-    border: 1px solid rgba(239, 68, 68, 0.25);
+    margin-bottom: 1.5rem;
     font-size: 0.85rem;
     font-weight: 500;
-    text-align: center;
+    animation: shake 0.35s ease;
 }
 
-.admin-login-form .form-group {
-    margin-bottom: 20px;
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25%,
+    75% {
+        transform: translateX(-5px);
+    }
+
+    50% {
+        transform: translateX(5px);
+    }
 }
 
-.admin-login-form label {
+/* Form */
+.al-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.al-field label {
     display: block;
-    color: #94a3b8;
-    margin-bottom: 8px;
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     font-weight: 700;
+    color: #475569;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.07em;
+    margin-bottom: 0.45rem;
 }
 
-.admin-login-form input {
+.al-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.al-input-icon {
+    position: absolute;
+    left: 1rem;
+    color: #94a3b8;
+    pointer-events: none;
+    transition: color 0.2s;
+}
+
+.al-input-wrap:focus-within .al-input-icon {
+    color: #3b82f6;
+}
+
+.al-input-wrap input {
     width: 100%;
-    padding: 14px 16px;
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.85rem 2.75rem 0.85rem 2.75rem;
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
-    color: #ffffff;
-    font-size: 0.95rem;
-    font-weight: 600;
+    font-size: 0.925rem;
+    font-weight: 500;
+    color: #0f172a;
+    background: #f8fafc;
+    font-family: inherit;
     box-sizing: border-box;
-    transition: all 0.25s ease;
-}
-
-.admin-login-form input:hover {
-    background: rgba(15, 23, 42, 0.8);
-    border-color: rgba(255, 255, 255, 0.12);
-}
-
-.admin-login-form input:focus {
+    transition: all 0.2s ease;
     outline: none;
-    border-color: #38bdf8;
-    background: #0f172a;
-    box-shadow: 
-        0 0 0 3px rgba(56, 189, 248, 0.15),
-        0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
-.admin-login-btn {
+.al-input-wrap input::placeholder {
+    color: #cbd5e1;
+}
+
+.al-input-wrap input:hover {
+    border-color: #cbd5e1;
+    background: #ffffff;
+}
+
+.al-input-wrap input:focus {
+    border-color: #3b82f6;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+/* Show/hide password */
+.al-pw-toggle {
+    position: absolute;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+}
+
+.al-pw-toggle:hover {
+    color: #3b82f6;
+}
+
+/* Submit */
+.al-submit {
     width: 100%;
-    padding: 14px;
-    background: linear-gradient(135deg, #38bdf8, #2563eb);
+    padding: 0.9rem;
+    margin-top: 0.25rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     color: #ffffff;
     border: none;
     border-radius: 12px;
     font-size: 0.95rem;
     font-weight: 700;
+    font-family: inherit;
     cursor: pointer;
-    transition: all 0.25s ease;
-    margin-top: 12px;
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.admin-login-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, #0ea5e9, #1d4ed8);
+.al-submit:hover:not(:disabled) {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
 }
 
-.admin-login-btn:active:not(:disabled) {
+.al-submit:active:not(:disabled) {
     transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
 }
 
-.admin-login-btn:disabled {
-    opacity: 0.6;
+.al-submit:disabled,
+.al-submit--busy {
+    opacity: 0.65;
     cursor: not-allowed;
-    box-shadow: none;
+}
+
+/* Spinner */
+.al-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Footer note */
+.al-footer-note {
+    margin: 1.5rem 0 0;
+    text-align: center;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    line-height: 1.5;
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .al-left {
+        display: none;
+    }
+
+    .al-right {
+        background: #f8fafc;
+        min-height: 100vh;
+    }
+
+    .al-card {
+        box-shadow: none;
+        border: 1px solid #e2e8f0;
+    }
+}
+
+@media (max-width: 480px) {
+    .al-right {
+        padding: 1.5rem;
+    }
+
+    .al-card {
+        padding: 2rem 1.5rem;
+        border-radius: 18px;
+    }
+
+    .al-card-header h2 {
+        font-size: 1.3rem;
+    }
 }

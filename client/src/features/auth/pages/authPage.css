@@ -140,6 +140,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background-color: #0054c9dd;
 }
 
 .avatars-group {

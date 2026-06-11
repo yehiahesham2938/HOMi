@@ -4,11 +4,13 @@ import Header from '../../../../components/global/header';
 import Footer from '../../../../components/global/footer';
 import Sidebar from '../../../../components/global/Landlord/sidebar';
 import LiveTrackingModal from '../components/LiveTrackingModal';
+import ApplicationsModal from '../components/ApplicationsModal';
 import './LandlordMaintenance.css';
 import {
-    FaTools, FaCheckCircle, FaClock, FaExclamationTriangle,
-    FaChevronRight, FaMapMarkerAlt, FaUser, FaWallet,
+    FaTools, FaClock, FaExclamationTriangle, FaWallet,
+    FaTint, FaBolt, FaSnowflake, FaLeaf, FaHammer, FaWrench, FaUsers, FaShieldAlt
 } from 'react-icons/fa';
+import DetailedIssueModal from '../components/DetailedIssueModal';
 import maintenanceService, {
     type MaintenanceRequest,
 } from '../../../../services/maintenance.service';
@@ -30,6 +32,23 @@ function statusBadge(status: MaintenanceRequest['status']) {
     }
 }
 
+function getCategoryIcon(category: string) {
+    const cat = String(category || '').toLowerCase();
+    switch (cat) {
+        case 'plumbing': return <FaTint className="type-icon-inner color-plumbing" />;
+        case 'electrical': return <FaBolt className="type-icon-inner color-electrical" />;
+        case 'hvac': return <FaSnowflake className="type-icon-inner color-ac" />;
+        case 'exterior': return <FaLeaf className="type-icon-inner color-gardening" />;
+        case 'structural': return <FaHammer className="type-icon-inner color-other" />;
+        case 'appliances': return <FaWrench className="type-icon-inner color-other" />;
+        case 'utilities': return <FaBolt className="type-icon-inner color-other" />;
+        case 'pest': return <FaLeaf className="type-icon-inner color-other" />;
+        case 'common': return <FaUsers className="type-icon-inner color-other" />;
+        case 'security': return <FaShieldAlt className="type-icon-inner color-other" />;
+        default: return <FaHammer className="type-icon-inner color-other" />;
+    }
+}
+
 const LandlordMaintenance: React.FC = () => {
     const { t } = useTranslation();
     const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
@@ -37,6 +56,7 @@ const LandlordMaintenance: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [selected, setSelected] = useState<MaintenanceRequest | null>(null);
     const [trackRequest, setTrackRequest] = useState<MaintenanceRequest | null>(null);
+    const [appsRequest, setAppsRequest] = useState<MaintenanceRequest | null>(null);
 
     const load = useCallback(async () => {
         try {
@@ -153,61 +173,79 @@ const LandlordMaintenance: React.FC = () => {
                                     <p>You'll see issues here as soon as your tenants report any.</p>
                                 </div>
                             ) : (
-                                <div className="active-requests-list">
+                                <div className="marketplace-grid">
                                     {requests.map((req) => {
                                         const sb = statusBadge(req.status);
+                                        const urgencyClass = req.urgency ? req.urgency.toLowerCase() : 'medium';
                                         return (
-                                            <div key={req.id} className="active-request-row">
-                                                <div className={`status-indicator ${sb.cls}`}>
-                                                    {req.status === 'COMPLETED' || req.status === 'RESOLVED_BY_ADMIN' ? <FaCheckCircle /> :
-                                                        req.status === 'DISPUTED' ? <FaExclamationTriangle /> :
-                                                            <FaClock />}
-                                                </div>
-                                                <div className="req-main-info">
-                                                    <h4>{req.title}</h4>
-                                                    <p>{req.description}</p>
-                                                    {req.property && (
-                                                        <small style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#64748b', marginTop: 4 }}>
-                                                            <FaMapMarkerAlt /> {req.property.title} — {req.property.address}
-                                                        </small>
+                                            <div key={req.id} className={`post-card-premium card-urgency-${urgencyClass}`}>
+                                                <div className="card-glass-glow"></div>
+                                                <div className="post-card-header">
+                                                    <div className="post-card-badge status-pill">
+                                                        <span className={`status-dot dot-${sb.cls}`}></span>
+                                                        <span>{sb.label}</span>
+                                                    </div>
+                                                    {req.urgency && (
+                                                        <div className={`urgency-pill urgency-${urgencyClass}`}>
+                                                            {req.urgency}
+                                                        </div>
                                                     )}
                                                 </div>
-                                                <div className="req-provider">
-                                                    <span className="label"><FaUser style={{ marginRight: 4 }} /> Tenant</span>
-                                                    <span className="value">
-                                                        {req.tenant ? `${req.tenant.firstName} ${req.tenant.lastName}`.trim() : '—'}
-                                                    </span>
+                                                <div className="post-card-content">
+                                                    <div className="post-card-type">
+                                                        <div className={`type-icon-wrapper bg-${urgencyClass}`}>
+                                                            {getCategoryIcon(req.category)}
+                                                        </div>
+                                                        <span className="category-text">
+                                                            {t('myProperties.maintenanceTypes.' + req.category, req.category)}
+                                                        </span>
+                                                    </div>
+                                                    <h3 className="post-title-text">{req.title}</h3>
+                                                    <p className="post-description">{req.description}</p>
+                                                    <div className="post-meta">
+                                                        <div className="meta-item flex-row-center">
+                                                            <FaClock className="meta-icon" />
+                                                            <span>{new Date(req.createdAt).toLocaleDateString()}</span>
+                                                        </div>
+                                                        <div className="meta-item flex-row-center">
+                                                            <FaBolt className="meta-icon animated-pulse" />
+                                                            <span>{req.applicationsCount ?? 0} applications</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div className="req-provider">
-                                                    <span className="label">Maintainer</span>
-                                                    <span className="value">
-                                                        {req.provider
-                                                            ? req.provider.businessName ??
-                                                            `${req.provider.firstName} ${req.provider.lastName}`.trim()
-                                                            : '—'}
-                                                    </span>
+                                                <div className="post-card-footer">
+                                                    <div className="budget-info">
+                                                        <span className="budget-label">
+                                                            {req.chargeParty === 'LANDLORD' ? 'You pay (Landlord)' : 'Tenant pays'}
+                                                        </span>
+                                                        <strong className="budget-val">
+                                                            {req.agreedPrice != null
+                                                                ? `EGP ${Number(req.agreedPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                                                : req.estimatedBudget
+                                                                    ? `EGP ${Number(req.estimatedBudget).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                                                    : '—'}
+                                                        </strong>
+                                                    </div>
+                                                    <div className="post-action-buttons">
+                                                        <button className="view-bids-btn btn-view" onClick={() => setSelected(req)}>Details</button>
+                                                        {req.status === 'OPEN' && (
+                                                            <button
+                                                                className="view-bids-btn btn-bids"
+                                                                onClick={() => setAppsRequest(req)}
+                                                            >
+                                                                Bids ({req.applicationsCount ?? 0})
+                                                            </button>
+                                                        )}
+                                                        {(req.status === 'EN_ROUTE' || req.status === 'IN_PROGRESS') && (
+                                                            <button
+                                                                className="view-bids-btn btn-track"
+                                                                onClick={() => setTrackRequest(req)}
+                                                            >
+                                                                Track
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <div className="req-date">
-                                                    <span className="label">
-                                                        <FaWallet style={{ marginRight: 4 }} />
-                                                        {req.chargeParty === 'LANDLORD' ? 'You pay' : 'Tenant pays'}
-                                                    </span>
-                                                    <span className="value">
-                                                        {req.agreedPrice != null ? `EGP ${Number(req.agreedPrice).toFixed(2)}` : '—'}
-                                                    </span>
-                                                </div>
-                                                <div className="req-status-badge">
-                                                    <span className={`badge ${sb.cls}`}>{sb.label}</span>
-                                                </div>
-                                                <button
-                                                    className="req-details-btn"
-                                                    onClick={() => {
-                                                        if (req.status === 'EN_ROUTE' || req.status === 'IN_PROGRESS') setTrackRequest(req);
-                                                        else setSelected(req);
-                                                    }}
-                                                >
-                                                    <FaChevronRight />
-                                                </button>
                                             </div>
                                         );
                                     })}
@@ -215,138 +253,14 @@ const LandlordMaintenance: React.FC = () => {
                             )}
                         </div>
                     </section>
-                    {selected && (
-                        <div className="req-modal-overlay" onClick={() => setSelected(null)}>
-                            <div className="req-modal modal-md-width" onClick={(e) => e.stopPropagation()}>
 
-                                <header className="req-modal-header">
-                                    <div className="req-modal-title-group">
-                                        <span className="modal-pre-title">
-                                            Request Details
-                                        </span>
-                                        <h2>{selected.title}</h2>
-                                        <div className="modal-badge-group">
-                                            <span className={`badge ${statusBadge(selected.status).cls}`}>
-                                                {statusBadge(selected.status).label}
-                                            </span>
-                                            <span className={`badge urgency-pill urgency-${selected.urgency?.toLowerCase()}`}>
-                                                {selected.urgency}
-                                            </span>
-                                            <span className="modal-category-badge">
-                                                {t('myProperties.maintenanceTypes.' + selected.category, selected.category)}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <button className="req-close-btn" onClick={() => setSelected(null)}>×</button>
-                                </header>
-
-                                <div className="req-modal-body">
-
-                                    <div className="modal-section">
-                                        <h4 className="modal-section-title">Description</h4>
-                                        <p className="req-modal-desc">
-                                            {selected.description}
-                                        </p>
-                                    </div>
-
-                                    <div className="modal-grid-two-col">
-                                        {/* Property and Resident */}
-                                        <div className="modal-panel-card">
-                                            <h4 className="modal-panel-title">
-                                                Property & Resident
-                                            </h4>
-                                            <div className="panel-items-list">
-                                                {selected.property && (
-                                                    <div className="panel-item-group">
-                                                        <span className="panel-item-label">Property</span>
-                                                        <strong className="panel-item-value">{selected.property.title}</strong>
-                                                        <span className="panel-item-subtext">{selected.property.address}</span>
-                                                    </div>
-                                                )}
-                                                <div className="panel-item-group">
-                                                    <span className="panel-item-label">Tenant</span>
-                                                    <strong className="panel-item-value">
-                                                        {selected.tenant ? `${selected.tenant.firstName} ${selected.tenant.lastName}`.trim() : '—'}
-                                                    </strong>
-                                                    {selected.tenant?.phone && (
-                                                        <span className="panel-item-subtext">{selected.tenant.phone}</span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Maintainer & Financials */}
-                                        <div className="modal-panel-card">
-                                            <h4 className="modal-panel-title">
-                                                Provider & Cost Allocation
-                                            </h4>
-                                            <div className="panel-items-list">
-                                                <div className="panel-item-group">
-                                                    <span className="panel-item-label">Assigned Maintainer</span>
-                                                    <strong className="panel-item-value">
-                                                        {selected.provider
-                                                            ? selected.provider.businessName ?? `${selected.provider.firstName} ${selected.provider.lastName}`.trim()
-                                                            : 'Not Assigned Yet'}
-                                                    </strong>
-                                                    {selected.provider && selected.provider.rating !== undefined && (
-                                                        <span className="panel-rating">
-                                                            ★ {selected.provider.rating.toFixed(1)} ({selected.provider.ratingsCount} reviews)
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <div className="panel-item-group">
-                                                    <span className="panel-item-label">Charge Party & Agreed Price</span>
-                                                    <strong className="panel-item-value">
-                                                        {selected.chargeParty === 'LANDLORD' ? 'Landlord Pays' : 'Tenant Pays'}
-                                                    </strong>
-                                                    <span className="panel-price">
-                                                        {selected.agreedPrice != null ? `EGP ${Number(selected.agreedPrice).toFixed(2)}` : 'Awaiting Bid'}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {selected.completionNotes && (
-                                        <div className="notes-panel notes-success">
-                                            <h4 className="notes-title">Provider Completion Notes</h4>
-                                            <p className="notes-content">{selected.completionNotes}</p>
-                                        </div>
-                                    )}
-
-                                    {selected.disputedReason && (
-                                        <div className="notes-panel notes-danger">
-                                            <h4 className="notes-title">Dispute Reason</h4>
-                                            <p className="notes-content">{selected.disputedReason}</p>
-                                        </div>
-                                    )}
-
-                                    {selected.images.length > 0 && (
-                                        <div className="req-modal-gallery">
-                                            <strong className="gallery-title">Issue Photos</strong>
-                                            <div className="gallery-grid">
-                                                {selected.images.map((u, i) => (
-                                                    <img key={i} src={u} alt={`issue ${i + 1}`} />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {selected.completionImages.length > 0 && (
-                                        <div className="req-modal-gallery">
-                                            <strong className="gallery-title">Completion Photos</strong>
-                                            <div className="gallery-grid">
-                                                {selected.completionImages.map((u, i) => (
-                                                    <img key={i} src={u} alt={`completion ${i + 1}`} />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                            </div>
-                        </div>
-                    )}
+                    <DetailedIssueModal
+                        isOpen={!!selected}
+                        onClose={() => setSelected(null)}
+                        isViewOnly
+                        initialData={selected}
+                        onPostSuccess={() => {}}
+                    />
 
                     {trackRequest && (
                         <LiveTrackingModal
@@ -355,6 +269,16 @@ const LandlordMaintenance: React.FC = () => {
                             request={trackRequest}
                         />
                     )}
+
+                    <ApplicationsModal
+                        isOpen={!!appsRequest}
+                        onClose={() => setAppsRequest(null)}
+                        request={appsRequest}
+                        onAccepted={() => {
+                            setAppsRequest(null);
+                            void load();
+                        }}
+                    />
 
                     <Footer />
                 </div>

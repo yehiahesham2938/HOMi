@@ -23,6 +23,19 @@ interface DetailedIssueModalProps {
 
 const CATEGORIES = [...MAINTENANCE_CATEGORIES];
 
+const CATEGORY_TO_DB_AREA: Record<string, string> = {
+    structural: 'Structural Repairs',
+    appliances: 'Interior Appliances',
+    utilities: 'Utility Bills',
+    plumbing: 'Plumbing',
+    electrical: 'Electrical',
+    hvac: 'HVAC / Air Conditioning',
+    pest: 'Pest Control',
+    exterior: 'Exterior Maintenance',
+    common: 'Common Areas',
+    security: 'Security Systems',
+};
+
 const URGENCY_OPTIONS: { value: MaintenanceUrgency; label: string }[] = [
     { value: 'LOW', label: 'Low' },
     { value: 'MEDIUM', label: 'Medium' },
@@ -46,7 +59,7 @@ const DetailedIssueModal: React.FC<DetailedIssueModalProps> = ({
     isViewOnly = false,
     initialData = null
 }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [category, setCategory] = useState<string>('plumbing');
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -61,6 +74,27 @@ const DetailedIssueModal: React.FC<DetailedIssueModalProps> = ({
     const [context, setContext] = useState<TenantMaintenanceContext | null>(null);
     const [loadingContext, setLoadingContext] = useState(false);
     const activeRentals = context?.activeRentals;
+
+    const getCategoryLabelWithParty = (cat: string) => {
+        const localizedName = t('myProperties.maintenanceTypes.' + cat, cat);
+        if (isViewOnly) return localizedName;
+
+        const dbArea = CATEGORY_TO_DB_AREA[cat];
+        if (!dbArea) return localizedName;
+
+        const activeContractId = selectedContractId || context?.contractId;
+        const currentRental = activeRentals?.find((r) => r.contractId === activeContractId);
+        const responsibilities = currentRental?.responsibilities ?? context?.responsibilities ?? [];
+        const resp = responsibilities.find((r) => r.area === dbArea);
+        const party = resp?.responsibleParty || 'TENANT';
+
+        const isArabic = i18n.language === 'ar';
+        if (party === 'LANDLORD') {
+            return `${localizedName} ${isArabic ? '(على المالك)' : '(By Landlord)'}`;
+        } else {
+            return `${localizedName} ${isArabic ? '(على المستأجر)' : '(By Tenant)'}`;
+        }
+    };
 
     // Fetch tenant context (active property + wallet) when opening for posting
     useEffect(() => {
@@ -305,7 +339,7 @@ const DetailedIssueModal: React.FC<DetailedIssueModalProps> = ({
                             <div className="form-group">
                                 <label><FaTag /> Category</label>
                                 <select value={category} onChange={(e) => setCategory(e.target.value)} required disabled={isViewOnly}>
-                                    {CATEGORIES.map((cat) => <option key={cat} value={cat}>{t('myProperties.maintenanceTypes.' + cat, cat)}</option>)}
+                                    {CATEGORIES.map((cat) => <option key={cat} value={cat}>{getCategoryLabelWithParty(cat)}</option>)}
                                 </select>
                             </div>
 

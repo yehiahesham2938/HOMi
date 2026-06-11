@@ -1,14 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     FaTimes, FaStar, FaWallet, FaCheckCircle, FaUser,
     FaInfoCircle, FaClock, FaShieldAlt, FaBolt, FaChevronDown,
-    FaChevronUp, FaArrowRight, FaEye,
+    FaChevronUp, FaArrowRight, FaEye, FaComments,
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import maintenanceService, {
     type MaintenanceJobApplication,
     type MaintenanceRequest,
 } from '../../../../services/maintenance.service';
+import authService from '../../../../services/auth.service';
+import contractService from '../../../../services/contract.service';
 import ProviderProfile, { type MinimalProvider } from './ProviderProfile';
 import './ApplicationsModal.css';
 
@@ -21,6 +24,7 @@ interface Props {
 
 const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccepted }) => {
     const navigate = useNavigate();
+    const { i18n } = useTranslation();
     const [applications, setApplications] = useState<MaintenanceJobApplication[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -37,13 +41,20 @@ const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccept
             try {
                 setLoading(true);
                 setError(null);
-                const [apps, ctx] = await Promise.all([
+                const role = authService.getCurrentUser()?.user?.role;
+                const isLandlordRole = role === 'LANDLORD';
+                const [apps, walletRes] = await Promise.all([
                     maintenanceService.listApplicationsForRequest(request.id),
-                    maintenanceService.getTenantContext().catch(() => null),
+                    isLandlordRole
+                        ? contractService.getWalletBalance().catch(() => null)
+                        : maintenanceService.getTenantContext().catch(() => null),
                 ]);
                 if (cancelled) return;
                 setApplications(apps);
-                if (ctx) setWalletBalance(ctx.walletBalance);
+                if (walletRes) {
+                    const balance = 'balance' in walletRes ? walletRes.balance : walletRes.walletBalance;
+                    setWalletBalance(balance);
+                }
             } catch (err: any) {
                 if (!cancelled) setError(err?.response?.data?.message ?? 'Failed to load applications.');
             } finally {
@@ -75,8 +86,12 @@ const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccept
         }
         setError(null);
         setAcceptingId(app.id);
+        const role = authService.getCurrentUser()?.user?.role;
+        const isLandlordRole = role === 'LANDLORD';
         try {
-            const updated = await maintenanceService.acceptApplication(app.id);
+            const updated = isLandlordRole
+                ? await maintenanceService.acceptApplicationAsLandlord(app.id)
+                : await maintenanceService.acceptApplication(app.id);
             onAccepted(updated);
         } catch (err: any) {
             setError(err?.response?.data?.message ?? 'Could not accept this application.');
@@ -225,6 +240,22 @@ const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccept
                                                 <button className="app-profile-link-btn" onClick={() => handleViewProfile(app)}>
                                                     <FaEye /> View Profile
                                                 </button>
+                                                <button 
+                                                    className="app-profile-link-btn app-chat-btn" 
+                                                    onClick={() => {
+                                                        if (app.providerId) {
+                                                            navigate('/messages', {
+                                                                state: {
+                                                                    participantId: app.providerId,
+                                                                    propertyId: request.propertyId || undefined
+                                                                }
+                                                            });
+                                                        }
+                                                    }}
+                                                    style={{ marginLeft: '12px' }}
+                                                >
+                                                    <FaComments /> Message
+                                                </button>
                                             </div>
 
                                             {app.coverNote && <p className="app-note">&ldquo;{app.coverNote}&rdquo;</p>}
@@ -264,23 +295,62 @@ const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccept
                                                 <strong className="price-value">
                                                     EGP {app.finalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                 </strong>
-                                                {insufficient && (
-                                                    <span className="price-warning">Insufficient balance</span>
-                                                )}
                                             </div>
-
-                                            <button
-                                                className={`app-accept-btn ${insufficient ? 'btn-insufficient' : ''}`}
-                                                disabled={!!acceptingId || insufficient}
-                                                onClick={() => handleAccept(app)}
-                                            >
-                                                {acceptingId === app.id
-                                                    ? <><div className="btn-spinner" /> Approving…</>
-                                                    : insufficient
-                                                        ? <><FaWallet /> Top Up First</>
-                                                        : <><FaCheckCircle /> Approve &amp; Escrow</>
+                                            {(() => {
+                                                const role = authService.getCurrentUser()?.user?.role;
+                                                const isLandlordRole = role === 'LANDLORD';
+                                                const isTenantRole = role === 'TENANT';
+                                                const canAccept = (request.chargeParty === 'LANDLORD' && isLandlordRole) ||
+                                                                  (request.chargeParty === 'TENANT' && isTenantRole);
+                                                
+                                                if (canAccept) {
+                                                    return (
+                                                        <button
+                                                            className={`app-accept-btn ${insufficient ? 'btn-insufficient' : ''}`}
+                                                            disabled={!!acceptingId || insufficient}
+                                                            onClick={() => handleAccept(app)}
+                                                        >
+                                                            {acceptingId === app.id
+                                                                ? <><div className="btn-spinner" /> Approving…</>
+                                                                : insufficient
+                                                                    ? <><FaWallet /> Top Up First</>
+                                                                    : <><FaCheckCircle /> Approve &amp; Escrow</>
+                                                            }
+                                                        </button>
+                                                    );
                                                 }
-                                            </button>
+
+                                                const isArabic = i18n.language === 'ar';
+                                                const labelText = request.chargeParty === 'LANDLORD'
+                                                    ? (isArabic ? 'موافقة المالك' : 'Approval by Landlord')
+                                                    : (isArabic ? 'موافقة المستأجر' : 'Approval by Tenant');
+                                                
+                                                return (
+                                                    <button
+                                                        type="button"
+                                                        className="app-awaiting-approval-btn"
+                                                        disabled
+                                                        style={{
+                                                            width: '100%',
+                                                            padding: '10px 16px',
+                                                            borderRadius: 12,
+                                                            border: '1px solid #d1d5db',
+                                                            background: '#f3f4f6',
+                                                            color: '#9ca3af',
+                                                            cursor: 'not-allowed',
+                                                            fontWeight: 600,
+                                                            fontSize: '0.9rem',
+                                                            marginTop: 8,
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            gap: 6
+                                                        }}
+                                                    >
+                                                        <FaClock /> {labelText}
+                                                    </button>
+                                                );
+                                            })()}
                                         </div>
                                     </div>
                                 </div>

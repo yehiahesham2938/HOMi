@@ -227,6 +227,7 @@ export interface LandlordContract {
     landlordSignatureUrl?: string | null;
     tenantSignatureUrl?: string | null;
     createdAt: string;
+    updatedAt?: string;
     landlord?: ContractParty;
     tenant?: ContractParty;
     property?: ContractProperty;

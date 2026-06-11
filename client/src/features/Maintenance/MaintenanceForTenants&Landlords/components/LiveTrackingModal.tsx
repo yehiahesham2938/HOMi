@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { FaTimes, FaMapMarkerAlt, FaUser, FaPhone, FaCar, FaCheckCircle, FaCircle, FaWrench } from 'react-icons/fa';
+import { FaTimes, FaMapMarkerAlt, FaUser, FaPhone, FaCar, FaCheckCircle, FaCircle, FaWrench, FaComments } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import maintenanceService, {
     type MaintenanceRequest,
     type MaintenanceLocationData,
@@ -26,6 +27,7 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
 }
 
 const LiveTrackingModal: React.FC<Props> = ({ isOpen, onClose, request }) => {
+    const navigate = useNavigate();
     const [location, setLocation] = useState<MaintenanceLocationData | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -118,11 +120,28 @@ const LiveTrackingModal: React.FC<Props> = ({ isOpen, onClose, request }) => {
                                     {provider?.providerType === 'CENTER' ? 'Service Center' : 'Independent'}
                                 </span>
                             </div>
-                            {provider?.phone && (
-                                <a href={`tel:${provider.phone}`} className="lt-provider-phone">
-                                    <FaPhone /> {provider.phone}
-                                </a>
-                            )}
+                            <div className="lt-provider-actions">
+                                {provider?.phone && (
+                                    <a href={`tel:${provider.phone}`} className="lt-action-link lt-phone-link">
+                                        <FaPhone /> {provider.phone}
+                                    </a>
+                                )}
+                                {provider?.id && (
+                                    <button 
+                                        className="lt-action-btn lt-message-btn" 
+                                        onClick={() => {
+                                            navigate('/messages', {
+                                                state: {
+                                                    participantId: provider.id,
+                                                    propertyId: request.propertyId || undefined
+                                                }
+                                            });
+                                        }}
+                                    >
+                                        <FaComments /> Chat
+                                    </button>
+                                )}
+                            </div>
                         </div>
                         <div className={`lt-status-pill ${arrived ? 'arrived' : 'en-route'}`}>
                             {arrived ? 'Arrived' : status === 'EN_ROUTE' ? 'En Route' : status === 'IN_PROGRESS' ? 'Working' : status}

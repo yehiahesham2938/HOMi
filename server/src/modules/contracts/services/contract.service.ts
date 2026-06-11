@@ -439,7 +439,7 @@ class ContractService {
                 {
                     model: Property,
                     as: 'property',
-                    attributes: ['id', 'landlord_id', 'monthly_price', 'security_deposit'],
+                    attributes: ['id', 'landlord_id', 'monthly_price', 'security_deposit', 'maintenance_responsibilities'],
                 },
             ],
         });
@@ -483,6 +483,29 @@ class ContractService {
             move_in_date: rentalRequest.move_in_date,
             lease_duration_months: durationMonths,
         });
+
+        // Copy maintenance responsibilities from property to contract
+        const propertyResponsibilities = property.maintenance_responsibilities ?? [];
+        const LOWERCASE_TO_DB_AREA: Record<string, string> = {
+            structural: 'Structural Repairs',
+            appliances: 'Interior Appliances',
+            utilities: 'Utility Bills',
+            plumbing: 'Plumbing',
+            electrical: 'Electrical',
+            hvac: 'HVAC / Air Conditioning',
+            pest: 'Pest Control',
+            exterior: 'Exterior Maintenance',
+            common: 'Common Areas',
+            security: 'Security Systems',
+        };
+        const contractResponsibilities = propertyResponsibilities.map((item: any) => ({
+            contract_id: contract.id,
+            area: LOWERCASE_TO_DB_AREA[item.area] || item.area,
+            responsible_party: item.responsible_party,
+        }));
+        if (contractResponsibilities.length > 0) {
+            await ContractMaintenanceResponsibility.bulkCreate(contractResponsibilities);
+        }
 
         await activityLogService.log({
             actor: { userId: property.landlord_id, role: 'LANDLORD' },

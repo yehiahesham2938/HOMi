@@ -76,25 +76,38 @@ export class MaintenanceError extends Error {
 // stores responsibilities against `MaintenanceArea`. This map normalises one
 // to the other so we can check whether a category falls on the landlord.
 const CATEGORY_TO_CONTRACT_AREAS: Record<string, string[]> = {
-    structural: ['structural'],
-    appliances: ['appliances'],
-    utilities: ['utilities'],
-    plumbing: ['plumbing'],
-    electrical: ['electrical'],
-    hvac: ['hvac'],
-    pest: ['pest'],
-    exterior: ['exterior'],
-    common: ['common'],
-    security: ['security'],
+    structural: ['Structural Repairs'],
+    appliances: ['Interior Appliances'],
+    utilities: ['Utility Bills'],
+    plumbing: ['Plumbing'],
+    electrical: ['Electrical'],
+    hvac: ['HVAC / Air Conditioning'],
+    pest: ['Pest Control'],
+    exterior: ['Exterior Maintenance'],
+    common: ['Common Areas'],
+    security: ['Security Systems'],
     other: [],
     // Keep backwards compatibility for old categories
-    Plumbing: ['plumbing'],
-    Electrical: ['electrical'],
-    Painting: ['appliances', 'structural', 'exterior'],
-    'AC Service': ['hvac'],
-    Gardening: ['exterior', 'common'],
-    Flooring: ['structural', 'appliances'],
+    Plumbing: ['Plumbing'],
+    Electrical: ['Electrical'],
+    Painting: ['Interior Appliances', 'Structural Repairs', 'Exterior Maintenance'],
+    'AC Service': ['HVAC / Air Conditioning'],
+    Gardening: ['Exterior Maintenance', 'Common Areas'],
+    Flooring: ['Structural Repairs', 'Interior Appliances'],
     Other: [],
+};
+
+const LOWERCASE_TO_DB_AREA: Record<string, string> = {
+    structural: 'Structural Repairs',
+    appliances: 'Interior Appliances',
+    utilities: 'Utility Bills',
+    plumbing: 'Plumbing',
+    electrical: 'Electrical',
+    hvac: 'HVAC / Air Conditioning',
+    pest: 'Pest Control',
+    exterior: 'Exterior Maintenance',
+    common: 'Common Areas',
+    security: 'Security Systems',
 };
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -485,10 +498,29 @@ class MaintenanceService {
             },
         });
 
-        // If ANY matching area is the landlord's responsibility, charge landlord.
-        for (const r of responsibilities) {
-            if (r.responsible_party === 'LANDLORD') return MaintenanceChargeParty.LANDLORD;
+        if (responsibilities.length > 0) {
+            // If ANY matching area is the landlord's responsibility, charge landlord.
+            for (const r of responsibilities) {
+                if (r.responsible_party === 'LANDLORD') return MaintenanceChargeParty.LANDLORD;
+            }
+            return MaintenanceChargeParty.TENANT;
         }
+
+        // Fallback: If no contract responsibilities are found, fetch from property's maintenance_responsibilities
+        const contract = await Contract.findByPk(contractId, {
+            include: [{ model: Property, as: 'property' }]
+        });
+        if (contract && (contract as any).property) {
+            const p = (contract as any).property as Property;
+            const propertyResponsibilities = p.maintenance_responsibilities ?? [];
+            for (const item of propertyResponsibilities) {
+                const mappedArea = LOWERCASE_TO_DB_AREA[item.area] || item.area;
+                if (areas.includes(mappedArea) && item.responsible_party === 'LANDLORD') {
+                    return MaintenanceChargeParty.LANDLORD;
+                }
+            }
+        }
+
         return MaintenanceChargeParty.TENANT;
     }
 
@@ -504,7 +536,7 @@ class MaintenanceService {
                 {
                     model: Property,
                     as: 'property',
-                    attributes: ['id', 'landlord_id', 'title', 'address'],
+                    attributes: ['id', 'landlord_id', 'title', 'address', 'maintenance_responsibilities'],
                     include: [
                         { 
                             model: PropertyImage, 
@@ -589,10 +621,12 @@ class MaintenanceService {
         property: PropertyMini;
         landlord: PartyMini;
         walletBalance: number;
+        responsibilities?: Array<{ area: string; responsibleParty: string }>;
         activeRentals: Array<{
             contractId: string;
             property: PropertyMini;
             landlord: PartyMini;
+            responsibilities?: Array<{ area: string; responsibleParty: string }>;
         }>;
     }> {
         const activeContracts = await this.getActiveContractsForTenant(tenantId);
@@ -607,7 +641,8 @@ class MaintenanceService {
         const firstProperty = (first as any).property as Property;
 
         const landlordIds = Array.from(new Set(activeContracts.map((c) => String((c as any).landlord_id))));
-        const [landlords, profile] = await Promise.all([
+        const contractIds = activeContracts.map((c) => c.id);
+        const [landlords, profile, responsibilities] = await Promise.all([
             User.findAll({
                 where: { id: { [Op.in]: landlordIds } },
                 attributes: ['id', 'email'],
@@ -618,8 +653,18 @@ class MaintenanceService {
                 }],
             }),
             Profile.findOne({ where: { user_id: tenantId }, attributes: ['wallet_balance'] }),
+            ContractMaintenanceResponsibility.findAll({
+                where: { contract_id: { [Op.in]: contractIds } },
+            }),
         ]);
         const landlordById = new Map(landlords.map((u) => [u.id, u]));
+
+        const responsibilitiesByContractId = new Map<string, Array<{ area: string; responsibleParty: string }>>();
+        for (const r of responsibilities) {
+            const list = responsibilitiesByContractId.get(r.contract_id) ?? [];
+            list.push({ area: r.area, responsibleParty: r.responsible_party });
+            responsibilitiesByContractId.set(r.contract_id, list);
+        }
 
         const activeRentals = activeContracts.map((c) => {
             const p = (c as any).property as Property | undefined;
@@ -631,19 +676,36 @@ class MaintenanceService {
                 );
             }
             const landlord = landlordById.get(String((c as any).landlord_id));
+            const dbResponsibilities = responsibilitiesByContractId.get(c.id);
+            const rentalResponsibilities = (dbResponsibilities && dbResponsibilities.length > 0)
+                ? dbResponsibilities
+                : (p.maintenance_responsibilities ?? []).map((item: any) => ({
+                    area: LOWERCASE_TO_DB_AREA[item.area] || item.area,
+                    responsibleParty: item.responsible_party,
+                  }));
             return {
                 contractId: c.id,
                 property: propertyMini(p)!,
                 landlord: partyMini(landlord as any)!,
+                responsibilities: rentalResponsibilities,
             };
         });
 
         const firstLandlord = landlordById.get(String((first as any).landlord_id));
+        const firstDbResponsibilities = responsibilitiesByContractId.get(first.id);
+        const firstResponsibilities = (firstDbResponsibilities && firstDbResponsibilities.length > 0)
+            ? firstDbResponsibilities
+            : (firstProperty.maintenance_responsibilities ?? []).map((item: any) => ({
+                area: LOWERCASE_TO_DB_AREA[item.area] || item.area,
+                responsibleParty: item.responsible_party,
+              }));
+
         return {
             contractId: first.id,
             property: propertyMini(firstProperty)!,
             landlord: partyMini(firstLandlord as any)!,
             walletBalance: toNumber((profile as any)?.wallet_balance),
+            responsibilities: firstResponsibilities,
             activeRentals,
         };
     }
@@ -1045,9 +1107,10 @@ class MaintenanceService {
             status: MaintenanceJobApplicationStatus.PENDING,
         });
 
-        // Notify tenant
+        // Notify tenant or landlord based on chargeParty
+        const targetUserId = request.charge_party === 'LANDLORD' ? request.landlord_id : request.tenant_id;
         await notificationService.create({
-            userId: request.tenant_id,
+            userId: targetUserId,
             type: NotifType.MAINTENANCE_NEW_APPLICATION,
             title: 'New application on your request',
             body: `A maintainer applied with a price of EGP ${Number(input.finalPrice).toFixed(2)}.`,
@@ -1070,12 +1133,12 @@ class MaintenanceService {
     }
 
     async listApplicationsForTenant(
-        tenantId: string,
+        userId: string,
         requestId: string
     ): Promise<MaintenanceJobApplicationResponse[]> {
         const request = await MaintenanceRequest.findByPk(requestId);
         if (!request) throw new MaintenanceError('Request not found', 404, 'REQUEST_NOT_FOUND');
-        if (request.tenant_id !== tenantId) {
+        if (request.tenant_id !== userId && request.landlord_id !== userId) {
             throw new MaintenanceError('Forbidden', 403, 'FORBIDDEN');
         }
         const apps = await MaintenanceJobApplication.findAll({
@@ -1096,7 +1159,7 @@ class MaintenanceService {
     // ─── Tenant: accept a provider's application (escrow) ─────────────────
 
     async acceptApplication(
-        tenantId: string,
+        userId: string,
         applicationId: string
     ): Promise<MaintenanceRequestResponse> {
         const tx = await sequelize.transaction();
@@ -1112,7 +1175,13 @@ class MaintenanceService {
                 lock: tx.LOCK.UPDATE,
             });
             if (!request) throw new MaintenanceError('Request not found', 404, 'REQUEST_NOT_FOUND');
-            if (request.tenant_id !== tenantId) throw new MaintenanceError('Forbidden', 403, 'FORBIDDEN');
+
+            const isLandlordCharge = request.charge_party === 'LANDLORD';
+            const expectedUser = isLandlordCharge ? request.landlord_id : request.tenant_id;
+            if (userId !== expectedUser) {
+                throw new MaintenanceError('Forbidden', 403, 'FORBIDDEN');
+            }
+
             if (request.status !== MaintenanceRequestStatus.OPEN) {
                 throw new MaintenanceError(
                     'This request is no longer open.',
@@ -1129,7 +1198,7 @@ class MaintenanceService {
             }
 
             const price = toNumber(application.final_price);
-            await this.debitWallet(tenantId, price, tx);
+            await this.debitWallet(expectedUser, price, tx);
 
             await request.update(
                 {
@@ -1161,7 +1230,7 @@ class MaintenanceService {
             await tx.commit();
 
             await activityLogService.log({
-                actor: { userId: tenantId, role: 'TENANT' },
+                actor: { userId: expectedUser, role: isLandlordCharge ? 'LANDLORD' : 'TENANT' },
                 action: 'MAINTENANCE_ESCROW_DEBIT',
                 entityType: 'MAINTENANCE_REQUEST',
                 entityId: request.id,
@@ -1183,15 +1252,27 @@ class MaintenanceService {
                 relatedEntityId: request.id,
                 data: { agreedPrice: price },
             });
-            // Notify landlord
-            await notificationService.create({
-                userId: request.landlord_id,
-                type: NotifType.MAINTENANCE_APPLICATION_ACCEPTED,
-                title: 'A maintainer was accepted',
-                body: `Tenant accepted a "${request.category}" provider for ${Number(price).toFixed(2)} EGP.`,
-                relatedEntityType: 'MaintenanceRequest',
-                relatedEntityId: request.id,
-            });
+
+            // Notify correct party
+            if (isLandlordCharge) {
+                await notificationService.create({
+                    userId: request.tenant_id,
+                    type: NotifType.MAINTENANCE_APPLICATION_ACCEPTED,
+                    title: 'Landlord accepted a maintainer',
+                    body: `Landlord accepted a "${request.category}" provider for ${Number(price).toFixed(2)} EGP.`,
+                    relatedEntityType: 'MaintenanceRequest',
+                    relatedEntityId: request.id,
+                });
+            } else {
+                await notificationService.create({
+                    userId: request.landlord_id,
+                    type: NotifType.MAINTENANCE_APPLICATION_ACCEPTED,
+                    title: 'A maintainer was accepted',
+                    body: `Tenant accepted a "${request.category}" provider for ${Number(price).toFixed(2)} EGP.`,
+                    relatedEntityType: 'MaintenanceRequest',
+                    relatedEntityId: request.id,
+                });
+            }
             // Notify rejected providers
             const rejected = await MaintenanceJobApplication.findAll({
                 where: {
@@ -1531,11 +1612,12 @@ class MaintenanceService {
                 }
 
                 let payoutAmount = escrow;
-                let tenantDebitedNow = 0;
+                let payerDebitedNow = 0;
                 if (payoutAmount <= 0 && agreed > 0) {
-                    await this.debitWallet(req.tenant_id, agreed, tx, 'INSUFFICIENT_WALLET_BALANCE');
+                    const payerId = req.charge_party === MaintenanceChargeParty.LANDLORD ? req.landlord_id : req.tenant_id;
+                    await this.debitWallet(payerId, agreed, tx, 'INSUFFICIENT_WALLET_BALANCE');
                     payoutAmount = agreed;
-                    tenantDebitedNow = agreed;
+                    payerDebitedNow = agreed;
                 }
                 if (payoutAmount > 0) {
                     await this.creditWallet(req.assigned_provider_id, payoutAmount, tx);
@@ -1565,32 +1647,22 @@ class MaintenanceService {
                     { transaction: tx }
                 );
 
-                // Landlord-charged maintenance: log a credit for the tenant's next rent
-                if (req.charge_party === MaintenanceChargeParty.LANDLORD && req.contract_id) {
-                    await LandlordMaintenanceCharge.create(
-                        {
-                            request_id: req.id,
-                            contract_id: req.contract_id,
-                            landlord_id: req.landlord_id,
-                            tenant_id: tenantId,
-                            amount: payoutAmount,
-                            status: LandlordMaintenanceChargeStatus.PENDING,
-                            applied_at: null,
-                        },
-                        { transaction: tx }
-                    );
-                }
+                // Landlord-charged maintenance: since landlord pays directly from wallet, we do not log a rent credit/charge.
 
                 await tx.commit();
 
-                if (tenantDebitedNow > 0) {
+                if (payerDebitedNow > 0) {
+                    const isLandlord = req.charge_party === MaintenanceChargeParty.LANDLORD;
                     await activityLogService.log({
-                        actor: { userId: tenantId, role: 'TENANT' },
+                        actor: {
+                            userId: isLandlord ? req.landlord_id : req.tenant_id,
+                            role: isLandlord ? 'LANDLORD' : 'TENANT',
+                        },
                         action: 'MAINTENANCE_DIRECT_SETTLEMENT_DEBIT',
                         entityType: 'MAINTENANCE_REQUEST',
                         entityId: req.id,
                         description: 'Maintenance settlement debited from wallet at completion confirmation.',
-                        metadata: { requestId: req.id, amount: tenantDebitedNow },
+                        metadata: { requestId: req.id, amount: payerDebitedNow },
                     });
                 }
 
@@ -1977,8 +2049,14 @@ class MaintenanceService {
             let tenantDebitedNow = 0;
 
             if (input.resolution === MaintenanceConflictResolution.CHARGE_TENANT) {
-                // Pay provider atomically; if escrow is missing, debit tenant now.
-                if (payoutAmount <= 0 && agreed > 0) {
+                // If landlord paid escrow originally, refund landlord and debit tenant to pay provider.
+                if (req.charge_party === MaintenanceChargeParty.LANDLORD && escrow > 0) {
+                    await this.creditWallet(req.landlord_id, escrow, tx);
+                    await this.debitWallet(req.tenant_id, agreed, tx, 'INSUFFICIENT_WALLET_BALANCE');
+                    payoutAmount = agreed;
+                    tenantDebitedNow = agreed;
+                } else if (payoutAmount <= 0 && agreed > 0) {
+                    // Pay provider atomically; if escrow is missing, debit tenant now.
                     await this.debitWallet(req.tenant_id, agreed, tx, 'INSUFFICIENT_WALLET_BALANCE');
                     payoutAmount = agreed;
                     tenantDebitedNow = agreed;
@@ -1994,26 +2072,11 @@ class MaintenanceService {
                     },
                     { transaction: tx }
                 );
-
-                if (req.charge_party === MaintenanceChargeParty.LANDLORD && req.contract_id) {
-                    await LandlordMaintenanceCharge.findOrCreate({
-                        where: { request_id: req.id },
-                        defaults: {
-                            request_id: req.id,
-                            contract_id: req.contract_id,
-                            landlord_id: req.landlord_id,
-                            tenant_id: req.tenant_id,
-                            amount: payoutAmount,
-                            status: LandlordMaintenanceChargeStatus.PENDING,
-                            applied_at: null,
-                        },
-                        transaction: tx,
-                    });
-                }
             } else {
-                // Refund tenant, provider gets nothing
+                // Refund the payer (landlord if originally landlord responsible, tenant otherwise), provider gets nothing
                 if (escrow > 0) {
-                    await this.creditWallet(req.tenant_id, escrow, tx);
+                    const refundeeId = req.charge_party === MaintenanceChargeParty.LANDLORD ? req.landlord_id : req.tenant_id;
+                    await this.creditWallet(refundeeId, escrow, tx);
                 }
                 await req.update(
                     {
@@ -2022,14 +2085,6 @@ class MaintenanceService {
                         resolved_at: testingClockService.getNow(),
                     },
                     { transaction: tx }
-                );
-                // If a landlord-charge had been recorded earlier, cancel it
-                await LandlordMaintenanceCharge.update(
-                    { status: LandlordMaintenanceChargeStatus.CANCELLED },
-                    {
-                        where: { request_id: req.id, status: LandlordMaintenanceChargeStatus.PENDING },
-                        transaction: tx,
-                    }
                 );
             }
 

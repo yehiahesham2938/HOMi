@@ -108,7 +108,14 @@ const DetailedPropertyCard = ({ property }: { property: LandlordPropertyRow }) =
         <div className="detailed-info-section">
           <div className="detailed-header">
             <div className="title-area">
-              <h2>{property.name}</h2>
+              <div className="detailed-title-row">
+                <h2>{property.name}</h2>
+                <span className="detailed-card-mobile-price">
+                  <span className="currency">$</span>
+                  <span className="amount">{property.price.replace('$', '')}</span>
+                  <span className="period">/mo</span>
+                </span>
+              </div>
               <p className="detailed-address"><FaMapMarkerAlt /> {property.address}</p>
             </div>
             <button className="icon-btn-more"><FaEllipsisH /></button>
@@ -150,10 +157,7 @@ const DetailedPropertyCard = ({ property }: { property: LandlordPropertyRow }) =
 
         <div className="detailed-stats-section">
           <div className="financial-overview">
-            <div className="stat-pill">
-              <label>{t('myProperties.yield')}</label>
-              <span className="yield-up">+{property.yield}%</span>
-            </div>
+
             <div className="main-price">
               <span className="currency">$</span>
               <span className="amount">{property.price.replace('$', '')}</span>

@@ -381,6 +381,9 @@ const ManagePropertyModal: React.FC<ManagePropertyModalProps> = ({ property, onC
                       <input type="number" value={formData.sqft} onChange={(e) => setFormData({...formData, sqft: Number(e.target.value)})} disabled={isLocked} />
                    </div>
                 </div>
+                <button type="button" className="delete-property-btn mobile-only">
+                  <FaTrashAlt /> {t('myProperties.deleteListing')}
+                </button>
               </div>
             )}
 

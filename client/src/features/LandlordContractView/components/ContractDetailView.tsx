@@ -58,8 +58,8 @@ const ContractDetailView: React.FC<Props> = ({ contract, isReadOnly = false, onU
         governingLaw: '',
         disputeResolution: '',
         amendments: '',
-        emergencyName: '',
-        emergencyPhone: ''
+        emergencyName: contract.tenantEmergencyContactName || '',
+        emergencyPhone: contract.tenantEmergencyPhone || ''
     });
     const [step1Errors, setStep1Errors] = useState<Partial<Record<
         'idFullName' | 'idNumber' | 'currentAddress' | 'mainPhone' | 'contractDate' | 'emergencyName' | 'emergencyPhone' | 'lateFee' | 'occupants',
@@ -175,6 +175,8 @@ const ContractDetailView: React.FC<Props> = ({ contract, isReadOnly = false, onU
                     rent_due_date: toDueDateEnum(landlordData.rentDueDate),
                     late_fee_amount: Number(landlordData.lateFee),
                     max_occupants: Number(landlordData.occupants),
+                    emergency_contact_name: landlordData.emergencyName,
+                    emergency_phone: landlordData.emergencyPhone,
                 });
             }
 

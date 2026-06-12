@@ -202,7 +202,6 @@ const InstallmentsModal: React.FC<InstallmentsModalProps> = ({ contractId, contr
 
                         <div className="installments-table-wrapper">
                             <table className="installments-table">
-                                theme-dark
                                 <thead>
                                     <tr>
                                         <th>#</th>

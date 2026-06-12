@@ -16,6 +16,7 @@ import {
 } from '../../TenantPayment/utils/rentSchedule';
 import InstallmentsModal from '../components/InstallmentsModal';
 import OverdueRentTable from '../components/OverdueRentTable';
+import SupportHelpChat from '../../GetHelp/components/SupportHelpChat';
 
 const formatDate = (date?: string): string => {
     if (!date) return 'N/A';
@@ -40,6 +41,7 @@ const ActiveRental: React.FC = () => {
     const [propertyDetails, setPropertyDetails] = useState<PropertyResponse | null>(null);
     const [isPayingRent, setIsPayingRent] = useState(false);
     const [showInstallments, setShowInstallments] = useState(false);
+    const [showSupportChat, setShowSupportChat] = useState(false);
     const [installmentsData, setInstallmentsData] = useState<ContractInstallments | null>(null);
     const [preferredContractId, setPreferredContractId] = useState<string>('');
 
@@ -313,10 +315,7 @@ const ActiveRental: React.FC = () => {
                                         <span className="stat-label">Wallet Balance</span>
                                         <span className="stat-value highlight">${installmentsData?.walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? '0.00'}</span>
                                     </div>
-                                    <div className="hero-stat-box">
-                                        <span className="stat-label">Lease Progress</span>
-                                        <span className="stat-value">{installmentsData?.paidInstallments ?? 0} / {installmentsData?.leaseDurationMonths ?? 0} mo</span>
-                                    </div>
+
                                 </div>
                             </header>
 
@@ -345,7 +344,7 @@ const ActiveRental: React.FC = () => {
                                     <div className="support-card">
                                         <h4>Need Help?</h4>
                                         <p>Contact our 24/7 support line for urgent property issues.</p>
-                                        <button className="secondary-btn">Contact Support</button>
+                                        <button className="secondary-btn" onClick={() => setShowSupportChat(true)}>Contact Support</button>
                                     </div>
 
                                     <div className="cancel-rental-card">
@@ -375,6 +374,12 @@ const ActiveRental: React.FC = () => {
                     onPaid={() => {
                         void handleInstallmentsPaid();
                     }}
+                />
+            )}
+            {showSupportChat && (
+                <SupportHelpChat
+                    isOpen={showSupportChat}
+                    onClose={() => setShowSupportChat(false)}
                 />
             )}
         </div>

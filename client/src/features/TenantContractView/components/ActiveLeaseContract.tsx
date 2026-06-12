@@ -229,6 +229,13 @@ const ActiveLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
                                     <span className="party-role">{t('activeLease.tenant')}</span>
                                     <span className="party-name">{contract.tenant}</span>
                                     <span className="party-status"><ShieldCheck size={14}/> {t('activeLease.verified')}</span>
+                                    {contract.tenantEmergencyContactName && (
+                                        <div className="emergency-info-sub">
+                                            <span className="sub-label">{t('activeLease.emergencyContact') || 'Emergency Contact'}:</span>
+                                            <span className="sub-value">{contract.tenantEmergencyContactName}</span>
+                                            <span className="sub-value phone">{contract.tenantEmergencyPhone}</span>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="party-box">
                                     <span className="party-role">{t('activeLease.landlord')}</span>
@@ -364,6 +371,12 @@ const ActiveLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
                                                     <span className="pdf-data-value" style={{ fontWeight: 'bold' }}>{previewLang === 'ar' ? (tenantNameAr || contract.tenant) : contract.tenant}</span><br/>
                                                     <span className="pdf-data-label" style={{ marginTop: '8px' }}>{previewLang === 'en' ? 'National ID' : 'الرقم القومي'}:</span> <span className="pdf-data-value">{toArNum(contract.tenantNationalId)}</span><br/>
                                                     <span className="pdf-data-label">{previewLang === 'en' ? 'Primary Address' : 'العنوان الحالي'}:</span> <span className="pdf-data-value">{contract.tenantAddress || contract.propertyAddress}</span>
+                                                    {contract.tenantEmergencyContactName && (
+                                                        <>
+                                                            <br/>
+                                                            <span className="pdf-data-label" style={{ marginTop: '8px' }}>{previewLang === 'en' ? 'Emergency Contact' : 'جهة اتصال الطوارئ'}:</span> <span className="pdf-data-value">{contract.tenantEmergencyContactName} ({toArNum(contract.tenantEmergencyPhone)})</span>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>

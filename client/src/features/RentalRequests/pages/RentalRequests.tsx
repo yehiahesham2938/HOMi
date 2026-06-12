@@ -4,7 +4,6 @@ import Header from '../../../components/global/header';
 import Sidebar from '../../../components/global/Landlord/sidebar';
 import Footer from '../../../components/global/footer';
 import RequestCard from '../components/RequestCard';
-import StatsOverview from '../components/StatsOverview';
 import FilterTabs from '../components/FilterTabs';
 import { FaInbox } from 'react-icons/fa'; // Added for the empty state
 import rentalRequestService, { type LandlordRentalRequest } from '../../../services/rental-request.service';
@@ -106,7 +105,6 @@ const RentalRequests: React.FC = () => {
                             <h1>{t('rentalRequests.requests')}</h1>
                             <p>{t('rentalRequests.managingRequests', { count: mappedRequests.length })}</p>
                         </div>
-                        <StatsOverview totalApplicants={mappedRequests.length} />
                     </header>
 
                     <FilterTabs activeTab={activeTab} setActiveTab={setActiveTab} counts={tabCounts} />

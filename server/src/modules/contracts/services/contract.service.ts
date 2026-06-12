@@ -753,6 +753,8 @@ class ContractService {
             rent_due_date: input.rent_due_date,
             late_fee_amount: input.late_fee_amount,
             max_occupants: input.max_occupants,
+            tenant_emergency_contact_name: input.emergency_contact_name ?? null,
+            tenant_emergency_phone: input.emergency_phone ?? null,
         });
 
         await activityLogService.log({
@@ -2241,6 +2243,11 @@ class ContractService {
                     },
                 ],
             },
+            {
+                model: LeaseTerminationRequest,
+                as: 'terminationRequests',
+                attributes: ['id', 'status', 'reason', 'created_at', 'requester_id'],
+            },
         ];
     }
 
@@ -2551,6 +2558,16 @@ class ContractService {
                     responsibleParty: mr.responsible_party,
                 })
             );
+        }
+
+        if ((contract as any).terminationRequests) {
+            response.terminationRequests = (contract as any).terminationRequests.map((tr: any) => ({
+                id: tr.id,
+                status: tr.status,
+                reason: tr.reason,
+                createdAt: tr.created_at || tr.createdAt,
+                requesterId: tr.requester_id || tr.requesterId,
+            }));
         }
 
         return response;

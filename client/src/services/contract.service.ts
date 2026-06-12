@@ -235,6 +235,13 @@ export interface LandlordContract {
     maintenanceResponsibilities?: ContractMaintenanceResponsibility[];
     landlordSignature?: string;
     tenantSignature?: string;
+    terminationRequests?: Array<{
+        id: string;
+        status: string;
+        reason: string;
+        createdAt: string;
+        requesterId: string;
+    }>;
 }
 
 export interface VerificationSummary {
@@ -429,6 +436,8 @@ class ContractService {
         rent_due_date: RentDueDate;
         late_fee_amount: number;
         max_occupants: number;
+        emergency_contact_name?: string;
+        emergency_phone?: string;
     }): Promise<{ success: boolean; data: LandlordContract }> {
         const response = await apiClient.put<{ success: boolean; data: LandlordContract }>(
             `/contracts/${id}/landlord/lease-terms`,

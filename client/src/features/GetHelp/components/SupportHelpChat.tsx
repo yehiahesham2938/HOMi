@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { X, Send, Loader2 } from 'lucide-react';
 import { messageService, type MessageDto } from '../../../services/message.service';
 import authService from '../../../services/auth.service';
+import '../pages/GetHelp.css';
 
 interface Props {
     isOpen: boolean;

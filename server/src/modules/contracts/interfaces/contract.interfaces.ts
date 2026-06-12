@@ -25,6 +25,8 @@ export interface LandlordLeaseTermsInput {
     rent_due_date: RentDueDateType;
     late_fee_amount: number;
     max_occupants: number;
+    emergency_contact_name?: string;
+    emergency_phone?: string;
 }
 
 // ─── Landlord Step 2: Identity Details ────────────────────────────────────────
@@ -211,6 +213,13 @@ export interface ContractResponse {
     tenantEmergencyPhone: string | null;
     createdAt: Date;
     updatedAt: Date;
+    terminationRequests?: Array<{
+        id: string;
+        status: string;
+        reason: string;
+        createdAt: Date | string;
+        requesterId: string;
+    }>;
     maintenanceResponsibilities?: MaintenanceResponsibilityResponse[];
     landlord?: {
         id: string;

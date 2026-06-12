@@ -4,8 +4,10 @@ import Header from '../../../components/global/header';
 import Sidebar from '../../../components/global/Tenant/sidebar';
 import Footer from '../../../components/global/footer';
 import ActiveLeaseContract from '../components/ActiveLeaseContract';
+import TerminatedLeaseContract from '../components/TerminatedLeaseContract';
+import ExpiredLeaseContract from '../components/ExpiredLeaseContract';
 
-import { FileText, Clock, Plus, Building2, ChevronRight } from 'lucide-react';
+import { FileText, Clock, Building2, ChevronRight } from 'lucide-react';
 import ContractDetailView from '../components/ContractDetailView';
 import contractService, { type LandlordContract as ContractApi } from '../../../services/contract.service';
 import { normalizeSignatureUrl } from '../../../shared/utils/signatureUrl';
@@ -49,6 +51,13 @@ export interface LeaseContract {
     permittedUse?: string;
     rightToEnter?: string;
     noticePeriod?: string;
+    terminationRequests?: Array<{
+        id: string;
+        status: string;
+        reason: string;
+        createdAt: string;
+        requesterId: string;
+    }>;
 }
 
 import { useTranslation } from 'react-i18next';
@@ -105,14 +114,29 @@ const Contract: React.FC = () => {
         permittedUse: 'Residential Only',
         rightToEnter: 'With 24h Prior Notice',
         noticePeriod: '30 Days',
+        terminationRequests: contract.terminationRequests || [],
     });
 
     const fetchContracts = useCallback(async () => {
         try {
-            const response = await contractService.getTenantContracts({ page: 1, limit: 50 });
+            const [response, clock] = await Promise.all([
+                contractService.getTenantContracts({ page: 1, limit: 50 }),
+                contractService.getTestingClock()
+            ]);
+            const referenceDate = clock?.now ? new Date(clock.now) : new Date();
             const mapped = (response.data || [])
                 .map(mapContract)
-                .filter((c) => c.status === 'PENDING_TENANT' || c.status === 'PENDING_PAYMENT' || c.status === 'ACTIVE' || c.status === 'EXPIRED' || c.status === 'TERMINATED');
+                .filter((c) => c.status === 'PENDING_TENANT' || c.status === 'PENDING_PAYMENT' || c.status === 'ACTIVE' || c.status === 'EXPIRED' || c.status === 'TERMINATED')
+                .filter((c) => {
+                    const isPending = c.status === 'PENDING_TENANT' || c.status === 'PENDING_PAYMENT';
+                    if (isPending && c.createdAt) {
+                        const createdDate = new Date(c.createdAt);
+                        const diffTime = referenceDate.getTime() - createdDate.getTime();
+                        const diffDays = diffTime / (1000 * 60 * 60 * 24);
+                        if (diffDays > 10) return false;
+                    }
+                    return true;
+                });
             setContracts(mapped);
         } catch {
             setContracts([]);
@@ -191,8 +215,6 @@ const Contract: React.FC = () => {
                                                 onClick={() => {
                                                     if (contract.status === 'PENDING_PAYMENT') {
                                                         globalThis.location.href = '/tenant-payment?tab=pending';
-                                                    } else if (contract.status === 'EXPIRED') {
-                                                        globalThis.location.href = '/tenant-payment?tab=upcoming';
                                                     } else {
                                                         setSelectedContract(contract);
                                                     }
@@ -244,6 +266,20 @@ const Contract: React.FC = () => {
 
             {selectedContract?.status === 'ACTIVE' && (
                 <ActiveLeaseContract
+                    contract={selectedContract}
+                    onClose={() => setSelectedContract(null)}
+                />
+            )}
+
+            {selectedContract?.status === 'TERMINATED' && (
+                <TerminatedLeaseContract
+                    contract={selectedContract}
+                    onClose={() => setSelectedContract(null)}
+                />
+            )}
+
+            {selectedContract?.status === 'EXPIRED' && (
+                <ExpiredLeaseContract
                     contract={selectedContract}
                     onClose={() => setSelectedContract(null)}
                 />

@@ -314,3 +314,144 @@
     opacity: 1;
   }
 }
+
+@media (max-width: 768px) {
+  .prop-card-container {
+    display: grid !important;
+    grid-template-columns: 80px 1fr !important;
+    padding: 0.6rem !important;
+    gap: 0.75rem !important;
+    align-items: start !important;
+    background: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04) !important;
+  }
+
+  .prop-card-media {
+    width: 80px !important;
+    height: 80px !important;
+    min-height: 80px !important;
+    max-height: 80px !important;
+    border-radius: 10px !important;
+    margin: 0 !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08) !important;
+  }
+
+  .prop-floating-badges {
+    top: 2px !important;
+    left: 2px !important;
+    right: auto !important;
+  }
+
+  .status-pill {
+    padding: 2px 4px !important;
+    font-size: 0.55rem !important;
+    border-radius: 4px !important;
+    gap: 2px !important;
+    letter-spacing: 0 !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(4px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .pulse-indicator {
+    width: 4px !important;
+    height: 4px !important;
+  }
+
+  .prop-media-overlay {
+    display: none !important;
+  }
+
+  .prop-card-content {
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.25rem !important;
+    min-width: 0 !important;
+  }
+
+  .prop-title {
+    font-size: 0.95rem !important;
+    margin-bottom: 1px !important;
+    font-weight: 800;
+  }
+
+  .prop-location {
+    font-size: 0.7rem !important;
+    margin-bottom: 2px !important;
+    gap: 2px !important;
+  }
+
+  .tenant-snapshot {
+    padding: 4px 6px !important;
+    margin-bottom: 2px !important;
+    border-radius: 8px !important;
+    gap: 6px !important;
+    background: rgba(245, 243, 255, 0.4) !important;
+    border: 1px solid rgba(79, 70, 229, 0.08) !important;
+  }
+
+  .tenant-avatar {
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 6px !important;
+    font-size: 0.65rem !important;
+  }
+
+  .tenant-details .label {
+    font-size: 0.55rem !important;
+  }
+
+  .tenant-details .name {
+    font-size: 0.75rem !important;
+  }
+
+  .payment-status {
+    padding: 2px 6px !important;
+    font-size: 0.6rem !important;
+    border-radius: 4px !important;
+  }
+
+  .prop-specs-minimal {
+    display: none !important;
+  }
+
+  .prop-footer {
+    border-top: none !important;
+    padding-top: 0 !important;
+    margin-top: 2px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+
+  .price-label {
+    font-size: 0.55rem !important;
+    margin-bottom: 0 !important;
+  }
+
+  .price-amt {
+    font-size: 0.95rem !important;
+  }
+
+  .price-period {
+    font-size: 0.65rem !important;
+  }
+
+  .prop-action-icon {
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 6px !important;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.15) !important;
+    color: #ffffff !important;
+  }
+
+  .prop-action-icon svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+}

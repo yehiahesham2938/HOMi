@@ -335,12 +335,155 @@
   }
 }
 
-@media (max-width: 500px) {
-  .rental-footer {
-    flex-direction: column;
-    align-items: flex-start;
+@media (max-width: 768px) {
+  .rental-card-premium {
+    padding: 0 !important;
+    min-height: auto !important;
+    background: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
   }
+
+  .rental-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    width: 100% !important;
+  }
+
+  .rental-media {
+    width: 100% !important;
+    height: 150px !important;
+    min-height: 150px !important;
+    max-height: 150px !important;
+    border-radius: 20px 20px 0 0 !important;
+    box-shadow: none !important;
+  }
+
+  .rental-price-tag {
+    left: 12px !important;
+    bottom: 12px !important;
+    padding: 4px 10px !important;
+    border-radius: 8px !important;
+    background: linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25) !important;
+  }
+
+  .rental-price-tag .price-amt {
+    font-size: 1.05rem !important;
+    color: #ffffff !important;
+  }
+
+  .rental-price-tag .price-unit {
+    font-size: 0.68rem !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+  }
+
+  .rental-info {
+    padding: 1rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.6rem !important;
+  }
+
+  .rental-title {
+    font-size: 1.15rem !important;
+    font-weight: 800;
+  }
+
+  .rental-address {
+    font-size: 0.8rem !important;
+    gap: 4px !important;
+  }
+
+  .lease-section {
+    padding: 8px 12px !important;
+    border-radius: 12px !important;
+    margin-top: 2px !important;
+    background: rgba(255, 255, 255, 0.6) !important;
+    border: 1px solid rgba(226, 232, 240, 0.6) !important;
+  }
+
+  .lease-header {
+    margin-bottom: 4px !important;
+  }
+
+  .lease-label {
+    font-size: 0.72rem !important;
+    color: #475569 !important;
+  }
+
+  .lease-remaining {
+    font-size: 0.75rem !important;
+    padding: 2px 8px !important;
+    border-radius: 6px !important;
+    background: rgba(79, 70, 229, 0.08) !important;
+    border: 1px solid rgba(79, 70, 229, 0.15) !important;
+  }
+
+  .progress-container {
+    gap: 6px !important;
+  }
+
+  .progress-track {
+    height: 6px !important;
+    background: #e2e8f0 !important;
+  }
+
+  .progress-fill {
+    box-shadow: 0 0 6px rgba(79, 70, 229, 0.4) !important;
+  }
+
+  .progress-pct {
+    font-size: 0.75rem !important;
+    min-width: 25px !important;
+  }
+
+  /* Show specs row on mobile since we have full width */
+  .specs-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .spec-tag {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    border-radius: 8px !important;
+    border: 1px solid var(--card-border) !important;
+    padding: 4px 8px !important;
+    font-size: 0.72rem !important;
+    color: #334155 !important;
+    background: #ffffff !important;
+  }
+
+  .rental-footer {
+    border-top: 1px solid #f1f5f9 !important;
+    padding-top: 0.6rem !important;
+    margin-top: 4px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+
   .btn-manage-circle {
-    align-self: flex-end;
+    width: 36px !important;
+    height: 36px !important;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2) !important;
+    display: grid !important;
+    place-items: center !important;
+  }
+
+  .btn-manage-circle svg {
+    width: 14px !important;
+    height: 14px !important;
+    color: #ffffff !important;
   }
 }

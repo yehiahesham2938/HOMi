@@ -208,3 +208,75 @@ button.notif-card {
   transform: translateX(3px);
   color: var(--primary);
 }
+
+@media (max-width: 768px) {
+  .notifications-premium {
+    height: auto !important;
+    max-height: 240px !important;
+    padding: 0.6rem !important;
+  }
+
+  .notif-header {
+    margin-bottom: 0.35rem !important;
+  }
+
+  .bell-ring {
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 6px !important;
+  }
+
+  .bell-ring svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  .notif-header h3 {
+    font-size: 0.9rem !important;
+  }
+
+  .btn-mark-all {
+    font-size: 0.6rem !important;
+  }
+
+  .notif-scroll-area {
+    gap: 4px !important;
+    max-height: 180px !important;
+  }
+
+  .notif-card {
+    padding: 4px 6px !important;
+    border-radius: 8px !important;
+    gap: 6px !important;
+  }
+
+  .icon-orb {
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 0.7rem !important;
+    border-radius: 6px !important;
+  }
+
+  .icon-orb svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  .notif-subject {
+    font-size: 0.75rem !important;
+  }
+
+  .notif-timestamp {
+    font-size: 0.58rem !important;
+  }
+
+  .notif-text {
+    font-size: 0.7rem !important;
+    line-height: 1.25 !important;
+    -webkit-line-clamp: 1 !important;
+  }
+
+  .notif-action-hint {
+    font-size: 0.65rem !important;
+  }
+}

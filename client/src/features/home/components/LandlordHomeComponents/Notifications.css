@@ -245,3 +245,78 @@
   background: var(--primary-glow);
   color: var(--primary);
 }
+
+@media (max-width: 768px) {
+  .landlord-notifications-card {
+    height: auto !important;
+    max-height: 240px !important;
+    padding: 0.6rem !important;
+  }
+
+  .notif-header {
+    margin-bottom: 0.35rem !important;
+  }
+
+  .bell-ring {
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 6px !important;
+    font-size: 0.85rem !important;
+  }
+
+  .notif-title-group h3 {
+    font-size: 0.9rem !important;
+  }
+
+  .btn-mark-all {
+    font-size: 0.6rem !important;
+  }
+
+  .notif-scroll-area {
+    gap: 4px !important;
+    max-height: 180px !important;
+  }
+
+  .notif-item-row {
+    padding: 4px 6px !important;
+    border-radius: 8px !important;
+    gap: 6px !important;
+  }
+
+  .icon-box {
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 0.7rem !important;
+    border-radius: 6px !important;
+  }
+
+  .icon-box svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  .subject {
+    font-size: 0.75rem !important;
+  }
+
+  .timestamp {
+    font-size: 0.58rem !important;
+  }
+
+  .description {
+    font-size: 0.7rem !important;
+    line-height: 1.25 !important;
+    -webkit-line-clamp: 1 !important;
+  }
+
+  .arrow-hint {
+    font-size: 0.65rem !important;
+  }
+
+  .btn-history-expand {
+    margin-top: 0.5rem !important;
+    padding: 6px !important;
+    border-radius: 8px !important;
+    font-size: 0.75rem !important;
+  }
+}

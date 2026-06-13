@@ -890,6 +890,7 @@ const CompleteProfile: React.FC = () => {
                     gender: step1.gender as Gender,
                     birthdate: step1.birthdate,
                     preferredLanguage: step1.preferredLanguage,
+                    fullNameArabic: step1.fullNameArabic || undefined,
                 });
             }
 
@@ -955,6 +956,7 @@ const CompleteProfile: React.FC = () => {
                     gender: step1.gender as Gender,
                     birthdate: step1.birthdate,
                     preferredLanguage: step1.preferredLanguage,
+                    fullNameArabic: step1.fullNameArabic || undefined,
                 });
             }
 
@@ -1058,10 +1060,8 @@ const CompleteProfile: React.FC = () => {
                                                 gender: step1.gender as Gender,
                                                 birthdate: step1.birthdate,
                                                 preferredLanguage: step1.preferredLanguage,
+                                                fullNameArabic: fullNameArabic || undefined,
                                             });
-                                            if (fullNameArabic) {
-                                                await authService.updateProfile({ fullNameArabic });
-                                            }
                                         } else if (step1.preferredLanguage) {
                                             await authService.updateProfile({ preferredLanguage: step1.preferredLanguage });
                                         }
@@ -1091,10 +1091,8 @@ const CompleteProfile: React.FC = () => {
                                             gender: step1.gender as Gender,
                                             birthdate: step1.birthdate,
                                             preferredLanguage: step1.preferredLanguage,
+                                            fullNameArabic: fullNameArabic || undefined,
                                         });
-                                        if (fullNameArabic) {
-                                            await authService.updateProfile({ fullNameArabic });
-                                        }
                                         await authService.getProfile();
                                         setHeaderAvatarUrl(authService.getCurrentUser()?.profile?.avatarUrl ?? null);
                                     } catch (err) {

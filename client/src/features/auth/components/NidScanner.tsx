@@ -253,7 +253,9 @@ const NidScanner: React.FC<NidScannerProps> = ({ onSuccess, onCancel }) => {
             setProcessingStep(2);
 
             const nid     = (data.result?.front_nid || data.result?.back_nid || '').replace(/\D/g, '');
-            const name    = data.result?.full_name || '';
+            const firstName = data.result?.first_name || '';
+            const lastNameRest = data.result?.full_name || '';
+            const name    = `${firstName} ${lastNameRest}`.trim() || '';
             const expiry  = data.result?.expiry_date || '';
             const expired = data.document_verification_plus?.expired ?? isExpired(expiry);
             const fraud   = data.advanced_confidence?.is_face_fraud_detected ?? false;

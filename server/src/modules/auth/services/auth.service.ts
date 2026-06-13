@@ -187,13 +187,22 @@ export class AuthService {
         let maskedNationalId: string | null = null;
         if (profile.national_id) {
             try {
-                // national_id is stored encrypted; profile.national_id is already the
-                // decrypted value AFTER Sequelize afterFind hook runs.
-                const raw = String(profile.national_id).replace(/\D/g, '');
-                if (raw.length === 14) {
-                    maskedNationalId = raw.slice(0, 2) + '**********' + raw.slice(12);
-                } else if (raw.length > 0) {
-                    maskedNationalId = raw.slice(0, 2) + '*'.repeat(raw.length - 2);
+                let decrypted: string | null = null;
+                if (profile.national_id.includes(':')) {
+                    decrypted = profile.getDecryptedNationalId();
+                } else {
+                    decrypted = profile.national_id;
+                }
+
+                if (decrypted) {
+                    const raw = String(decrypted).replace(/\D/g, '');
+                    if (raw.length === 14) {
+                        maskedNationalId = raw.slice(0, 2) + '**********' + raw.slice(12);
+                    } else if (raw.length >= 4) {
+                        maskedNationalId = raw.slice(0, 2) + '*'.repeat(raw.length - 4) + raw.slice(-2);
+                    } else if (raw.length > 0) {
+                        maskedNationalId = raw.slice(0, 1) + '*'.repeat(raw.length - 2) + raw.slice(-1);
+                    }
                 }
             } catch {
                 maskedNationalId = null;

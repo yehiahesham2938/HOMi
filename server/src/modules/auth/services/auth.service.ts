@@ -183,6 +183,23 @@ export class AuthService {
 
     /** Maps a Profile model row to API profile DTO (single place for /me, login, role update). */
     private mapProfileToResponse(profile: Profile): ProfileResponse {
+        // Build masked NID — decrypt to check length, then mask
+        let maskedNationalId: string | null = null;
+        if (profile.national_id) {
+            try {
+                // national_id is stored encrypted; profile.national_id is already the
+                // decrypted value AFTER Sequelize afterFind hook runs.
+                const raw = String(profile.national_id).replace(/\D/g, '');
+                if (raw.length === 14) {
+                    maskedNationalId = raw.slice(0, 2) + '**********' + raw.slice(12);
+                } else if (raw.length > 0) {
+                    maskedNationalId = raw.slice(0, 2) + '*'.repeat(raw.length - 2);
+                }
+            } catch {
+                maskedNationalId = null;
+            }
+        }
+
         return {
             id: profile.id,
             userId: profile.user_id,
@@ -209,6 +226,7 @@ export class AuthService {
             onboardingStep3Completed: profile.onboarding_step3_completed ?? false,
             onboardingStep2Completed: profile.onboarding_step2_completed ?? true,
             fullNameArabic: profile.full_name_arabic ?? null,
+            maskedNationalId,
         };
     }
 
@@ -498,6 +516,9 @@ export class AuthService {
                     birthdate: new Date(input.birthdate),
                     ...(input.preferredLanguage?.trim()
                         ? { preferred_language: input.preferredLanguage.trim() }
+                        : {}),
+                    ...(input.fullNameArabic?.trim()
+                        ? { full_name_arabic: input.fullNameArabic.trim() }
                         : {}),
                 },
                 { transaction }

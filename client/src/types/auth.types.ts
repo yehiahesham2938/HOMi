@@ -68,6 +68,8 @@ export interface CompleteVerificationRequest {
     gender: Gender;
     birthdate: string;
     preferredLanguage?: string;
+    /** Arabic full name from NID OCR — saved atomically with national_id */
+    fullNameArabic?: string;
 }
 
 export interface TenantRentalPreferencesPayload {
@@ -134,8 +136,10 @@ export interface ProfileResponse {
     onboardingStep3Skipped: boolean;
     onboardingStep3Completed: boolean;
     onboardingStep2Completed: boolean;
-    /** Arabic full name from NID OCR */
+    /** Arabic full name from NID OCR — read-only, set by verification flow */
     fullNameArabic?: string | null;
+    /** Masked NID e.g. "29**********34" — never the raw value */
+    maskedNationalId?: string | null;
 }
 
 export interface CheckSignupAvailabilityResponse {

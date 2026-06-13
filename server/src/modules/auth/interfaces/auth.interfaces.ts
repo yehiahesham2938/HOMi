@@ -38,6 +38,8 @@ export interface CompleteVerificationRequest {
     gender: GenderType;
     birthdate: string;
     preferredLanguage?: string;
+    /** Arabic full name from NID OCR — saved atomically with national_id */
+    fullNameArabic?: string;
 }
 
 /**
@@ -114,6 +116,8 @@ export interface ProfileResponse {
     onboardingStep2Completed: boolean;
     /** Arabic full name extracted from NID OCR */
     fullNameArabic: string | null;
+    /** Masked NID shown in UI — e.g. "29**********34". Never the raw value. */
+    maskedNationalId: string | null;
 }
 
 /**

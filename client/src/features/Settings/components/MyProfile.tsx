@@ -1,7 +1,7 @@
 // client/src/features/Settings/components/MyProfile.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import './MyProfile.css';
-import { FaCamera, FaIdBadge, FaEnvelope, FaPhone, FaMapMarkerAlt, FaUserCircle } from 'react-icons/fa';
+import { FaCamera, FaIdBadge, FaEnvelope, FaPhone, FaMapMarkerAlt, FaUserCircle, FaLock, FaIdCard } from 'react-icons/fa';
 import { authService } from '../../../services/auth.service';
 import type { UserResponse, ProfileResponse, UpdateProfileRequest } from '../../../types/auth.types';
 
@@ -19,34 +19,31 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-    // Form state
+    // Editable form state
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [phone, setPhone] = useState('');
     const [bio, setBio] = useState('');
     const [currentLocation, setCurrentLocation] = useState('');
-    const [arabicName, setArabicName] = useState('');
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Computed originals for change detection
+    const originalFirstName    = profile?.firstName    ?? '';
+    const originalLastName     = profile?.lastName     ?? '';
+    const originalPhone        = profile?.phoneNumber  ?? '';
+    const originalBio          = profile?.bio          ?? '';
+    const originalLocation     = profile?.currentLocation ?? '';
 
-    const originalFirstName = profile?.firstName ?? '';
-    const originalLastName = profile?.lastName ?? '';
-    const originalPhone = profile?.phoneNumber ?? '';
-    const originalBio = profile?.bio ?? '';
-    const originalLocation = profile?.currentLocation ?? '';
-    const originalArabicName = user?.id ? (localStorage.getItem(`arabicName_${user.id}`) ?? '') : '';
-    const hasChanges =
-        (isMaintainer
-            ? bio !== originalBio
-            : (
-                firstName !== originalFirstName ||
-                lastName !== originalLastName ||
-                phone !== originalPhone ||
-                bio !== originalBio ||
-                currentLocation !== originalLocation ||
-                arabicName !== originalArabicName
-            ));
+    const hasChanges = isMaintainer
+        ? bio !== originalBio
+        : (
+            firstName !== originalFirstName ||
+            lastName  !== originalLastName  ||
+            phone     !== originalPhone     ||
+            bio       !== originalBio       ||
+            currentLocation !== originalLocation
+        );
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -59,10 +56,6 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                 setPhone(data.profile.phoneNumber);
                 setBio(data.profile.bio ?? '');
                 setCurrentLocation(data.profile.currentLocation ?? '');
-                if (data.user?.id) {
-                    const savedAr = localStorage.getItem(`arabicName_${data.user.id}`);
-                    setArabicName(savedAr ?? '');
-                }
             } catch {
                 // Fall back to locally-cached data if the request fails
                 const cached = authService.getCurrentUser();
@@ -74,10 +67,6 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                     setPhone(cached.profile.phoneNumber);
                     setBio(cached.profile.bio ?? '');
                     setCurrentLocation(cached.profile.currentLocation ?? '');
-                    if (cached.user?.id) {
-                        const savedAr = localStorage.getItem(`arabicName_${cached.user.id}`);
-                        setArabicName(savedAr ?? '');
-                    }
                 }
             } finally {
                 setLoading(false);
@@ -100,8 +89,6 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
             return;
         }
 
-        // Resize to max 300×300 px using canvas, then export as JPEG 80%
-        // so the base64 string stays small enough for the DB (typically ~30–50 KB)
         const resizeImage = (src: string): Promise<string> =>
             new Promise((resolve) => {
                 const img = new Image();
@@ -126,7 +113,6 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
         reader.onload = async () => {
             try {
                 const resized = await resizeImage(reader.result as string);
-                // Optimistic preview
                 setAvatarSrc(resized);
                 setUploadingAvatar(true);
                 setMessage(null);
@@ -147,12 +133,10 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
         reader.readAsDataURL(file);
     };
 
-
     const handleSave = async () => {
         setSaving(true);
         setMessage(null);
         try {
-            // ── Client-side validation ────────────────────────────────────
             if (!isMaintainer && !firstName.trim()) {
                 setMessage({ type: 'error', text: 'First name cannot be empty.' });
                 setSaving(false);
@@ -164,18 +148,14 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                 return;
             }
 
-            // Only send fields that have actually changed vs the stored original.
-            // This prevents 400 errors from the backend when nothing changed,
-            // and avoids sending an empty phone (Google OAuth users may have none).
             const cached = authService.getCurrentUser();
-            const orig = cached?.profile;
+            const orig   = cached?.profile;
             const payload: UpdateProfileRequest = {};
 
             if (!isMaintainer) {
-                if (firstName !== (orig?.firstName ?? '')) payload.firstName = firstName;
-                if (lastName !== (orig?.lastName ?? '')) payload.lastName = lastName;
-                // Only include phone if it's non-empty AND different from original
-                if (phone && phone !== (orig?.phoneNumber ?? '')) payload.phone = phone;
+                if (firstName !== (orig?.firstName ?? ''))         payload.firstName = firstName;
+                if (lastName  !== (orig?.lastName  ?? ''))         payload.lastName  = lastName;
+                if (phone && phone !== (orig?.phoneNumber ?? ''))  payload.phone     = phone;
             }
             if (bio !== (orig?.bio ?? '')) {
                 const nextBio = bio.trim();
@@ -185,20 +165,7 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                 payload.currentLocation = currentLocation.trim() || null;
             }
 
-            let arNameChanged = false;
-            if (user?.id && arabicName !== originalArabicName) {
-                localStorage.setItem(`arabicName_${user.id}`, arabicName.trim());
-                arNameChanged = true;
-            }
-
             if (Object.keys(payload).length === 0) {
-                if (arNameChanged) {
-                    setMessage({ type: 'success', text: 'Arabic name updated successfully!' });
-                    setSaving(false);
-                    setUser(prev => prev ? { ...prev } : null);
-                    setTimeout(() => setMessage(null), 3000);
-                    return;
-                }
                 setMessage({ type: 'success', text: 'No changes to save.' });
                 setSaving(false);
                 setTimeout(() => setMessage(null), 3000);
@@ -216,15 +183,14 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
             setMessage({ type: 'error', text: msg });
         } finally {
             setSaving(false);
-            // Auto-clear the message after 4 seconds
             setTimeout(() => setMessage(null), 4000);
         }
     };
 
-    const getRoleLabel = (role?: string) => {
-        if (role === 'LANDLORD') return 'Landlord';
-        if (role === 'TENANT') return 'Tenant';
-        return role ?? 'Member';
+    const getRoleLabel = (r?: string) => {
+        if (r === 'LANDLORD') return 'Landlord';
+        if (r === 'TENANT')   return 'Tenant';
+        return r ?? 'Member';
     };
 
     const formatDate = (date?: Date | string) => {
@@ -238,7 +204,6 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
 
     const [avatarSrc, setAvatarSrc] = useState<string>(profile?.avatarUrl || fallbackAvatar);
 
-    // Sync avatar when profile loads
     useEffect(() => {
         setAvatarSrc(profile?.avatarUrl || fallbackAvatar);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -254,6 +219,11 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
 
     const updatePrefsLabel =
         user?.role === 'LANDLORD' ? 'Update business profile' : 'Update rental preferences';
+
+    // Read-only verified identity fields from DB
+    const arabicName       = profile?.fullNameArabic   || null;
+    const maskedNid        = profile?.maskedNationalId || null;
+    const isVerified       = profile?.isVerificationComplete ?? false;
 
     return (
         <div className="profile-wrapper">
@@ -335,6 +305,7 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                 )}
 
                 <div className="input-group-modern">
+                    {/* First Name */}
                     <div className="modern-field">
                         <FaIdBadge className="field-icon" />
                         <div className="field-content">
@@ -349,6 +320,8 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                             />
                         </div>
                     </div>
+
+                    {/* Last Name */}
                     <div className="modern-field">
                         <FaIdBadge className="field-icon" />
                         <div className="field-content">
@@ -363,22 +336,8 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                             />
                         </div>
                     </div>
-                    {!isMaintainer && (
-                        <div className="modern-field">
-                            <FaIdBadge className="field-icon" />
-                            <div className="field-content">
-                                <label>Full Name (Arabic)</label>
-                                <input
-                                    type="text"
-                                    value={arabicName}
-                                    onChange={(e) => setArabicName(e.target.value)}
-                                    placeholder="الاسم الكامل باللغة العربية"
-                                    dir="rtl"
-                                    style={{ textAlign: 'right', fontFamily: 'inherit' }}
-                                />
-                            </div>
-                        </div>
-                    )}
+
+                    {/* Email — always read-only */}
                     <div className="modern-field">
                         <FaEnvelope className="field-icon" />
                         <div className="field-content">
@@ -392,6 +351,8 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                             />
                         </div>
                     </div>
+
+                    {/* Phone */}
                     <div className="modern-field">
                         <FaPhone className="field-icon" />
                         <div className="field-content">
@@ -400,12 +361,14 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                                 type="text"
                                 value={phone}
                                 onChange={(e) => setPhone(e.target.value)}
-                                placeholder="+1 (555) 000-0000"
+                                placeholder="+20 10 0000 0000"
                                 readOnly={isMaintainer}
                                 style={isMaintainer ? { opacity: 0.65, cursor: 'not-allowed' } : undefined}
                             />
                         </div>
                     </div>
+
+                    {/* Bio */}
                     <div className="modern-field" style={{ gridColumn: '1 / -1' }}>
                         <FaUserCircle className="field-icon" />
                         <div className="field-content">
@@ -415,20 +378,17 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                                 onChange={(e) => setBio(e.target.value)}
                                 placeholder="Tell others a bit about yourself"
                                 rows={3}
-                                style={{
-                                    resize: 'vertical',
-                                    minHeight: 72,
-                                    width: '100%',
-                                    fontFamily: 'inherit',
-                                }}
+                                style={{ resize: 'vertical', minHeight: 72, width: '100%', fontFamily: 'inherit' }}
                             />
                         </div>
                     </div>
+
+                    {/* Current location */}
                     {!isMaintainer && (
                         <div className="modern-field">
                             <FaMapMarkerAlt className="field-icon" />
                             <div className="field-content">
-                                <label>Current location</label>
+                                <label>Current Location</label>
                                 <input
                                     type="text"
                                     value={currentLocation}
@@ -440,6 +400,87 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                     )}
                 </div>
 
+                {/* ── Verified Identity section ─────────────────────────── */}
+                {!isMaintainer && isVerified && (maskedNid || arabicName) && (
+                    <>
+                        <div className="form-section-title" style={{ marginTop: 28 }}>
+                            Verified Identity
+                            <span style={{
+                                marginLeft: 10,
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.06em',
+                                color: '#16a34a',
+                                background: 'rgba(34,197,94,0.1)',
+                                border: '1px solid rgba(34,197,94,0.3)',
+                                padding: '2px 8px',
+                                borderRadius: 20,
+                            }}>
+                                ✓ Locked
+                            </span>
+                        </div>
+                        <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginBottom: 16, marginTop: -4 }}>
+                            These fields are set by your National ID scan and cannot be changed here.
+                        </p>
+                        <div className="input-group-modern">
+                            {maskedNid && (
+                                <div className="modern-field">
+                                    <FaIdCard className="field-icon" style={{ color: '#2563eb' }} />
+                                    <div className="field-content">
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            National ID
+                                            <FaLock size={10} style={{ color: '#94a3b8' }} />
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={maskedNid}
+                                            readOnly
+                                            title="National ID is locked after verification"
+                                            style={{
+                                                cursor: 'not-allowed',
+                                                fontFamily: 'monospace',
+                                                letterSpacing: '0.12em',
+                                                fontSize: '0.95rem',
+                                                background: 'rgba(37,99,235,0.04)',
+                                                border: '1.5px solid rgba(37,99,235,0.2)',
+                                                color: '#1e40af',
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                            {arabicName && (
+                                <div className="modern-field">
+                                    <FaIdBadge className="field-icon" style={{ color: '#2563eb' }} />
+                                    <div className="field-content">
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            Full Name (Arabic)
+                                            <FaLock size={10} style={{ color: '#94a3b8' }} />
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={arabicName}
+                                            readOnly
+                                            dir="rtl"
+                                            title="Arabic name is extracted from your National ID scan"
+                                            style={{
+                                                cursor: 'not-allowed',
+                                                fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif",
+                                                fontSize: '1.05rem',
+                                                fontWeight: 600,
+                                                textAlign: 'right',
+                                                background: 'rgba(37,99,235,0.04)',
+                                                border: '1.5px solid rgba(37,99,235,0.2)',
+                                                color: '#1e40af',
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </>
+                )}
 
                 <button
                     className="prime-save-button"

@@ -71,6 +71,9 @@ export class Profile extends Model<
     /** True after user confirms tenant vs landlord (updateRole from onboarding step 2). */
     declare onboarding_step2_completed: CreationOptional<boolean>;
 
+    /** Arabic full name extracted from NID OCR */
+    declare full_name_arabic: CreationOptional<string | null>;
+
     // Timestamps
     declare created_at: CreationOptional<Date>;
     declare updated_at: CreationOptional<Date>;
@@ -237,6 +240,10 @@ Profile.init(
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: false,
+        },
+        full_name_arabic: {
+            type: DataTypes.TEXT,
+            allowNull: true,
         },
         created_at: {
             type: DataTypes.DATE,

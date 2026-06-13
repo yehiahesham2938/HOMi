@@ -603,6 +603,56 @@ class AuthService {
         await apiClient.delete('/auth/passkeys');
         await this.getProfile();
     }
+
+    /**
+     * Proxy Egyptian NID OCR to Valify via the HOMI backend.
+     * Valify credentials never leave the server.
+     *
+     * @param frontImg  Base64 string (with or without data-URL prefix) of the NID front
+     * @param backImg   Base64 string (with or without data-URL prefix) of the NID back
+     */
+    async nidOcr(frontImg: string, backImg: string): Promise<{
+        result: {
+            first_name: string;
+            full_name: string;
+            street: string;
+            front_nid: string;
+            serial_number: string;
+            back_nid: string;
+            release_date: string;
+            gender: string;
+            marital_status: string;
+            profession: string;
+            religion: string;
+            husband_name: string;
+            date_of_birth: string;
+            age: number;
+            birth_governarate: string;
+            police_station: string;
+            governorate: string;
+            expiry_date: string;
+        };
+        advanced_confidence: { is_face_fraud_detected: boolean };
+        document_verification_plus: {
+            expired: boolean;
+            front_data_validity: boolean;
+            back_data_validity: boolean;
+            is_front_greyscale: boolean;
+            is_back_greyscale: boolean;
+        };
+        profession_analysis: { workplace: string; profession_categorization: string };
+        document_liveness: {
+            is_front_document_live: boolean;
+            front_document_format: string;
+            is_back_document_live: boolean;
+            back_document_format: string;
+        };
+        transaction_id: string;
+        trials_remaining: number;
+    }> {
+        const response = await apiClient.post('/auth/nid-ocr', { frontImg, backImg }, { timeout: 90_000 });
+        return response.data;
+    }
 }
 
 export const authService = new AuthService();

@@ -21,6 +21,7 @@ import type {
 import type { RegistrationResponseJSON, AuthenticationResponseJSON } from '@simplewebauthn/server';
 import { webauthnService } from '../services/webauthn.service.js';
 import { env } from '../../../config/env.js';
+import { performNidOcr } from '../services/valify.service.js';
 
 /**
  * Authentication Controller
@@ -564,6 +565,64 @@ export class AuthController {
             await webauthnService.deleteAllPasskeys(userId);
             res.status(200).json({ success: true, message: 'Passkeys removed from your account.' });
         } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * POST /auth/nid-ocr
+     * Proxy Egyptian NID scanning to Valify OCR API.
+     * Credentials never leave the server.
+     * Requires authentication.
+     */
+    async nidOcr(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const userId = req.user?.userId;
+            if (!userId) {
+                throw new AuthError('User not authenticated', 401, 'NOT_AUTHENTICATED');
+            }
+
+            const { frontImg, backImg } = req.body as { frontImg?: string; backImg?: string };
+
+            if (!frontImg || !backImg) {
+                throw new AuthError(
+                    'Both frontImg and backImg (base64) are required.',
+                    400,
+                    'MISSING_IMAGES'
+                );
+            }
+
+            const result = await performNidOcr(frontImg, backImg);
+            res.status(200).json(result);
+        } catch (error) {
+            // Axios errors from Valify — always return 502 to client so the
+            // client never sees a misleading 404/401 from the upstream API.
+            if (
+                error instanceof Error &&
+                'isAxiosError' in error &&
+                !(error instanceof AuthError)
+            ) {
+                const axErr = error as {
+                    isAxiosError: boolean;
+                    response?: { status?: number; data?: unknown };
+                    message: string;
+                };
+                const upstreamStatus = axErr.response?.status;
+                const upstreamBody   = axErr.response?.data;
+
+                // Log the upstream detail on the server for debugging
+                console.error(
+                    `[Valify] Upstream error ${upstreamStatus ?? 'no-response'}: `,
+                    upstreamBody ?? axErr.message
+                );
+
+                res.status(502).json({
+                    success: false,
+                    message: 'ID verification service is temporarily unavailable. Please try again.',
+                    code:    'VALIFY_ERROR',
+                });
+                return;
+            }
             next(error);
         }
     }

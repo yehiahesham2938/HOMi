@@ -208,6 +208,7 @@ export class AuthService {
             onboardingStep3Skipped: profile.onboarding_step3_skipped ?? false,
             onboardingStep3Completed: profile.onboarding_step3_completed ?? false,
             onboardingStep2Completed: profile.onboarding_step2_completed ?? true,
+            fullNameArabic: profile.full_name_arabic ?? null,
         };
     }
 
@@ -1000,6 +1001,8 @@ export class AuthService {
             if (input.preferredBudgetMin !== undefined) updateData.preferred_budget_min = input.preferredBudgetMin;
             if (input.preferredBudgetMax !== undefined) updateData.preferred_budget_max = input.preferredBudgetMax;
             if (input.preferredLanguage !== undefined) updateData.preferred_language = input.preferredLanguage;
+            // Arabic full name from NID OCR
+            if (input.fullNameArabic !== undefined) updateData.full_name_arabic = input.fullNameArabic;
 
             if (input.onboardingStep3Complete === true) {
                 if (!user.email_verified) {

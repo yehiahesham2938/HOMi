@@ -100,6 +100,8 @@ export interface UpdateProfileRequest {
     tenantRentalPreferences?: TenantRentalPreferencesPayload | null;
     landlordBusinessProfile?: LandlordBusinessProfilePayload | null;
     onboardingStep3Complete?: boolean;
+    /** Arabic full name extracted from NID OCR */
+    fullNameArabic?: string;
 }
 
 export interface ChangePasswordRequest {
@@ -132,6 +134,8 @@ export interface ProfileResponse {
     onboardingStep3Skipped: boolean;
     onboardingStep3Completed: boolean;
     onboardingStep2Completed: boolean;
+    /** Arabic full name from NID OCR */
+    fullNameArabic?: string | null;
 }
 
 export interface CheckSignupAvailabilityResponse {

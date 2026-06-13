@@ -1027,4 +1027,18 @@ router.delete(
     authController.deletePasskeys.bind(authController)
 );
 
+/**
+ * POST /auth/nid-ocr
+ * Proxy Egyptian NID OCR to Valify — credentials stay server-side.
+ * Requires authentication (Bearer token).
+ *
+ * Body: { frontImg: string (base64), backImg: string (base64) }
+ * Returns: Valify OCR response (result, document_verification_plus, etc.)
+ */
+router.post(
+    '/nid-ocr',
+    protect,
+    authController.nidOcr.bind(authController)
+);
+
 export default router;

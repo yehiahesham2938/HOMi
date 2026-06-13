@@ -112,6 +112,8 @@ export interface ProfileResponse {
     onboardingStep3Completed: boolean;
     /** False until user confirms tenant vs landlord in onboarding step 2. */
     onboardingStep2Completed: boolean;
+    /** Arabic full name extracted from NID OCR */
+    fullNameArabic: string | null;
 }
 
 /**
@@ -214,6 +216,8 @@ export interface UpdateProfileRequest {
     landlordBusinessProfile?: LandlordBusinessProfilePayload | null;
     /** When true with valid step-3 payloads, marks onboarding complete and sets user.is_verified. */
     onboardingStep3Complete?: boolean;
+    /** Arabic full name extracted from NID OCR */
+    fullNameArabic?: string;
 }
 
 /**

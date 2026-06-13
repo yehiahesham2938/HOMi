@@ -180,6 +180,11 @@ export const syncDatabase = async (force: boolean = false): Promise<void> => {
                 ADD COLUMN IF NOT EXISTS "onboarding_step3_skipped" BOOLEAN NOT NULL DEFAULT false,
                 ADD COLUMN IF NOT EXISTS "onboarding_step3_completed" BOOLEAN NOT NULL DEFAULT false;
         `);
+        // Arabic full name extracted from NID OCR — idempotent
+        await sequelize.query(`
+            ALTER TABLE IF EXISTS "profiles"
+                ADD COLUMN IF NOT EXISTS "full_name_arabic" TEXT;
+        `);
         await sequelize.query(`
             UPDATE profiles p
             SET onboarding_step3_completed = true

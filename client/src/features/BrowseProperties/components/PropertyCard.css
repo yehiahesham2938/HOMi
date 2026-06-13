@@ -234,3 +234,45 @@
   color: #fff;
   border-color: var(--blue);
 }
+
+/* Mobile responsive overrides for PropertyCard (2-column layout) */
+@media (max-width: 768px) {
+  .prop-img img {
+    height: 120px !important;
+  }
+
+  .prop-save,
+  .prop-type-tag,
+  .prop-location,
+  .prop-availability,
+  .prop-specs,
+  .prop-landlord {
+    display: none !important;
+  }
+
+  .prop-body {
+    padding: 8px 10px !important;
+  }
+
+  .prop-price {
+    font-size: 0.95rem !important;
+    margin-bottom: 2px !important;
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 2px !important;
+  }
+
+  .prop-price em {
+    font-size: 0.68rem !important;
+  }
+
+  .prop-title {
+    font-size: 0.8rem !important;
+    margin-bottom: 0 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block !important;
+    height: auto !important;
+  }
+}

@@ -1,5 +1,6 @@
 // client/src/features/BrowseProperties/pages/PropertyDetailPage.tsx
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { 
     FaBed, FaBath, FaRulerCombined, FaMapMarkerAlt, FaHeart, FaShareAlt, 
@@ -104,6 +105,7 @@ function availabilityRibbon(property: PropertyUI): { label: string; dateLine: st
 }
 
 const PropertyDetailPage: React.FC = () => {
+    const { t } = useTranslation();
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const location = useLocation();
@@ -118,7 +120,7 @@ const PropertyDetailPage: React.FC = () => {
     const isUserGuest = !authService.isAuthenticated();
     const isLandlord = currentUser?.user?.role === 'LANDLORD';
     const isTenant = currentUser?.user?.role === 'TENANT';
-    const openedFromGuest = isUserGuest || !!(location.state as { openedFromGuest?: boolean })?.openedFromGuest;
+    const openedFromGuest = !!(location.state as { openedFromGuest?: boolean })?.openedFromGuest;
 
     // Heart state
     const [isSaved, setIsSaved] = useState(false);
@@ -458,7 +460,7 @@ const PropertyDetailPage: React.FC = () => {
         <div className="property-detail-page-wrapper">
             {isUserGuest ? <GuestHeader showBackToHome={true} /> : <Header />}
             <div className="property-detail-page-body">
-                {isLandlord ? <LandlordSidebar /> : isTenant ? <TenantSidebar /> : null}
+                {!isUserGuest && (isLandlord ? <LandlordSidebar /> : isTenant ? <TenantSidebar /> : null)}
                 
                 <div className="property-detail-page-content">
                     {/* BREADCRUMB & BACK NAVIGATION */}
@@ -614,7 +616,7 @@ const PropertyDetailPage: React.FC = () => {
                                             {maintenanceResponsibilities.length > 0 ? (
                                                 maintenanceResponsibilities.map((item, index) => (
                                                     <div className="resp-grid-row" key={index}>
-                                                        <span className="area-title">{item.area}</span>
+                                                        <span className="area-title">{t('myProperties.maintenanceTypes.' + item.area, item.area)}</span>
                                                         <span className={`resp-badge ${item.responsible_party.toLowerCase()}`}>
                                                             {item.responsible_party === 'LANDLORD' ? 'Landlord' : 'Tenant'}
                                                         </span>

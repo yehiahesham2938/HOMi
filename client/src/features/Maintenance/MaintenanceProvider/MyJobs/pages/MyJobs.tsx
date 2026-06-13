@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Header from '../../../../../components/global/header';
 import Footer from '../../../../../components/global/footer';
 import MaintenanceSideBar from '../../SideBar/MaintenanceSideBar';
@@ -62,6 +63,7 @@ function statusInfo(status: MaintenanceRequestStatus): { label: string; cls: str
 }
 
 const MyJobs: React.FC = () => {
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState<TabId>('all');
     const [jobs, setJobs] = useState<MaintenanceRequest[]>([]);
     const [loading, setLoading] = useState(false);
@@ -177,7 +179,7 @@ const MyJobs: React.FC = () => {
                                         onClick={() => setSelectedJob(j)}
                                     >
                                         <div className="mj-card-header">
-                                            <span className="mj-cat"><FaTools /> {j.category}</span>
+                                            <span className="mj-cat"><FaTools /> {t('myProperties.maintenanceTypes.' + j.category, j.category)}</span>
                                             <span className={`mj-status ${info.cls}`}>{info.icon} {info.label}</span>
                                         </div>
                                         <h4 className="mj-title">{j.title}</h4>

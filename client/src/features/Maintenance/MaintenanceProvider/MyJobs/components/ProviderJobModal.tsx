@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     FaTimes, FaCar, FaCheckCircle, FaImage, FaTools, FaUpload, FaTrash,
     FaMapMarkerAlt, FaUser, FaPhone, FaPlay, FaStop,
@@ -26,6 +27,7 @@ async function fileToBase64(file: File): Promise<string> {
 }
 
 const ProviderJobModal: React.FC<Props> = ({ isOpen, onClose, job, onUpdated }) => {
+    const { t } = useTranslation();
     const [busy, setBusy] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [completionNotes, setCompletionNotes] = useState('');
@@ -137,7 +139,7 @@ const ProviderJobModal: React.FC<Props> = ({ isOpen, onClose, job, onUpdated }) 
             <div className="pjm-modal" onClick={(e) => e.stopPropagation()}>
                 <header className="pjm-header">
                     <div>
-                        <span className="pjm-tag">{job.category} · {job.urgency}</span>
+                        <span className="pjm-tag">{t('myProperties.maintenanceTypes.' + job.category, job.category)} · {job.urgency}</span>
                         <h2>{job.title}</h2>
                         <p>{job.description}</p>
                     </div>

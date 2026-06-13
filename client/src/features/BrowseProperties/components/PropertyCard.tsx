@@ -19,17 +19,18 @@ interface PropertyCardProps {
         ownerImage?: string;
         ownerVerified?: boolean;
         status?: string;
+        availableDate?: string;
     };
     onOpenDetails: () => void;
     isSaved?: boolean;
     onToggleSave?: (propertyId: string | number) => void;
 }
 
-const PropertyCard: React.FC<PropertyCardProps> = ({ 
-    property, 
-    onOpenDetails, 
-    isSaved = false, 
-    onToggleSave 
+const PropertyCard: React.FC<PropertyCardProps> = ({
+    property,
+    onOpenDetails,
+    isSaved = false,
+    onToggleSave
 }) => {
     const isFeatured = property.tags && property.tags.some(t => t.toLowerCase() === 'featured' || t.toLowerCase() === '⭐ featured');
     const isRented = property.status?.toUpperCase() === 'RENTED';
@@ -51,7 +52,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         >
             <div className="prop-img">
                 <img src={property.image} alt={property.title} loading="lazy" />
-                <span className={`prop-badge ${badgeClass}`}>{badge}</span>
                 <button
                     className={`prop-save ${isSaved ? 'saved' : ''}`}
                     onClick={handleWishlistToggle}
@@ -70,6 +70,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                     <div className="prop-location-dot"></div>
                     {property.address}
                 </div>
+                {property.availableDate && (
+                    <div className="prop-availability" style={{ fontSize: '0.8rem', color: '#2563eb', fontWeight: '700', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span>📅 Available: {property.availableDate}</span>
+                    </div>
+                )}
                 <div className="prop-specs">
                     <div className="prop-spec">
                         <strong>{property.beds}</strong>Beds

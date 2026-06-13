@@ -542,7 +542,8 @@
       "pest": "Pest Control",
       "exterior": "Exterior Maintenance",
       "common": "Common Areas",
-      "security": "Security Systems"
+      "security": "Security Systems",
+      "other": "Other"
     }
   },
   "rentalRequests": {

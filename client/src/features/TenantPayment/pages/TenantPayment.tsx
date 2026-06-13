@@ -26,6 +26,11 @@ import {
     SearchX,
     CalendarX,
     ArrowLeft,
+    Lock,
+    Search,
+    Building2,
+    Filter,
+    Wrench,
 } from 'lucide-react';
 import './TenantPayment.css';
 import CreditCardModal from '../components/CreditCardModal';
@@ -38,14 +43,14 @@ import contractService, {
 import rentalRequestService, { type MyRentalRequest } from '../../../services/rental-request.service';
 import { authService } from '../../../services/auth.service';
 import paymentMethodService, { type SavedPaymentMethod } from '../../../services/payment-method.service';
+import maintenanceService, { type MaintenanceRequest } from '../../../services/maintenance.service';
 import {
-    formatDateLabel,
     getPrepaidInstallmentsCount,
     getRentCycleSummary,
     getRentInstallmentStats,
 } from '../utils/rentSchedule';
 
-type TabType = 'overview' | 'upcoming' | 'history' | 'topup' | 'methods' | 'pending' | 'receipt';
+type TabType = 'overview' | 'upcoming' | 'history' | 'topup' | 'methods' | 'pending' | 'receipt' | 'deposits' | 'maintenance';
 
 const formatMoney = (amount: number): string =>
     `$${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -78,6 +83,9 @@ const TenantPayment: React.FC = () => {
     const [paymentHistory, setPaymentHistory] = useState<TenantPaymentHistoryItem[]>([]);
     const [savedMethods, setSavedMethods] = useState<SavedPaymentMethod[]>([]);
     const [walletBalance, setWalletBalance] = useState(0);
+    const [depositSearchTerm, setDepositSearchTerm] = useState('');
+    const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
+    const [maintenanceSearchTerm, setMaintenanceSearchTerm] = useState('');
 
     const [installmentsTarget, setInstallmentsTarget] = useState<{ contractId: string; title: string } | null>(null);
 
@@ -132,12 +140,13 @@ const TenantPayment: React.FC = () => {
         setDataError(null);
 
         try {
-            const [contractsRes, requestsRes, methods, wallet, history] = await Promise.all([
+            const [contractsRes, requestsRes, methods, wallet, history, maintRes] = await Promise.all([
                 contractService.getTenantContracts({ page: 1, limit: 50 }),
                 rentalRequestService.getMyRequests({ page: 1, limit: 50 }),
                 paymentMethodService.getMyMethods(),
                 contractService.getWalletBalance(),
                 contractService.getPaymentHistory(120),
+                maintenanceService.listTenantRequests().catch(() => []),
             ]);
 
             setTenantContracts(contractsRes.data ?? []);
@@ -145,6 +154,7 @@ const TenantPayment: React.FC = () => {
             setPaymentHistory(history ?? []);
             setSavedMethods(methods);
             setWalletBalance(Number(wallet.balance ?? 0));
+            setMaintenanceRequests(maintRes ?? []);
             setPaymentActionError(null);
         } catch {
             setDataError('Could not load latest payment data.');
@@ -270,10 +280,10 @@ const TenantPayment: React.FC = () => {
         void doVerify();
     }, [location.pathname, location.search]);
 
-    const activeContract = useMemo(
-        () => tenantContracts.find((c) => ['ACTIVE', 'PENDING_PAYMENT', 'PENDING_TENANT'].includes(c.status)),
-        [tenantContracts]
-    );
+    // const activeContract = useMemo(
+    //     () => tenantContracts.find((c) => ['ACTIVE', 'PENDING_PAYMENT', 'PENDING_TENANT'].includes(c.status)),
+    //     [tenantContracts]
+    // );
 
     const pendingPaymentContract = useMemo(
         () => tenantContracts.find((c) => c.status === 'PENDING_PAYMENT'),
@@ -329,6 +339,61 @@ const TenantPayment: React.FC = () => {
     const hasUpcomingPayments = activeContracts.length > 0 || Boolean(pendingPaymentContract);
     const hasPaymentHistory = paymentHistory.length > 0;
     const hasPendingRequests = tenantRequests.some((r) => r.status === 'APPROVED' || r.status === 'PENDING');
+
+    const tenantDeposits = useMemo(() => {
+        return tenantContracts
+            .filter((c) => Number(c.securityDeposit ?? c.property?.securityDeposit ?? 0) > 0)
+            .map((c) => {
+                const propertyTitle = c.property?.title || 'Property';
+                const amount = Number(c.securityDeposit ?? c.property?.securityDeposit ?? 0);
+                const date = c.moveInDate || c.createdAt;
+
+                let status: 'HELD' | 'REFUNDED' | 'FORFEITED' | 'PENDING' = 'PENDING';
+                if (c.status === 'ACTIVE') status = 'HELD';
+                else if (c.status === 'EXPIRED') status = 'REFUNDED';
+                else if (c.status === 'TERMINATED') status = 'FORFEITED';
+                else if (c.status === 'PENDING_PAYMENT') status = 'PENDING';
+
+                return { id: c.id, propertyTitle, amount, status, date };
+            })
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }, [tenantContracts]);
+
+    const filteredTenantDeposits = useMemo(() => {
+        const q = depositSearchTerm.trim().toLowerCase();
+        if (!q) return tenantDeposits;
+        return tenantDeposits.filter((item) => item.propertyTitle.toLowerCase().includes(q));
+    }, [tenantDeposits, depositSearchTerm]);
+
+    const maintenancePayments = useMemo(() => {
+        return maintenanceRequests
+            .filter((req) => req.chargeParty === 'TENANT' && req.agreedPrice !== null)
+            .map((req) => {
+                const landlordName = req.landlord ? `${req.landlord.firstName ?? ''} ${req.landlord.lastName ?? ''}`.trim() : 'Landlord';
+                const propertyTitle = req.property?.title || 'Property';
+                const providerName = req.provider ? `${req.provider.firstName ?? ''} ${req.provider.lastName ?? ''}`.trim() : 'Provider';
+
+                let statusBadge = 'Escrowed';
+                if (req.status === 'COMPLETED' || req.status === 'RESOLVED_BY_ADMIN') {
+                    statusBadge = 'Released';
+                } else if (req.status === 'CANCELLED') {
+                    statusBadge = 'Refunded';
+                }
+
+                return {
+                    id: req.id,
+                    title: req.title,
+                    category: req.category,
+                    landlordName,
+                    propertyTitle,
+                    providerName,
+                    amount: req.agreedPrice ?? 0,
+                    date: req.providerCompletedAt || req.updatedAt || req.createdAt,
+                    statusBadge,
+                };
+            })
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }, [maintenanceRequests]);
 
     const getNextDueDateLabel = (): string => {
         if (!nextUnpaidRent) return 'No active lease';
@@ -961,6 +1026,180 @@ const TenantPayment: React.FC = () => {
         </div>
     );
 
+    const renderDeposits = () => {
+        if (tenantDeposits.length === 0) {
+            return (
+                <div className="tab-viewport animate-fade-up">
+                    <div className="empty-state">
+                        <div className="empty-icon"><Lock size={32} /></div>
+                        <h4>No Security Deposits</h4>
+                        <p>Security deposits from your lease agreements will appear here, showing their current escrow status.</p>
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="tab-viewport animate-fade-up">
+                <div className="table-controls">
+                    <div className="search-box">
+                        <Search size={18} />
+                        <input
+                            type="text"
+                            placeholder="Search property..."
+                            value={depositSearchTerm}
+                            onChange={(e) => setDepositSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <button className="btn-filter"><Filter size={16} /> Filter</button>
+                </div>
+                <div className="table-wrapper">
+                    <table className="modern-table">
+                        <thead>
+                            <tr>
+                                <th>Property</th>
+                                <th>Deposit Amount</th>
+                                <th>Lease Start Date</th>
+                                <th>Escrow Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredTenantDeposits.map((item) => {
+                                let badgeClass = 'pill';
+                                let badgeStyle: React.CSSProperties = {};
+                                let statusText = 'Awaiting Payment';
+                                if (item.status === 'HELD') {
+                                    badgeStyle = { background: '#eff6ff', color: '#1d4ed8', borderRadius: '6px', padding: '3px 10px', fontSize: '12px', fontWeight: 700 };
+                                    statusText = 'Held in Escrow';
+                                } else if (item.status === 'REFUNDED') {
+                                    badgeStyle = { background: '#e6fcf5', color: '#0ca678', borderRadius: '6px', padding: '3px 10px', fontSize: '12px', fontWeight: 700 };
+                                    statusText = 'Returned to You';
+                                } else if (item.status === 'FORFEITED') {
+                                    badgeStyle = { background: '#fef2f2', color: '#dc2626', borderRadius: '6px', padding: '3px 10px', fontSize: '12px', fontWeight: 700 };
+                                    statusText = 'Forfeited to Landlord';
+                                } else {
+                                    badgeStyle = { background: '#fffbeb', color: '#92400e', borderRadius: '6px', padding: '3px 10px', fontSize: '12px', fontWeight: 700 };
+                                    statusText = 'Awaiting Payment';
+                                }
+
+                                return (
+                                    <tr key={item.id}>
+                                        <td>
+                                            <div className="prop-cell" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <Building2 size={14} style={{ flexShrink: 0 }} />
+                                                <span>{item.propertyTitle}</span>
+                                            </div>
+                                        </td>
+                                        <td className="font-medium">{formatMoney(item.amount)}</td>
+                                        <td>{formatLongDate(item.date)}</td>
+                                        <td><span className={badgeClass} style={badgeStyle}>{statusText}</span></td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+    };
+
+    const renderMaintenance = () => {
+        if (maintenancePayments.length === 0) {
+            return (
+                <div className="tab-viewport animate-fade-up">
+                    <div className="empty-state">
+                        <div className="empty-icon"><Wrench size={32} /></div>
+                        <h4>No Maintenance Payments</h4>
+                        <p>When you submit maintenance requests or pay for completed jobs, those records will appear here.</p>
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="tab-viewport animate-fade-up">
+                <div className="table-controls">
+                    <div className="search-box">
+                        <Search size={18} />
+                        <input
+                            type="text"
+                            placeholder="Search provider, property, or job..."
+                            value={maintenanceSearchTerm}
+                            onChange={(e) => setMaintenanceSearchTerm(e.target.value)}
+                        />
+                    </div>
+                </div>
+                <div className="table-wrapper">
+                    <table className="modern-table">
+                        <thead>
+                            <tr>
+                                <th>Job Title / Category</th>
+                                <th>Property</th>
+                                <th>Provider</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th>Payment Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {maintenancePayments
+                                .filter((item) =>
+                                    item.providerName.toLowerCase().includes(maintenanceSearchTerm.toLowerCase()) ||
+                                    item.propertyTitle.toLowerCase().includes(maintenanceSearchTerm.toLowerCase()) ||
+                                    item.title.toLowerCase().includes(maintenanceSearchTerm.toLowerCase())
+                                )
+                                .map((item) => {
+                                    let badgeStyle: React.CSSProperties = {};
+                                    if (item.statusBadge === 'Released') {
+                                        badgeStyle = { background: '#e6fcf5', color: '#0ca678', borderRadius: '6px', padding: '3px 10px', fontSize: '12px', fontWeight: 700 };
+                                    } else if (item.statusBadge === 'Refunded') {
+                                        badgeStyle = { background: '#fef2f2', color: '#dc2626', borderRadius: '6px', padding: '3px 10px', fontSize: '12px', fontWeight: 700 };
+                                    } else if (item.statusBadge === 'Escrowed') {
+                                        badgeStyle = { background: '#eff6ff', color: '#1d4ed8', borderRadius: '6px', padding: '3px 10px', fontSize: '12px', fontWeight: 700 };
+                                    }
+
+                                    return (
+                                        <tr key={item.id}>
+                                            <td>
+                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <span style={{ fontWeight: 600, color: 'var(--saas-text-main)' }}>{item.title}</span>
+                                                    <span style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'capitalize', marginTop: '2px' }}>
+                                                        {item.category}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="prop-cell" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <Building2 size={14} style={{ flexShrink: 0 }} /> 
+                                                    <span>{item.propertyTitle}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="user-info-cell" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <div className="avatar-mini" style={{
+                                                        width: '24px', height: '24px', borderRadius: '50%', background: '#f1f5f9', color: '#475569',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700
+                                                    }}>{item.providerName.charAt(0)}</div>
+                                                    <span>{item.providerName}</span>
+                                                </div>
+                                            </td>
+                                            <td className="font-medium">{formatMoney(item.amount)}</td>
+                                            <td>{formatLongDate(item.date)}</td>
+                                            <td>
+                                                <span className="pill" style={badgeStyle}>
+                                                    {item.statusBadge}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+    };
+
     const renderMethods = () => (
         <div className="tab-viewport animate-fade-in">
             <div className="methods-viewport">
@@ -1072,6 +1311,8 @@ const TenantPayment: React.FC = () => {
                 {activeTab === 'overview' && renderOverview()}
                 {activeTab === 'upcoming' && renderUpcoming()}
                 {activeTab === 'history' && renderHistory()}
+                {activeTab === 'deposits' && renderDeposits()}
+                {activeTab === 'maintenance' && renderMaintenance()}
                 {activeTab === 'topup' && renderTopUp()}
                 {activeTab === 'methods' && renderMethods()}
                 {activeTab === 'pending' && renderPending()}
@@ -1098,6 +1339,8 @@ const TenantPayment: React.FC = () => {
                                 { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={16} /> },
                                 { id: 'upcoming', label: 'Upcoming', icon: <CalendarClock size={16} /> },
                                 { id: 'history', label: 'History', icon: <History size={16} /> },
+                                { id: 'maintenance', label: 'Maintenance', icon: <Wrench size={16} /> },
+                                { id: 'deposits', label: 'Deposits', icon: <Lock size={16} /> },
                                 { id: 'topup', label: 'Top Up', icon: <Wallet size={16} /> },
                                 { id: 'methods', label: 'Methods', icon: <CreditCard size={16} /> },
                                 { id: 'pending', label: 'Requests', icon: <FileSearch size={16} /> },

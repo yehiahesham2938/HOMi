@@ -120,6 +120,13 @@ const GuestSearch: React.FC = () => {
     const [selectedPrice, setSelectedPrice] = useState('');
     const [sortBy, setSortBy] = useState('featured');
 
+    const [selectedFurnishing, setSelectedFurnishing] = useState('');
+    const [selectedTargetTenant, setSelectedTargetTenant] = useState('');
+    const [minPrice, setMinPrice] = useState('');
+    const [maxPrice, setMaxPrice] = useState('');
+    const [availabilityDate, setAvailabilityDate] = useState('');
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
     // Map geographic search coordinates & states
     const [position, setPosition] = useState<{ lat: number, lng: number } | null>({ lat: 30.0444, lng: 31.2357 }); // Defaults to Cairo
     const [radiusKm, setRadiusKm] = useState<number>(10);
@@ -188,20 +195,56 @@ const GuestSearch: React.FC = () => {
 
         const matchesType = !selectedType || (property.type || '').toUpperCase() === selectedType.toUpperCase();
 
+        let matchesAvailabilityDate = true;
+        if (availabilityDate && property.availabilityDateISO) {
+            const selectedDate = new Date(availabilityDate);
+            const propDate = new Date(property.availabilityDateISO);
+            if (!Number.isNaN(selectedDate.getTime()) && !Number.isNaN(propDate.getTime())) {
+                matchesAvailabilityDate = propDate.getTime() <= selectedDate.getTime();
+            }
+        }
+
+        let matchesFurnishing = true;
+        if (selectedFurnishing) {
+            const normFurnishing = (property.furnishing || '').toLowerCase();
+            const normSelected = selectedFurnishing.toLowerCase();
+            if (normSelected === 'fully') {
+                matchesFurnishing = normFurnishing.includes('fully');
+            } else if (normSelected === 'semi') {
+                matchesFurnishing = normFurnishing.includes('semi');
+            } else if (normSelected === 'unfurnished') {
+                matchesFurnishing = normFurnishing.includes('unfurnished');
+            }
+        }
+
+        let matchesTargetTenant = true;
+        if (selectedTargetTenant) {
+            matchesTargetTenant = (property.targetTenant || '').toUpperCase() === selectedTargetTenant.toUpperCase();
+        }
+
+        let matchesMinPrice = true;
+        if (minPrice) {
+            matchesMinPrice = property.price >= parseInt(minPrice);
+        }
+
+        const effectiveMaxPrice = maxPrice || selectedPrice;
+        let matchesMaxPrice = true;
+        if (effectiveMaxPrice) {
+            matchesMaxPrice = property.price <= parseInt(effectiveMaxPrice);
+        }
+
         const matchesBeds =
             !selectedBeds ||
             (selectedBeds === '4' ? property.beds >= 4 : property.beds === parseInt(selectedBeds));
 
-        const matchesPrice = !selectedPrice || property.price <= parseInt(selectedPrice);
-
         // Distance matching radius logic
-        const matchesDistance = !position ||
+        const matchesDistance = !position || !showAdvancedFilters ||
             (property.locationLat && property.locationLng
                 ? getDistance(position.lat, position.lng, property.locationLat, property.locationLng) <= radiusKm
                 : (q ? (property.address || '').toLowerCase().includes(q) : true)
             );
 
-        return matchesQuery && matchesType && matchesBeds && matchesPrice && matchesDistance;
+        return matchesQuery && matchesType && matchesAvailabilityDate && matchesFurnishing && matchesTargetTenant && matchesMinPrice && matchesMaxPrice && matchesBeds && matchesDistance;
     });
 
     const sortedProperties = [...filteredProperties].sort((a, b) => {
@@ -258,6 +301,11 @@ const GuestSearch: React.FC = () => {
         setSortBy('featured');
         setPosition({ lat: 30.0444, lng: 31.2357 }); // Resets to Cairo center
         setRadiusKm(10);
+        setSelectedFurnishing('');
+        setSelectedTargetTenant('');
+        setMinPrice('');
+        setMaxPrice('');
+        setAvailabilityDate('');
         setLocationError(null);
     };
 
@@ -288,9 +336,9 @@ const GuestSearch: React.FC = () => {
                         </div>
 
                         <div className="shb-filter-card">
-                            <div className="filter-grid-inputs">
+                            <div className="filter-grid-inputs basic-filters">
                                 <div className="filter-input-col">
-                                    <label>Location Text Filter</label>
+                                    <label>City / Location</label>
                                     <div className="input-with-icon">
                                         <span className="input-icon">📍</span>
                                         <input
@@ -305,7 +353,7 @@ const GuestSearch: React.FC = () => {
                                 <div className="filter-input-col">
                                     <label>Property Type</label>
                                     <div className="input-with-icon">
-                                        <span className="input-icon"></span>
+                                        <span className="input-icon">🏠</span>
                                         <select
                                             value={selectedType}
                                             onChange={(e) => setSelectedType(e.target.value)}
@@ -319,39 +367,109 @@ const GuestSearch: React.FC = () => {
                                 </div>
 
                                 <div className="filter-input-col">
-                                    <label>Max Price / Month</label>
+                                    <label>Availability Date</label>
                                     <div className="input-with-icon">
-                                        <span className="input-icon"></span>
-                                        <select
-                                            value={selectedPrice}
-                                            onChange={(e) => setSelectedPrice(e.target.value)}
-                                        >
-                                            <option value="">Any Price</option>
-                                            <option value="8000">Up to 8k EGP</option>
-                                            <option value="15000">Up to 15k EGP</option>
-                                            <option value="25000">Up to 25k EGP</option>
-                                            <option value="50000">Up to 50k EGP</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div className="filter-input-col">
-                                    <label>Bedrooms</label>
-                                    <div className="input-with-icon">
-                                        <span className="input-icon"></span>
-                                        <select
-                                            value={selectedBeds}
-                                            onChange={(e) => setSelectedBeds(e.target.value)}
-                                        >
-                                            <option value="">Any Beds</option>
-                                            <option value="1">1 Bedroom</option>
-                                            <option value="2">2 Bedrooms</option>
-                                            <option value="3">3 Bedrooms</option>
-                                            <option value="4">4+ Bedrooms</option>
-                                        </select>
+                                        <span className="input-icon">📅</span>
+                                        <input
+                                            type="date"
+                                            value={availabilityDate}
+                                            onChange={(e) => setAvailabilityDate(e.target.value)}
+                                            style={{ cursor: 'pointer' }}
+                                        />
                                     </div>
                                 </div>
                             </div>
+
+                            <div className="advanced-toggle-row">
+                                <button 
+                                    type="button" 
+                                    className="advanced-toggle-btn"
+                                    onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                                >
+                                    <SlidersHorizontal size={16} />
+                                    {showAdvancedFilters ? 'Hide Advanced Filters' : 'View Advanced Filters'}
+                                </button>
+                            </div>
+
+                            {showAdvancedFilters && (
+                                <div className="filter-grid-inputs advanced-filters-panel animate-fade-down">
+                                    <div className="filter-input-col">
+                                        <label>Furnishing</label>
+                                        <div className="input-with-icon">
+                                            <span className="input-icon">🛋️</span>
+                                            <select
+                                                value={selectedFurnishing}
+                                                onChange={(e) => setSelectedFurnishing(e.target.value)}
+                                            >
+                                                <option value="">Any Furnishing</option>
+                                                <option value="fully">Fully Furnished</option>
+                                                <option value="semi">Semi-Furnished</option>
+                                                <option value="unfurnished">Unfurnished</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="filter-input-col">
+                                        <label>Min Price / Month (EGP)</label>
+                                        <div className="input-with-icon">
+                                            <span className="input-icon">💵</span>
+                                            <input
+                                                type="number"
+                                                placeholder="Min price"
+                                                value={minPrice}
+                                                onChange={(e) => setMinPrice(e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="filter-input-col">
+                                        <label>Max Price / Month (EGP)</label>
+                                        <div className="input-with-icon">
+                                            <span className="input-icon">💵</span>
+                                            <input
+                                                type="number"
+                                                placeholder="Max price"
+                                                value={maxPrice}
+                                                onChange={(e) => setMaxPrice(e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="filter-input-col">
+                                        <label>Target Tenant</label>
+                                        <div className="input-with-icon">
+                                            <span className="input-icon">👥</span>
+                                            <select
+                                                value={selectedTargetTenant}
+                                                onChange={(e) => setSelectedTargetTenant(e.target.value)}
+                                            >
+                                                <option value="">Any Tenant</option>
+                                                <option value="STUDENTS">Students</option>
+                                                <option value="FAMILIES">Families</option>
+                                                <option value="TOURISTS">Tourists</option>
+                                                <option value="ANY">Any</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="filter-input-col">
+                                        <label>Bedrooms</label>
+                                        <div className="input-with-icon">
+                                            <span className="input-icon">🛏️</span>
+                                            <select
+                                                value={selectedBeds}
+                                                onChange={(e) => setSelectedBeds(e.target.value)}
+                                            >
+                                                <option value="">Any Beds</option>
+                                                <option value="1">1 Bedroom</option>
+                                                <option value="2">2 Bedrooms</option>
+                                                <option value="3">3 Bedrooms</option>
+                                                <option value="4">4+ Bedrooms</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="filter-actions-row">
                                 <button className="clear-filters-btn" onClick={clearFilters}>Reset Filters</button>
@@ -452,7 +570,7 @@ const GuestSearch: React.FC = () => {
                                 </div>
                                 {locationError && <p className="map-location-error" style={{ color: '#ef4444', fontSize: '0.75rem', margin: 0 }}>{locationError}</p>}
 
-                                {position && (
+                                {position && showAdvancedFilters && (
                                     <div className="map-radius-control" style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-muted)' }}>
                                             <span>Search Radius:</span>

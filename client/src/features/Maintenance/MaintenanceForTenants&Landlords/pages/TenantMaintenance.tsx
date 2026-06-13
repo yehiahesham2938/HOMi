@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import Header from '../../../../components/global/header';
 import Footer from '../../../../components/global/footer';
@@ -9,12 +10,12 @@ import ProviderProfile from '../components/ProviderProfile';
 import ApplicationsModal from '../components/ApplicationsModal';
 import LiveTrackingModal from '../components/LiveTrackingModal';
 import CompletionConfirmModal from '../components/CompletionConfirmModal';
+import IssuePostCard, { statusColor } from '../components/IssuePostCard';
 import './TenantMaintenance.css';
 import {
     FaPlus, FaSearch, FaFilter, FaTools, FaCalendarCheck,
-    FaHammer, FaBolt, FaCheckCircle, FaClock, FaTimesCircle,
-    FaChevronRight, FaMapMarkerAlt, FaUsers,
-    FaTint, FaSnowflake, FaLeaf, FaPaintRoller, FaWrench, FaTrashAlt
+    FaCheckCircle, FaClock,
+    FaChevronRight, FaUsers, FaTrashAlt
 } from 'react-icons/fa';
 import maintenanceService, {
     type BrowseProvider,
@@ -23,34 +24,10 @@ import maintenanceService, {
 import socketService from '../../../../services/socket.service';
 import { MAINTENANCE_CATEGORIES } from '../../constants/categories';
 
-function statusColor(status: MaintenanceRequest['status']) {
-    switch (status) {
-        case 'OPEN': return { label: 'Open', className: 'open' };
-        case 'ASSIGNED': return { label: 'Scheduled', className: 'scheduled' };
-        case 'EN_ROUTE': return { label: 'On the way', className: 'en-route' };
-        case 'IN_PROGRESS': return { label: 'In progress', className: 'in-progress' };
-        case 'AWAITING_CONFIRMATION': return { label: 'Awaiting confirmation', className: 'awaiting' };
-        case 'COMPLETED': return { label: 'Completed', className: 'completed' };
-        case 'DISPUTED': return { label: 'Disputed', className: 'disputed' };
-        case 'RESOLVED_BY_ADMIN': return { label: 'Resolved by admin', className: 'completed' };
-        case 'CANCELLED': return { label: 'Cancelled', className: 'cancelled' };
-        default: return { label: status, className: 'open' };
-    }
-}
 
-function getCategoryIcon(category: string) {
-    switch (category) {
-        case 'Plumbing': return <FaTint className="type-icon-inner color-plumbing" />;
-        case 'Electrical': return <FaBolt className="type-icon-inner color-electrical" />;
-        case 'Painting': return <FaPaintRoller className="type-icon-inner color-painting" />;
-        case 'AC Service': return <FaSnowflake className="type-icon-inner color-ac" />;
-        case 'Gardening': return <FaLeaf className="type-icon-inner color-gardening" />;
-        case 'Flooring': return <FaWrench className="type-icon-inner color-flooring" />;
-        default: return <FaHammer className="type-icon-inner color-other" />;
-    }
-}
 
 const TenantMaintenance: React.FC = () => {
+    const { t } = useTranslation();
     const [searchParams] = useSearchParams();
     const initialTab = (searchParams.get('tab') as 'post' | 'browse' | 'active') || 'post';
     const [activeTab, setActiveTab] = useState<'post' | 'browse' | 'active'>(initialTab);
@@ -82,6 +59,7 @@ const TenantMaintenance: React.FC = () => {
     const [appsRequest, setAppsRequest] = useState<MaintenanceRequest | null>(null);
     const [trackRequest, setTrackRequest] = useState<MaintenanceRequest | null>(null);
     const [confirmRequest, setConfirmRequest] = useState<MaintenanceRequest | null>(null);
+    const [cancelTarget, setCancelTarget] = useState<MaintenanceRequest | null>(null);
 
     // ─── Loaders ────────────────────────────────────────────────────────────
     const loadProviders = useCallback(async () => {
@@ -163,14 +141,8 @@ const TenantMaintenance: React.FC = () => {
         setRequests((prev) => [created, ...prev]);
     };
 
-    const handleCancel = async (req: MaintenanceRequest) => {
-        if (!window.confirm('Cancel this maintenance request?')) return;
-        try {
-            const updated = await maintenanceService.cancelTenantRequest(req.id);
-            setRequests((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
-        } catch (err: any) {
-            alert(err?.response?.data?.message ?? 'Could not cancel.');
-        }
+    const handleCancel = (req: MaintenanceRequest) => {
+        setCancelTarget(req);
     };
 
     const handleViewProfile = (id: string) => {
@@ -205,94 +177,18 @@ const TenantMaintenance: React.FC = () => {
                 </div>
             ) : (
                 <div className="marketplace-grid">
-                    {activeRequests.map((req) => {
-                        const sc = statusColor(req.status);
-                        const urgencyClass = req.urgency ? req.urgency.toLowerCase() : 'medium';
-                        return (
-                            <div key={req.id} className={`post-card-premium card-urgency-${urgencyClass}`}>
-                                <div className="card-glass-glow"></div>
-                                <div className="post-card-header">
-                                    <div className="post-card-badge status-pill">
-                                        <span className={`status-dot dot-${sc.className}`}></span>
-                                        <span>{sc.label}</span>
-                                    </div>
-                                    {req.urgency && (
-                                        <div className={`urgency-pill urgency-${urgencyClass}`}>
-                                            {req.urgency}
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="post-card-content">
-                                    <div className="post-card-type">
-                                        <div className={`type-icon-wrapper bg-${urgencyClass}`}>
-                                            {getCategoryIcon(req.category)}
-                                        </div>
-                                        <span className="category-text">{req.category}</span>
-                                    </div>
-                                    <h3 className="post-title-text">{req.title}</h3>
-                                    <p className="post-description">{req.description}</p>
-                                    <div className="post-meta">
-                                        <div className="meta-item flex-row-center">
-                                            <FaClock className="meta-icon" />
-                                            <span>{new Date(req.createdAt).toLocaleDateString()}</span>
-                                        </div>
-                                        <div className="meta-item flex-row-center">
-                                            <FaBolt className="meta-icon animated-pulse" />
-                                            <span>{req.applicationsCount ?? 0} applications</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="post-card-footer">
-                                    <div className="budget-info">
-                                        <span className="budget-label">{req.agreedPrice != null ? 'Agreed price' : 'Budget estimation'}</span>
-                                        <strong className="budget-val">
-                                            {req.agreedPrice != null
-                                                ? `EGP ${Number(req.agreedPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                                                : req.estimatedBudget
-                                                    ? `EGP ${Number(req.estimatedBudget).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                                                    : '—'}
-                                        </strong>
-                                    </div>
-                                    <div className="post-action-buttons">
-                                        <button className="view-bids-btn btn-view" onClick={() => openViewIssueModal(req)}>Details</button>
-                                        {req.status === 'OPEN' && (
-                                            <button
-                                                className="view-bids-btn btn-bids"
-                                                onClick={() => openApplicationsModal(req)}
-                                            >
-                                                Bids ({req.applicationsCount ?? 0})
-                                            </button>
-                                        )}
-                                        {(req.status === 'EN_ROUTE' || req.status === 'IN_PROGRESS') && (
-                                            <button
-                                                className="view-bids-btn btn-track"
-                                                onClick={() => openTrackingModal(req)}
-                                            >
-                                                Track
-                                            </button>
-                                        )}
-                                        {req.status === 'AWAITING_CONFIRMATION' && (
-                                            <button
-                                                className="view-bids-btn btn-confirm"
-                                                onClick={() => setConfirmRequest(req)}
-                                            >
-                                                Confirm
-                                            </button>
-                                        )}
-                                        {req.status === 'OPEN' && (
-                                            <button
-                                                className="view-bids-btn btn-cancel-trash"
-                                                onClick={() => handleCancel(req)}
-                                                title="Cancel Request"
-                                            >
-                                                <FaTrashAlt />
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
+                    {activeRequests.map((req) => (
+                        <IssuePostCard
+                            key={req.id}
+                            request={req}
+                            role="TENANT"
+                            onDetails={openViewIssueModal}
+                            onBids={openApplicationsModal}
+                            onTrack={openTrackingModal}
+                            onConfirm={setConfirmRequest}
+                            onCancel={handleCancel}
+                        />
+                    ))}
                 </div>
             )}
         </div>
@@ -318,7 +214,7 @@ const TenantMaintenance: React.FC = () => {
                     >
                         <option value="All">All Categories</option>
                         {MAINTENANCE_CATEGORIES.map((c) => (
-                            <option key={c} value={c}>{c}</option>
+                            <option key={c} value={c}>{t('myProperties.maintenanceTypes.' + c, c)}</option>
                         ))}
                     </select>
                 </div>
@@ -568,6 +464,41 @@ const TenantMaintenance: React.FC = () => {
                                 setConfirmRequest(null);
                             }}
                         />
+                    )}
+
+                    {cancelTarget && (
+                        <div className="custom-confirm-modal-overlay" onClick={() => setCancelTarget(null)}>
+                            <div className="custom-confirm-modal-card animate-in" onClick={(e) => e.stopPropagation()}>
+                                <div className="custom-confirm-modal-icon-box">
+                                    <FaTrashAlt className="custom-confirm-modal-icon" />
+                                </div>
+                                <h3>Cancel Maintenance Request</h3>
+                                <p>Are you sure you want to cancel the request <strong>"{cancelTarget.title}"</strong>? This action cannot be undone.</p>
+                                <div className="custom-confirm-modal-actions">
+                                    <button 
+                                        className="custom-confirm-btn btn-cancel" 
+                                        onClick={() => setCancelTarget(null)}
+                                    >
+                                        No, keep it
+                                    </button>
+                                    <button 
+                                        className="custom-confirm-btn btn-confirm-delete" 
+                                        onClick={async () => {
+                                            const req = cancelTarget;
+                                            setCancelTarget(null);
+                                            try {
+                                                const updated = await maintenanceService.cancelTenantRequest(req.id);
+                                                setRequests((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+                                            } catch (err: any) {
+                                                setError(err?.response?.data?.message ?? 'Could not cancel.');
+                                            }
+                                        }}
+                                    >
+                                        Yes, cancel request
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     )}
 
                     <Footer />

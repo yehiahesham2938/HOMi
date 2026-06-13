@@ -171,10 +171,12 @@ export interface TenantMaintenanceContext {
     property: PropertyMini;
     landlord: PartyMini;
     walletBalance: number;
+    responsibilities?: Array<{ area: string; responsibleParty: string }>;
     activeRentals: Array<{
         contractId: string;
         property: PropertyMini;
         landlord: PartyMini;
+        responsibilities?: Array<{ area: string; responsibleParty: string }>;
     }>;
 }
 
@@ -285,6 +287,13 @@ class MaintenanceService {
     async acceptApplication(applicationId: string): Promise<MaintenanceRequest> {
         const r = await apiClient.post<ApiOk<MaintenanceRequest>>(
             `/maintenance/tenant/applications/${applicationId}/accept`
+        );
+        return r.data.data;
+    }
+
+    async acceptApplicationAsLandlord(applicationId: string): Promise<MaintenanceRequest> {
+        const r = await apiClient.post<ApiOk<MaintenanceRequest>>(
+            `/maintenance/landlord/applications/${applicationId}/accept`
         );
         return r.data.data;
     }

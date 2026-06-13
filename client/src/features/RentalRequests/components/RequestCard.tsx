@@ -104,7 +104,6 @@ const RequestCard = ({ data, onStatusChange }: RequestCardProps) => {
                                 target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(applicant.name)}&background=random`;
                             }}
                         />
-                        <span className="rc-match-badge">{applicant.matchScore}% {t('rentalRequests.card.match', { defaultValue: 'Match' })}</span>
                     </div>
                     <div className="rc-user-info">
                         <h3>{applicant.name} <FaCheckCircle className="icon-blue" /></h3>

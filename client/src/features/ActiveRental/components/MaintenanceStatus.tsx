@@ -1,5 +1,5 @@
 import './MaintenanceStatus.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaTools, FaChevronRight, FaWrench, FaCheckCircle, FaClock, FaTimesCircle, FaExclamationCircle } from 'react-icons/fa';
 import maintenanceService, { type MaintenanceRequest } from '../../../services/maintenance.service';
@@ -49,10 +49,21 @@ const MaintenanceStatus = ({ contract }: { contract: LandlordContract | null }) 
         load();
     }, []);
 
-    const activeRequests = requests.filter(
-        r => !['COMPLETED', 'CANCELLED', 'RESOLVED_BY_ADMIN'].includes(r.status)
-    );
-    const recentRequests = requests.slice(0, 2); // limit to 2 for cleaner layout with timeline spacing
+    const propertyId = contract?.property?.id;
+    const filteredRequests = useMemo(() => {
+        if (!propertyId) return requests;
+        return requests.filter(r => r.propertyId === propertyId);
+    }, [requests, propertyId]);
+
+    const activeRequests = useMemo(() => {
+        return filteredRequests.filter(
+            r => !['COMPLETED', 'CANCELLED', 'RESOLVED_BY_ADMIN'].includes(r.status)
+        );
+    }, [filteredRequests]);
+
+    const recentRequests = useMemo(() => {
+        return filteredRequests.slice(0, 2); // limit to 2 for cleaner layout with timeline spacing
+    }, [filteredRequests]);
 
     const steps = ["Posted", "Scheduled", "In Progress", "Completed"];
 

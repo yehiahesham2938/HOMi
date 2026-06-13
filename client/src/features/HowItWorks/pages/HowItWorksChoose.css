@@ -123,3 +123,35 @@
 .hiw-choose-card--landlord .hiw-choose-card-cta {
   color: #059669;
 }
+
+/* --- Mobile responsiveness --- */
+@media (max-width: 576px) {
+  .hiw-choose-layout .hiw-choose-main {
+    padding: 80px 16px 40px !important;
+  }
+  .hiw-choose-layout .hiw-choose-card {
+    padding: 20px 16px !important;
+    border-radius: 16px !important;
+  }
+  .hiw-choose-layout .hiw-choose-title {
+    font-size: 1.6rem !important;
+  }
+  .hiw-choose-layout .hiw-choose-lede {
+    font-size: 0.95rem !important;
+    margin-bottom: 24px !important;
+  }
+  .hiw-choose-layout .hiw-choose-card-icon {
+    width: 52px !important;
+    height: 52px !important;
+    border-radius: 12px !important;
+    margin-bottom: 14px !important;
+  }
+  .hiw-choose-layout .hiw-choose-card h2 {
+    font-size: 1.15rem !important;
+    margin-bottom: 6px !important;
+  }
+  .hiw-choose-layout .hiw-choose-card p {
+    font-size: 0.88rem !important;
+    margin-bottom: 16px !important;
+  }
+}

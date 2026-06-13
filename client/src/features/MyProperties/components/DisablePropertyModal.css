@@ -255,3 +255,74 @@
   cursor: not-allowed;
   box-shadow: none;
 }
+
+/* Mobile responsive styling for DisablePropertyModal */
+@media (max-width: 768px) {
+  .disable-modal-overlay {
+    padding: 16px;
+  }
+  
+  .disable-modal-container {
+    max-width: 100%;
+    width: 100%;
+    max-height: 85vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .disable-modal-overlay {
+    padding: 0;
+  }
+  
+  .disable-modal-container {
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
+  
+  .disable-modal-header {
+    padding: 16px 20px;
+  }
+  
+  .disable-modal-header h2 {
+    font-size: 1.15rem;
+  }
+  
+  .disable-modal-content {
+    padding: 20px;
+    gap: 16px;
+  }
+  
+  .disable-warning-text {
+    font-size: 0.85rem;
+    padding: 10px 12px;
+  }
+  
+  .disable-option-card {
+    padding: 14px;
+    gap: 12px;
+  }
+  
+  .option-title {
+    font-size: 0.95rem;
+  }
+  
+  .option-description {
+    font-size: 0.8rem;
+  }
+  
+  .disable-date-input {
+    max-width: 100% !important;
+  }
+  
+  .disable-modal-actions {
+    padding: 16px 20px;
+  }
+  
+  .disable-btn-cancel,
+  .disable-btn-confirm {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+    border-radius: 8px;
+  }
+}

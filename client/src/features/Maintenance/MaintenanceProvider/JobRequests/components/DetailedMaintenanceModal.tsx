@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import './DetailedMaintenanceModal.css';
 import { FaTimes, FaCreditCard, FaCalendarAlt, FaClock, FaMapMarkerAlt, FaUser, FaTag, FaCheckCircle, FaTrashAlt, FaDollarSign } from 'react-icons/fa';
 
@@ -29,6 +30,7 @@ const DetailedMaintenanceModal: React.FC<DetailedMaintenanceModalProps> = ({
     onAccept,
     onIgnore
 }) => {
+    const { t } = useTranslation();
     const [scheduleTime, setScheduleTime] = useState('');
     const [isAccepted, setIsAccepted] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
@@ -70,7 +72,7 @@ const DetailedMaintenanceModal: React.FC<DetailedMaintenanceModalProps> = ({
                             <FaCheckCircle />
                         </div>
                         <h2>Visit Scheduled!</h2>
-                        <p>Your visit for <strong>{request.issueType}</strong> has been scheduled for:</p>
+                        <p>Your visit for <strong>{t('myProperties.maintenanceTypes.' + request.issueType, request.issueType)}</strong> has been scheduled for:</p>
                         <div className="success-time-badge">
                             <FaClock /> {new Date(scheduleTime).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
                         </div>
@@ -97,7 +99,7 @@ const DetailedMaintenanceModal: React.FC<DetailedMaintenanceModalProps> = ({
                                 <div className="details-main-column">
                                     <section className="modal-info-section">
                                         <label className="modal-section-label"><FaTag /> Category</label>
-                                        <h3 className="modal-category-title">{request.issueType}</h3>
+                                        <h3 className="modal-category-title">{t('myProperties.maintenanceTypes.' + request.issueType, request.issueType)}</h3>
                                     </section>
 
                                     <section className="modal-info-section">

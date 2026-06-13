@@ -79,3 +79,33 @@
 .add-property-card:active {
   transform: scale(0.97);
 }
+
+@media (max-width: 768px) {
+  .add-property-card {
+    background: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04) !important;
+  }
+
+  .dotted-border {
+    min-height: 120px !important;
+    padding: 15px 10px !important;
+    background: rgba(245, 243, 255, 0.2) !important;
+    border: 2.5px dashed rgba(79, 70, 229, 0.25) !important;
+  }
+
+  .plus-icon {
+    font-size: 2rem !important;
+    color: var(--primary) !important;
+  }
+
+  .add-content h3 {
+    font-size: 1rem !important;
+    font-weight: 800;
+  }
+
+  .add-content p {
+    font-size: 0.8rem !important;
+  }
+}

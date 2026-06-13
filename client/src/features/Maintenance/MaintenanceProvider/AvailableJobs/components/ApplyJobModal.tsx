@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     FaTimes, FaMapMarkerAlt, FaUser, FaTag, FaClock,
     FaDollarSign, FaImage, FaCheckCircle, FaArrowRight, FaInfoCircle, FaListAlt
@@ -16,6 +17,7 @@ interface Props {
 }
 
 const ApplyJobModal: React.FC<Props> = ({ isOpen, onClose, job, onApplied }) => {
+    const { t } = useTranslation();
     const [finalPrice, setFinalPrice] = useState('');
     const [priceBreakdown, setPriceBreakdown] = useState('');
     const [coverNote, setCoverNote] = useState('');
@@ -98,7 +100,7 @@ const ApplyJobModal: React.FC<Props> = ({ isOpen, onClose, job, onApplied }) => 
                         <div className="modal-info-column">
                             <section className="modal-info-block">
                                 <label className="modal-block-label"><FaTag /> Category</label>
-                                <h3 className="modal-job-type">{job.category} — {job.title}</h3>
+                                <h3 className="modal-job-type">{t('myProperties.maintenanceTypes.' + job.category, job.category)} — {job.title}</h3>
                             </section>
 
                             <section className="modal-info-block">

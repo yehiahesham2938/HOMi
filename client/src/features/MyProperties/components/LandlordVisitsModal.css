@@ -334,3 +334,71 @@
      color: #991b1b;
      border: 1px solid #fca5a5;
  }
+
+/* Mobile responsive styling for LandlordVisitsModal */
+@media (max-width: 480px) {
+  .visits-modal-overlay {
+    padding: 0;
+  }
+  
+  .visits-modal-container {
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
+  
+  .visits-modal-header {
+    padding: 16px 20px;
+  }
+  
+  .visits-modal-header h2 {
+    font-size: 1.2rem;
+  }
+  
+  .visits-modal-content {
+    padding: 20px;
+  }
+  
+  .visit-item-card {
+    padding: 14px;
+    gap: 12px;
+  }
+  
+  .tenant-profile-info {
+    gap: 8px;
+  }
+  
+  .tenant-avatar,
+  .tenant-avatar-fallback {
+    width: 36px;
+    height: 36px;
+    font-size: 0.75rem;
+  }
+  
+  .tenant-profile-info h4 {
+    font-size: 0.85rem;
+  }
+  
+  .tenant-email {
+    font-size: 0.75rem;
+  }
+  
+  .visit-datetime-badge {
+    padding: 8px 10px;
+    border-radius: 8px;
+  }
+  
+  .dt-item {
+    font-size: 0.75rem;
+  }
+  
+  .btn-action {
+    padding: 8px 10px;
+    font-size: 0.75rem;
+  }
+  
+  .visit-status-tag {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+}

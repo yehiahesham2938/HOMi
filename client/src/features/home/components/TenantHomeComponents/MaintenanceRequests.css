@@ -225,10 +225,146 @@
   box-shadow: 0 6px 15px rgba(79, 70, 229, 0.25);
 }
 
-@media (max-width: 1200px) {
-  .maintenance-top-nav {
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
+@media (max-width: 768px) {
+  .maintenance-dashboard {
+    height: auto !important;
+    min-height: auto !important;
+    padding: 1rem !important;
+    gap: 0.85rem !important;
+    background: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04) !important;
+  }
+
+  .title-icon-ring {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 10px !important;
+    background: var(--primary-glow) !important;
+  }
+
+  .title-icon-ring svg {
+    width: 16px !important;
+    height: 16px !important;
+    color: var(--primary) !important;
+  }
+
+  .section-title h3 {
+    font-size: 1.1rem !important;
+    font-weight: 800;
+  }
+
+  .btn-ghost-history {
+    padding: 5px 10px !important;
+    font-size: 0.75rem !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(4px) !important;
+  }
+
+  .active-request-card {
+    padding: 10px 12px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.02) !important;
+  }
+
+  .issue-subject {
+    font-size: 0.95rem !important;
+    font-weight: 800;
+    margin-bottom: 2px !important;
+  }
+
+  .tech-eta-card {
+    font-size: 0.8rem !important;
+  }
+
+  .status-badge-premium {
+    padding: 3px 6px !important;
+    font-size: 0.65rem !important;
+    border-radius: 6px !important;
+  }
+
+  .new-request-cta {
+    padding: 10px !important;
+    border-radius: 12px !important;
+    margin-top: 0.5rem !important;
+    background: rgba(245, 243, 255, 0.5) !important;
+    border: 1px dashed rgba(79, 70, 229, 0.25) !important;
+  }
+
+  .cta-icon-box {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+  }
+
+  .cta-icon-box svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  .cta-content h4 {
+    font-size: 0.82rem !important;
+    color: #475569 !important;
+  }
+
+  .btn-new-request {
+    padding: 6px 12px !important;
+    font-size: 0.78rem !important;
+    border-radius: 8px !important;
+    width: auto !important;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.15) !important;
+    border: none !important;
+  }
+
+  .cta-content {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  .request-body {
+    grid-template-columns: 1fr auto !important;
+    gap: 10px !important;
+  }
+
+  .request-timeline {
+    border-left: 1px dashed #e2e8f0 !important;
+    padding-left: 10px !important;
+    border-top: none !important;
+    padding-top: 0 !important;
+    min-height: 32px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .cta-content {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 6px !important;
+  }
+
+  .btn-new-request {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .request-body {
+    grid-template-columns: 1fr !important;
+    gap: 4px !important;
+  }
+
+  .request-timeline {
+    border-left: none !important;
+    padding-left: 0 !important;
+    border-top: 1px dashed #e2e8f0 !important;
+    padding-top: 6px !important;
+    min-height: auto !important;
   }
 }

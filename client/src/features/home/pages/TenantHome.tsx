@@ -202,13 +202,13 @@ const TenantHome: React.FC = () => {
               <section className="grid-col-1 active-payment-card-slot">
                 <UpcomingPayments contract={activeContract} referenceDate={simulatedNow} />
               </section>
-              <section className="grid-col-1">
+              <section className="grid-col-1 active-notifications-card-slot">
                 <Notifications />
               </section>
-              <section className="grid-col-1">
+              <section className="grid-col-1 active-maintenance-card-slot">
                 <MaintenanceRequests contract={activeContract} />
               </section>
-              <section className="grid-col-1">
+              <section className="grid-col-1 active-rewards-card-slot">
                 <RewardsSummary contracts={tenantContracts} />
               </section>
             </div>

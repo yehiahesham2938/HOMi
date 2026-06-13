@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import './AvailableJobCard.css';
 import { 
     FaMapMarkerAlt, FaUser, FaTag, FaClock, 
@@ -30,6 +31,7 @@ const AvailableJobCard: React.FC<AvailableJobCardProps> = ({
     onViewDetails,
     onApply
 }) => {
+    const { t } = useTranslation();
     return (
         <div className="modern-job-card">
             <div className={`status-border ${urgency.toLowerCase()}`} />
@@ -47,7 +49,7 @@ const AvailableJobCard: React.FC<AvailableJobCardProps> = ({
                         <div className="cat-icon-bg">
                             <FaTag />
                         </div>
-                        <span className="cat-text">{issueType}</span>
+                        <span className="cat-text">{t('myProperties.maintenanceTypes.' + issueType, issueType)}</span>
                     </div>
                     
                     <h3 className="job-title-main">{description}</h3>

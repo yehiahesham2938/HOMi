@@ -16,6 +16,8 @@ export const LandlordLeaseTermsSchema = z.object({
         .number({ error: 'Max occupants is required' })
         .int('Max occupants must be an integer')
         .min(1, 'Max occupants must be at least 1'),
+    emergency_contact_name: z.string().optional(),
+    emergency_phone: z.string().optional(),
 });
 
 /**

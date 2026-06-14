@@ -84,8 +84,10 @@
 .rmx .mc-id h3 .vf{color:var(--blue-500);display:inline-grid}
 .rmx .mc-meta{font-size:12.5px;color:var(--rm-muted);margin:3px 0 0;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
 .rmx .mc-meta .mp{display:flex;align-items:center;gap:3px}
-.rmx .ring{position:relative;flex-shrink:0}
-.rmx .ring svg{transform:rotate(-90deg)}
+.rmx .ring{position:relative;flex-shrink:0;border-radius:50%;overflow:hidden;background:transparent}
+.rmx .ring svg{display:block;transform:rotate(-90deg);background:transparent}
+.rmx .ring, .rmx .ring svg, .rmx .ring .num{background:transparent !important}
+.rmx .ring .num{background:transparent}
 .rmx .ring .num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:1px;white-space:nowrap;line-height:1;font-size:13px;font-weight:800;color:var(--rm-ink)}
 .rmx .ring .num small{font-size:8px;font-weight:700;color:var(--rm-muted);position:relative;top:1px}
 .rmx .mc-body{padding:13px 16px 16px;display:flex;flex-direction:column;gap:12px;flex:1}

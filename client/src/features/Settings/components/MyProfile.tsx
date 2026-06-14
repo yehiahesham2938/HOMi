@@ -450,34 +450,32 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                                     </div>
                                 </div>
                             )}
-                            {arabicName && (
-                                <div className="modern-field">
-                                    <FaIdBadge className="field-icon" style={{ color: '#2563eb' }} />
-                                    <div className="field-content">
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                            Full Name (Arabic)
-                                            <FaLock size={10} style={{ color: '#94a3b8' }} />
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={arabicName}
-                                            readOnly
-                                            dir="rtl"
-                                            title="Arabic name is extracted from your National ID scan"
-                                            style={{
-                                                cursor: 'not-allowed',
-                                                fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif",
-                                                fontSize: '1.05rem',
-                                                fontWeight: 600,
-                                                textAlign: 'right',
-                                                background: 'rgba(37,99,235,0.04)',
-                                                border: '1.5px solid rgba(37,99,235,0.2)',
-                                                color: '#1e40af',
-                                            }}
-                                        />
-                                    </div>
+                            <div className="modern-field">
+                                <FaIdBadge className="field-icon" style={{ color: '#2563eb' }} />
+                                <div className="field-content">
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                        Full Name (Arabic)
+                                        <FaLock size={10} style={{ color: '#94a3b8' }} />
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={arabicName || '—'}
+                                        readOnly
+                                        dir="rtl"
+                                        title="Arabic name is extracted from your National ID scan"
+                                        style={{
+                                            cursor: 'not-allowed',
+                                            fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif",
+                                            fontSize: '1.05rem',
+                                            fontWeight: 600,
+                                            textAlign: 'right',
+                                            background: 'rgba(37,99,235,0.04)',
+                                            border: '1.5px solid rgba(37,99,235,0.2)',
+                                            color: '#1e40af',
+                                        }}
+                                    />
                                 </div>
-                            )}
+                            </div>
                         </div>
                     </>
                 )}

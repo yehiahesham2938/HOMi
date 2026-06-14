@@ -130,3 +130,45 @@
 
 .message-history { flex: 1; padding: 30px; overflow-y: auto; background: #fcfdfe; display: flex; flex-direction: column; }
 .date-separator { text-align: center; font-size: 0.75rem; color: #94a3b8; margin: 20px 0; font-weight: 600; }
+
+.chat-back-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.chat-back-btn:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+@media (max-width: 768px) {
+  .chat-window {
+    display: none !important;
+    width: 100% !important;
+  }
+  
+  .messages-hub-container.has-active-chat .chat-window {
+    display: flex !important;
+  }
+
+  .chat-back-btn {
+    display: flex;
+  }
+  
+  .chat-header {
+    padding: 12px 16px !important;
+  }
+  
+  .message-history {
+    padding: 16px !important;
+  }
+}

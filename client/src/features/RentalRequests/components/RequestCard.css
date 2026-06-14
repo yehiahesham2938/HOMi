@@ -240,3 +240,69 @@
     opacity: 0.65;
     cursor: not-allowed;
 }
+
+@media (max-width: 768px) {
+  .rc-compact {
+    padding: 18px !important;
+    gap: 12px !important;
+    border-radius: 12px !important;
+  }
+
+  .rc-compact:hover {
+    transform: none !important;
+  }
+
+  .rc-avatar-box img {
+    width: 50px !important;
+    height: 50px !important;
+  }
+
+  .rc-user-info h3 {
+    font-size: 1rem !important;
+  }
+
+  .rc-user-info p {
+    font-size: 0.82rem !important;
+  }
+
+  .rc-stats-grid {
+    padding: 10px !important;
+    gap: 8px !important;
+  }
+
+  .rc-stat span {
+    font-size: 0.92rem !important;
+  }
+
+  .rc-property {
+    font-size: 0.82rem !important;
+    padding: 8px 10px !important;
+  }
+
+  .rc-specs {
+    font-size: 0.82rem !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .rc-message {
+    font-size: 0.82rem !important;
+  }
+
+  .rc-btn-primary {
+    padding: 10px !important;
+    font-size: 0.88rem !important;
+  }
+
+  .rc-btn-secondary,
+  .rc-btn-decline {
+    padding: 8px !important;
+    font-size: 0.82rem !important;
+  }
+
+  .rc-approved-banner,
+  .rc-declined-banner {
+    padding: 10px 12px !important;
+    font-size: 0.88rem !important;
+  }
+}

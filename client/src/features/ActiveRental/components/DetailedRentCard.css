@@ -469,12 +469,48 @@
         gap: 10px;
     }
     .pdf-buttons-group {
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    .download-contract-btn {
+        padding: 8px 10px;
+        font-size: 0.75rem;
+        border-radius: 10px;
+        justify-content: center;
+        gap: 6px;
+    }
+    .rules-trigger-btn {
+        padding: 8px 10px;
+        font-size: 0.75rem;
+        border-radius: 10px;
+        width: 100%;
+        justify-content: center;
+        gap: 6px;
     }
     .mini-rules-modal {
         left: 0;
         right: 0;
         width: auto;
+    }
+    .landlord-profile-card {
+        padding: 8px 12px;
+        gap: 10px;
+    }
+    .landlord-avatar-placeholder {
+        width: 32px;
+        height: 32px;
+        font-size: 0.85rem;
+    }
+    .landlord-name {
+        font-size: 0.8rem;
+    }
+    .lease-progress-container {
+        padding: 10px 12px;
+        gap: 4px;
+    }
+    .lease-progress-labels {
+        font-size: 0.65rem;
     }
 }
 
@@ -697,6 +733,7 @@
     text-align: justify;
     padding-bottom: 8px;
     border-bottom: 1px solid #f9f9f9;
+    white-space: pre-line;
 }
 
 .pdf-signature-area {

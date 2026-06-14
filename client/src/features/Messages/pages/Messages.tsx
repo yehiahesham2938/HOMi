@@ -317,7 +317,7 @@ const Messages: React.FC = () => {
       <SidebarComponent />
       <div className="messages-main-content">
         <Header />
-        <div className="messages-hub-container">
+        <div className={`messages-hub-container ${selectedConversationId ? 'has-active-chat' : ''}`}>
           <ChatSidebar
             conversations={conversations}
             activeId={selectedConversationId}
@@ -335,6 +335,7 @@ const Messages: React.FC = () => {
             onRefreshConversation={handleRefreshConversation}
             onClearDraft={() => setDraft('')}
             isLoading={isMessagesLoading}
+            onBack={() => setSelectedConversationId(null)}
           />
         </div>
       </div>

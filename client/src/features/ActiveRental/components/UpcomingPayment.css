@@ -225,3 +225,83 @@
     line-height: 1.4;
     font-weight: 500;
 }
+
+@media (max-width: 768px) {
+    .payment-card {
+        padding: 1.5rem;
+        border-radius: 24px;
+        height: auto;
+        min-height: unset;
+    }
+
+    .payment-header {
+        margin-bottom: 16px;
+    }
+
+    .payment-header h3 {
+        font-size: 1rem;
+    }
+
+    .due-tag {
+        padding: 4px 10px;
+        font-size: 0.7rem;
+    }
+
+    .amount-display {
+        margin-bottom: 16px;
+        justify-content: flex-start;
+    }
+
+    .amount-display .value {
+        font-size: 2.5rem;
+    }
+
+    .amount-display .currency {
+        font-size: 1.3rem;
+    }
+
+    .payment-details {
+        padding-top: 12px;
+        margin-bottom: 20px;
+        gap: 10px;
+    }
+
+    .detail-row {
+        font-size: 0.85rem;
+    }
+
+    .paid-banner {
+        padding: 12px 14px;
+        border-radius: 14px;
+        margin-bottom: 16px;
+        gap: 10px;
+    }
+
+    .paid-banner svg {
+        font-size: 1.15rem;
+    }
+
+    .paid-banner strong {
+        font-size: 0.88rem;
+    }
+
+    .paid-banner small {
+        font-size: 0.75rem;
+        display: block;
+    }
+
+    .pay-now-btn {
+        padding: 14px;
+        font-size: 0.95rem;
+        border-radius: 14px;
+    }
+
+    .pay-now-btn.secondary {
+        margin-top: 8px;
+    }
+
+    .autopay-note {
+        margin-top: 12px;
+        font-size: 0.72rem;
+    }
+}

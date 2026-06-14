@@ -10,7 +10,12 @@ export const createDefaultConfig = (rawEnv = process.env) => ({
         testDateEnabled: false,
     },
     security: {
-        corsOrigins: ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174'],
+        // Comma-separated list of allowed browser origins. In production set
+        // CORS_ORIGINS to your deployed frontend URL(s), e.g.
+        //   CORS_ORIGINS=https://your-app.vercel.app
+        corsOrigins: rawEnv.CORS_ORIGINS
+            ? rawEnv.CORS_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean)
+            : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174'],
     },
     database: {
         host: rawEnv.DB_HOST ?? 'localhost',

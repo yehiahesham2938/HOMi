@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MessageBubble from './MessageBubble';
 import ChatInput from './ChatInput';
-import { FiMoreHorizontal, FiHeadphones } from 'react-icons/fi';
+import { FiMoreHorizontal, FiHeadphones, FiArrowLeft } from 'react-icons/fi';
 import type { ConversationDto, MessageDto } from '../../../services/message.service';
 import './ChatWindow.css';
 
@@ -17,6 +17,7 @@ interface ChatWindowProps {
   onRefreshConversation: () => void;
   onClearDraft: () => void;
   isLoading: boolean;
+  onBack?: () => void;
 }
 
 const ChatWindow: React.FC<ChatWindowProps> = ({
@@ -29,6 +30,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   onRefreshConversation,
   onClearDraft,
   isLoading,
+  onBack,
 }) => {
   const navigate = useNavigate();
   const [showActionsMenu, setShowActionsMenu] = useState(false);
@@ -82,6 +84,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   return (
   <div className={`chat-window ${isSupportThread ? 'chat-window--support' : ''}`}>
     <div className={`chat-header ${isSupportThread ? 'chat-header--support' : ''}`}>
+      {onBack && conversation && (
+        <button
+          type="button"
+          className="chat-back-btn"
+          onClick={onBack}
+          aria-label="Go back to threads list"
+        >
+          <FiArrowLeft size={20} />
+        </button>
+      )}
       {isSupportThread ? (
         <div className="user-meta user-meta--support-brand" aria-label="HOMi Help Center">
           <div className="support-header-icon" aria-hidden>

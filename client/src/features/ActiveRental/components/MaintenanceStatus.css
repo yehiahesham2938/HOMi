@@ -335,3 +335,92 @@
     70% { box-shadow: 0 0 0 6px rgba(59, 130, 246, 0); }
     100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
 }
+
+@media (max-width: 768px) {
+    .mstatus-card {
+        padding: 1.5rem;
+        border-radius: 24px;
+        height: auto;
+        min-height: unset;
+    }
+
+    .mstatus-header {
+        margin-bottom: 16px;
+    }
+
+    .mstatus-icon-ring {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        font-size: 1rem;
+        display: flex;
+    }
+
+    .mstatus-title-area h3 {
+        font-size: 1.05rem;
+        margin-bottom: 3px;
+    }
+
+    .mstatus-subtitle {
+        font-size: 0.78rem;
+        display: block;
+    }
+
+    .mstatus-view-all-btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        border-radius: 10px;
+    }
+
+    .maintenance-timeline-box {
+        padding: 14px;
+        border-radius: 16px;
+        gap: 8px;
+    }
+
+    .timeline-title-group h4 {
+        font-size: 0.9rem;
+    }
+
+    .timeline-category-badge {
+        font-size: 0.6rem;
+        padding: 2px 6px;
+    }
+
+    .mstatus-badge {
+        font-size: 0.6rem;
+        padding: 4px 8px;
+        gap: 4px;
+    }
+
+    .timeline-progress-track {
+        display: none; /* Keep progress track hidden on mobile */
+    }
+
+    .timeline-provider-text {
+        display: block;
+        font-size: 0.78rem;
+        margin: 0;
+    }
+
+    .mstatus-empty {
+        padding: 30px 15px;
+        gap: 12px;
+    }
+
+    .mstatus-empty-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 1.2rem;
+    }
+
+    .mstatus-empty p {
+        font-size: 0.88rem;
+    }
+
+    .mstatus-post-btn-wrap {
+        padding: 8px 16px;
+        font-size: 0.82rem;
+        border-radius: 10px;
+    }
+}

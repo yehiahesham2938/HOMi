@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import {
     X, ChevronRight, ChevronLeft, ShieldCheck, Pencil,
-    Landmark, Zap, Ban, User, DollarSign, Cpu, Clock, Globe,
-    Fingerprint, CheckCircle2, FileText, Scale, MoreVertical,
-    Download, Share2, MessageSquare, History
+    Landmark, Zap, User, DollarSign, Cpu, Clock, Globe,
+    Fingerprint, CheckCircle2, Scale
 } from 'lucide-react';
 import { type LeaseContract } from '../pages/Contract';
 import SignatureModal from './SignatureModal';

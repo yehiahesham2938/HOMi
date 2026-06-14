@@ -1,6 +1,6 @@
 import React from 'react';
 import { 
-    X, CheckCircle2, FileText, Download, 
+    X, CheckCircle2, Download, 
     User, DollarSign, Calendar, MapPin, 
     ShieldCheck, Clock, Building2, Eye, Receipt,
     ChevronLeft, ChevronRight
@@ -80,15 +80,15 @@ const ActiveLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
     };
 
     // Localization Helpers for Preview
-    const toArNum = (val: string | number | undefined | null) => {
+    const toArNum = (val: string | number | undefined | null, forceAr = false) => {
         if (val === undefined || val === null) return '—';
-        if (previewLang !== 'ar') return val.toString();
+        if (!forceAr) return val.toString();
         return val.toString().replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[parseInt(d)]);
     };
 
-    const translateDate = (dateStr: string | undefined | null) => {
+    const translateDate = (dateStr: string | undefined | null, forceAr = false) => {
         if (!dateStr) return '—';
-        if (previewLang !== 'ar') return dateStr;
+        if (!forceAr) return dateStr;
         const monthsAr: { [key: string]: string } = {
             'Jan': 'يناير', 'Feb': 'فبراير', 'Mar': 'مارس', 'Apr': 'أبريل', 'May': 'مايو', 'Jun': 'يونيو',
             'Jul': 'يوليو', 'Aug': 'أغسطس', 'Sep': 'سبتمبر', 'Oct': 'أكتوبر', 'Nov': 'نوفمبر', 'Dec': 'ديسمبر',
@@ -99,12 +99,12 @@ const ActiveLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
         Object.keys(monthsAr).forEach(m => {
             res = res.replace(new RegExp(m, 'gi'), monthsAr[m]);
         });
-        return toArNum(res);
+        return toArNum(res, true);
     };
 
-    const formatDurationAr = (durationStr: string | undefined | null) => {
+    const formatDurationAr = (durationStr: string | undefined | null, forceAr = false) => {
         if (!durationStr) return '—';
-        if (previewLang !== 'ar') return durationStr;
+        if (!forceAr) return durationStr;
         const numMatch = durationStr.match(/\d+/);
         if (!numMatch) return durationStr;
         const n = parseInt(numMatch[0]);
@@ -113,30 +113,30 @@ const ActiveLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
         if (isMonth) {
             if (n === 1) return 'شهر واحد';
             if (n === 2) return 'شهرين';
-            if (n >= 3 && n <= 10) return `${toArNum(n)} شهور`;
-            return `${toArNum(n)} شهر`;
+            if (n >= 3 && n <= 10) return `${toArNum(n, true)} شهور`;
+            return `${toArNum(n, true)} شهر`;
         }
         if (isYear) {
             if (n === 1) return 'سنة واحدة';
             if (n === 2) return 'سنتين';
-            if (n >= 3 && n <= 10) return `${toArNum(n)} سنوات`;
-            return `${toArNum(n)} سنة`;
+            if (n >= 3 && n <= 10) return `${toArNum(n, true)} سنوات`;
+            return `${toArNum(n, true)} سنة`;
         }
-        return toArNum(durationStr);
+        return toArNum(durationStr, true);
     };
 
     const localizedPreview = {
-        id: toArNum(contract.id),
-        amount: toArNum(contract.amount),
-        deposit: toArNum(contract.deposit),
-        lateFee: toArNum(contract.lateFeeAmount || 0),
-        startDate: translateDate(contract.startDate),
-        duration: formatDurationAr(contract.duration),
+        id: toArNum(contract.id, previewLang === 'ar'),
+        amount: toArNum(contract.amount, previewLang === 'ar'),
+        deposit: toArNum(contract.deposit, previewLang === 'ar'),
+        lateFee: toArNum(contract.lateFeeAmount || 0, previewLang === 'ar'),
+        startDate: translateDate(contract.startDate, previewLang === 'ar'),
+        duration: formatDurationAr(contract.duration, previewLang === 'ar'),
         propertyType: previewLang === 'ar' ? 'وحدة سكنية' : (contract.propertyType || 'Residential'),
         permittedUse: previewLang === 'ar' ? 'للسكن فقط' : (contract.permittedUse || 'Residential'),
         rightToEnter: previewLang === 'ar' ? 'بإخطار مسبق ٢٤ ساعة' : (contract.rightToEnter || 'With 24h Notice'),
         notice: previewLang === 'ar' ? '٢٤ ساعة' : (contract.noticePeriod || '24 Hours'),
-        executionDate: translateDate(new Date(contract.createdAt).toLocaleDateString())
+        executionDate: translateDate(new Date(contract.createdAt).toLocaleDateString(), previewLang === 'ar')
     };
 
     return (
@@ -418,20 +418,188 @@ const ActiveLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
                                         <div className="pdf-section">
                                             <div className="pdf-section-title">{previewLang === 'en' ? '5. LEGAL CLAUSES & COVENANTS' : '٥. البنود القانونية'}</div>
                                             <div className="pdf-clause-list">
-                                                <div className="pdf-clause-item">{previewLang === 'en' ? '1.' : '١.'} {previewLang === 'en' ? `Description: The property is located at ${contract.propertyAddress}. It consists of the unit specified (${localizedPreview.propertyType}).` : `الوصف: يقع العقار في ${contract.propertyAddress}. ويتكون من الوحدة المحددة (${localizedPreview.propertyType}).`}</div>
-                                                <div className="pdf-clause-item">{previewLang === 'en' ? '2.' : '٢.'} {previewLang === 'en' ? `Duration: The contract starts on ${localizedPreview.startDate} and has a duration of ${localizedPreview.duration}.` : `المدة: يبدأ العقد في ${localizedPreview.startDate} ومدته ${localizedPreview.duration}.`}</div>
-                                                <div className="pdf-clause-item">{previewLang === 'en' ? '3.' : '٣.'} {previewLang === 'en' ? `Value: The monthly rent is $${localizedPreview.amount}. It must be paid in advance at the beginning of each month.` : `القيمة: مبلغ الإيجار الشهرى هو ${localizedPreview.amount} جنية مصري. يجب دفعه مقدماً في بداية كل شهر.`}</div>
-                                                <div className="pdf-clause-item">{previewLang === 'en' ? '4.' : '٤.'} {previewLang === 'en' ? `Deposit: A security deposit of $${localizedPreview.deposit} is paid and held in HOMi escrow. Refunded to Tenant on successful completion, or forfeited to Landlord on non-payment default.` : `التأمين: يتم دفع تأمين قدره ${localizedPreview.deposit} جنية مصري يُحتفظ به في ضمان هومي. يُرد للمستأجر عند إتمام العقد بنجاح، أو يُصادر للمؤجر في حال تعثر السداد.`}</div>
-                                                <div className="pdf-clause-item">{previewLang === 'en' ? '5.' : '٥.'} {previewLang === 'en' ? `Late Payment: A late fee of $${localizedPreview.lateFee} applies if payment is delayed more than 5 days.` : `التأخير: تطبق غرامة ${localizedPreview.lateFee} جنية مصري في حال التأخر عن الدفع لأكثر من ٥ أيام.`}</div>
-                                                <div className="pdf-clause-item">{previewLang === 'en' ? '6.' : '٦.'} {previewLang === 'en' ? 'No Subleasing: Lessee cannot sublease or make changes without written consent.' : 'التنازل: لا يجوز للمستأجر التنازل عن الإيجار أو تغيير العقار دون موافقة.'}</div>
-                                                <div className="pdf-clause-item">{previewLang === 'en' ? '7.' : '٧.'} {previewLang === 'en' ? 'Use: Property must be used for residential purposes only. Any other use terminates contract.' : 'الاستخدام: يستخدم العقار للسكن فقط. أي استخدام آخر ينهي العقد تلقائياً.'}</div>
-                                                <div className="pdf-clause-item">{previewLang === 'en' ? '8.' : '٨.'} {previewLang === 'en' ? 'Expenses: Lessee expenses (decorations/improvements) are not reimbursable by lessor.' : 'المصاريف: مصاريف المستأجر (تحسينات/ديكور) لا يستردها وتصبح جزءاً من العقار.'}</div>
-                                                <div className="pdf-clause-item">{previewLang === 'en' ? '9.' : '٩.'} {previewLang === 'en' ? 'Condition: Lessee must return property in original condition. Liable for negligence.' : 'الحالة: يجب إعادة العقار بحالته الأصلية. المستأجر مسؤول عن أي إهمال.'}</div>
-                                                <div className="pdf-clause-item">{previewLang === 'en' ? '10.' : '١٠.'} {previewLang === 'en' ? 'Eviction: Lessee must vacate at end of term. Delay results in illegal occupation.' : 'الإخلاء: يجب الإخلاء عند انتهاء العقد. التأخير يعتبر شغلاً غير قانوني.'}</div>
-                                                <div className="pdf-clause-item">{previewLang === 'en' ? '11.' : '١١.'} {previewLang === 'en' ? 'Utilities: Lessee is responsible for water, electricity, gas, and internet bills.' : 'المرافق: المستأجر مسؤول عن دفع فواتير الكهرباء والمياه والغاز والإنترنت.'}</div>
-                                                <div className="pdf-clause-item">{previewLang === 'en' ? '12.' : '١٢.'} {previewLang === 'en' ? 'Termination: Early termination requires one month notice or one month rent penalty.' : 'الإنهاء: يتطلب الإنهاء المبكر إخطاراً قبل شهر أو دفع إيجار شهر غرامة.'}</div>
-                                                <div className="pdf-clause-item">{previewLang === 'en' ? '13.' : '١٣.'} {previewLang === 'en' ? 'Correspondence: Addresses in contract are valid for all legal notices.' : 'المراسلات: العناوين المذكورة صحيحة لجميع الإخطارات القانونية والمراسلات.'}</div>
-                                                <div className="pdf-clause-item">{previewLang === 'en' ? '14.' : '١٤.'} {previewLang === 'en' ? 'Jurisdiction: Digital copies provided to both parties. Subject to local courts.' : 'الاختصاص: نسختان رقميتان للطرفين. يخضع العقد للمحاكم المحلية.'}</div>
+                                                <div className="pdf-clause-item">
+                                                    {previewLang === 'en' ? (
+                                                        <>
+                                                            Term 1: Description of the Rented Property{"\n"}
+                                                            The Lessor hereby leases to the Lessee, and the Lessee hereby leases from the Lessor, the real property located at {contract.propertyAddress}, consisting of the specific residential unit ({contract.propertyType || 'Residential'}). The Lessee acknowledges that they have inspected the property and found it to be in good, clean, and tenantable condition, suitable for its permitted residential use.
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            البند الأول: وصف العقار المؤجر{"\n"}
+                                                            يؤجر المؤجر بموجب هذا العقد للمستأجر، ويستأجر المستأجر من المؤجر، العقار الكائن في {contract.propertyAddress}، والمكون من الوحدة السكنية المحددة (وحدة سكنية). ويقر المستأجر بأنه قد عاين العقار المعاينة التامة النافية للجهالة ووجده في حالة جيدة ونظيفة وصالحة للاستخدام السكني المخصص له.
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <div className="pdf-clause-item">
+                                                    {previewLang === 'en' ? (
+                                                        <>
+                                                            Term 2: Lease Term & Duration{"\n"}
+                                                            This lease agreement shall commence on {contract.startDate} and continue for a fixed duration of {contract.duration}. Upon the expiration of the lease term, this agreement shall terminate automatically. Any renewal or extension of this lease must be agreed upon in writing by both parties by signing a new agreement prior to the expiration date.
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            البند الثاني: مدة عقد الإيجار{"\n"}
+                                                            يبدأ سريان هذا العقد في تاريخ {translateDate(contract.startDate, true)} ويستمر لمدة محددة قدرها {formatDurationAr(contract.duration, true)}. وينتهي هذا العقد تلقائياً بقوة القانون عند نهاية مدته دون حاجة إلى إخطار أو إنذار. ولا يتجدد هذا العقد تلقائياً إلا بموجب اتفاق مكتوب وجديد موقع من كلا الطرفين قبل تاريخ انتهاء العقد.
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <div className="pdf-clause-item">
+                                                    {previewLang === 'en' ? (
+                                                        <>
+                                                            Term 3: Rental Value & Payments{"\n"}
+                                                            The monthly rent for the leased property is set at L.E{contract.amount}, payable in advance on the first day of each calendar month. Payments must be processed through the HOMI platform or directly to the Lessor, who shall issue a digital receipt. The Lessee shall not withhold or deduct any amount from the monthly rent for any reason whatsoever.
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            البند الثالث: القيمة الإيجارية وسدادها{"\n"}
+                                                            تم تحديد الأجرة الشهرية للعقار المؤجر بمبلغ {toArNum(contract.amount, true)} جنية مصري، وتدفع مقدماً في اليوم الأول من كل شهر ميلادي. يجب سداد القيمة الإيجارية من خلال منصة هومي (HOMI) أو مباشرة للمؤجر الذي يلتزم بإصدار إيصال رقمي يفيد الاستلام. ولا يحق للمستأجر حبس أو خصم أي جزء من الأجرة الشهرية لأي سبب من الأسباب.
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <div className="pdf-clause-item">
+                                                    {previewLang === 'en' ? (
+                                                        <>
+                                                            Term 4: Security Deposit{"\n"}
+                                                            A security deposit of L.E{contract.deposit} shall be paid by the Lessee and held securely in HOMI's escrow system during the active lease cycle. The Lessor shall have no access to these funds while the lease remains active. Upon successful completion of the lease term and full payment of all financial obligations, the security deposit shall be automatically refunded to the Lessee. If the lease is terminated due to Lessee's default, non-payment, or breach of contract, the security deposit shall be forfeited and released to the Lessor.
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            البند الرابع: مبلغ التأمين{"\n"}
+                                                            يلتزم المستأجر بسداد مبلغ تأمين قدره {toArNum(contract.deposit, true)} جنية مصري، ويُاحتفظ به بشكل آمن في نظام الضمان التابع لمنصة هومي (HOMI) طوال فترة الإيجار النشطة. ولا يحق للمؤجر سحب أو استخدام هذه الأموال طالما ظل العقد سارياً. وعند انتهاء مدة الإيجار بنجاح وسداد المستأجر لكافة التزاماته المالية، يتم رد مبلغ التأمين تلقائياً إلى المستأجر. وفي حالة إنهاء العقد بسبب تقصير المستأجر أو عدم السداد أو الإخلال بشروط العقد، يُصادر مبلغ التأمين ويُحول لصالح المؤجر.
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <div className="pdf-clause-item">
+                                                    {previewLang === 'en' ? (
+                                                        <>
+                                                            Term 5: Late Payment & Default{"\n"}
+                                                            If the Lessee fails to pay the monthly rent within five (5) days of the due date, a late fee penalty of L.E{contract.lateFeeAmount || 0} shall be assessed. If the payment delay continues beyond fifteen (15) days, the Lessor shall have the absolute right to terminate this agreement immediately, evict the Lessee, and reclaim possession of the property without requiring a prior court ruling or formal notices.
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            البند الخامس: التأخر في سداد الأجرة والفسخ{"\n"}
+                                                            في حالة تأخر المستأجر في دفع الإيجار لمدة تتجاوز خمسة (٥) أيام من تاريخ الاستحقاق، تطبق غرامة تأخير قدرها {toArNum(contract.lateFeeAmount || 0, true)} جنية مصري. وإذا استمر التأخر في السداد لأكثر من خمسة عشر (١٥) يوماً، يحق للمؤجر فسخ العقد فوراً، وإخلاء المستأجر واسترداد حيازة العقار دون الحاجة لحكم قضائي مسبق أو إجراءات رسمية.
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <div className="pdf-clause-item">
+                                                    {previewLang === 'en' ? (
+                                                        <>
+                                                            Term 6: Subleasing & Assignments{"\n"}
+                                                            The Lessee is strictly prohibited from subleasing the property, assigning this lease, or transferring any part of the tenancy to a third party without obtaining the prior written consent of the Lessor. Any unauthorized subleasing or assignment shall be considered a material breach and shall result in the immediate termination of this contract.
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            البند السادس: التأجير من الباطن والتنازل{"\n"}
+                                                            يُحظر على المستأجر حظراً تاماً إعادة تأجير العقار من الباطن، أو التنازل عن الإيجار، أو نقل أي جزء من حقوق الإيجار إلى الغير دون الحصول على موافقة كتابية مسبقة من المؤجر. ويعتبر أي تأجير من الباطن أو تنازل غير مصرح به إخلالاً جوهرياً يؤدي إلى فسخ العقد فوراً.
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <div className="pdf-clause-item">
+                                                    {previewLang === 'en' ? (
+                                                        <>
+                                                            Term 7: Permitted Use of the Property{"\n"}
+                                                            The leased property must be used solely and exclusively for residential purposes by the Lessee and their immediate family members. The Lessee shall comply with all local housing regulations and shall not conduct any commercial, professional, or illegal activities within the premises, nor cause any disturbance or nuisance to the neighbors.
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            البند السابع: الغرض من الاستخدام{"\n"}
+                                                            يجب استخدام العقار المؤجر لأغراض السكن الخاص فقط للمستأجر وأفراد أسرته المقيمين معه. ويتعهد المستأجر بالالتزام بجميع القوانين واللوائح السكنية المحلية، ويُحظر عليه القيام بأي أنشطة تجارية أو مهنية أو غير قانونية داخل العقار، أو التسبب في أي إزعاج أو مضايقة للجيران.
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <div className="pdf-clause-item">
+                                                    {previewLang === 'en' ? (
+                                                        <>
+                                                            Term 8: Modifications & Alterations{"\n"}
+                                                            The Lessee shall not perform any structural modifications, alterations, additions, or decorations to the property (such as drilling walls, dividing rooms, or changing doors and windows) without the prior written consent of the Lessor. In the event of unauthorized changes, the Lessee must restore the property to its original state at their own expense.
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            البند الثامن: التعديلات والتغييرات بالعقار{"\n"}
+                                                            يُحظر على المستأجر إجراء أي تعديلات هيكلية، أو تغييرات، أو إضافات، أو أعمال ديكور في العقار (مثل هدم أو بناء أو تقسيم الغرف أو فتح نوافذ وأبواب) دون الحصول على موافقة كتابية مسبقة من المؤجر. وفي حالة القيام بذلك بدون موافقة، يلتزم المستأجر بإعادة العقار إلى حالته الأصلية على نفقته الخاصة.
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <div className="pdf-clause-item">
+                                                    {previewLang === 'en' ? (
+                                                        <>
+                                                            Term 9: Maintenance & Care{"\n"}
+                                                            The Lessee commits to using the property with utmost care and responsibility. The Lessee shall be responsible for routine minor maintenance and repairs resulting from daily use and negligence. Major structural repairs and maintenance of core building systems shall be the responsibility of the Lessor, in accordance with the maintenance responsibility allocation set forth in this agreement.
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            البند التاسع: الصيانة والمحافظة على العقار{"\n"}
+                                                            يتعهد المستأجر باستخدام العقار المؤجر بعناية ومسؤولية تامة والمحافظة عليه. ويتحمل المستأجر تكاليف الصيانة الدورية البسيطة والإصلاحات الناتجة عن الاستخدام اليومي أو الإهمال. بينما يتحمل المؤجر مسؤولية الإصلاحات الهيكلية الكبرى وصيانة الأنظمة الأساسية للمبنى وفقاً لجدول توزيع مسؤوليات الصيانة الوارد في هذا العقد.
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <div className="pdf-clause-item">
+                                                    {previewLang === 'en' ? (
+                                                        <>
+                                                            Term 10: Eviction & Holdover Compensation{"\n"}
+                                                            Upon the expiration or termination of this lease, the Lessee must vacate the property and return it to the Lessor in its original clean condition. Any holdover or failure to vacate shall constitute illegal occupation, and the Lessee shall be liable to pay the Lessor double the daily rent rate for each day of delay as liquidated damages, in addition to legal costs.
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            البند العاشر: الإخلاء عند انتهاء العقد والتعويض عن التأخير{"\n"}
+                                                            عند انتهاء مدة الإيجار أو فسخ العقد، يلتزم المستأجر بإخلاء العقار وتسليمه للمؤجر بحالته الأصلية النظيفة. ويعتبر أي تأخر في الإخلاء شغلاً غير قانوني للعقار، ويلتزم المستأجر بدفع تعويض للمؤجر يعادل ضعف الأجرة اليومية عن كل يوم تأخير كتعويض اتفاقي، بالإضافة إلى تحمل المصاريف القانونية.
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <div className="pdf-clause-item">
+                                                    {previewLang === 'en' ? (
+                                                        <>
+                                                            Term 11: Utilities & Public Charges{"\n"}
+                                                            The Lessee shall bear the full responsibility for the timely payment of all utility bills (including water, electricity, natural gas, internet, and trash collection fees) during the tenancy term. The Lessee must provide proof of payment of all such utility bills to the Lessor upon request.
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            البند الحادي عشر: فواتير المرافق والرسوم{"\n"}
+                                                            يتحمل المستأجر المسؤولية الكاملة عن سداد جميع فواتير المرافق (بما في ذلك المياه، والكهرباء، والغاز الطبيعي، والإنترنت، ورسوم النظافة) في مواعيدها المحددة طوال فترة الإيجار. ويلتزم المستأجر بتقديم ما يثبت سداد هذه الفواتير للمؤجر عند الطلب.
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <div className="pdf-clause-item">
+                                                    {previewLang === 'en' ? (
+                                                        <>
+                                                            Term 12: Early Termination & Notices{"\n"}
+                                                            Neither party may terminate this lease agreement early except as provided by law or by mutual written agreement. If the Lessee wishes to vacate the property prior to the end of the term, they must provide at least thirty (30) days written notice and pay a penalty equivalent to one month's rent, unless the early termination is due to Lessor's failure to maintain the property in habitable condition.
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            البند الثاني عشر: الإنهاء المبكر والإخطارات{"\n"}
+                                                            لا يحق لأي من الطرفين إنهاء هذا العقد مبكراً إلا بموجب ما ينص عليه القانون أو بالاتفاق الكتابي المتبادل. وفي حال رغبة المستأجر في الإخلاء قبل نهاية المدة، يجب عليه تقديم إخطار كتابي مدته ثلاثون (٣٠) يوماً على الأقل، وسداد غرامة تعادل أجرة شهر واحد، ما لم يكن الإنهاء بسبب إخفاق المؤجر في صيانة العقار.
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <div className="pdf-clause-item">
+                                                    {previewLang === 'en' ? (
+                                                        <>
+                                                            Term 13: Addresses for Legal Notice{"\n"}
+                                                            All notices, demands, or legal correspondence required under this lease shall be sent to the parties' respective primary addresses stated in this agreement. Any change in address must be communicated to the other party in writing immediately, otherwise notices sent to the listed addresses shall be deemed legally delivered.
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            البند الثالث عشر: العناوين والمراسلات القانونية{"\n"}
+                                                            تعتبر جميع الإخطارات أو المراسلات القانونية المطلوبة بموجب هذا العقد صحيحة ومنتجة لأثرها إذا أُرسلت إلى العناوين الرئيسية لكل من الطرفين المذكورة في صدر هذا العقد. ويجب إبلاغ الطرف الآخر فوراً بأي تغيير في العنوان، وإلا اعتُبرت المراسلات الموجهة للعنوان المذكور مسلّمة قانوناً.
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <div className="pdf-clause-item">
+                                                    {previewLang === 'en' ? (
+                                                        <>
+                                                            Term 14: Governing Law & Jurisdiction{"\n"}
+                                                            This lease agreement shall be governed by and construed in accordance with the local laws of the Arab Republic of Egypt. Any disputes arising from the interpretation, execution, or breach of this agreement shall be subject to the exclusive jurisdiction of the competent local courts where the property is located.
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            البند الرابع عشر: القانون الواجب التطبيق والاختصاص القضائي{"\n"}
+                                                            يخضع هذا العقد ويفسر وفقاً للقوانين المعمول بها في جمهورية مصر العربية. ويخضع أي نزاع ينشأ عن تفسير أو تنفيذ أو الإخلال ببنود هذا العقد للاختصاص القضائي الحصري للمحاكم المحلية المختصة التي يقع في دائرتها العقار المؤجر.
+                                                        </>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
 

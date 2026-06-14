@@ -3,9 +3,9 @@ export default {
         nodeEnv: 'production',
         testDateEnabled: false,
     },
-    security: {
-        corsOrigins: ['https://homi.app'],
-    },
+    // corsOrigins intentionally omitted here so the value is driven by the
+    // CORS_ORIGINS environment variable (see config/default.ts). Set it to your
+    // deployed frontend URL on Railway, e.g. CORS_ORIGINS=https://your-app.vercel.app
     database: {
         pool: {
             max: 30,

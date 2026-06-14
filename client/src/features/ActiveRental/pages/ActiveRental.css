@@ -110,9 +110,17 @@
 }
 
 @keyframes statPulse {
-    0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5); }
-    70% { box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+    0% {
+        box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5);
+    }
+
+    70% {
+        box-shadow: 0 0 0 6px rgba(52, 211, 153, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(52, 211, 153, 0);
+    }
 }
 
 /* Sidebar Grid Layout */
@@ -138,7 +146,7 @@
     border-radius: 28px;
     border: 1px solid rgba(59, 130, 246, 0.15);
     text-align: center;
-    box-shadow: 
+    box-shadow:
         0 20px 40px -15px rgba(59, 130, 246, 0.08),
         0 4px 12px rgba(15, 23, 42, 0.01);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -146,7 +154,7 @@
 
 .support-card:hover {
     transform: translateY(-2px);
-    box-shadow: 
+    box-shadow:
         0 28px 50px -15px rgba(59, 130, 246, 0.12),
         0 8px 16px rgba(15, 23, 42, 0.02);
     border-color: rgba(59, 130, 246, 0.3);
@@ -174,7 +182,7 @@
     border-radius: 28px;
     border: 1px solid rgba(244, 63, 94, 0.15);
     text-align: center;
-    box-shadow: 
+    box-shadow:
         0 20px 40px -15px rgba(244, 63, 94, 0.05),
         0 4px 12px rgba(15, 23, 42, 0.01);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -182,7 +190,7 @@
 
 .cancel-rental-card:hover {
     transform: translateY(-2px);
-    box-shadow: 
+    box-shadow:
         0 28px 50px -15px rgba(244, 63, 94, 0.08),
         0 8px 16px rgba(15, 23, 42, 0.02);
     border-color: rgba(244, 63, 94, 0.3);
@@ -274,7 +282,7 @@
         padding: 30px;
         gap: 20px;
     }
-    
+
     .hero-banner-stats {
         justify-content: space-between;
     }
@@ -291,14 +299,138 @@
 
 @media (max-width: 768px) {
     .active-rentals-container {
-        padding: 1.5rem 1.5rem;
+        padding: 1rem;
+        margin-top: 80px;
+        overflow-x: hidden;
+    }
+
+    .active-rental-hero-banner {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 20px 16px;
+        border-radius: 20px;
+        gap: 16px;
     }
 
     .hero-banner-content h1 {
-        font-size: 1.75rem;
+        font-size: 1.5rem;
+    }
+
+    .hero-banner-subtitle {
+        font-size: 0.82rem;
     }
 
     .hero-banner-stats {
         flex-direction: column;
+        width: 100%;
+        gap: 8px;
+    }
+
+    .hero-stat-box {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px;
+        min-width: unset;
+        text-align: left;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        display: flex;
+    }
+
+    .hero-stat-box .stat-label {
+        margin: 0;
+    }
+
+    .active-rental-content {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+        width: 100%;
+    }
+
+    .main-rental-info,
+    .payment-sidebar {
+        display: contents;
+    }
+
+    .premium-detailed-card {
+        grid-column: 1;
+        order: 1;
+        margin-bottom: 0;
+    }
+
+    .payment-card {
+        grid-column: 1;
+        order: 2;
+    }
+
+    .mstatus-card {
+        grid-column: 1;
+        order: 3;
+    }
+
+    .support-card {
+        grid-column: 1;
+        order: 4;
+        padding: 1.5rem;
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .cancel-rental-card {
+        grid-column: 1;
+        order: 5;
+        padding: 1.5rem;
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .support-card h4,
+    .cancel-rental-card h4 {
+        font-size: 1.15rem;
+        margin: 0 0 6px 0;
+        text-align: left;
+    }
+
+    .support-card p,
+    .cancel-rental-card p {
+        display: block;
+        font-size: 0.82rem;
+        margin-bottom: 1.25rem;
+        text-align: left;
+    }
+
+    .secondary-btn,
+    .cancel-btn {
+        padding: 12px;
+        font-size: 0.9rem;
+        border-radius: 12px;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .active-rental-content {
+        gap: 1rem;
+    }
+
+    .active-rental-hero-banner {
+        padding: 16px 12px;
+    }
+
+    .hero-banner-content h1 {
+        font-size: 1.3rem;
+    }
+
+    .support-card,
+    .cancel-rental-card {
+        padding: 1.25rem;
     }
 }

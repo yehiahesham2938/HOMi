@@ -1133,3 +1133,89 @@
         width: 100%;
     }
 }
+
+@media (max-width: 480px) {
+    .application-page-content-wrapper {
+        padding: 20px 12px;
+    }
+
+    .app-main-form-panel {
+        padding: 20px 16px;
+    }
+
+    .form-title-header {
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+    }
+
+    .form-title-header h1 {
+        font-size: 1.35rem;
+    }
+
+    .form-title-header p {
+        font-size: 0.85rem;
+    }
+
+    .step-circle {
+        width: 36px;
+        height: 36px;
+        font-size: 0.85rem;
+    }
+
+    .step-label {
+        font-size: 0.68rem;
+    }
+
+    .app-field-group label {
+        font-size: 0.8rem;
+    }
+
+    .app-field-group input[type="date"],
+    .app-field-group input[type="number"],
+    .app-field-group textarea,
+    .situation-select,
+    .rent-duration-split-select select {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+        border-radius: 10px;
+    }
+
+    .custom-tags-adder-row {
+        gap: 8px;
+    }
+
+    .custom-tags-adder-row button {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+    }
+
+    .custom-tags-adder-row input {
+        padding: 10px 12px;
+        border-radius: 10px;
+    }
+
+    .lifestyle-chips-grid {
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 8px;
+    }
+
+    .lifestyle-habit-chip {
+        padding: 8px 10px;
+        font-size: 0.78rem;
+        border-radius: 10px;
+    }
+
+    .app-submit-success-state {
+        padding: 36px 16px;
+    }
+
+    .app-submit-success-state h2 {
+        font-size: 1.5rem;
+    }
+
+    .app-submit-success-state p {
+        font-size: 0.88rem;
+        margin-bottom: 24px;
+    }
+}

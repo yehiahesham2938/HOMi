@@ -454,16 +454,24 @@ describe('Auth Integration Tests', () => {
         });
     });
 
-    // ── GET /api/auth/verify-email ───────────────────────────────────────────
-    describe('GET /api/auth/verify-email', () => {
-        it('returns 400 for invalid/expired token', async () => {
+    // ── POST /api/auth/verify-email ──────────────────────────────────────────
+    describe('POST /api/auth/verify-email', () => {
+        it('returns 401 without an access token', async () => {
+            const res = await request(app)
+                .post('/api/auth/verify-email')
+                .send({ otp: '123456' });
+            expect(res.status).toBe(401);
+        });
+
+        it('returns 400 for invalid/expired OTP', async () => {
             vi.mocked(authService.verifyEmail).mockRejectedValue(
                 new AuthError('Invalid or expired verification token', 400, 'INVALID_VERIFICATION_TOKEN')
             );
 
             const res = await request(app)
-                .get('/api/auth/verify-email')
-                .query({ token: 'bad-token' });
+                .post('/api/auth/verify-email')
+                .set('Authorization', makeToken())
+                .send({ otp: '123456' });
             expect(res.status).toBe(400);
             expect(res.body.code).toBe('INVALID_VERIFICATION_TOKEN');
         });
@@ -472,8 +480,9 @@ describe('Auth Integration Tests', () => {
             vi.mocked(authService.verifyEmail).mockResolvedValue({ success: true } as any);
 
             const res = await request(app)
-                .get('/api/auth/verify-email')
-                .query({ token: 'valid-token' });
+                .post('/api/auth/verify-email')
+                .set('Authorization', makeToken())
+                .send({ otp: '123456' });
             expect(res.status).toBe(200);
         });
     });

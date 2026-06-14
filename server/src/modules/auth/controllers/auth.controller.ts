@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
+import crypto from 'crypto';
 import { authService, AuthError } from '../services/auth.service.js';
 import {
     REFRESH_COOKIE_NAME,
@@ -21,6 +22,25 @@ import type {
 import type { RegistrationResponseJSON, AuthenticationResponseJSON } from '@simplewebauthn/server';
 import { webauthnService } from '../services/webauthn.service.js';
 import { env } from '../../../config/env.js';
+import { performNidOcr } from '../services/valify.service.js';
+import { emitNidCompleted } from '../../../shared/realtime/socket.js';
+
+// ─── In-memory NID scan session store ───────────────────────────────────────
+// Keys are 32-byte hex tokens (64 chars). Each entry lives for 10 minutes.
+interface NidSession {
+    userId: string;
+    expiresAt: number; // epoch ms
+    result?: { nationalId: string; fullNameArabic: string };
+}
+const nidSessions = new Map<string, NidSession>();
+
+// Purge expired sessions every 5 minutes
+setInterval(() => {
+    const now = Date.now();
+    for (const [k, v] of nidSessions) {
+        if (v.expiresAt < now) nidSessions.delete(k);
+    }
+}, 5 * 60 * 1000);
 
 /**
  * Authentication Controller
@@ -563,6 +583,166 @@ export class AuthController {
             }
             await webauthnService.deleteAllPasskeys(userId);
             res.status(200).json({ success: true, message: 'Passkeys removed from your account.' });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * POST /auth/nid-ocr
+     * Proxy Egyptian NID scanning to Valify OCR API.
+     * Credentials never leave the server.
+     * Requires authentication.
+     */
+    async nidOcr(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const userId = req.user?.userId;
+            if (!userId) {
+                throw new AuthError('User not authenticated', 401, 'NOT_AUTHENTICATED');
+            }
+
+            const { frontImg, backImg } = req.body as { frontImg?: string; backImg?: string };
+
+            if (!frontImg || !backImg) {
+                throw new AuthError(
+                    'Both frontImg and backImg (base64) are required.',
+                    400,
+                    'MISSING_IMAGES'
+                );
+            }
+
+            const result = await performNidOcr(frontImg, backImg);
+            res.status(200).json(result);
+        } catch (error) {
+            // Axios errors from Valify — always return 502 to client so the
+            // client never sees a misleading 404/401 from the upstream API.
+            if (
+                error instanceof Error &&
+                'isAxiosError' in error &&
+                !(error instanceof AuthError)
+            ) {
+                const axErr = error as {
+                    isAxiosError: boolean;
+                    response?: { status?: number; data?: unknown };
+                    message: string;
+                };
+                const upstreamStatus = axErr.response?.status;
+                const upstreamBody   = axErr.response?.data;
+
+                // Log the upstream detail on the server for debugging
+                console.error(
+                    `[Valify] Upstream error ${upstreamStatus ?? 'no-response'}: `,
+                    upstreamBody ?? axErr.message
+                );
+
+                res.status(502).json({
+                    success: false,
+                    message: 'ID verification service is temporarily unavailable. Please try again.',
+                    code:    'VALIFY_ERROR',
+                });
+                return;
+            }
+            next(error);
+        }
+    }
+
+    // ─── NID Session (QR cross-device flow) ─────────────────────────────
+
+    /**
+     * POST /auth/nid-session
+     * Creates a short-lived NID scan session token for the QR cross-device flow.
+     * Requires authentication (the desktop user must be logged in).
+     * Returns: { token: string } — 64 hex chars, valid 10 min.
+     */
+    async createNidSession(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const userId = req.user?.userId;
+            if (!userId) {
+                throw new AuthError('Not authenticated', 401, 'NOT_AUTHENTICATED');
+            }
+            const token = crypto.randomBytes(32).toString('hex');
+            nidSessions.set(token, {
+                userId,
+                expiresAt: Date.now() + 10 * 60 * 1000, // 10 min
+            });
+            res.status(201).json({ token });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * POST /auth/nid-session/:token/complete
+     * Called by the mobile phone after the user confirms their NID scan.
+     * Public endpoint — the QR token is the credential.
+     * Body: { nationalId: string, fullNameArabic: string }
+     */
+    async completeNidSession(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { token } = req.params as { token: string };
+            const { nationalId, fullNameArabic } = req.body as {
+                nationalId?: string;
+                fullNameArabic?: string;
+            };
+
+            if (!token || !/^[0-9a-f]{64}$/.test(token)) {
+                throw new AuthError('Invalid session token', 400, 'INVALID_NID_TOKEN');
+            }
+            if (!nationalId || !fullNameArabic) {
+                throw new AuthError('nationalId and fullNameArabic are required', 400, 'MISSING_NID_DATA');
+            }
+
+            const session = nidSessions.get(token);
+            if (!session) {
+                throw new AuthError('Session not found or expired', 404, 'NID_SESSION_NOT_FOUND');
+            }
+            if (session.expiresAt < Date.now()) {
+                nidSessions.delete(token);
+                throw new AuthError('QR session has expired. Please refresh the QR code.', 410, 'NID_SESSION_EXPIRED');
+            }
+            if (session.result) {
+                throw new AuthError('Session already completed', 409, 'NID_SESSION_ALREADY_DONE');
+            }
+
+            // Store the result
+            session.result = { nationalId, fullNameArabic };
+
+            // Notify the desktop via Socket.IO
+            emitNidCompleted(token, { nationalId, fullNameArabic });
+
+            res.status(200).json({ success: true, message: 'NID scan accepted. Return to your desktop.' });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    /**
+     * GET /auth/nid-session/:token
+     * Polls the session status. Used as fallback when WebSocket is unavailable.
+     * Public endpoint.
+     */
+    async getNidSession(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { token } = req.params as { token: string };
+
+            if (!token || !/^[0-9a-f]{64}$/.test(token)) {
+                throw new AuthError('Invalid session token', 400, 'INVALID_NID_TOKEN');
+            }
+
+            const session = nidSessions.get(token);
+            if (!session) {
+                throw new AuthError('Session not found or expired', 404, 'NID_SESSION_NOT_FOUND');
+            }
+            if (session.expiresAt < Date.now()) {
+                nidSessions.delete(token);
+                throw new AuthError('Session expired', 410, 'NID_SESSION_EXPIRED');
+            }
+
+            if (session.result) {
+                res.status(200).json({ status: 'completed', ...session.result });
+            } else {
+                res.status(200).json({ status: 'pending' });
+            }
         } catch (error) {
             next(error);
         }

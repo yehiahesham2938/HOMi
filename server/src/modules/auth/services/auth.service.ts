@@ -183,6 +183,32 @@ export class AuthService {
 
     /** Maps a Profile model row to API profile DTO (single place for /me, login, role update). */
     private mapProfileToResponse(profile: Profile): ProfileResponse {
+        // Build masked NID — decrypt to check length, then mask
+        let maskedNationalId: string | null = null;
+        if (profile.national_id) {
+            try {
+                let decrypted: string | null = null;
+                if (profile.national_id.includes(':')) {
+                    decrypted = profile.getDecryptedNationalId();
+                } else {
+                    decrypted = profile.national_id;
+                }
+
+                if (decrypted) {
+                    const raw = String(decrypted).replace(/\D/g, '');
+                    if (raw.length === 14) {
+                        maskedNationalId = raw.slice(0, 2) + '**********' + raw.slice(12);
+                    } else if (raw.length >= 4) {
+                        maskedNationalId = raw.slice(0, 2) + '*'.repeat(raw.length - 4) + raw.slice(-2);
+                    } else if (raw.length > 0) {
+                        maskedNationalId = raw.slice(0, 1) + '*'.repeat(raw.length - 2) + raw.slice(-1);
+                    }
+                }
+            } catch {
+                maskedNationalId = null;
+            }
+        }
+
         return {
             id: profile.id,
             userId: profile.user_id,
@@ -208,6 +234,8 @@ export class AuthService {
             onboardingStep3Skipped: profile.onboarding_step3_skipped ?? false,
             onboardingStep3Completed: profile.onboarding_step3_completed ?? false,
             onboardingStep2Completed: profile.onboarding_step2_completed ?? true,
+            fullNameArabic: profile.full_name_arabic ?? null,
+            maskedNationalId,
         };
     }
 
@@ -497,6 +525,9 @@ export class AuthService {
                     birthdate: new Date(input.birthdate),
                     ...(input.preferredLanguage?.trim()
                         ? { preferred_language: input.preferredLanguage.trim() }
+                        : {}),
+                    ...(input.fullNameArabic?.trim()
+                        ? { full_name_arabic: input.fullNameArabic.trim() }
                         : {}),
                 },
                 { transaction }
@@ -1000,6 +1031,8 @@ export class AuthService {
             if (input.preferredBudgetMin !== undefined) updateData.preferred_budget_min = input.preferredBudgetMin;
             if (input.preferredBudgetMax !== undefined) updateData.preferred_budget_max = input.preferredBudgetMax;
             if (input.preferredLanguage !== undefined) updateData.preferred_language = input.preferredLanguage;
+            // Arabic full name from NID OCR
+            if (input.fullNameArabic !== undefined) updateData.full_name_arabic = input.fullNameArabic;
 
             if (input.onboardingStep3Complete === true) {
                 if (!user.email_verified) {

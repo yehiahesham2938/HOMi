@@ -50,6 +50,14 @@ const sequelizeMock = (data: any = {}) => ({
     comparePassword: vi.fn(),
     toJSON: vi.fn().mockReturnValue(data),
     isVerificationComplete: vi.fn().mockReturnValue(true),
+    getDecryptedNationalId: vi.fn().mockImplementation(function (this: any) {
+        if (!this.national_id) return null;
+        if (this.national_id.includes(':')) {
+            const parts = this.national_id.split(':');
+            return parts[parts.length - 1];
+        }
+        return this.national_id;
+    }),
 });
 
 describe('AuthService', () => {
@@ -239,6 +247,18 @@ describe('AuthService', () => {
             expect(res.user.id).toBe('u1');
             expect(res.profile.id).toBe('p1');
             expect(res.passkeyEnabled).toBe(false);
+        });
+
+        it('should correctly decrypt and mask the national ID', async () => {
+            const profile = sequelizeMock({
+                id: 'p1',
+                national_id: 'mockiv:mocktag:29001011234567',
+            });
+            const user = sequelizeMock({ id: 'u1', profile });
+            vi.mocked(User.findByPk).mockResolvedValue(user as any);
+
+            const res = await authService.getCurrentUser('u1');
+            expect(res.profile.maskedNationalId).toBe('29**********67');
         });
     });
 

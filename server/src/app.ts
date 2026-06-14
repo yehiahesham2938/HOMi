@@ -62,7 +62,9 @@ if (env.NODE_ENV === 'production') {
     app.use(helmet({ ...helmetOptions, contentSecurityPolicy: false }));
 }
 app.use(cors({
-    origin: env.CORS_ORIGINS,
+    origin: env.NODE_ENV === 'development'
+        ? (origin, callback) => callback(null, true)
+        : env.CORS_ORIGINS,
     credentials: true,
 }));
 
@@ -72,8 +74,8 @@ app.use(globalRateLimiter);
 // ======================
 // Body Parsing
 // ======================
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
 // ======================
 // API Documentation (Swagger UI)

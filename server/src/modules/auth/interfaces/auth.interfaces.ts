@@ -38,6 +38,8 @@ export interface CompleteVerificationRequest {
     gender: GenderType;
     birthdate: string;
     preferredLanguage?: string;
+    /** Arabic full name from NID OCR — saved atomically with national_id */
+    fullNameArabic?: string;
 }
 
 /**
@@ -112,6 +114,10 @@ export interface ProfileResponse {
     onboardingStep3Completed: boolean;
     /** False until user confirms tenant vs landlord in onboarding step 2. */
     onboardingStep2Completed: boolean;
+    /** Arabic full name extracted from NID OCR */
+    fullNameArabic: string | null;
+    /** Masked NID shown in UI — e.g. "29**********34". Never the raw value. */
+    maskedNationalId: string | null;
 }
 
 /**
@@ -214,6 +220,8 @@ export interface UpdateProfileRequest {
     landlordBusinessProfile?: LandlordBusinessProfilePayload | null;
     /** When true with valid step-3 payloads, marks onboarding complete and sets user.is_verified. */
     onboardingStep3Complete?: boolean;
+    /** Arabic full name extracted from NID OCR */
+    fullNameArabic?: string;
 }
 
 /**

@@ -10,14 +10,20 @@ import './CompleteProfile.css';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../../../services/auth.service';
 import type { Gender } from '../../../types/auth.types';
+import NidScanner from '../../auth/components/NidScanner';
+import NidQrBridge from '../../auth/components/NidQrBridge';
+
+/** Returns true when the current device is likely a desktop/laptop. */
+const isDesktopDevice = (): boolean => !/Mobi|Android|iPhone|iPad|iPod|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 type UserRole = 'tenant' | 'landlord' | null;
 
 interface Step1Draft {
     birthdate: string;
     gender: Gender | '';
-    nationalId: string;
+    nationalId: string;         // always populated by scanner result
     preferredLanguage: string;
+    fullNameArabic: string;     // extracted from NID OCR
 }
 
 interface TenantStep3Draft {
@@ -51,6 +57,7 @@ const defaultStep1 = (): Step1Draft => ({
     gender: '',
     nationalId: '',
     preferredLanguage: 'en',
+    fullNameArabic: '',
 });
 
 const defaultTenantStep3 = (): TenantStep3Draft => ({
@@ -83,6 +90,7 @@ function hydrateStep1FromProfile(profile: CachedProfile | null | undefined): Ste
     d.gender = rawG === 'MALE' || rawG === 'FEMALE' ? rawG : '';
     d.nationalId = '';
     d.preferredLanguage = profile.preferredLanguage || 'en';
+    d.fullNameArabic = (profile as { fullNameArabic?: string | null }).fullNameArabic || '';
     return d;
 }
 
@@ -92,6 +100,7 @@ function mergeStep1Hydration(profile: CachedProfile | null | undefined, prev: St
     
     if (!verificationComplete) {
         if (prev.nationalId.replace(/\D/g, '').length > 0) next.nationalId = prev.nationalId;
+        if (prev.fullNameArabic) next.fullNameArabic = prev.fullNameArabic;
         if (prev.birthdate) next.birthdate = prev.birthdate;
         if (prev.gender) next.gender = prev.gender;
         if (prev.preferredLanguage) next.preferredLanguage = prev.preferredLanguage;
@@ -288,6 +297,11 @@ const CompleteProfile: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // NID Scanner mid-step state
+    const [showNidScanner, setShowNidScanner] = useState(false);
+    // Pending data that will be submitted AFTER scanner succeeds
+    const pendingSubmitRef = useRef<{ nationalId: string; fullNameArabic: string } | null>(null);
 
     const [step1, setStep1] = useState<Step1Draft>(defaultStep1);
     const [tenantStep3, setTenantStep3] = useState<TenantStep3Draft>(defaultTenantStep3);
@@ -622,8 +636,8 @@ const CompleteProfile: React.FC = () => {
         if (draft.gender !== 'MALE' && draft.gender !== 'FEMALE') return 'Please select Male or Female.';
         if (!nationalIdOptional) {
             const digits = draft.nationalId.replace(/\D/g, '');
-            if (!digits) return 'Please enter your National ID.';
-            if (!/^\d{14}$/.test(digits)) return 'National ID must be exactly 14 digits.';
+            if (!digits) return 'Please scan your National ID using the camera to proceed.';
+            if (!/^\d{14}$/.test(digits)) return 'National ID must be exactly 14 digits. Please rescan your ID.';
         }
         return null;
     };
@@ -639,6 +653,12 @@ const CompleteProfile: React.FC = () => {
         }
         setError(null);
 
+        // If NID not yet scanned (and not locked), show the camera scanner mid-step
+        if (!nationalIdLocked && !step1.nationalId) {
+            setShowNidScanner(true);
+            return;
+        }
+
         if (settingsOnlyFlow) {
             setLoading(true);
             try {
@@ -653,6 +673,7 @@ const CompleteProfile: React.FC = () => {
                             gender: step1.gender as Gender,
                             birthdate: step1.birthdate,
                             preferredLanguage: step1.preferredLanguage,
+                            fullNameArabic: step1.fullNameArabic || undefined,
                         });
                     } else if (step1.preferredLanguage) {
                         await authService.updateProfile({
@@ -689,6 +710,7 @@ const CompleteProfile: React.FC = () => {
                         gender: step1.gender as Gender,
                         birthdate: step1.birthdate,
                         preferredLanguage: step1.preferredLanguage,
+                        fullNameArabic: step1.fullNameArabic || undefined,
                     });
                     await authService.getProfile();
                     setHeaderAvatarUrl(authService.getCurrentUser()?.profile?.avatarUrl ?? null);
@@ -872,6 +894,7 @@ const CompleteProfile: React.FC = () => {
                     gender: step1.gender as Gender,
                     birthdate: step1.birthdate,
                     preferredLanguage: step1.preferredLanguage,
+                    fullNameArabic: step1.fullNameArabic || undefined,
                 });
             }
 
@@ -937,6 +960,7 @@ const CompleteProfile: React.FC = () => {
                     gender: step1.gender as Gender,
                     birthdate: step1.birthdate,
                     preferredLanguage: step1.preferredLanguage,
+                    fullNameArabic: step1.fullNameArabic || undefined,
                 });
             }
 
@@ -1005,6 +1029,7 @@ const CompleteProfile: React.FC = () => {
 
     const cpProfile = authService.getCurrentUser()?.profile;
     const nationalIdFieldLocked = !!settingsOnlyFlow && cpProfile?.isVerificationComplete === true;
+    const nidAlreadyScanned = !!step1.nationalId && /^\d{14}$/.test(step1.nationalId);
 
     const stepLabels: Array<{ num: 1 | 2 | 3; title: string; subtitle: string }> = [
         { num: 1, title: 'Identity', subtitle: 'Basics' },
@@ -1013,6 +1038,167 @@ const CompleteProfile: React.FC = () => {
     ];
 
     return (
+        <>
+        {/* NID Scanner / QR Bridge mid-step overlay */}
+        {showNidScanner && (
+            isDesktopDevice() ? (
+                /* ─── Desktop: show QR code for phone to scan ─────────────── */
+                <div className="nid-overlay">
+                    <NidQrBridge
+                        onSuccess={(nationalId, fullNameArabic) => {
+                            setShowNidScanner(false);
+                            setStep1((s) => ({ ...s, nationalId, fullNameArabic }));
+                            setError(null);
+                            setTimeout(() => {
+                                void (async () => {
+                                    const cached = authService.getCurrentUser();
+                                    const verificationComplete = !!cached?.profile?.isVerificationComplete;
+
+                                    if (settingsOnlyFlow) {
+                                        setLoading(true);
+                                        try {
+                                            if (alreadyLoggedIn && cached?.user) {
+                                                if (!verificationComplete) {
+                                                    await authService.completeVerification({
+                                                        nationalId,
+                                                        gender: step1.gender as Gender,
+                                                        birthdate: step1.birthdate,
+                                                        preferredLanguage: step1.preferredLanguage,
+                                                        fullNameArabic: fullNameArabic || undefined,
+                                                    });
+                                                } else if (step1.preferredLanguage) {
+                                                    await authService.updateProfile({ preferredLanguage: step1.preferredLanguage });
+                                                }
+                                                await authService.getProfile();
+                                                setHeaderAvatarUrl(authService.getCurrentUser()?.profile?.avatarUrl ?? null);
+                                            }
+                                            navigate('/settings');
+                                        } catch (err) {
+                                            let errorMessage = 'Could not save identity. Please try again.';
+                                            if (axios.isAxiosError(err) && err.response?.data) {
+                                                const data = err.response.data as { message?: string };
+                                                if (data.message) errorMessage = data.message;
+                                            }
+                                            setError(errorMessage);
+                                        } finally {
+                                            setLoading(false);
+                                        }
+                                        return;
+                                    }
+
+                                    if (alreadyLoggedIn && cached?.user) {
+                                        if (!cached.profile?.onboardingStep2Completed) {
+                                            setLoading(true);
+                                            try {
+                                                await authService.completeVerification({
+                                                    nationalId,
+                                                    gender: step1.gender as Gender,
+                                                    birthdate: step1.birthdate,
+                                                    preferredLanguage: step1.preferredLanguage,
+                                                    fullNameArabic: fullNameArabic || undefined,
+                                                });
+                                                await authService.getProfile();
+                                                setHeaderAvatarUrl(authService.getCurrentUser()?.profile?.avatarUrl ?? null);
+                                            } catch (err) {
+                                                let errorMessage = 'Could not save identity. Please try again.';
+                                                if (axios.isAxiosError(err) && err.response?.data) {
+                                                    const data = err.response.data as { message?: string; code?: string };
+                                                    if (data.message) errorMessage = data.message;
+                                                }
+                                                setError(errorMessage);
+                                                setLoading(false);
+                                                return;
+                                            } finally {
+                                                setLoading(false);
+                                            }
+                                        }
+                                    }
+                                    setStep(2);
+                                })();
+                            }, 50);
+                        }}
+                        onCancel={() => setShowNidScanner(false)}
+                    />
+                </div>
+            ) : (
+                /* ─── Mobile: direct camera scanner ───────────────────────── */
+                <NidScanner
+                    onSuccess={(nationalId, fullNameArabic) => {
+                        setShowNidScanner(false);
+                        setStep1((s) => ({ ...s, nationalId, fullNameArabic }));
+                        setError(null);
+                        setTimeout(() => {
+                            void (async () => {
+                                const cached = authService.getCurrentUser();
+                                const verificationComplete = !!cached?.profile?.isVerificationComplete;
+
+                                if (settingsOnlyFlow) {
+                                    setLoading(true);
+                                    try {
+                                        if (alreadyLoggedIn && cached?.user) {
+                                            if (!verificationComplete) {
+                                                await authService.completeVerification({
+                                                    nationalId,
+                                                    gender: step1.gender as Gender,
+                                                    birthdate: step1.birthdate,
+                                                    preferredLanguage: step1.preferredLanguage,
+                                                    fullNameArabic: fullNameArabic || undefined,
+                                                });
+                                            } else if (step1.preferredLanguage) {
+                                                await authService.updateProfile({ preferredLanguage: step1.preferredLanguage });
+                                            }
+                                            await authService.getProfile();
+                                            setHeaderAvatarUrl(authService.getCurrentUser()?.profile?.avatarUrl ?? null);
+                                        }
+                                        navigate('/settings');
+                                    } catch (err) {
+                                        let errorMessage = 'Could not save identity. Please try again.';
+                                        if (axios.isAxiosError(err) && err.response?.data) {
+                                            const data = err.response.data as { message?: string };
+                                            if (data.message) errorMessage = data.message;
+                                        }
+                                        setError(errorMessage);
+                                    } finally {
+                                        setLoading(false);
+                                    }
+                                    return;
+                                }
+
+                                if (alreadyLoggedIn && cached?.user) {
+                                    if (!cached.profile?.onboardingStep2Completed) {
+                                        setLoading(true);
+                                        try {
+                                            await authService.completeVerification({
+                                                nationalId,
+                                                gender: step1.gender as Gender,
+                                                birthdate: step1.birthdate,
+                                                preferredLanguage: step1.preferredLanguage,
+                                                fullNameArabic: fullNameArabic || undefined,
+                                            });
+                                            await authService.getProfile();
+                                            setHeaderAvatarUrl(authService.getCurrentUser()?.profile?.avatarUrl ?? null);
+                                        } catch (err) {
+                                            let errorMessage = 'Could not save identity. Please try again.';
+                                            if (axios.isAxiosError(err) && err.response?.data) {
+                                                const data = err.response.data as { message?: string; code?: string };
+                                                if (data.message) errorMessage = data.message;
+                                            }
+                                            setError(errorMessage);
+                                            setLoading(false);
+                                            return;
+                                        } finally {
+                                            setLoading(false);
+                                        }
+                                    }
+                                }
+                                setStep(2);
+                            })();
+                        }, 50);
+                    }}
+                    onCancel={() => setShowNidScanner(false)}
+                />
+            )
+        )}
         <div
             className={`onboarding-viewport${step > 1 && !settingsOnlyFlow ? ' onboarding-viewport--step-back' : ''}`}
             onClick={(ev) => {
@@ -1275,36 +1461,133 @@ const CompleteProfile: React.FC = () => {
                                     <option value="FEMALE">Female</option>
                                 </select>
                             </div>
-                            <div className="form-field">
+                        <div className="form-field">
                                 <label
                                     className="form-field__label form-field__label--with-icon"
                                     htmlFor="cp-step1-national-id"
                                 >
                                     <IdCard size={18} className="form-field__label-icon" aria-hidden />
-                                    <span>National ID / Passport {req}</span>
+                                    <span>National ID {req}</span>
                                 </label>
-                                <input
-                                    id="cp-step1-national-id"
-                                    type="text"
-                                    inputMode="numeric"
-                                    autoComplete="off"
-                                    maxLength={14}
-                                    placeholder="14-digit National ID"
-                                    value={step1.nationalId}
-                                    onChange={(e) =>
-                                        setStep1((s) => ({
-                                            ...s,
-                                            nationalId: e.target.value.replace(/\D/g, '').slice(0, 14),
-                                        }))
-                                    }
-                                    disabled={nationalIdFieldLocked}
-                                    title={
-                                        nationalIdFieldLocked
-                                            ? 'National ID can no longer be changed at this step'
-                                            : undefined
-                                    }
-                                />
+                                {nationalIdFieldLocked ? (
+                                    // Already verified — show locked indicator
+                                    <div style={{
+                                        padding: '13px 16px',
+                                        borderRadius: 14,
+                                        border: '1.5px solid rgba(34,197,94,0.35)',
+                                        background: 'rgba(34,197,94,0.06)',
+                                        fontSize: '0.9rem',
+                                        color: '#166534',
+                                        fontWeight: 600,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 8,
+                                    }}>
+                                        <CheckCircle2 size={16} color="#16a34a" />
+                                        National ID verified
+                                    </div>
+                                ) : nidAlreadyScanned ? (
+                                    // Scanned this session — show read-only with rescan option
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                        <div style={{
+                                            padding: '13px 16px',
+                                            borderRadius: 14,
+                                            border: '1.5px solid rgba(37,99,235,0.35)',
+                                            background: 'rgba(37,99,235,0.05)',
+                                            fontSize: '0.9rem',
+                                            color: '#1e3a8a',
+                                            fontWeight: 600,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 8,
+                                            letterSpacing: '0.06em',
+                                            fontFamily: 'monospace',
+                                        }}>
+                                            <CheckCircle2 size={16} color="#2563eb" />
+                                            {step1.nationalId.slice(0, 2) + '**********' + step1.nationalId.slice(12)}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            style={{
+                                                background: 'none',
+                                                border: 'none',
+                                                color: '#2563eb',
+                                                fontSize: '0.8rem',
+                                                cursor: 'pointer',
+                                                textDecoration: 'underline',
+                                                textUnderlineOffset: '3px',
+                                                textAlign: 'left',
+                                                padding: '2px 0',
+                                                fontFamily: 'inherit',
+                                            }}
+                                            onClick={() => {
+                                                setStep1((s) => ({ ...s, nationalId: '', fullNameArabic: '' }));
+                                                setShowNidScanner(true);
+                                            }}
+                                        >
+                                            Rescan ID
+                                        </button>
+                                    </div>
+                                ) : (
+                                    // Not yet scanned — show camera scan prompt button
+                                    <button
+                                        type="button"
+                                        id="cp-step1-national-id"
+                                        onClick={() => setShowNidScanner(true)}
+                                        style={{
+                                            width: '100%',
+                                            padding: '13px 16px',
+                                            borderRadius: 14,
+                                            border: '1.5px dashed rgba(37,99,235,0.5)',
+                                            background: 'linear-gradient(135deg, rgba(37,99,235,0.04), rgba(37,99,235,0.02))',
+                                            fontSize: '0.9rem',
+                                            color: '#2563eb',
+                                            fontWeight: 600,
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 10,
+                                            transition: 'all 0.2s',
+                                            textAlign: 'left',
+                                            fontFamily: 'inherit',
+                                        }}
+                                        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(37,99,235,0.08)'; }}
+                                        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'linear-gradient(135deg, rgba(37,99,235,0.04), rgba(37,99,235,0.02))'; }}
+                                    >
+                                        <IdCard size={20} />
+                                        Scan National ID with Camera
+                                    </button>
+                                )}
                             </div>
+                            {/* Arabic name field — shown only after successful scan */}
+                            {nidAlreadyScanned && step1.fullNameArabic && (
+                                <div className="form-field full">
+                                    <label
+                                        className="form-field__label form-field__label--with-icon"
+                                        htmlFor="cp-step1-arabic-name"
+                                    >
+                                        <User size={18} className="form-field__label-icon" aria-hidden />
+                                        <span>Full Name (Arabic)</span>
+                                    </label>
+                                    <input
+                                        id="cp-step1-arabic-name"
+                                        type="text"
+                                        readOnly
+                                        dir="rtl"
+                                        value={step1.fullNameArabic}
+                                        style={{
+                                            fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif",
+                                            fontSize: '1rem',
+                                            background: 'rgba(37,99,235,0.03)',
+                                            border: '1.5px solid rgba(37,99,235,0.2)',
+                                            color: '#1e3a8a',
+                                            fontWeight: 600,
+                                            cursor: 'default',
+                                        }}
+                                        title="Extracted from your National ID"
+                                    />
+                                </div>
+                            )}
                             <div className="form-field">
                                 <label
                                     className="form-field__label form-field__label--with-icon"
@@ -1678,6 +1961,7 @@ const CompleteProfile: React.FC = () => {
                 </div>
             </div>
         </div>
+        </>
     );
 };
 

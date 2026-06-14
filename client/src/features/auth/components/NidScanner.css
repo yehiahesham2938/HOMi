@@ -1,0 +1,891 @@
+/* ============================================================
+   NidScanner.css — Egyptian National ID camera scanner
+   HOMI blue theme, dark overlay, premium micro-animations
+   ============================================================ */
+
+/* ── Overlay ─────────────────────────────────────────────── */
+.nid-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(3, 7, 20, 0.97);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: nidOverlayIn 0.3s ease;
+    backdrop-filter: blur(6px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@keyframes nidOverlayIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* ── Scanner card ─────────────────────────────────────────── */
+.nid-card {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    animation: nidCardIn 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+@keyframes nidCardIn {
+    from { opacity: 0; transform: scale(0.92) translateY(20px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+.nid-header {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.nid-logo-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.nid-logo-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.5);
+}
+
+.nid-logo-icon svg {
+    color: #fff;
+}
+
+.nid-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #f1f5f9;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.nid-subtitle {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ── Progress pills ─────────────────────────────────────── */
+.nid-progress {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.nid-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.nid-pill--inactive {
+    background: rgba(255, 255, 255, 0.06);
+    color: #64748b;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nid-pill--active {
+    background: rgba(37, 99, 235, 0.25);
+    color: #93c5fd;
+    border: 1px solid rgba(37, 99, 235, 0.5);
+    box-shadow: 0 0 12px rgba(37, 99, 235, 0.3);
+}
+
+.nid-pill--done {
+    background: rgba(34, 197, 94, 0.18);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+.nid-pill-divider {
+    width: 24px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* ── Camera frame wrapper ───────────────────────────────── */
+.nid-frame-wrap {
+    position: relative;
+    width: 100%;
+    /* ID card ratio: 85.6mm × 54mm ≈ 1.586:1 */
+    aspect-ratio: 1.586 / 1;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #000;
+    box-shadow:
+        0 0 0 2px rgba(37, 99, 235, 0.6),
+        0 0 40px rgba(37, 99, 235, 0.25),
+        inset 0 0 60px rgba(0, 0, 0, 0.5);
+}
+
+/* Live camera feed — GPU-accelerated for smooth 30fps rendering */
+.nid-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    /* Force GPU compositing layer — eliminates camera lag on mobile */
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* Captured still image */
+.nid-preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Permission request overlay inside frame */
+.nid-permission-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    text-align: center;
+    background: radial-gradient(ellipse at center, rgba(37, 99, 235, 0.12), transparent);
+}
+
+.nid-permission-icon-wrap {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(37, 99, 235, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(37, 99, 235, 0.4);
+    animation: nidPulse 2s infinite;
+}
+
+@keyframes nidPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+    50%       { box-shadow: 0 0 0 14px rgba(37, 99, 235, 0); }
+}
+
+.nid-permission-text {
+    color: #cbd5e1;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.nid-permission-title {
+    color: #f1f5f9;
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+}
+
+/* Blue corner brackets on the frame */
+.nid-corner {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border-color: #2563eb;
+    border-style: solid;
+    border-width: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.nid-corner--tl { top: 10px; left: 10px; border-top-width: 3px; border-left-width: 3px; border-top-left-radius: 6px; }
+.nid-corner--tr { top: 10px; right: 10px; border-top-width: 3px; border-right-width: 3px; border-top-right-radius: 6px; }
+.nid-corner--bl { bottom: 10px; left: 10px; border-bottom-width: 3px; border-left-width: 3px; border-bottom-left-radius: 6px; }
+.nid-corner--br { bottom: 10px; right: 10px; border-bottom-width: 3px; border-right-width: 3px; border-bottom-right-radius: 6px; }
+
+/* Scan line animation when camera is live */
+.nid-scanline {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.8), transparent);
+    animation: nidScanDown 2.5s linear infinite;
+    z-index: 2;
+    pointer-events: none;
+}
+
+@keyframes nidScanDown {
+    0%   { top: 10%; opacity: 1; }
+    90%  { top: 90%; opacity: 1; }
+    100% { top: 10%; opacity: 0; }
+}
+
+/* Flash button in top-right */
+.nid-flash-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, box-shadow 0.2s;
+    background: rgba(15, 23, 42, 0.7);
+    color: #94a3b8;
+    backdrop-filter: blur(8px);
+}
+
+.nid-flash-btn:hover {
+    background: rgba(37, 99, 235, 0.3);
+    color: #93c5fd;
+}
+
+.nid-flash-btn--on {
+    background: rgba(250, 204, 21, 0.2);
+    color: #fbbf24;
+    box-shadow: 0 0 12px rgba(250, 204, 21, 0.4);
+}
+
+/* Retake / green checkmark overlay */
+.nid-captured-badge {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+}
+
+.nid-captured-check {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.25);
+    border: 2px solid #22c55e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: nidCheckPop 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+@keyframes nidCheckPop {
+    from { opacity: 0; transform: scale(0.5); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── Instruction bar below frame ────────────────────────── */
+.nid-instruction {
+    width: 100%;
+    padding: 14px 20px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 14px;
+    margin-top: 14px;
+    text-align: center;
+}
+
+.nid-instruction-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #2563eb;
+    margin-bottom: 4px;
+}
+
+.nid-instruction-text {
+    font-size: 0.92rem;
+    color: #cbd5e1;
+    line-height: 1.5;
+}
+
+/* ── Action buttons ─────────────────────────────────────── */
+.nid-actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.nid-btn-capture {
+    position: relative;
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    border: 3px solid rgba(37, 99, 235, 0.8);
+    background: transparent;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.15);
+}
+
+.nid-btn-capture:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(37, 99, 235, 0.2), 0 0 28px rgba(37, 99, 235, 0.4);
+}
+
+.nid-btn-capture:active:not(:disabled) {
+    transform: scale(0.96);
+}
+
+.nid-btn-capture:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.nid-btn-capture__inner {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.5);
+    transition: transform 0.15s;
+}
+
+.nid-btn-capture:hover:not(:disabled) .nid-btn-capture__inner {
+    transform: scale(0.95);
+}
+
+.nid-capture-label {
+    font-size: 0.8rem;
+    color: #64748b;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* Alternative file upload link */
+.nid-upload-link {
+    background: none;
+    border: none;
+    color: #3b82f6;
+    font-size: 0.82rem;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding: 4px 8px;
+    font-family: inherit;
+    transition: color 0.2s;
+}
+
+.nid-upload-link:hover { color: #60a5fa; }
+
+/* ── Flip animation scene ───────────────────────────────── */
+.nid-flip-scene {
+    width: 100%;
+    perspective: 900px;
+    margin-bottom: 8px;
+}
+
+.nid-flip-card {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1.586 / 1;
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nid-flip-card--flipped {
+    transform: rotateY(180deg);
+}
+
+.nid-flip-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    overflow: hidden;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.nid-flip-face--back {
+    transform: rotateY(180deg);
+}
+
+.nid-flip-face img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.nid-flip-face--placeholder {
+    background: radial-gradient(ellipse at center, rgba(37, 99, 235, 0.12), rgba(3, 7, 20, 0.9));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    border: 2px solid rgba(37, 99, 235, 0.3);
+}
+
+.nid-flip-placeholder-text {
+    color: #94a3b8;
+    font-size: 0.88rem;
+    text-align: center;
+    padding: 0 20px;
+}
+
+/* ── Processing spinner ─────────────────────────────────── */
+.nid-processing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 32px;
+    width: 100%;
+}
+
+.nid-spinner-wrap {
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.nid-spinner-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 3px solid transparent;
+}
+
+.nid-spinner-ring--outer {
+    border-top-color: #2563eb;
+    border-right-color: rgba(37, 99, 235, 0.3);
+    animation: nidSpin 1.2s linear infinite;
+}
+
+.nid-spinner-ring--inner {
+    inset: 10px;
+    border-top-color: rgba(37, 99, 235, 0.6);
+    animation: nidSpin 0.8s linear infinite reverse;
+}
+
+@keyframes nidSpin {
+    to { transform: rotate(360deg); }
+}
+
+.nid-spinner-icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #3b82f6;
+}
+
+.nid-processing-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin: 0;
+    text-align: center;
+}
+
+.nid-processing-sub {
+    font-size: 0.88rem;
+    color: #64748b;
+    margin: 4px 0 0;
+    text-align: center;
+}
+
+/* Processing steps list */
+.nid-steps-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 320px;
+}
+
+.nid-step-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: #64748b;
+    transition: color 0.3s;
+}
+
+.nid-step-item--active {
+    color: #93c5fd;
+}
+
+.nid-step-item--done {
+    color: #4ade80;
+}
+
+.nid-step-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #1e293b;
+    border: 2px solid #334155;
+    flex-shrink: 0;
+    transition: all 0.3s;
+}
+
+.nid-step-item--active .nid-step-dot {
+    background: #2563eb;
+    border-color: #3b82f6;
+    box-shadow: 0 0 8px rgba(37, 99, 235, 0.6);
+    animation: nidDotPulse 1s infinite;
+}
+
+.nid-step-item--done .nid-step-dot {
+    background: #22c55e;
+    border-color: #4ade80;
+}
+
+@keyframes nidDotPulse {
+    0%, 100% { transform: scale(1); }
+    50%       { transform: scale(1.3); }
+}
+
+/* ── Result popup ───────────────────────────────────────── */
+.nid-result-popup {
+    width: 100%;
+    max-width: 460px;
+    background: rgba(15, 23, 42, 0.97);
+    border-radius: 24px;
+    padding: 36px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.04),
+        0 25px 60px -12px rgba(0, 0, 0, 0.8);
+    animation: nidResultIn 0.45s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+@keyframes nidResultIn {
+    from { opacity: 0; transform: scale(0.88) translateY(20px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Result icon */
+.nid-result-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: nidCheckPop 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) 0.1s both;
+}
+
+.nid-result-icon--success {
+    background: rgba(34, 197, 94, 0.15);
+    border: 2px solid rgba(34, 197, 94, 0.5);
+    color: #4ade80;
+    box-shadow: 0 0 32px rgba(34, 197, 94, 0.3);
+}
+
+.nid-result-icon--error {
+    background: rgba(239, 68, 68, 0.15);
+    border: 2px solid rgba(239, 68, 68, 0.5);
+    color: #f87171;
+    box-shadow: 0 0 32px rgba(239, 68, 68, 0.3);
+}
+
+.nid-result-icon--warn {
+    background: rgba(245, 158, 11, 0.15);
+    border: 2px solid rgba(245, 158, 11, 0.5);
+    color: #fbbf24;
+    box-shadow: 0 0 32px rgba(245, 158, 11, 0.25);
+}
+
+.nid-result-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #f1f5f9;
+    margin: 0;
+    text-align: center;
+}
+
+.nid-result-body {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    text-align: center;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Verified data card */
+.nid-data-card {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.nid-data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.nid-data-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #475569;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.nid-data-value {
+    font-size: 0.88rem;
+    color: #cbd5e1;
+    font-weight: 500;
+    text-align: right;
+    direction: auto;
+    overflow-wrap: break-word;
+    word-break: break-all;
+}
+
+.nid-data-value--mono {
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.06em;
+}
+
+.nid-data-value--arabic {
+    direction: rtl;
+    font-size: 1rem;
+    color: #f1f5f9;
+    font-weight: 600;
+    font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+}
+
+/* Divider */
+.nid-data-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+/* Badge chips inside data card */
+.nid-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.nid-badge--green {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.35);
+}
+
+.nid-badge--red {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+/* Result action buttons */
+.nid-result-actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.nid-btn-primary {
+    width: 100%;
+    padding: 15px;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+    font-family: inherit;
+}
+
+.nid-btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(37, 99, 235, 0.5);
+}
+
+.nid-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.nid-btn-secondary {
+    width: 100%;
+    padding: 13px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: #94a3b8;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+
+.nid-btn-secondary:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+    color: #cbd5e1;
+}
+
+/* ── Permission screen (fullscreen) ─────────────────────── */
+.nid-perm-card {
+    width: 100%;
+    max-width: 400px;
+    background: rgba(15, 23, 42, 0.95);
+    border-radius: 24px;
+    padding: 40px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(37, 99, 235, 0.15);
+    text-align: center;
+    animation: nidResultIn 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.nid-perm-icon {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: rgba(37, 99, 235, 0.15);
+    border: 2px solid rgba(37, 99, 235, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #3b82f6;
+    animation: nidPulse 2.5s infinite;
+}
+
+.nid-perm-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #f1f5f9;
+    margin: 0;
+}
+
+.nid-perm-body {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.nid-perm-features {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    text-align: left;
+}
+
+.nid-perm-feature {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.nid-perm-feature-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #2563eb;
+    flex-shrink: 0;
+}
+
+.nid-error-inline {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 12px;
+    color: #f87171;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+/* ── Canvas (hidden, used for capture) ──────────────────── */
+.nid-capture-canvas {
+    display: none;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 540px) {
+    .nid-overlay { padding: 12px; }
+    .nid-title   { font-size: 1.1rem; }
+    .nid-result-popup { padding: 28px 20px; }
+    .nid-perm-card    { padding: 32px 20px; }
+    .nid-pill { padding: 5px 10px; font-size: 0.72rem; }
+}

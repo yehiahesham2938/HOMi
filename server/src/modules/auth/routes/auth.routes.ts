@@ -1027,4 +1027,50 @@ router.delete(
     authController.deletePasskeys.bind(authController)
 );
 
+/**
+ * POST /auth/nid-ocr
+ * Proxy Egyptian NID OCR to Valify — credentials stay server-side.
+ * Requires authentication (Bearer token).
+ *
+ * Body: { frontImg: string (base64), backImg: string (base64) }
+ * Returns: Valify OCR response (result, document_verification_plus, etc.)
+ */
+router.post(
+    '/nid-ocr',
+    protect,
+    authController.nidOcr.bind(authController)
+);
+
+/**
+ * POST /auth/nid-session
+ * Create a short-lived QR session token for cross-device NID scanning.
+ * Requires authentication.
+ */
+router.post(
+    '/nid-session',
+    protect,
+    authController.createNidSession.bind(authController)
+);
+
+/**
+ * POST /auth/nid-session/:token/complete
+ * Submit NID scan result from the mobile device.
+ * Public — the QR token itself is the credential.
+ */
+router.post(
+    '/nid-session/:token/complete',
+    authController.completeNidSession.bind(authController)
+);
+
+/**
+ * GET /auth/nid-session/:token
+ * Poll session status (fallback for environments where WebSocket is blocked).
+ * Public.
+ */
+router.get(
+    '/nid-session/:token',
+    authController.getNidSession.bind(authController)
+);
+
 export default router;
+

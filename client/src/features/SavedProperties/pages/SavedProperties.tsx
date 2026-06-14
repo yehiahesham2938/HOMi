@@ -1,121 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaTrashAlt, FaChartLine, FaArrowRight } from 'react-icons/fa';
+import { Trash2, LineChart, ArrowRight, Heart } from 'lucide-react';
 import Header from '../../../components/global/header';
 import Sidebar from '../../../components/global/Tenant/sidebar';
 import Footer from '../../../components/global/footer';
 import PropertyCard from '../../BrowseProperties/components/PropertyCard';
-import { resolveLandlordUserIdFromPropertyResponse, type PropertyResponse } from '../../../services/property.service';
+import { mapPropertyToUI, type PropertyUI } from '../../../utils/propertyMapping';
 import savedPropertiesService from '../../../services/saved-properties.service';
 
 import './SavedProperties.css';
 
-interface SavedPropertyUI {
-    id: string;
-    ownerId: string;
-    title: string;
-    address: string;
-    price: number;
-    beds: number;
-    baths: number;
-    sqft: number;
-    image: string;
-    allImages: string[];
-    tags: string[];
-    rating: number;
-    securityDeposit: number;
-    furnishing: string;
-    targetTenant: string;
-    availableDate: string;
-    petsAllowed: boolean;
-    description: string;
-    ownerName: string;
-    ownerImage: string;
-    ownerVerified: boolean;
-    maintenanceResponsibilities: Array<{
-        area: string;
-        responsible_party: 'LANDLORD' | 'TENANT';
-    }>;
-    locationLat: number | null;
-    locationLng: number | null;
-    availabilityDateISO: string | null;
-    listedAtISO: string;
-}
-
-const mapTargetTenant = (targetTenant: string) => {
-    switch (targetTenant) {
-        case 'STUDENTS':
-            return 'Students';
-        case 'FAMILIES':
-            return 'Families';
-        case 'TOURISTS':
-            return 'Tourists';
-        default:
-            return 'Any';
-    }
-};
-
-const mapFurnishingLabel = (furnishing: string | null): string => {
-    if (furnishing === 'Fully') return 'Fully Furnished';
-    if (furnishing === 'Semi') return 'Semi-Furnished';
-    return 'Unfurnished';
-};
-
-const mapPropertyToUI = (property: PropertyResponse): SavedPropertyUI => {
-    const mainImage = property.images.find((image) => image.isMain)?.imageUrl;
-    const fallbackImage = property.images[0]?.imageUrl;
-    const image = mainImage || fallbackImage || 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&q=80&w=800&q=80';
-    const allImages = property.images.length > 0 ? property.images.map((img) => img.imageUrl) : [image];
-    const tags = property.amenities.slice(0, 2).map((amenity) => amenity.name);
-    const normalizedFurnishing = mapFurnishingLabel(property.furnishing);
-
-    return {
-        id: property.id,
-        ownerId: resolveLandlordUserIdFromPropertyResponse(property),
-        title: property.title,
-        address: property.address,
-        price: property.monthlyPrice,
-        beds: property.specifications?.bedrooms ?? 0,
-        baths: property.specifications?.bathrooms ?? 0,
-        sqft: property.specifications?.areaSqft ?? 0,
-        image,
-        allImages,
-        tags: tags.length > 0 ? tags : [property.type ?? 'Property', normalizedFurnishing],
-        rating: 4.8,
-        securityDeposit: property.securityDeposit,
-        furnishing: normalizedFurnishing,
-        targetTenant: mapTargetTenant(property.targetTenant),
-        availableDate: property.availabilityDate ? new Date(property.availabilityDate).toLocaleDateString() : 'Not specified',
-        availabilityDateISO: property.availabilityDate ?? null,
-        listedAtISO: property.createdAt,
-        locationLat:
-            property.detailedLocation != null && Number.isFinite(property.detailedLocation.locationLat)
-                ? property.detailedLocation.locationLat
-                : null,
-        locationLng:
-            property.detailedLocation != null && Number.isFinite(property.detailedLocation.locationLong)
-                ? property.detailedLocation.locationLong
-                : null,
-        petsAllowed: property.houseRules.some((rule) => rule.name === 'Pets Allowed'),
-        description: property.description,
-        ownerName: property.landlord
-            ? `${property.landlord.firstName} ${property.landlord.lastName}`.trim()
-            : 'Owner',
-        ownerImage:
-            property.landlord?.avatarUrl ||
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                property.landlord
-                    ? `${property.landlord.firstName} ${property.landlord.lastName}`.trim() || 'Owner'
-                    : 'Owner'
-            )}&background=0f172a&color=ffffff&size=128`,
-        ownerVerified: Boolean(property.landlord?.isVerified),
-        maintenanceResponsibilities: property.maintenanceResponsibilities ?? [],
-    };
-};
-
 const SavedProperties: React.FC = () => {
     const navigate = useNavigate();
-    const [savedItems, setSavedItems] = useState<SavedPropertyUI[]>([]);
+    const [savedItems, setSavedItems] = useState<PropertyUI[]>([]);
     const [showClearConfirm, setShowClearConfirm] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -125,14 +22,14 @@ const SavedProperties: React.FC = () => {
             setLoading(true);
             setError(null);
             try {
-                const savedProperties = await savedPropertiesService.getSavedProperties();
+                const response = await savedPropertiesService.getSavedProperties();
 
-                if (savedProperties.length === 0) {
+                if (response.length === 0) {
                     setSavedItems([]);
                     return;
                 }
 
-                const mapped = savedProperties.map(mapPropertyToUI);
+                const mapped = response.map(mapPropertyToUI);
                 setSavedItems(mapped);
             } catch {
                 setError('Failed to load saved properties.');
@@ -157,7 +54,7 @@ const SavedProperties: React.FC = () => {
         };
     }, [savedItems]);
 
-    const handleOpenDetails = (property: SavedPropertyUI) => {
+    const handleOpenDetails = (property: PropertyUI) => {
         navigate(`/properties/${property.id}`);
     };
 
@@ -182,130 +79,127 @@ const SavedProperties: React.FC = () => {
 
     return (
         <div className="sp-root">
-            <Sidebar />
-
             <div className="sp-main">
-                <Header />
+                <Sidebar />
 
                 <div className="sp-page">
+                    <Header />
 
-                    {/* ── HERO BANNER ── */}
-                    <div className="sp-hero">
-                        <div className="sp-hero-noise" />
-                        <div className="sp-hero-glow sp-hero-glow--a" />
-                        <div className="sp-hero-glow sp-hero-glow--b" />
-
-                        <div className="sp-hero-inner">
-                            <p className="sp-eyebrow">Your Collection</p>
-                            <h1 className="sp-hero-title">
-                                Saved<br />
-                                <em>Properties</em>
-                            </h1>
-                            <p className="sp-hero-sub">
-                                Curated listings you've marked for later — compare, explore, and apply.
-                            </p>
+                    {/* ── Page Header ── */}
+                    <header className="sp-header animate-fade-in">
+                        <div>
+                            <h1>Saved Properties</h1>
+                            <p>Curated listings you've saved — compare options, track updates, and start applications.</p>
                         </div>
+                    </header>
 
-                        {!loading && savedItems.length > 0 && (
-                            <div className="sp-stats-row">
-                                <div className="sp-stat">
-                                    <span className="sp-stat-val">{savedItems.length}</span>
-                                    <span className="sp-stat-lbl">Saved</span>
+                    {/* ── Loaded Content ── */}
+                    {!loading && !error && savedItems.length > 0 && (
+                        <>
+                            {/* Stats Cards Row */}
+                            <div className="sp-stats-grid">
+                                <div className="sp-stat-card">
+                                    <span className="sp-stat-label">Total Saved</span>
+                                    <span className="sp-stat-value">{savedItems.length}</span>
+                                    <span className="sp-stat-desc">Properties in your wishlist</span>
                                 </div>
-                                <div className="sp-stat-divider" />
-                                <div className="sp-stat">
-                                    <span className="sp-stat-val">${stats.avg.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-                                    <span className="sp-stat-lbl">Avg / mo</span>
+                                <div className="sp-stat-card">
+                                    <span className="sp-stat-label">Average Rent</span>
+                                    <span className="sp-stat-value">
+                                        {stats.avg.toLocaleString(undefined, { maximumFractionDigits: 0 })} EGP
+                                    </span>
+                                    <span className="sp-stat-desc">Mean cost per month</span>
                                 </div>
-                                <div className="sp-stat-divider" />
-                                <div className="sp-stat">
-                                    <span className="sp-stat-val">${stats.min.toLocaleString()}</span>
-                                    <span className="sp-stat-lbl">Lowest</span>
-                                </div>
-                                <div className="sp-stat-divider" />
-                                <div className="sp-stat">
-                                    <span className="sp-stat-val">${stats.max.toLocaleString()}</span>
-                                    <span className="sp-stat-lbl">Highest</span>
+                                <div className="sp-stat-card">
+                                    <span className="sp-stat-label">Price Range</span>
+                                    <span className="sp-stat-value">
+                                        {stats.min.toLocaleString()} - {stats.max.toLocaleString()}
+                                    </span>
+                                    <span className="sp-stat-desc">EGP per month (min - max)</span>
                                 </div>
                             </div>
-                        )}
-                    </div>
 
-                    {/* ── CONTENT ── */}
-                    <div className="sp-content">
-
-                        {!loading && savedItems.length > 0 && (
-                            <>
-                                {/* Toolbar */}
-                                <div className="sp-toolbar">
-                                    <div className="sp-insight">
-                                        <span className="sp-insight-icon"><FaChartLine /></span>
-                                        <span className="sp-insight-text">
-                                            <strong>Market Pulse:</strong> Properties in your list are seeing 30% higher engagement this week.
-                                        </span>
-                                        <button className="sp-insight-cta">
-                                            Compare <FaArrowRight />
-                                        </button>
-                                    </div>
-
-                                    <div className="sp-toolbar-actions">
-                                        {showClearConfirm ? (
-                                            <div className="sp-confirm">
-                                                <span>Remove all?</span>
-                                                <button className="sp-confirm-yes" onClick={handleClearAll}>Yes, clear</button>
-                                                <button className="sp-confirm-no" onClick={() => setShowClearConfirm(false)}>Cancel</button>
-                                            </div>
-                                        ) : (
-                                            <button
-                                                className="sp-clear-btn"
-                                                onClick={() => setShowClearConfirm(true)}
-                                                title="Clear All"
-                                            >
-                                                <FaTrashAlt />
-                                                <span>Clear All</span>
-                                            </button>
-                                        )}
+                            {/* Market Insight & Toolbar Row */}
+                            <div className="sp-insight-banner">
+                                <div className="sp-insight-content">
+                                    <span className="sp-insight-icon"><LineChart size={20} /></span>
+                                    <div className="sp-insight-text">
+                                        <strong>Market Pulse:</strong> Properties in your list are seeing 30% higher engagement this week. We recommend applying early.
                                     </div>
                                 </div>
-
-                                {/* Grid */}
-                                <div className="sp-grid">
-                                    {savedItems.map((item, i) => (
-                                        <div
-                                            className="sp-card-wrapper"
-                                            key={item.id}
-                                            style={{ animationDelay: `${i * 80}ms` }}
-                                        >
-                                            <PropertyCard
-                                                property={item}
-                                                onOpenDetails={() => handleOpenDetails(item)}
-                                                isSaved={true}
-                                                onToggleSave={handleToggleSave}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            </>
-                        )}
-
-                        {/* Empty State */}
-                        {!loading && error && (
-                            <div className="sp-empty">
-                                <h2 className="sp-empty-title">Could not load saved properties</h2>
-                                <p className="sp-empty-sub">{error}</p>
-                                <button
-                                    className="sp-browse-btn"
-                                    onClick={() => navigate('/browse-properties')}
-                                >
-                                    Browse Properties <FaArrowRight />
+                                <button className="sp-insight-cta" onClick={() => navigate('/browse-properties')}>
+                                    Explore More <ArrowRight size={14} />
                                 </button>
                             </div>
-                        )}
 
-                        {!loading && !error && savedItems.length === 0 && (
-                            <div className="sp-empty">
-                                <div className="sp-empty-ring sp-empty-ring--outer" />
-                                <div className="sp-empty-ring sp-empty-ring--inner" />
+                            {/* Toolbar (Actions) */}
+                            <div className="sp-toolbar">
+                                {showClearConfirm ? (
+                                    <div className="sp-confirm-inline">
+                                        <span>Remove all saved properties?</span>
+                                        <button className="sp-confirm-btn-yes" onClick={handleClearAll}>Yes, clear</button>
+                                        <button className="sp-confirm-btn-no" onClick={() => setShowClearConfirm(false)}>Cancel</button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        className="sp-clear-btn"
+                                        onClick={() => setShowClearConfirm(true)}
+                                        title="Clear All Saved Properties"
+                                    >
+                                        <Trash2 size={16} />
+                                        <span>Clear Wishlist</span>
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Properties Grid */}
+                            <div className="sp-grid">
+                                {savedItems.map((item, i) => (
+                                    <div
+                                        className="sp-card-wrapper"
+                                        key={item.id}
+                                        style={{ animationDelay: `${i * 60}ms` }}
+                                    >
+                                        <PropertyCard
+                                            property={item}
+                                            onOpenDetails={() => handleOpenDetails(item)}
+                                            isSaved={true}
+                                            onToggleSave={handleToggleSave}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
+
+                    {/* ── Loading State ── */}
+                    {loading && (
+                        <div className="sp-loader-wrapper">
+                            <div className="sp-spinner" />
+                            <p>Loading your saved properties...</p>
+                        </div>
+                    )}
+
+                    {/* ── Error State ── */}
+                    {!loading && error && (
+                        <div className="sp-empty-wrapper">
+                            <h2>Could not load saved properties</h2>
+                            <p>{error}</p>
+                            <button
+                                className="sp-browse-btn"
+                                onClick={() => navigate('/browse-properties')}
+                            >
+                                Browse Properties <ArrowRight size={16} />
+                            </button>
+                        </div>
+                    )}
+
+                    {/* ── Empty State ── */}
+                    {!loading && !error && savedItems.length === 0 && (
+                        <div className="sp-empty-wrapper">
+                            <div className="sp-empty-video-container">
+                                <div className="sp-empty-ring sp-empty-ring-outer" />
+                                <div className="sp-empty-ring sp-empty-ring-inner" />
                                 <video
                                     className="sp-empty-video"
                                     src="/HOMI_Boy.mp4"
@@ -314,29 +208,23 @@ const SavedProperties: React.FC = () => {
                                     muted
                                     playsInline
                                 />
-                                <h2 className="sp-empty-title">Nothing saved yet</h2>
-                                <p className="sp-empty-sub">
-                                    Start browsing and heart the listings you love — they'll appear right here.
-                                </p>
-                                <button
-                                    className="sp-browse-btn"
-                                    onClick={() => navigate('/browse-properties')}
-                                >
-                                    Browse Properties <FaArrowRight />
-                                </button>
                             </div>
-                        )}
+                            <h2>Your wishlist is empty</h2>
+                            <p>
+                                Start browsing the market and tap the heart icon on properties you like. They will appear here for you to compare and apply.
+                            </p>
+                            <button
+                                className="sp-browse-btn"
+                                onClick={() => navigate('/browse-properties')}
+                            >
+                                <Heart size={16} fill="white" />
+                                <span>Browse Properties</span>
+                            </button>
+                        </div>
+                    )}
 
-                        {loading && (
-                            <div className="sp-empty">
-                                <h2 className="sp-empty-title">Loading saved properties...</h2>
-                                <p className="sp-empty-sub">Please wait while we fetch your latest saved listings.</p>
-                            </div>
-                        )}
-                    </div>
+                    <Footer />
                 </div>
-
-                <Footer />
             </div>
         </div>
     );

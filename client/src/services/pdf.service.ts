@@ -119,6 +119,7 @@ class PDFService {
                 text-align: justify;
                 padding-bottom: 8px;
                 border-bottom: 1px solid #f9f9f9;
+                white-space: pre-line;
             }
             .signature-area {
                 margin-top: auto;
@@ -183,20 +184,20 @@ class PDFService {
                 tenantSig: 'Tenant Signature',
                 date: 'Execution Date',
                 footer: 'Digitally Verified Agreement • HOMI Platform • Timestamped Security',
-                clause1: '1. Description: The property is located at {{address}}. It consists of the unit specified ({{type}}).',
-                clause2: '2. Duration: The contract starts on {{startDate}} and has a duration of {{duration}}.',
-                clause3: '3. Value: The monthly rent is {{amount}}. It must be paid in advance at the beginning of each month.',
-                clause4: '4. Deposit: A security deposit of {{deposit}} is paid and held in HOMi escrow. Refunded to Tenant on successful completion, or forfeited to Landlord on non-payment default.',
-                clause5: '5. Late Payment: A late fee of {{lateFee}} applies if payment is delayed more than 5 days.',
-                clause6: '6. No Subleasing: Lessee cannot sublease or make changes without written consent.',
-                clause7: '7. Use: Property must be used for residential purposes only. Any other use terminates contract.',
-                clause8: '8. Expenses: Lessee expenses (decorations/improvements) are not reimbursable by lessor.',
-                clause9: '9. Condition: Lessee must return property in original condition. Liable for negligence.',
-                clause10: '10. Eviction: Lessee must vacate at end of term. Delay results in illegal occupation.',
-                clause11: '11. Utilities: Lessee is responsible for water, electricity, gas, and internet bills.',
-                clause12: '12. Termination: Early termination requires one month notice or one month rent penalty.',
-                clause13: '13. Correspondence: Addresses in contract are valid for all legal notices.',
-                clause14: '14. Jurisdiction: Digital copies provided to both parties. Subject to local courts.'
+                clause1: 'Term 1: Description of the Rented Property\nThe Lessor hereby leases to the Lessee, and the Lessee hereby leases from the Lessor, the real property located at {{address}}, consisting of the specific residential unit ({{type}}). The Lessee acknowledges that they have inspected the property and found it to be in good, clean, and tenantable condition, suitable for its permitted residential use.',
+                clause2: 'Term 2: Lease Term & Duration\nThis lease agreement shall commence on {{startDate}} and continue for a fixed duration of {{duration}}. Upon the expiration of the lease term, this agreement shall terminate automatically. Any renewal or extension of this lease must be agreed upon in writing by both parties by signing a new agreement prior to the expiration date.',
+                clause3: 'Term 3: Rental Value & Payments\nThe monthly rent for the leased property is set at {{amount}}, payable in advance on the first day of each calendar month. Payments must be processed through the HOMI platform or directly to the Lessor, who shall issue a digital receipt. The Lessee shall not withhold or deduct any amount from the monthly rent for any reason whatsoever.',
+                clause4: 'Term 4: Security Deposit\nA security deposit of {{deposit}} shall be paid by the Lessee and held securely in HOMI\'s escrow system during the active lease cycle. The Lessor shall have no access to these funds while the lease remains active. Upon successful completion of the lease term and full payment of all financial obligations, the security deposit shall be automatically refunded to the Lessee. If the lease is terminated due to Lessee\'s default, non-payment, or breach of contract, the security deposit shall be forfeited and released to the Lessor.',
+                clause5: 'Term 5: Late Payment & Default\nIf the Lessee fails to pay the monthly rent within five (5) days of the due date, a late fee penalty of {{lateFee}} shall be assessed. If the payment delay continues beyond fifteen (15) days, the Lessor shall have the absolute right to terminate this agreement immediately, evict the Lessee, and reclaim possession of the property without requiring a prior court ruling or formal notices.',
+                clause6: 'Term 6: Subleasing & Assignments\nThe Lessee is strictly prohibited from subleasing the property, assigning this lease, or transferring any part of the tenancy to a third party without obtaining the prior written consent of the Lessor. Any unauthorized subleasing or assignment shall be considered a material breach and shall result in the immediate termination of this contract.',
+                clause7: 'Term 7: Permitted Use of the Property\nThe leased property must be used solely and exclusively for residential purposes by the Lessee and their immediate family members. The Lessee shall comply with all local housing regulations and shall not conduct any commercial, professional, or illegal activities within the premises, nor cause any disturbance or nuisance to the neighbors.',
+                clause8: 'Term 8: Modifications & Alterations\nThe Lessee shall not perform any structural modifications, alterations, additions, or decorations to the property (such as drilling walls, dividing rooms, or changing doors and windows) without the prior written consent of the Lessor. In the event of unauthorized changes, the Lessee must restore the property to its original state at their own expense.',
+                clause9: 'Term 9: Maintenance & Care\nThe Lessee commits to using the property with utmost care and responsibility. The Lessee shall be responsible for routine minor maintenance and repairs resulting from daily use and negligence. Major structural repairs and maintenance of core building systems shall be the responsibility of the Lessor, in accordance with the maintenance responsibility allocation set forth in this agreement.',
+                clause10: 'Term 10: Eviction & Holdover Compensation\nUpon the expiration or termination of this lease, the Lessee must vacate the property and return it to the Lessor in its original clean condition. Any holdover or failure to vacate shall constitute illegal occupation, and the Lessee shall be liable to pay the Lessor double the daily rent rate for each day of delay as liquidated damages, in addition to legal costs.',
+                clause11: 'Term 11: Utilities & Public Charges\nThe Lessee shall bear the full responsibility for the timely payment of all utility bills (including water, electricity, natural gas, internet, and trash collection fees) during the tenancy term. The Lessee must provide proof of payment of all such utility bills to the Lessor upon request.',
+                clause12: 'Term 12: Early Termination & Notices\nNeither party may terminate this lease agreement early except as provided by law or by mutual written agreement. If the Lessee wishes to vacate the property prior to the end of the term, they must provide at least thirty (30) days written notice and pay a penalty equivalent to one month\'s rent, unless the early termination is due to Lessor\'s failure to maintain the property in habitable condition.',
+                clause13: 'Term 13: Addresses for Legal Notice\nAll notices, demands, or legal correspondence required under this lease shall be sent to the parties\' respective primary addresses stated in this agreement. Any change in address must be communicated to the other party in writing immediately, otherwise notices sent to the listed addresses shall be deemed legally delivered.',
+                clause14: 'Term 14: Governing Law & Jurisdiction\nThis lease agreement shall be governed by and construed in accordance with the local laws of the Arab Republic of Egypt. Any disputes arising from the interpretation, execution, or breach of this agreement shall be subject to the exclusive jurisdiction of the competent local courts where the property is located.'
             },
             ar: {
                 title: 'عقد إيجار وحدة سكنية',
@@ -224,20 +225,20 @@ class PDFService {
                 tenantSig: 'توقيع المستأجر',
                 date: 'تاريخ التوقيع',
                 footer: 'عقد موثق رقمياً • منصة هومي (HOMI) • حماية تقنية وتوقيع زمنى',
-                clause1: '١. الوصف: يقع العقار في {{address}}. ويتكون من الوحدة المحددة ({{type}}).',
-                clause2: '٢. المدة: يبدأ العقد في {{startDate}} ومدته {{duration}}.',
-                clause3: '٣. القيمة: مبلغ الإيجار الشهرى هو {{amount}}. يجب دفعه مقدماً في بداية كل شهر.',
-                clause4: '٤. التأمين: يتم دفع تأمين قدره {{deposit}} يُحتفظ به في ضمان هومي. يُرد للمستأجر عند إتمام العقد بنجاح، أو يُصادر للمؤجر في حال تعثر السداد.',
-                clause5: '٥. التأخير: تطبق غرامة {{lateFee}} في حال التأخر عن الدفع لأكثر من ٥ أيام.',
-                clause6: '٦. التنازل: لا يجوز للمستأجر التنازل عن الإيجار أو تغيير العقار دون موافقة.',
-                clause7: '٧. الاستخدام: يستخدم العقار للسكن فقط. أي استخدام آخر ينهي العقد تلقائياً.',
-                clause8: '٨. المصاريف: مصاريف المستأجر (تحسينات/ديكور) لا يستردها وتصبح جزءاً من العقار.',
-                clause9: '٩. الحالة: يجب إعادة العقار بحالته الأصلية. المستأجر مسؤول عن أي إهمال.',
-                clause10: '١٠. الإخلاء: يجب الإخلاء عند انتهاء العقد. التأخير يعتبر شغلاً غير قانوني.',
-                clause11: '١١. المرافق: المستأجر مسؤول عن دفع فواتير الكهرباء والمياه والغاز والإنترنت.',
-                clause12: '١٢. الإنهاء: يتطلب الإنهاء المبكر إخطاراً قبل شهر أو دفع إيجار شهر غرامة.',
-                clause13: '١٣. المراسلات: العناوين المذكورة صحيحة لجميع الإخطارات القانونية والمراسلات.',
-                clause14: '١٤. الاختصاص: نسختان رقميتان للطرفين. يخضع العقد للمحاكم المحلية.'
+                clause1: 'البند الأول: وصف العقار المؤجر\nيؤجر المؤجر بموجب هذا العقد للمستأجر، ويستأجر المستأجر من المؤجر، العقار الكائن في {{address}}، والمكون من الوحدة السكنية المحددة ({{type}}). ويقر المستأجر بأنه قد عاين العقار المعاينة التامة النافية للجهالة ووجده في حالة جيدة ونظيفة وصالحة للاستخدام السكني المخصص له.',
+                clause2: 'البند الثاني: مدة عقد الإيجار\nيبدأ سريان هذا العقد في تاريخ {{startDate}} ويستمر لمدة محددة قدرها {{duration}}. وينتهي هذا العقد تلقائياً بقوة القانون عند نهاية مدته دون حاجة إلى إخطار أو إنذار. ولا يتجدد هذا العقد تلقائياً إلا بموجب اتفاق مكتوب وجديد موقع من كلا الطرفين قبل تاريخ انتهاء العقد.',
+                clause3: 'البند الثالث: القيمة الإيجارية وسدادها\nتم تحديد الأجرة الشهرية للعقار المؤجر بمبلغ {{amount}}، وتدفع مقدماً في اليوم الأول من كل شهر ميلادي. يجب سداد القيمة الإيجارية من خلال منصة هومي (HOMI) أو مباشرة للمؤجر الذي يلتزم بإصدار إيصال رقمي يفيد الاستلام. ولا يحق للمستأجر حبس أو خصم أي جزء من الأجرة الشهرية لأي سبب من الأسباب.',
+                clause4: 'البند الرابع: مبلغ التأمين\nيلتزم المستأجر بسداد مبلغ تأمين قدره {{deposit}}، ويُاحتفظ به بشكل آمن في نظام الضمان التابع لمنصة هومي (HOMI) طوال فترة الإيجار النشطة. ولا يحق للمؤجر سحب أو استخدام هذه الأموال طالما ظل العقد سارياً. وعند انتهاء مدة الإيجار بنجاح وسداد المستأجر لكافة التزاماته المالية، يتم رد مبلغ التأمين تلقائياً إلى المستأجر. وفي حالة إنهاء العقد بسبب تقصير المستأجر أو عدم السداد أو الإخلال بشروط العقد، يُصادر مبلغ التأمين ويُحول لصالح المؤجر.',
+                clause5: 'البند الخامس: التأخر في سداد الأجرة والفسخ\nفي حالة تأخر المستأجر في دفع الإيجار لمدة تتجاوز خمسة (٥) أيام من تاريخ الاستحقاق، تطبق غرامة تأخير قدرها {{lateFee}}. وإذا استمر التأخر في السداد لأكثر من خمسة عشر (١٥) يوماً، يحق للمؤجر فسخ العقد فوراً، وإخلاء المستأجر واسترداد حيازة العقار دون الحاجة لحكم قضائي مسبق أو إجراءات رسمية.',
+                clause6: 'البند السادس: التأجير من الباطن والتنازل\nيُحظر على المستأجر حظراً تاماً إعادة تأجير العقار من الباطن، أو التنازل عن الإيجار، أو نقل أي جزء من حقوق الإيجار إلى الغير دون الحصول على موافقة كتابية مسبقة من المؤجر. ويعتبر أي تأجير من الباطن أو تنازل غير مصرح به إخلالاً جوهرياً يؤدي إلى فسخ العقد فوراً.',
+                clause7: 'البند السابع: الغرض من الاستخدام\nيجب استخدام العقار المؤجر لأغراض السكن الخاص فقط للمستأجر وأفراد أسرته المقيمين معه. ويتعهد المستأجر بالالتزام بجميع القوانين واللوائح السكنية المحلية، ويُحظر عليه القيام بأي أنشطة تجارية أو مهنية أو غير قانونية داخل العقار، أو التسبب في أي إزعاج أو مضايقة للجيران.',
+                clause8: 'البند الثامن: التعديلات والتغييرات بالعقار\nيُحظر على المستأجر إجراء أي تعديلات هيكلية، أو تغييرات، أو إضافات، أو أعمال ديكور في العقار (مثل هدم أو بناء أو تقسيم الغرف أو فتح نوافذ وأبواب) دون الحصول على موافقة كتابية مسبقة من المؤجر. وفي حالة القيام بذلك بدون موافقة، يلتزم المستأجر بإعادة العقار إلى حالته الأصلية على نفقته الخاصة.',
+                clause9: 'البند التاسع: الصيانة والمحافظة على العقار\nيتعهد المستأجر باستخدام العقار المؤجر بعناية ومسؤولية تامة والمحافظة عليه. ويتحمل المستأجر تكاليف الصيانة الدورية البسيطة والإصلاحات الناتجة عن الاستخدام اليومي أو الإهمال. بينما يتحمل المؤجر مسؤولية الإصلاحات الهيكلية الكبرى وصيانة الأنظمة الأساسية للمبنى وفقاً لجدول توزيع مسؤوليات الصيانة الوارد في هذا العقد.',
+                clause10: 'البند العاشر: الإخلاء عند انتهاء العقد والتعويض عن التأخير\nعند انتهاء مدة الإيجار أو فسخ العقد، يلتزم المستأجر بإخلاء العقار وتسليمه للمؤجر بحالته الأصلية النظيفة. ويعتبر أي تأخر في الإخلاء شغلاً غير قانوني للعقار، ويلتزم المستأجر بدفع تعويض للمؤجر يعادل ضعف الأجرة اليومية عن كل يوم تأخير كتعويض اتفاقي، بالإضافة إلى تحمل المصاريف القانونية.',
+                clause11: 'البند الحادي عشر: فواتير المرافق والرسوم\nيتحمل المستأجر المسؤولية الكاملة عن سداد جميع فواتير المرافق (بما في ذلك المياه، والكهرباء، والغاز الطبيعي، والإنترنت، ورسوم النظافة) في مواعيدها المحددة طوال فترة الإيجار. ويلتزم المستأجر بتقديم ما يثبت سداد هذه الفواتير للمؤجر عند الطلب.',
+                clause12: 'البند الثاني عشر: الإنهاء المبكر والإخطارات\nلا يحق لأي من الطرفين إنهاء هذا العقد مبكراً إلا بموجب ما ينص عليه القانون أو بالاتفاق الكتابي المتبادل. وفي حال رغبة المستأجر في الإخلاء قبل نهاية المدة، يجب عليه تقديم إخطار كتابي مدته ثلاثون (٣٠) يوماً على الأقل، وسداد غرامة تعادل أجرة شهر واحد، ما لم يكن الإنهاء بسبب إخفاق المؤجر في صيانة العقار.',
+                clause13: 'البند الثالث عشر: العناوين والمراسلات القانونية\nتعتبر جميع الإخطارات أو المراسلات القانونية المطلوبة بموجب هذا العقد صحيحة ومنتجة لأثرها إذا أُرسلت إلى العناوين الرئيسية لكل من الطرفين المذكورة في صدر هذا العقد. ويجب إبلاغ الطرف الآخر فوراً بأي تغيير في العنوان، وإلا اعتُبرت المراسلات الموجهة للعنوان المذكور مسلّمة قانوناً.',
+                clause14: 'البند الرابع عشر: القانون الواجب التطبيق والاختصاص القضائي\nيخضع هذا العقد ويفسر وفقاً للقوانين المعمول بها في جمهورية مصر العربية. ويخضع أي نزاع ينشأ عن تفسير أو تنفيذ أو الإخلال ببنود هذا العقد للاخيار القضائي الحصري للمحاكم المحلية المختصة التي يقع في دائرتها العقار المؤجر.'
             }
         }[lang];
 

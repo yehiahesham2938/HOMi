@@ -697,6 +697,7 @@
     text-align: justify;
     padding-bottom: 8px;
     border-bottom: 1px solid #f9f9f9;
+    white-space: pre-line;
 }
 
 .pdf-signature-area {

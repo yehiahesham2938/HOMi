@@ -33,6 +33,13 @@ jobs:
 
       - name: Run tests
         run: npm test
+        # The config schema (Zod) requires the Upstash REST credentials to be
+        # non-empty at import time, even though the tests mock Redis and never
+        # contact it. Provide dummy values so config validation passes in CI.
+        env:
+          REDIS_ENABLED: 'false'
+          UPSTASH_REDIS_REST_URL: https://ci.example.upstash.io
+          UPSTASH_REDIS_REST_TOKEN: ci-dummy-token
 
   client:
     name: Client (build)

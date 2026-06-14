@@ -312,26 +312,82 @@
     100% { transform: scale(1); opacity: 1; }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
     .ccm-overlay {
         padding: 0;
         align-items: flex-end;
     }
-    
+
     .ccm-card {
-        border-radius: 28px 28px 0 0;
-        max-height: 95vh;
+        border-radius: 24px 24px 0 0;
+        max-height: 92vh;
+        max-width: 100%;
     }
-    
+
+    /* Drag handle */
+    .ccm-card::before {
+        content: '';
+        display: block;
+        width: 40px;
+        height: 4px;
+        background: rgba(203, 213, 225, 0.8);
+        border-radius: 99px;
+        margin: 10px auto 0 auto;
+        flex-shrink: 0;
+    }
+
     .ccm-header {
-        padding: 1.5rem 1.5rem 1.25rem;
+        padding: 1.25rem 1.25rem 1rem;
     }
-    
+
+    .ccm-header h2 {
+        font-size: 1.25rem;
+    }
+
+    .ccm-header svg {
+        font-size: 1.6rem;
+    }
+
     .ccm-error {
-        margin: 1.25rem 1.5rem 0;
+        margin: 1rem 1.25rem 0;
+        font-size: 0.88rem;
     }
-    
+
     .ccm-body {
-        padding: 1.5rem;
+        padding: 1.25rem;
+    }
+
+    .ccm-body h3 {
+        font-size: 1.05rem;
+    }
+
+    .ccm-subtitle {
+        font-size: 0.88rem;
+        margin-bottom: 1rem;
+    }
+
+    .ccm-star {
+        font-size: 2rem;
+    }
+
+    .ccm-stars {
+        gap: 0.4rem;
+        margin: 1rem 0;
+    }
+
+    .ccm-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .ccm-btn {
+        min-width: unset;
+        width: 100%;
+        padding: 0.875rem;
+        font-size: 0.9rem;
+    }
+
+    .ccm-photos {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
     }
 }

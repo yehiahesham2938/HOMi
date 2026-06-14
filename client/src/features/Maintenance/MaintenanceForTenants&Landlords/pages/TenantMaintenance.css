@@ -739,14 +739,246 @@
     }
 }
 
+/* ─── Mobile: 768px ──────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+
+    /* Container & Spacing */
+    .tenant-maintenance-hub-wrapper .maintenance-main-container {
+        padding: 1rem;
+    }
+
+    /* Hero */
+    .tenant-maintenance-hub-wrapper .maintenance-hero {
+        padding: 1.25rem;
+        border-radius: 20px;
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .tenant-maintenance-hub-wrapper .hero-text h1 {
+        font-size: 1.8rem;
+        letter-spacing: -0.02em;
+    }
+
+    .tenant-maintenance-hub-wrapper .hero-text p {
+        font-size: 0.9rem;
+    }
+
+    /* Quick Stats: side-scrollable row */
+    .tenant-maintenance-hub-wrapper .maintenance-quick-stats {
+        flex-direction: row;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 4px;
+        gap: 0.75rem;
+    }
+
+    .tenant-maintenance-hub-wrapper .maintenance-quick-stats::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tenant-maintenance-hub-wrapper .mini-stat {
+        min-width: 140px;
+        padding: 1rem;
+        border-radius: 16px;
+        gap: 0.85rem;
+        flex-shrink: 0;
+    }
+
+    .tenant-maintenance-hub-wrapper .stat-icon-wrapper {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        font-size: 1.1rem;
+    }
+
+    .tenant-maintenance-hub-wrapper .stat-num {
+        font-size: 1.4rem;
+    }
+
+    .tenant-maintenance-hub-wrapper .stat-desc {
+        font-size: 0.68rem;
+    }
+
+    /* Tabs: horizontally scrollable */
+    .tenant-maintenance-hub-wrapper .maintenance-tabs {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding: 0.35rem;
+        border-radius: 16px;
+        margin-bottom: 1.5rem;
+        gap: 0.25rem;
+    }
+
+    .tenant-maintenance-hub-wrapper .maintenance-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tenant-maintenance-hub-wrapper .tab-btn {
+        padding: 0.65rem 1.1rem;
+        font-size: 0.82rem;
+        border-radius: 12px;
+        gap: 0.5rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    /* Section Header */
+    .tenant-maintenance-hub-wrapper .tl-section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .tenant-maintenance-hub-wrapper .tl-section-header h2 {
+        font-size: 1.4rem;
+    }
+
+    .tenant-maintenance-hub-wrapper .tl-section-header p {
+        font-size: 0.88rem;
+    }
+
+    .tenant-maintenance-hub-wrapper .post-issue-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 0.9rem 1.5rem;
+        border-radius: 14px;
+        font-size: 0.92rem;
+    }
+
+    /* Marketplace & Provider Grids: single column, tight gap */
+    .tenant-maintenance-hub-wrapper .marketplace-grid {
+        grid-template-columns: 1fr;
+        gap: 0.6rem;
+    }
+
+    .tenant-maintenance-hub-wrapper .providers-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    /* Browse Controls */
     .tenant-maintenance-hub-wrapper .browse-controls {
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .tenant-maintenance-hub-wrapper .search-box-premium input,
+    .tenant-maintenance-hub-wrapper .filter-dropdown-premium select {
+        padding: 0.875rem 1rem 0.875rem 2.75rem;
+        font-size: 0.9rem;
+        border-radius: 14px;
+    }
+
+    /* Active Request Rows */
+    .tenant-maintenance-hub-wrapper .active-request-row {
+        padding: 1rem;
+        gap: 0.75rem;
+        border-radius: 16px;
+        position: relative;
+    }
+
+    .tenant-maintenance-hub-wrapper .active-request-row:hover {
+        transform: none;
+    }
+
+    .tenant-maintenance-hub-wrapper .status-indicator {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .tenant-maintenance-hub-wrapper .req-main-info h4 {
+        font-size: 0.98rem;
+    }
+
+    .tenant-maintenance-hub-wrapper .req-main-info p {
+        font-size: 0.82rem;
+        max-width: 100%;
+    }
+
+    .tenant-maintenance-hub-wrapper .req-provider,
+    .tenant-maintenance-hub-wrapper .req-date {
+        width: auto;
+        flex: 1;
+    }
+
+    .tenant-maintenance-hub-wrapper .req-status-badge .badge {
+        padding: 0.35rem 0.75rem;
+        font-size: 0.72rem;
+    }
+
+    .tenant-maintenance-hub-wrapper .req-details-btn {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: #f1f5f9;
+        border-radius: 8px;
+        padding: 0.5rem;
+        color: var(--text-muted);
+    }
+
+    /* Empty States */
+    .tenant-maintenance-hub-wrapper .empty-state-container {
+        padding: 3rem 1.25rem;
+        border-radius: 20px;
+    }
+
+    .tenant-maintenance-hub-wrapper .empty-state-icon-box {
+        width: 64px;
+        height: 64px;
+        font-size: 2rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .tenant-maintenance-hub-wrapper .empty-state-container h3 {
+        font-size: 1.3rem;
+    }
+
+    .tenant-maintenance-hub-wrapper .empty-state-container p {
+        font-size: 0.9rem;
+    }
+
+    .tenant-maintenance-hub-wrapper .empty-state-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .tenant-maintenance-hub-wrapper .primary-empty-btn,
+    .tenant-maintenance-hub-wrapper .secondary-empty-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Confirm/Cancel Modal */
+    .tenant-maintenance-hub-wrapper .custom-confirm-modal-card {
+        padding: 1.75rem 1.25rem;
+        border-radius: 20px;
+        margin: 0 1rem;
+    }
+
+    .tenant-maintenance-hub-wrapper .custom-confirm-modal-card h3 {
+        font-size: 1.15rem;
+    }
+
+    .tenant-maintenance-hub-wrapper .custom-confirm-modal-card p {
+        font-size: 0.88rem;
+    }
+
+    .tenant-maintenance-hub-wrapper .custom-confirm-modal-actions {
         flex-direction: column;
     }
 
-    .tenant-maintenance-hub-wrapper .filter-dropdown-premium select,
-    .tenant-maintenance-hub-wrapper .search-box-premium input {
-        font-size: 0.9rem;
+    .tenant-maintenance-hub-wrapper .custom-confirm-btn {
+        width: 100%;
+        padding: 0.85rem;
     }
 }
 

@@ -426,8 +426,178 @@
 }
 
 @media (max-width: 768px) {
+    /* Bottom-sheet: rises from bottom of screen */
+    .issue-modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .issue-modal-container {
+        border-radius: 20px 20px 0 0;
+        max-height: 88vh;
+        max-width: 100%;
+    }
+
+    /* Drag handle */
+    .issue-modal-container::before {
+        content: '';
+        display: block;
+        width: 36px;
+        height: 4px;
+        background: #cbd5e1;
+        border-radius: 99px;
+        margin: 8px auto 0 auto;
+        flex-shrink: 0;
+    }
+
+    /* Header: compact */
+    .issue-modal-header {
+        padding: 0.75rem 1rem;
+    }
+
+    .header-title {
+        gap: 0.75rem;
+    }
+
+    .header-icon-box {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .header-title h2 {
+        font-size: 1rem;
+        font-weight: 800;
+    }
+
+    .header-title p {
+        font-size: 0.78rem;
+        margin-top: 1px;
+    }
+
+    .close-modal-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
+
+    /* Scrollable body: tight */
+    .modal-scrollable-content {
+        padding: 0.875rem;
+    }
+
+    /* Form layout: single column, tighter */
     .form-grid {
         grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .form-group {
+        margin-bottom: 0.875rem;
+    }
+
+    .form-group label {
+        font-size: 0.82rem;
+        gap: 0.4rem;
+    }
+
+    .form-group select,
+    .form-group textarea,
+    .budget-input-wrapper input {
+        padding: 0.65rem 0.875rem;
+        font-size: 0.88rem;
+        border-radius: 10px;
+    }
+
+    .form-group textarea {
+        min-height: 80px;
+    }
+
+    /* Urgency pills: smaller */
+    .urgency-pills {
+        gap: 0.3rem;
+        padding: 0.3rem;
+        border-radius: 10px;
+    }
+
+    .urgency-pill {
+        padding: 0.45rem 0.5rem;
+        font-size: 0.75rem;
+        border-radius: 6px;
+    }
+
+    /* Upload area: much smaller */
+    .upload-area {
+        padding: 1rem;
+        height: 120px;
+        border-radius: 12px;
+    }
+
+    .upload-icon {
+        font-size: 1.4rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .upload-placeholder {
+        width: 100%;
+        height: auto;
+    }
+
+    .upload-placeholder p {
+        font-size: 0.82rem;
+    }
+
+    .upload-placeholder span {
+        font-size: 0.72rem;
+    }
+
+    /* Footer */
+    .issue-modal-footer {
+        padding: 0.75rem 0.875rem;
+        flex-direction: row;
+        gap: 0.5rem;
+    }
+
+    .cancel-btn {
+        padding: 0.65rem 1rem;
+        font-size: 0.82rem;
+        border-radius: 10px;
+    }
+
+    .submit-btn {
+        flex: 1;
+        padding: 0.65rem 1rem;
+        font-size: 0.85rem;
+        border-radius: 10px;
+        min-width: unset;
+    }
+
+    /* Success state */
+    .success-state {
+        padding: 2rem 1rem;
+    }
+
+    .success-icon-wrapper {
+        width: 60px;
+        height: 60px;
+        font-size: 2.2rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .success-content h2 {
+        font-size: 1.25rem;
+    }
+
+    .success-content p {
+        font-size: 0.88rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .done-btn {
+        padding: 0.75rem 2rem;
+        font-size: 0.9rem;
     }
 }
 

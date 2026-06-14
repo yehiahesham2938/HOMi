@@ -859,7 +859,186 @@
     }
 }
 
+/* ─── Mobile: 768px ──────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+
+    /* Container */
+    .landlord-maintenance-hub-wrapper .maintenance-main-container {
+        padding: 1rem;
+    }
+
+    /* Hero */
+    .landlord-maintenance-hub-wrapper .maintenance-hero {
+        padding: 1.25rem;
+        border-radius: 20px;
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .landlord-maintenance-hub-wrapper .hero-text h1 {
+        font-size: 1.8rem;
+        letter-spacing: -0.02em;
+    }
+
+    .landlord-maintenance-hub-wrapper .hero-text p {
+        font-size: 0.9rem;
+    }
+
+    /* Quick Stats: scrollable row */
+    .landlord-maintenance-hub-wrapper .maintenance-quick-stats {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        flex-wrap: nowrap;
+        padding-bottom: 4px;
+        gap: 0.75rem;
+    }
+
+    .landlord-maintenance-hub-wrapper .maintenance-quick-stats::-webkit-scrollbar {
+        display: none;
+    }
+
+    .landlord-maintenance-hub-wrapper .mini-stat {
+        min-width: 130px;
+        max-width: 160px;
+        padding: 0.875rem;
+        border-radius: 14px;
+        gap: 0.75rem;
+        flex: 0 0 auto;
+    }
+
+    .landlord-maintenance-hub-wrapper .stat-icon-wrapper {
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        font-size: 1rem;
+    }
+
+    .landlord-maintenance-hub-wrapper .stat-num {
+        font-size: 1.3rem;
+    }
+
+    .landlord-maintenance-hub-wrapper .stat-desc {
+        font-size: 0.65rem;
+    }
+
+    /* Section Headers */
+    .landlord-maintenance-hub-wrapper .l-section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .landlord-maintenance-hub-wrapper .l-section-header h2 {
+        font-size: 1.4rem;
+    }
+
+    .landlord-maintenance-hub-wrapper .l-section-header p {
+        font-size: 0.88rem;
+    }
+
+    /* Marketplace Grid */
+    .landlord-maintenance-hub-wrapper .marketplace-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    /* Active Request Rows */
+    .landlord-maintenance-hub-wrapper .active-request-row {
+        padding: 1rem;
+        gap: 0.75rem;
+        border-radius: 16px;
+        position: relative;
+    }
+
+    .landlord-maintenance-hub-wrapper .active-request-row:hover {
+        transform: none;
+    }
+
+    .landlord-maintenance-hub-wrapper .status-indicator {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .landlord-maintenance-hub-wrapper .req-main-info h4 {
+        font-size: 0.98rem;
+    }
+
+    .landlord-maintenance-hub-wrapper .req-main-info p {
+        font-size: 0.82rem;
+        max-width: 100%;
+    }
+
+    .landlord-maintenance-hub-wrapper .req-provider,
+    .landlord-maintenance-hub-wrapper .req-date {
+        width: auto;
+        flex: 1;
+    }
+
+    .landlord-maintenance-hub-wrapper .req-status-badge .badge {
+        padding: 0.35rem 0.75rem;
+        font-size: 0.72rem;
+    }
+
+    .landlord-maintenance-hub-wrapper .req-details-btn {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: #f1f5f9;
+        border-radius: 8px;
+        padding: 0.5rem;
+        color: var(--text-muted);
+    }
+
+    /* Empty States */
+    .landlord-maintenance-hub-wrapper .empty-state-container {
+        padding: 3rem 1.25rem;
+        border-radius: 20px;
+    }
+
+    .landlord-maintenance-hub-wrapper .empty-state-icon-box {
+        width: 64px;
+        height: 64px;
+        font-size: 2rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .landlord-maintenance-hub-wrapper .empty-state-container h3 {
+        font-size: 1.3rem;
+    }
+
+    .landlord-maintenance-hub-wrapper .empty-state-container p {
+        font-size: 0.9rem;
+    }
+
+    /* Modal (Details View) */
+    .landlord-maintenance-hub-wrapper .req-modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .landlord-maintenance-hub-wrapper .req-modal {
+        border-radius: 24px 24px 0 0;
+        max-height: 92vh;
+        max-width: 100%;
+    }
+
+    .landlord-maintenance-hub-wrapper .req-modal-header {
+        padding: 1.25rem 1rem;
+    }
+
+    .landlord-maintenance-hub-wrapper .req-modal-title-group h2 {
+        font-size: 1.2rem;
+    }
+
+    .landlord-maintenance-hub-wrapper .req-modal-body {
+        padding: 1.25rem 1rem;
+    }
+
     .landlord-maintenance-hub-wrapper .modal-grid-two-col {
         grid-template-columns: 1fr;
         gap: 1rem;

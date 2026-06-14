@@ -12,6 +12,9 @@
     flex-direction: column;
     box-shadow: var(--shadow-sm);
     overflow: hidden;
+    min-width: 0;   /* critical: prevents grid item from overflowing */
+    box-sizing: border-box;
+    max-width: 100%;
 }
 
 .card-glass-glow {
@@ -371,4 +374,157 @@
 .btn-cancel-trash:hover {
     background: #fecaca;
     color: #dc2626;
+}
+
+@media (max-width: 768px) {
+    /* Compact card — ~2 fit per screen height */
+    .post-card-premium {
+        padding: 0.875rem 1rem;
+        border-radius: 16px;
+        border-left-width: 3px;
+        min-width: 0;        /* stop grid item from blowing out */
+        max-width: 100%;     /* never exceed grid column */
+        box-sizing: border-box;
+    }
+
+    .post-card-premium:hover {
+        transform: none;
+    }
+
+    /* Header: compact badges */
+    .post-card-header {
+        margin-bottom: 0.6rem;
+        align-items: center;
+    }
+
+    .status-pill {
+        padding: 0.25rem 0.65rem;
+        gap: 0.35rem;
+    }
+
+    .status-pill span:last-child {
+        font-size: 0.68rem;
+    }
+
+    .status-dot {
+        width: 6px;
+        height: 6px;
+    }
+
+    .urgency-pill {
+        font-size: 0.6rem;
+        padding: 0.2rem 0.55rem;
+        border-radius: 7px;
+    }
+
+    /* Category row */
+    .post-card-type {
+        gap: 0.5rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .type-icon-wrapper {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        font-size: 0.78rem;
+        flex-shrink: 0;
+    }
+
+    .category-text {
+        font-size: 0.68rem;
+        letter-spacing: 0.04em;
+        /* no white-space: nowrap — let it wrap safely */
+    }
+
+    /* Title: clipped to 1 line, MUST use min-width:0 on parent */
+    .post-title-text {
+        font-size: 0.95rem;
+        margin: 0 0 0.35rem 0;
+        line-height: 1.3;
+        /* Use -webkit-box clamp instead of white-space:nowrap to avoid overflow */
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;  /* do NOT use nowrap — causes card to expand */
+    }
+
+    /* Description: 1 line, contained */
+    .post-description {
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem;
+        min-height: unset;
+        -webkit-line-clamp: 1;
+        line-height: 1.4;
+        overflow: hidden;
+    }
+
+    /* Meta: wrap allowed so items don't push card wide */
+    .post-meta {
+        gap: 0.5rem 0.75rem;
+        margin-bottom: 0.65rem;
+        padding-bottom: 0.65rem;
+        flex-wrap: wrap;   /* was nowrap — caused horizontal overflow */
+    }
+
+    .meta-item {
+        font-size: 0.72rem;
+        gap: 0.3rem;
+    }
+
+    .meta-icon {
+        font-size: 0.8rem;
+    }
+
+    /* Footer: budget left, buttons right — stays in one row */
+    .post-card-footer {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding-top: 0;
+        margin-top: 0;
+        flex-wrap: nowrap;
+    }
+
+    .budget-info {
+        flex-direction: row;
+        align-items: baseline;
+        gap: 0.35rem;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .budget-label {
+        font-size: 0.6rem;
+        margin-bottom: 0;
+        white-space: nowrap;
+    }
+
+    .budget-val {
+        font-size: 0.88rem;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    /* Buttons: small, no flex-grow so they don't push out */
+    .post-action-buttons {
+        width: auto;
+        gap: 0.3rem;
+        flex-shrink: 0;
+    }
+
+    .view-bids-btn {
+        flex: none;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.7rem;
+        border-radius: 9px;
+    }
+
+    .btn-cancel-trash {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.78rem;
+    }
 }

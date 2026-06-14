@@ -731,46 +731,210 @@
     font-size: 0.72rem;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+    /* Bottom-sheet: full-width, slides up */
+    .apps-modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+
     .apps-modal {
-        border-radius: 20px;
+        border-radius: 20px 20px 0 0;
+        max-height: 90vh;
+        max-width: 100%;
     }
 
+    /* Drag handle */
+    .apps-modal::before {
+        content: '';
+        display: block;
+        width: 36px;
+        height: 4px;
+        background: rgba(148, 163, 184, 0.5);
+        border-radius: 99px;
+        margin: 8px auto 0 auto;
+        flex-shrink: 0;
+    }
+
+    /* Header: compact dark band */
     .apps-modal-header {
-        padding: 1.25rem 1.25rem;
+        padding: 0.75rem 1rem;
     }
 
+    .apps-header-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        font-size: 0.9rem;
+    }
+
+    .apps-modal-header h2 {
+        font-size: 1rem;
+        margin-bottom: 0;
+    }
+
+    /* Hide subtitle on mobile — saves vertical space */
     .apps-header-sub {
         display: none;
     }
 
+    .apps-close-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 9px;
+        font-size: 0.85rem;
+    }
+
+    /* Wallet card: compact strip */
+    .apps-wallet-card {
+        padding: 0.6rem 1rem;
+    }
+
     .wallet-card-inner {
-        flex-wrap: wrap;
+        padding: 0.65rem 0.875rem;
+        gap: 0.65rem;
+        border-radius: 12px;
+    }
+
+    .wallet-icon-wrap {
+        width: 32px;
+        height: 32px;
+        border-radius: 9px;
+        font-size: 0.85rem;
+    }
+
+    .wallet-amount {
+        font-size: 1.1rem;
+    }
+
+    .wallet-label {
+        font-size: 0.62rem;
+    }
+
+    /* Hide badge on tiny screens */
+    .wallet-card-badge {
+        display: none;
+    }
+
+    .apps-topup-btn {
+        padding: 0.35rem 0.65rem;
+        font-size: 0.75rem;
+    }
+
+    /* Error banner: compact */
+    .apps-modal-error {
+        margin: 0.5rem 1rem;
+        padding: 0.75rem 1rem;
+        font-size: 0.82rem;
+        border-radius: 10px;
+    }
+
+    /* Body: tight padding */
+    .apps-modal-body {
+        padding: 0.75rem 0.875rem 1rem;
+        gap: 0.65rem;
+    }
+
+    /* Each bid card: compact layout */
+    .app-card-main {
+        flex-direction: row;
+        align-items: flex-start;
+        padding: 0.875rem 1rem;
         gap: 0.75rem;
     }
 
-    .wallet-card-badge {
-        margin-left: 0;
+    .app-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 13px;
+        font-size: 1.1rem;
     }
 
-    .apps-modal-body {
-        padding: 1rem 1.25rem 1.5rem;
+    .app-verified-badge {
+        width: 18px;
+        height: 18px;
+        font-size: 0.45rem;
     }
 
-    .app-card-main {
-        flex-direction: column;
-        padding: 1rem 1.25rem;
+    .app-name-row h4 {
+        font-size: 0.92rem;
     }
 
+    .app-type-pill {
+        font-size: 0.58rem;
+        padding: 0.15rem 0.5rem;
+    }
+
+    .app-rating-row {
+        font-size: 0.75rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .app-note {
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem;
+        -webkit-line-clamp: 2;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .app-meta-pills {
+        gap: 0.35rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .meta-pill {
+        font-size: 0.68rem;
+        padding: 0.2rem 0.55rem;
+    }
+
+    /* Right panel: inline price + button */
     .app-card-right {
-        align-items: flex-start;
-        min-width: unset;
-        width: 100%;
-        flex-direction: row;
-        align-items: center;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: flex-start;
+        min-width: 90px;
+        gap: 0.5rem;
     }
 
-    .app-price-block {
-        text-align: left;
+    .price-label {
+        font-size: 0.6rem;
+    }
+
+    .price-value {
+        font-size: 1.05rem;
+    }
+
+    .price-warning {
+        font-size: 0.65rem;
+    }
+
+    .app-accept-btn {
+        padding: 0.55rem 0.75rem;
+        font-size: 0.75rem;
+        border-radius: 10px;
+        white-space: nowrap;
+    }
+
+    /* Empty state */
+    .apps-modal-empty {
+        padding: 2rem 1rem;
+        border-radius: 14px;
+    }
+
+    .apps-empty-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 1.1rem;
+        border-radius: 12px;
+    }
+
+    .apps-modal-empty h4 {
+        font-size: 0.95rem;
+    }
+
+    .apps-modal-empty p {
+        font-size: 0.8rem;
     }
 }

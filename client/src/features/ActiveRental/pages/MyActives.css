@@ -64,14 +64,38 @@
 
 /* Responsive adjustment */
 @media (max-width: 768px) {
+    .my-actives-container {
+        padding: 1.5rem 1rem;
+        margin-top: 60px;
+    }
+
     .page-intro {
         flex-direction: column;
         align-items: flex-start;
         gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .page-intro h1 {
+        font-size: 1.75rem;
+    }
+
+    .stats-mini-grid {
+        flex-wrap: wrap;
+        width: 100%;
+        gap: 8px;
+    }
+
+    .stat-pill {
+        flex: 1;
+        min-width: 120px;
+        text-align: center;
+        padding: 8px 12px;
     }
     
     .rentals-grid {
         grid-template-columns: 1fr;
+        gap: 1.25rem;
     }
 }
 

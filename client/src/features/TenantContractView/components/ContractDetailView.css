@@ -921,3 +921,106 @@
     color: #000;
     font-weight: 600;
 }
+
+/* Responsive Overrides */
+@media (max-width: 768px) {
+    .detail-panel {
+        max-width: 100% !important;
+        border-radius: 0 !important;
+    }
+    
+    .panel-header {
+        padding: 20px !important;
+    }
+    
+    .panel-content {
+        padding: 20px !important;
+    }
+    
+    .panel-footer-nav {
+        padding: 16px 20px !important;
+        flex-wrap: wrap !important;
+    }
+
+    .btn-nav-primary, .btn-nav-secondary {
+        padding: 10px 16px !important;
+        font-size: 13px !important;
+    }
+    
+    .btn-nav-secondary {
+        flex: 1 1 auto !important;
+    }
+    
+    .btn-nav-primary {
+        flex: 2 1 auto !important;
+        justify-content: center !important;
+    }
+
+    /* Progress tracker and stepper adjustments */
+    .contract-stepper {
+        gap: 6px !important;
+        margin-bottom: 24px !important;
+        flex-wrap: wrap !important;
+    }
+    
+    .step-pill {
+        padding: 4px 10px !important;
+        font-size: 11px !important;
+    }
+    
+    .step-line {
+        width: 15px !important;
+    }
+
+    /* Form & Autofill grids stacking */
+    .input-grid,
+    .autofill-grid,
+    .policy-grid,
+    .mini-grid,
+    .party-details,
+    .signature-display-area {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+    
+    .field.full {
+        grid-column: span 1 !important;
+    }
+    
+    .party-details {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+
+    .signature-display-area {
+        flex-direction: column !important;
+        gap: 20px !important;
+    }
+
+    .sig-box {
+        width: 100% !important;
+    }
+
+    /* Verification summary grid (Step 5) */
+    .homi-auto-box .mini-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+    
+    .homi-auto-box .mini-grid .item.full {
+        grid-column: span 1 !important;
+    }
+
+    .legal-document-paper {
+        padding: 24px !important;
+    }
+
+    /* Action section tweaks */
+    .action-section {
+        padding: 24px 16px !important;
+    }
+
+    .breakdown {
+        padding: 12px !important;
+    }
+}

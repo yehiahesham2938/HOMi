@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
     X, ChevronRight, ChevronLeft, Pencil, ShieldCheck,
-    Landmark, Zap, Ban, User, DollarSign, Cpu, Clock, Globe,
+    Landmark, Zap, User, DollarSign, Cpu, Clock, Globe,
     Fingerprint, CheckCircle2, CreditCard
 } from 'lucide-react';
 import { type LeaseContract } from '../pages/Contract';

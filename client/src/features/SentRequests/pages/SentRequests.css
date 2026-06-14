@@ -413,6 +413,119 @@
 
 @media (max-width: 768px) {
     .sent-requests-content {
-        padding: 1.5rem;
+        margin-left: 0;
+        margin-top: 70px;
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .sent-requests-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .sent-requests-header p {
+        font-size: 0.85rem;
+    }
+
+    .filter-tabs {
+        overflow-x: auto;
+        padding-bottom: 6px;
+        scrollbar-width: none;
+    }
+
+    .filter-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .filter-tab {
+        padding: 6px 16px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .requests-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .request-card {
+        flex-direction: row;
+        height: auto;
+        min-height: 140px;
+        border-radius: 12px;
+    }
+
+    .request-card-image-wrapper {
+        width: 120px;
+        height: auto;
+        flex-shrink: 0;
+    }
+
+    .request-card-image-wrapper img {
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .status-badge {
+        top: 8px;
+        right: auto;
+        left: 8px;
+        padding: 3px 8px;
+        font-size: 0.62rem;
+    }
+
+    .request-card-info {
+        padding: 10px 12px;
+        gap: 0.35rem;
+        justify-content: space-between;
+    }
+
+    .request-card-info h3 {
+        font-size: 0.95rem;
+        line-height: 1.25;
+    }
+
+    .request-address {
+        font-size: 0.75rem;
+        margin: 0;
+    }
+
+    /* Hide specs row to make it compact */
+    .request-specs {
+        display: none !important;
+    }
+
+    .request-meta {
+        padding: 6px 8px;
+        border-radius: 8px;
+        gap: 3px;
+    }
+
+    .meta-row {
+        font-size: 0.7rem;
+    }
+
+    /* Hide Landlord name and Submission date on mobile */
+    .landlord-meta,
+    .submitted-meta {
+        display: none !important;
+    }
+
+    .request-card-footer {
+        padding-top: 6px;
+        margin-top: 0;
+    }
+
+    .request-price {
+        font-size: 1rem;
+    }
+
+    .request-price span {
+        font-size: 0.7rem;
+    }
+
+    .request-security-deposit {
+        font-size: 0.75rem !important;
     }
 }

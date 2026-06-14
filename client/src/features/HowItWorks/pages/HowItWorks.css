@@ -877,6 +877,10 @@
     padding-top: 104px; /* Header height on smaller screens is lower */
   }
 
+  .how-hero-right {
+    display: none !important;
+  }
+
   .how-faq-grid {
     grid-template-columns: 1fr;
   }
@@ -888,6 +892,172 @@
 
   .how-final-actions {
     justify-content: flex-start;
+  }
+}
+
+/* --- Mobile Responsive Overrides --- */
+@media (max-width: 768px) {
+  .how-page-layout .how-container {
+    padding: 0 16px !important;
+  }
+  .how-page-layout .how-hero {
+    padding: 100px 0 40px !important;
+  }
+  .how-page-layout .how-hero-container {
+    padding: 0 16px !important;
+    gap: 2rem !important;
+  }
+  .how-page-layout .how-hero-left h1 {
+    font-size: 2.2rem !important;
+    letter-spacing: -1px !important;
+  }
+  .how-page-layout .how-hero-subtitle {
+    font-size: 0.95rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+  .how-page-layout .step-row {
+    margin-bottom: 3rem !important;
+    padding-bottom: 3rem !important;
+    gap: 1.5rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .how-page-layout .floating-glass-chip {
+    display: none !important;
+  }
+  .how-page-layout .step-row {
+    margin-bottom: 2rem !important;
+    padding-bottom: 2rem !important;
+    gap: 1rem !important;
+  }
+  .how-page-layout .step-photo {
+    border-radius: 14px !important;
+  }
+  .how-page-layout .step-photo img {
+    height: 140px !important;
+  }
+  .how-page-layout .step-photo-caption {
+    padding: 0.8rem 1rem !important;
+  }
+  .how-page-layout .step-photo-caption strong {
+    font-size: 0.8rem !important;
+  }
+  .how-page-layout .step-photo-caption span {
+    font-size: 0.7rem !important;
+  }
+  .how-page-layout .step-content-title {
+    font-size: 1.25rem !important;
+    margin-bottom: 0.6rem !important;
+  }
+  .how-page-layout .step-content-desc {
+    font-size: 0.85rem !important;
+    line-height: 1.5 !important;
+    margin-bottom: 0.8rem !important;
+  }
+  .how-page-layout .step-number-badge {
+    margin-bottom: 0.6rem !important;
+  }
+  .how-page-layout .snb-circle {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.88rem !important;
+  }
+  .how-page-layout .snb-label {
+    font-size: 0.7rem !important;
+  }
+  .how-page-layout .step-bullets {
+    gap: 0.4rem !important;
+    margin-bottom: 1rem !important;
+  }
+  .how-page-layout .step-bullet {
+    font-size: 0.82rem !important;
+    gap: 8px !important;
+  }
+  .how-page-layout .step-bullet-icon {
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 0.6rem !important;
+    margin-top: 2px !important;
+  }
+  .how-page-layout .step-tags {
+    gap: 0.35rem !important;
+  }
+  .how-page-layout .step-tag {
+    font-size: 0.7rem !important;
+    padding: 0.2rem 0.6rem !important;
+  }
+  .how-page-layout .how-benefits-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  .how-page-layout .how-benefit-card {
+    padding: 16px !important;
+    border-radius: 12px !important;
+  }
+  .how-page-layout .how-benefit-card h3 {
+    font-size: 0.98rem !important;
+  }
+  .how-page-layout .how-benefit-card p {
+    font-size: 0.85rem !important;
+  }
+  .how-page-layout .how-faq-item {
+    padding: 14px !important;
+    border-radius: 12px !important;
+  }
+  .how-page-layout .how-faq-question {
+    font-size: 0.92rem !important;
+  }
+  .how-page-layout .how-faq-answer {
+    font-size: 0.85rem !important;
+  }
+  .how-page-layout .how-final-card {
+    padding: 20px !important;
+    border-radius: 18px !important;
+  }
+  .how-page-layout .how-final-left h2 {
+    font-size: 1.4rem !important;
+  }
+  .how-page-layout .how-final-left p {
+    font-size: 0.88rem !important;
+  }
+  .how-page-layout .how-final-actions {
+    width: 100% !important;
+  }
+  .how-page-layout .how-final-actions .how-btn-primary {
+    width: 100% !important;
+    text-align: center !important;
+  }
+  .how-page-layout .how-section-head h2 {
+    font-size: 1.5rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .how-page-layout .how-hero-left h1 {
+    font-size: 1.8rem !important;
+  }
+  .how-page-layout .how-cta-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+  .how-page-layout .how-btn-primary,
+  .how-page-layout .how-btn-secondary {
+    width: 100% !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+  }
+  .how-page-layout .mock-dashboard-card {
+    padding: 16px !important;
+    border-radius: 16px !important;
+  }
+  .how-page-layout .mock-rent-strip {
+    padding: 8px 12px !important;
+  }
+  .how-page-layout .mock-rent-strip .value {
+    font-size: 1.1rem !important;
   }
 }
 

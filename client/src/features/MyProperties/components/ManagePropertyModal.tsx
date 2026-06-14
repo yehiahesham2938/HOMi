@@ -89,18 +89,25 @@ const ManagePropertyModal: React.FC<ManagePropertyModalProps> = ({ property, onC
     securityDeposit: (property.securityDeposit ?? property.security_deposit ?? '').toString().replace(/[^0-9]/g, ''),
     amenities: Array.isArray(property.amenities) ? property.amenities.filter(Boolean) : [],
     houseRules: Array.isArray(property.houseRules) ? property.houseRules.filter(Boolean) : [],
-    maintenance: property.maintenance || {
-        structural: 'Landlord',
-        appliances: 'Tenant',
-        utilities: 'Tenant',
-        plumbing: 'Landlord',
-        electrical: 'Landlord',
-        hvac: 'Landlord',
-        pest: 'Tenant',
-        exterior: 'Landlord',
-        common: 'Landlord',
-        security: 'Landlord'
-    }
+    maintenance: property.maintenance || (
+        (property.maintenanceResponsibilities && property.maintenanceResponsibilities.length > 0)
+          ? property.maintenanceResponsibilities.reduce((acc: Record<string, string>, item: any) => {
+              acc[item.area] = item.responsible_party === 'LANDLORD' ? 'Landlord' : 'Tenant';
+              return acc;
+            }, {})
+          : {
+              structural: 'Landlord',
+              appliances: 'Tenant',
+              utilities: 'Tenant',
+              plumbing: 'Landlord',
+              electrical: 'Landlord',
+              hvac: 'Landlord',
+              pest: 'Tenant',
+              exterior: 'Landlord',
+              common: 'Landlord',
+              security: 'Landlord'
+            }
+    )
   }), [property, initialStatus]);
 
   // 2. Form State
@@ -232,18 +239,9 @@ const ManagePropertyModal: React.FC<ManagePropertyModalProps> = ({ property, onC
     }
   };
 
-  // Helper dictionary for clean display names
-  const maintenanceDisplayNames: Record<string, string> = {
-      structural: t('tenantHomeComponents.leaseResponsibilities'), // Using existing keys where possible or descriptive labels
-      appliances: t('landlordHomeComponents.amenities'), 
-      utilities: t('footer.pricingFees'), 
-      plumbing: t('maintenanceHome.plumbing'), 
-      electrical: t('maintenanceHome.electrical'), 
-      hvac: t('maintenanceHome.hvac'), 
-      pest: t('guestHome.trust'), 
-      exterior: t('landlordHomeComponents.photos'), 
-      common: t('guestHome.matchesMade'), 
-      security: t('guestHome.trust')
+  // Helper to get localized display name for maintenance areas
+  const getMaintenanceDisplayName = (key: string) => {
+      return t(`myProperties.maintenanceTypes.${key}`, { defaultValue: key });
   };
 
   return (
@@ -383,6 +381,9 @@ const ManagePropertyModal: React.FC<ManagePropertyModalProps> = ({ property, onC
                       <input type="number" value={formData.sqft} onChange={(e) => setFormData({...formData, sqft: Number(e.target.value)})} disabled={isLocked} />
                    </div>
                 </div>
+                <button type="button" className="delete-property-btn mobile-only">
+                  <FaTrashAlt /> {t('myProperties.deleteListing')}
+                </button>
               </div>
             )}
 
@@ -515,7 +516,7 @@ const ManagePropertyModal: React.FC<ManagePropertyModalProps> = ({ property, onC
                         <div className="responsibility-box scrollable">
                             {Object.entries(formData.maintenance).map(([key, value]) => (
                                 <div className="resp-row" key={key}>
-                                    <span>{maintenanceDisplayNames[key] || key}</span>
+                                    <span>{getMaintenanceDisplayName(key)}</span>
                                     <select 
                                         className="m-select compact"
                                         style={{ width: '120px', padding: '6px', fontSize: '0.85rem' }}

@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import Header from '../../../components/global/header';
+import Sidebar from '../../../components/global/Landlord/sidebar';
+import Footer from '../../../components/global/footer';
 import RequestCard from '../components/RequestCard';
-import StatsOverview from '../components/StatsOverview';
 import FilterTabs from '../components/FilterTabs';
 import { FaInbox } from 'react-icons/fa'; // Added for the empty state
 import rentalRequestService, { type LandlordRentalRequest } from '../../../services/rental-request.service';
@@ -93,14 +95,16 @@ const RentalRequests: React.FC = () => {
     }, [activeTab, mappedRequests]);
 
     return (
-        <>
-            <main className="rental-requests-page">
+        <div className="layout-wrapper" dir="ltr">
+            <Sidebar />
+            <div className="main-content">
+                <Header />
+                <main className="rental-requests-page">
                     <header className="page-intro">
                         <div className="intro-text">
                             <h1>{t('rentalRequests.requests')}</h1>
                             <p>{t('rentalRequests.managingRequests', { count: mappedRequests.length })}</p>
                         </div>
-                        <StatsOverview totalApplicants={mappedRequests.length} />
                     </header>
 
                     <FilterTabs activeTab={activeTab} setActiveTab={setActiveTab} counts={tabCounts} />
@@ -124,8 +128,10 @@ const RentalRequests: React.FC = () => {
                         </div>
                     )}
 
-            </main>
-        </>
+                </main>
+                <Footer />
+            </div>
+        </div>
     );
 };
 

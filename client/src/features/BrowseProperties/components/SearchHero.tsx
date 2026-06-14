@@ -110,6 +110,7 @@ interface SearchHeroProps {
 
 const SearchHero: React.FC<SearchHeroProps> = ({ onSearch }) => {
     const [showAdvanced, setShowAdvanced] = useState(false);
+    const [isMobileExpanded, setIsMobileExpanded] = useState(false);
     const [filters, setFilters] = useState<FilterParams>({
         type: '',
         furnishing: '',
@@ -257,145 +258,156 @@ const SearchHero: React.FC<SearchHeroProps> = ({ onSearch }) => {
 
     return (
         <div className="search-sidebar-container">
-            <div className="map-top-section">
-                <div className="leaflet-wrapper" style={{ height: '280px', width: '100%', position: 'relative', overflow: 'hidden' }}>
-                    <MapContainer
-                        center={position ? [position.lat, position.lng] : [30.0444, 31.2357]}
-                        zoom={position ? 12 : 6}
-                        maxBounds={EGYPT_BOUNDS}
-                        style={{ height: '100%', width: '100%' }}
-                    >
-                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                        {position && <MapCenterUpdater center={[position.lat, position.lng]} />}
-                        <SearchField onLocationSelect={(lat, lng) => setPosition({ lat, lng })} />
-                        {position ? (
-                            <MapEventsHandler
-                                position={position}
-                                onLocationSelect={(lat: number, lng: number) => setPosition({ lat, lng })}
-                                radiusKm={radiusKm}
-                            />
-                        ) : null}
-                    </MapContainer>
-                </div>
-            </div>
+            <button
+                type="button"
+                className="mobile-filter-toggle-btn"
+                onClick={() => setIsMobileExpanded(!isMobileExpanded)}
+            >
+                <FaSearch /> {isMobileExpanded ? 'Hide Search & Filters' : 'Show Search & Filters'}
+            </button>
 
-            <div className="search-form-section">
-                {/* Location Search Toolbar */}
-                <div className="adv-map-section">
-                    <label><FaMapMarkedAlt /> Where do you want to live?</label>
-                    <div className="map-search-toolbar">
-                        <button
-                            type="button"
-                            className="location-action-btn"
-                            onClick={handleUseCurrentLocation}
-                            disabled={isLocating}
+            <div className={`search-hero-content-body ${isMobileExpanded ? 'show' : ''}`}>
+                <div className="map-top-section">
+                    <div className="leaflet-wrapper" style={{ height: '280px', width: '100%', position: 'relative', overflow: 'hidden' }}>
+                        <MapContainer
+                            key={isMobileExpanded ? 'expanded' : 'collapsed'}
+                            center={position ? [position.lat, position.lng] : [30.0444, 31.2357]}
+                            zoom={position ? 12 : 6}
+                            maxBounds={EGYPT_BOUNDS}
+                            style={{ height: '100%', width: '100%' }}
                         >
-                            <FaCrosshairs /> {isLocating ? 'Locating...' : 'Use Current Location'}
-                        </button>
-                        <div className="city-search-box">
-                            <input
-                                type="text"
-                                placeholder="Type city name (e.g., Cairo)"
-                                value={cityQuery}
-                                onChange={(e) => setCityQuery(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        void handleCitySearch();
-                                    }
-                                }}
-                            />
+                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                            {position && <MapCenterUpdater center={[position.lat, position.lng]} />}
+                            <SearchField onLocationSelect={(lat, lng) => setPosition({ lat, lng })} />
+                            {position ? (
+                                <MapEventsHandler
+                                    position={position}
+                                    onLocationSelect={(lat: number, lng: number) => setPosition({ lat, lng })}
+                                    radiusKm={radiusKm}
+                                />
+                            ) : null}
+                        </MapContainer>
+                    </div>
+                </div>
+
+                <div className="search-form-section">
+                    {/* Location Search Toolbar */}
+                    <div className="adv-map-section">
+                        <label><FaMapMarkedAlt /> Where do you want to live?</label>
+                        <div className="map-search-toolbar">
                             <button
                                 type="button"
-                                className="city-search-btn"
-                                onClick={() => void handleCitySearch()}
-                                disabled={isCitySearching}
+                                className="location-action-btn"
+                                onClick={handleUseCurrentLocation}
+                                disabled={isLocating}
                             >
-                                {isCitySearching ? 'Searching...' : 'Find'}
+                                <FaCrosshairs /> {isLocating ? 'Locating...' : 'Use Current Location'}
                             </button>
+                            <div className="city-search-box">
+                                <input
+                                    type="text"
+                                    placeholder="Type city name (e.g., Cairo)"
+                                    value={cityQuery}
+                                    onChange={(e) => setCityQuery(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            void handleCitySearch();
+                                        }
+                                    }}
+                                />
+                                <button
+                                    type="button"
+                                    className="city-search-btn"
+                                    onClick={() => void handleCitySearch()}
+                                    disabled={isCitySearching}
+                                >
+                                    {isCitySearching ? 'Searching...' : 'Find'}
+                                </button>
+                            </div>
+                        </div>
+                        {locationError && <p className="map-location-error">{locationError}</p>}
+                        <div className="map-radius-control">
+                            <div className="radius-label">
+                                <span>Search Radius:</span>
+                                <strong>{radiusKm} km</strong>
+                            </div>
+                            <input
+                                type="range"
+                                min="1" max="50" step="1"
+                                value={radiusKm}
+                                onChange={(e) => setRadiusKm(Number(e.target.value))}
+                            />
+                        </div>
+                        {position && (
+                            <button className="clear-location-btn" onClick={() => { setPosition(null); setLocationError(null); }}>
+                                Clear Pin Location
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="filter-divider" />
+
+                    {/* Filters Stack */}
+                    <div className="filters-stack">
+                        <div className="price-inputs-row">
+                            <div className="filter-group flex-1">
+                                <label className="filter-label"><FaHome /> Property Type</label>
+                                <select name="type" value={filters.type} onChange={handleChange}>
+                                    <option value="">Any Type</option>
+                                    <option value="APARTMENT">Apartment</option>
+                                    <option value="VILLA">Villa</option>
+                                    <option value="STUDIO">Studio</option>
+                                    <option value="CHALET">Chalet</option>
+                                </select>
+                            </div>
+                            <div className="filter-group flex-1">
+                                <label className="filter-label"><FaCouch /> Furnishing</label>
+                                <select name="furnishing" value={filters.furnishing} onChange={handleChange}>
+                                    <option value="">Any Furnishing</option>
+                                    <option value="Fully">Fully Furnished</option>
+                                    <option value="Semi">Semi Furnished</option>
+                                    <option value="Unfurnished">Unfurnished</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="price-inputs-row">
+                            <div className="filter-group flex-1">
+                                <label className="filter-label"><FaDollarSign /> Min Price ($)</label>
+                                <input type="number" name="minPrice" placeholder="No min" value={filters.minPrice} onChange={handleChange} min={0} />
+                            </div>
+                            <div className="filter-group flex-1">
+                                <label className="filter-label"><FaDollarSign /> Max Price ($)</label>
+                                <input type="number" name="maxPrice" placeholder="No max" value={filters.maxPrice} onChange={handleChange} min={0} />
+                            </div>
+                        </div>
+
+                        <div className="price-inputs-row">
+                            <div className="filter-group flex-1">
+                                <label className="filter-label"><FaUserFriends /> Target Tenant</label>
+                                <select name="target_tenant" value={filters.target_tenant} onChange={handleChange}>
+                                    <option value="">Any Tenant Type</option>
+                                    <option value="STUDENTS">Students</option>
+                                    <option value="FAMILIES">Families</option>
+                                    <option value="TOURISTS">Tourists</option>
+                                </select>
+                            </div>
+                            <div className="filter-group flex-1">
+                                <label className="filter-label"><FaCalendarAlt /> Availability Month</label>
+                                <input type="month" name="availabilityDate" value={filters.availabilityDate} onChange={handleChange} />
+                            </div>
                         </div>
                     </div>
-                    {locationError && <p className="map-location-error">{locationError}</p>}
-                    <div className="map-radius-control">
-                        <div className="radius-label">
-                            <span>Search Radius:</span>
-                            <strong>{radiusKm} km</strong>
-                        </div>
-                        <input
-                            type="range"
-                            min="1" max="50" step="1"
-                            value={radiusKm}
-                            onChange={(e) => setRadiusKm(Number(e.target.value))}
-                        />
-                    </div>
-                    {position && (
-                        <button className="clear-location-btn" onClick={() => { setPosition(null); setLocationError(null); }}>
-                            Clear Pin Location
+
+                    <div className="search-buttons-group">
+                        <button type="button" className="sidebar-search-btn" onClick={handleSearchClick}>
+                            <FaSearch /> Search Properties
                         </button>
-                    )}
-                </div>
-
-                <div className="filter-divider" />
-
-                {/* Filters Stack */}
-                <div className="filters-stack">
-                    <div className="price-inputs-row">
-                        <div className="filter-group flex-1">
-                            <label className="filter-label"><FaHome /> Property Type</label>
-                            <select name="type" value={filters.type} onChange={handleChange}>
-                                <option value="">Any Type</option>
-                                <option value="APARTMENT">Apartment</option>
-                                <option value="VILLA">Villa</option>
-                                <option value="STUDIO">Studio</option>
-                                <option value="CHALET">Chalet</option>
-                            </select>
-                        </div>
-                        <div className="filter-group flex-1">
-                            <label className="filter-label"><FaCouch /> Furnishing</label>
-                            <select name="furnishing" value={filters.furnishing} onChange={handleChange}>
-                                <option value="">Any Furnishing</option>
-                                <option value="Fully">Fully Furnished</option>
-                                <option value="Semi">Semi Furnished</option>
-                                <option value="Unfurnished">Unfurnished</option>
-                            </select>
-                        </div>
+                        <button type="button" className="sidebar-clear-btn" onClick={handleClearClick}>
+                            Clear Search
+                        </button>
                     </div>
-
-                    <div className="price-inputs-row">
-                        <div className="filter-group flex-1">
-                            <label className="filter-label"><FaDollarSign /> Min Price ($)</label>
-                            <input type="number" name="minPrice" placeholder="No min" value={filters.minPrice} onChange={handleChange} min={0} />
-                        </div>
-                        <div className="filter-group flex-1">
-                            <label className="filter-label"><FaDollarSign /> Max Price ($)</label>
-                            <input type="number" name="maxPrice" placeholder="No max" value={filters.maxPrice} onChange={handleChange} min={0} />
-                        </div>
-                    </div>
-
-                    <div className="price-inputs-row">
-                        <div className="filter-group flex-1">
-                            <label className="filter-label"><FaUserFriends /> Target Tenant</label>
-                            <select name="target_tenant" value={filters.target_tenant} onChange={handleChange}>
-                                <option value="">Any Tenant Type</option>
-                                <option value="STUDENTS">Students</option>
-                                <option value="FAMILIES">Families</option>
-                                <option value="TOURISTS">Tourists</option>
-                            </select>
-                        </div>
-                        <div className="filter-group flex-1">
-                            <label className="filter-label"><FaCalendarAlt /> Availability Month</label>
-                            <input type="month" name="availabilityDate" value={filters.availabilityDate} onChange={handleChange} />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="search-buttons-group">
-                    <button type="button" className="sidebar-search-btn" onClick={handleSearchClick}>
-                        <FaSearch /> Search Properties
-                    </button>
-                    <button type="button" className="sidebar-clear-btn" onClick={handleClearClick}>
-                        Clear Search
-                    </button>
                 </div>
             </div>
         </div>

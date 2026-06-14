@@ -8,8 +8,8 @@
   --saas-text-muted: #666666;
   --saas-primary: #000000;
   --saas-accent-blue: #0070f3;
-  --saas-shadow-sm: 0 2px 4px rgba(0,0,0,0.02);
-  --saas-shadow-md: 0 12px 24px -10px rgba(0,0,0,0.08);
+  --saas-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.02);
+  --saas-shadow-md: 0 12px 24px -10px rgba(0, 0, 0, 0.08);
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
@@ -102,10 +102,22 @@
 }
 
 /* --- Status Colors (Green for Active) --- */
-.card-status-bar[data-status='active'] { background: #10b981; } /* Emerald Green */
-.card-status-bar[data-status='pending_landlord'] { background: var(--saas-accent-blue); }
-.card-status-bar[data-status='pending_tenant'] { background: #f59e0b; }
+.card-status-bar[data-status='active'] {
+  background: #10b981;
+}
+
+/* Emerald Green */
+.card-status-bar[data-status='pending_landlord'] {
+  background: var(--saas-accent-blue);
+}
+
+.card-status-bar[data-status='pending_tenant'] {
+  background: #f59e0b;
+}
+
 .card-status-bar[data-status='expired'] { background: #94a3b8; }
+.card-status-bar[data-status='terminated'] { background: #ef4444; }
+
 
 .card-body {
   padding: 32px;
@@ -139,10 +151,25 @@
 }
 
 /* --- Tag Colors (Green for Active) --- */
-.status-tag.active { background: #e6fcf5; color: #0ca678; } /* Mint background, dark green text */
-.status-tag.pending_landlord { background: #e7f5ff; color: #1c7ed6; }
-.status-tag.pending_tenant { background: #fff9db; color: #f08c00; }
+.status-tag.active {
+  background: #e6fcf5;
+  color: #0ca678;
+}
+
+/* Mint background, dark green text */
+.status-tag.pending_landlord {
+  background: #e7f5ff;
+  color: #1c7ed6;
+}
+
+.status-tag.pending_tenant {
+  background: #fff9db;
+  color: #f08c00;
+}
+
 .status-tag.expired { background: #f1f5f9; color: #475569; }
+.status-tag.terminated { background: #fef2f2; color: #dc2626; }
+
 
 .contract-card h3 {
   font-size: 22px;
@@ -214,7 +241,7 @@
   background: #000;
   color: #fff;
   border-color: #000;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary {

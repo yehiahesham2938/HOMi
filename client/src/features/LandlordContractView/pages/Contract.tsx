@@ -1,10 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Header from '../../../components/global/header';
+import Sidebar from '../../../components/global/Landlord/sidebar';
+import Footer from '../../../components/global/footer';
 import {
-    Plus, Building2, Clock, ChevronRight, FileText
+    Building2, Clock, ChevronRight, FileText
 } from 'lucide-react';
 import ContractDetailView from '../components/ContractDetailView';
 import ActiveLeaseContract from '../components/ActiveLeaseContract';
+import TerminatedLeaseContract from '../components/TerminatedLeaseContract';
+import ExpiredLeaseContract from '../components/ExpiredLeaseContract';
 import contractService, { type LandlordContract as LandlordContractApi } from '../../../services/contract.service';
 import { normalizeSignatureUrl } from '../../../shared/utils/signatureUrl';
 import './Contract.css';
@@ -17,7 +22,7 @@ export interface LeaseContract {
     landlord: string;
     amount: number;
     deposit: number;
-    status: 'PENDING_LANDLORD' | 'PENDING_TENANT' | 'ACTIVE' | 'EXPIRED';
+    status: 'PENDING_LANDLORD' | 'PENDING_TENANT' | 'ACTIVE' | 'EXPIRED' | 'TERMINATED';
     startDate: string;
     duration: string;
     rentDueDate: string;
@@ -45,6 +50,15 @@ export interface LeaseContract {
     rightToEnter?: string;
     noticePeriod?: string;
     leaseId?: string;
+    tenantEmergencyContactName?: string;
+    tenantEmergencyPhone?: string;
+    terminationRequests?: Array<{
+        id: string;
+        status: string;
+        reason: string;
+        createdAt: string;
+        requesterId: string;
+    }>;
 }
 
 import { useTranslation } from 'react-i18next';
@@ -74,9 +88,8 @@ const LandlordContract: React.FC = () => {
             landlord: `${contract.landlord?.firstName || ''} ${contract.landlord?.lastName || ''}`.trim() || 'Landlord',
             amount: contract.rentAmount || 0,
             deposit: contract.securityDeposit || 0,
-            status: (contract.status === 'TERMINATED' ? 'EXPIRED' :
-                contract.status === 'PENDING_PAYMENT' ? 'PENDING_TENANT' :
-                    contract.status) as LeaseContract['status'],
+            status: (contract.status === 'PENDING_PAYMENT' ? 'PENDING_TENANT' :
+                contract.status) as LeaseContract['status'],
             startDate: formatDate(contract.moveInDate),
             duration: `${contract.leaseDurationMonths} Months`,
             rentDueDate: contract.rentDueDate || '1ST_OF_MONTH',
@@ -101,13 +114,32 @@ const LandlordContract: React.FC = () => {
             rightToEnter: 'With 24h Prior Notice',
             noticePeriod: '30 Days',
             leaseId: contract.leaseId || undefined,
+            tenantEmergencyContactName: contract.tenantEmergencyContactName || '',
+            tenantEmergencyPhone: contract.tenantEmergencyPhone || '',
+            terminationRequests: contract.terminationRequests || [],
         });
     };
 
     const fetchContracts = useCallback(async () => {
         try {
-            const response = await contractService.getLandlordContracts({ page: 1, limit: 50 });
-            setContracts((response.data || []).map(mapContract));
+            const [response, clock] = await Promise.all([
+                contractService.getLandlordContracts({ page: 1, limit: 50 }),
+                contractService.getTestingClock()
+            ]);
+            const referenceDate = clock?.now ? new Date(clock.now) : new Date();
+            const mapped = (response.data || [])
+                .map(mapContract)
+                .filter((c) => {
+                    const isPending = c.status === 'PENDING_LANDLORD' || c.status === 'PENDING_TENANT';
+                    if (isPending && c.createdAt) {
+                        const createdDate = new Date(c.createdAt);
+                        const diffTime = referenceDate.getTime() - createdDate.getTime();
+                        const diffDays = diffTime / (1000 * 60 * 60 * 24);
+                        if (diffDays > 10) return false;
+                    }
+                    return true;
+                });
+            setContracts(mapped);
         } catch {
             setContracts([]);
         }
@@ -117,80 +149,94 @@ const LandlordContract: React.FC = () => {
         const timer = window.setTimeout(() => {
             void fetchContracts();
         }, 0);
-        return () => window.clearTimeout(timer);
+        const handler = () => { void fetchContracts(); };
+        globalThis.addEventListener('homi:testing-clock-changed', handler);
+        return () => {
+            window.clearTimeout(timer);
+            globalThis.removeEventListener('homi:testing-clock-changed', handler);
+        };
     }, [fetchContracts]);
 
     const hasContracts = contracts.length > 0;
 
     const getStatusInfo = (status: LeaseContract['status']) => {
-        const map = {
+        const map: Record<LeaseContract['status'], { label: string; color: string }> = {
             PENDING_LANDLORD: { label: t('landlordContract.pendingSignature'), color: 'blue' },
             PENDING_TENANT: { label: t('landlordContract.pendingTenant'), color: 'yellow' },
             ACTIVE: { label: t('landlordContract.activeLease'), color: 'green' },
             EXPIRED: { label: t('landlordContract.expired'), color: 'gray' },
+            TERMINATED: { label: 'Terminated', color: 'red' },
         };
         return map[status] || { label: 'Unknown', color: 'gray' };
     };
 
     return (
-        <main className="landlord-contracts-page">
-            <div className="landlord-hub-header">
-                <div>
-                    <h1>{t('landlordContract.pageTitle')}</h1>
-                    <p>{t('landlordContract.pageSubtitle')}</p>
-                </div>
+        <div className="dashboard-shell">
+            <Sidebar />
+            <div className="landlord-contract-content">
+                <Header />
+                <main className="landlord-contract-hub">
+                    <div className="landlord-hub-header">
+                        <div>
+                            <h1>{t('landlordContract.pageTitle')}</h1>
+                            <p>{t('landlordContract.pageSubtitle')}</p>
+                        </div>
+
+                    </div>
+
+                    {hasContracts ? (
+                        <div className="contract-list-grid">
+                            {contracts.map(contract => (
+                                <div key={contract.id} className="contract-card">
+                                    <div className="card-status-bar" data-status={contract.status.toLowerCase()}></div>
+                                    <div className="card-body">
+                                        <div className="card-top">
+                                            <span className="contract-id">{contract.id}</span>
+                                            <span className={`status-tag ${contract.status.toLowerCase()}`}>
+                                                {getStatusInfo(contract.status).label}
+                                            </span>
+                                        </div>
+                                        <h3>{contract.property}</h3>
+                                        <div className="card-meta">
+                                            <div className="meta-item"><Building2 size={14} /> {contract.duration}</div>
+                                            <div className="meta-item"><Clock size={14} /> {t('landlordContract.starts')} {contract.startDate}</div>
+                                        </div>
+                                    </div>
+                                    <div className="card-footer">
+                                        <div className="price-info">
+                                            <span className="label">{t('landlordContract.monthlyRevenue')}</span>
+                                            <span className="value">${contract.amount}</span>
+                                        </div>
+                                        <button className="btn-view-contract" onClick={() => setSelectedContract(contract)}>
+                                            {contract.status === 'PENDING_LANDLORD' ? t('landlordContract.manage') : t('landlordContract.view')} <ChevronRight size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="empty-state-container" style={{
+                            textAlign: 'center', padding: '80px 20px',
+                            backgroundColor: 'var(--saas-card-bg)',
+                            borderRadius: '14px', border: '1px dashed var(--saas-border-hover)'
+                        }}>
+                            <FileText size={48} color="var(--saas-text-muted)" style={{ margin: '0 auto 16px' }} />
+                            <h2 style={{ fontSize: '24px', marginBottom: '8px', color: 'var(--saas-text-main)' }}>{t('landlordContract.noActiveAgreements')}</h2>
+                            <p style={{ color: 'var(--saas-text-muted)', marginBottom: '24px' }}>{t('landlordContract.noContractsText')}</p>
+                            <button
+                                className="btn-primary"
+                                style={{ margin: '0 auto' }}
+                                onClick={() => navigate('/rental-requests')}
+                            >
+                                {t('landlordContract.viewRentalRequests')}
+                            </button>
+                        </div>
+                    )}
+                </main>
+                <Footer />
             </div>
 
-            {hasContracts ? (
-                <div className="contract-list-grid">
-                    {contracts.map(contract => (
-                        <div key={contract.id} className="contract-card">
-                            <div className="card-status-bar" data-status={contract.status.toLowerCase()}></div>
-                            <div className="card-body">
-                                <div className="card-top">
-                                    <span className="contract-id">{contract.id}</span>
-                                    <span className={`status-tag ${contract.status.toLowerCase()}`}>
-                                        {getStatusInfo(contract.status).label}
-                                    </span>
-                                </div>
-                                <h3>{contract.property}</h3>
-                                <div className="card-meta">
-                                    <div className="meta-item"><Building2 size={14} /> {contract.duration}</div>
-                                    <div className="meta-item"><Clock size={14} /> {t('landlordContract.starts')} {contract.startDate}</div>
-                                </div>
-                            </div>
-                            <div className="card-footer">
-                                <div className="price-info">
-                                    <span className="label">{t('landlordContract.monthlyRevenue')}</span>
-                                    <span className="value">${contract.amount}</span>
-                                </div>
-                                <button className="btn-view-contract" onClick={() => setSelectedContract(contract)}>
-                                    {contract.status === 'PENDING_LANDLORD' ? t('landlordContract.manage') : t('landlordContract.view')} <ChevronRight size={16} />
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            ) : (
-                <div className="empty-state-container" style={{
-                    textAlign: 'center', padding: '80px 20px',
-                    backgroundColor: 'var(--saas-card-bg)',
-                    borderRadius: '14px', border: '1px dashed var(--saas-border-hover)'
-                }}>
-                    <FileText size={48} color="var(--saas-text-muted)" style={{ margin: '0 auto 16px' }} />
-                    <h2 style={{ fontSize: '24px', marginBottom: '8px', color: 'var(--saas-text-main)' }}>{t('landlordContract.noActiveAgreements')}</h2>
-                    <p style={{ color: 'var(--saas-text-muted)', marginBottom: '24px' }}>{t('landlordContract.noContractsText')}</p>
-                    <button
-                        className="btn-primary"
-                        style={{ margin: '0 auto' }}
-                        onClick={() => navigate('/rental-requests')}
-                    >
-                        {t('landlordContract.viewRentalRequests')}
-                    </button>
-                </div>
-            )}
-
-            {selectedContract && selectedContract.status !== 'ACTIVE' && (
+            {selectedContract && (selectedContract.status === 'PENDING_LANDLORD' || selectedContract.status === 'PENDING_TENANT') && (
                 <ContractDetailView
                     contract={selectedContract}
                     isReadOnly={selectedContract.status !== 'PENDING_LANDLORD'}
@@ -205,7 +251,21 @@ const LandlordContract: React.FC = () => {
                     onClose={() => setSelectedContract(null)}
                 />
             )}
-        </main>
+
+            {selectedContract?.status === 'TERMINATED' && (
+                <TerminatedLeaseContract
+                    contract={selectedContract}
+                    onClose={() => setSelectedContract(null)}
+                />
+            )}
+
+            {selectedContract?.status === 'EXPIRED' && (
+                <ExpiredLeaseContract
+                    contract={selectedContract}
+                    onClose={() => setSelectedContract(null)}
+                />
+            )}
+        </div>
     );
 };
 

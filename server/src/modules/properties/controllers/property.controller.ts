@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { propertyService, PropertyError } from '../services/property.service.js';
 import { cacheService } from '../../../shared/services/cache.service.js';
+import { PropertyImage } from '../models/PropertyImage.js';
 import type {
     CreatePropertyRequest,
     UpdatePropertyRequest,
@@ -252,6 +253,51 @@ class PropertyController {
                 message: `Visit request ${status.toLowerCase()} successfully`,
                 data: booking,
             });
+        } catch (error) {
+            next(error);
+        }
+    }
+    /**
+     * GET /api/properties/images/:imageId
+     * Serve a raw base64 property image stored in the DB.
+     * The SQL CASE expression in getAllProperties / getPropertyById rewrites
+     * data:image… URLs to this path so the browser can fetch them normally.
+     */
+    async getImage(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const imageId = req.params['imageId'] as string;
+
+            // Fetch the raw column value directly — skip the CASE transform
+            const record = await PropertyImage.findByPk(imageId, {
+                attributes: ['id', 'image_url'],
+            });
+
+            if (!record) {
+                res.status(404).json({ success: false, message: 'Image not found' });
+                return;
+            }
+
+            const rawUrl: string = record.image_url;
+
+            // If it's already an external HTTP URL just redirect
+            if (/^https?:\/\//i.test(rawUrl)) {
+                res.redirect(rawUrl);
+                return;
+            }
+
+            // Parse data URI  →  data:<mime>;base64,<data>
+            const match = rawUrl.match(/^data:([^;]+);base64,(.+)$/s);
+            if (!match) {
+                res.status(422).json({ success: false, message: 'Unsupported image format' });
+                return;
+            }
+
+            const mimeType = match[1] as string;
+            const imageBuffer = Buffer.from(match[2] as string, 'base64');
+
+            res.set('Content-Type', mimeType);
+            res.set('Cache-Control', 'public, max-age=86400'); // cache 1 day
+            res.send(imageBuffer);
         } catch (error) {
             next(error);
         }

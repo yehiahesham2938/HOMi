@@ -1,11 +1,15 @@
 export const MAINTENANCE_CATEGORIES = [
-    'Plumbing',
-    'Electrical',
-    'Painting',
-    'AC Service',
-    'Gardening',
-    'Flooring',
-    'Other',
+    'structural',
+    'appliances',
+    'utilities',
+    'plumbing',
+    'electrical',
+    'hvac',
+    'pest',
+    'exterior',
+    'common',
+    'security',
+    'other',
 ] as const;
 
 export type MaintenanceCategory = (typeof MAINTENANCE_CATEGORIES)[number];

@@ -287,3 +287,35 @@
 [dir="rtl"] .lang-toggle {
   font-family: inherit; /* Ensure Arabic font is used if set globally */
 }
+
+/* ═══════════════════════════════════
+   NEW RESPONSIVE OVERRIDES
+   ═══════════════════════════════════ */
+
+@media (max-width: 576px) {
+  .header-container {
+    padding: 0 12px !important;
+  }
+
+  .lang-toggle {
+    padding: 4px 8px !important;
+    min-width: 45px !important;
+    font-size: 0.78rem !important;
+    height: 32px !important;
+  }
+
+  .header-notif-btn {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .mobile-menu-toggle {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 1.25rem !important;
+  }
+
+  .right-spacer {
+    gap: 6px !important;
+  }
+}

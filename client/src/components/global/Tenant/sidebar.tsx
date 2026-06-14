@@ -60,7 +60,7 @@ const Sidebar = () => {
   const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName || 'User')}&background=6366f1&color=fff&size=80`;
 
   return (
-    <aside className="sidebar">
+    <aside className="sidebar tenant-sidebar">
       {/* 1. Brand Section */}
       <div className="sidebar-brand">
         <img src="/logo.png" alt="HOMi Logo" className="logo-image" />

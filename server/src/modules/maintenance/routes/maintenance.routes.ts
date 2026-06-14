@@ -53,6 +53,11 @@ router.get(
     restrictTo(UserRole.LANDLORD),
     maintenanceController.listLandlordRequests.bind(maintenanceController)
 );
+router.post(
+    '/landlord/applications/:applicationId/accept',
+    restrictTo(UserRole.LANDLORD),
+    maintenanceController.acceptApplication.bind(maintenanceController)
+);
 
 // ─── Provider ─────────────────────────────────────────────────────────────
 router.get(
@@ -105,7 +110,7 @@ router.post(
 router.get('/requests/:id', maintenanceController.getOne.bind(maintenanceController));
 router.get(
     '/requests/:id/applications',
-    restrictTo(UserRole.TENANT),
+    restrictTo(UserRole.TENANT, UserRole.LANDLORD),
     maintenanceController.listApplicationsForRequest.bind(maintenanceController)
 );
 router.get('/requests/:id/location', maintenanceController.getCurrentLocation.bind(maintenanceController));

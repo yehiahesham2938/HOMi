@@ -31,6 +31,10 @@ interface RentalProps {
 
 const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
     const { t } = useTranslation();
+    const landlordEmail = contract?.landlord?.email;
+    const tenantEmail = contract?.tenant?.email;
+    const landlordNameAr = landlordEmail ? (localStorage.getItem('arabicName_email_' + landlordEmail) || undefined) : undefined;
+    const tenantNameAr = tenantEmail ? (localStorage.getItem('arabicName_email_' + tenantEmail) || undefined) : undefined;
     const navigate = useNavigate();
     const [showRules, setShowRules] = useState(false);
     const modalRef = useRef<HTMLDivElement>(null);
@@ -61,9 +65,11 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
             propertyAddress: rental.address,
             propertyType: rental.propertyType || 'Apartment',
             landlord: rental.landlord,
+            landlordNameAr,
             landlordNationalId: contract.landlordNationalId,
             landlordAddress: contract.landlordAddress || 'Cairo, Egypt',
             tenant: `${contract.tenant?.firstName || ''} ${contract.tenant?.lastName || ''}`.trim() || 'Tenant',
+            tenantNameAr,
             tenantNationalId: contract.tenantNationalId,
             tenantAddress: contract.tenantAddress || rental.address,
             startDate: rental.leaseStart,
@@ -309,13 +315,13 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
                                             <div className="pdf-data-grid">
                                                 <div className="pdf-party-card">
                                                     <span className="pdf-data-label">{previewLang === 'en' ? 'Lessor (Landlord)' : 'المؤجر (الطرف الأول)'}</span>
-                                                    <span className="pdf-data-value" style={{ fontWeight: 'bold' }}>{rental.landlord}</span><br/>
+                                                    <span className="pdf-data-value" style={{ fontWeight: 'bold' }}>{previewLang === 'ar' ? (landlordNameAr || rental.landlord) : rental.landlord}</span><br/>
                                                     <span className="pdf-data-label" style={{ marginTop: '8px' }}>{previewLang === 'en' ? 'National ID' : 'الرقم القومي'}:</span> <span className="pdf-data-value">{toArNum(contract?.landlordNationalId)}</span><br/>
                                                     <span className="pdf-data-label">{previewLang === 'en' ? 'Primary Address' : 'العنوان الحالي'}:</span> <span className="pdf-data-value">{contract?.landlordAddress || 'Cairo, Egypt'}</span>
                                                 </div>
                                                 <div className="pdf-party-card">
                                                     <span className="pdf-data-label">{previewLang === 'en' ? 'Lessee (Tenant)' : 'المستأجر (الطرف الثاني)'}</span>
-                                                    <span className="pdf-data-value" style={{ fontWeight: 'bold' }}>{`${contract?.tenant?.firstName || ''} ${contract?.tenant?.lastName || ''}`.trim() || 'Tenant'}</span><br/>
+                                                    <span className="pdf-data-value" style={{ fontWeight: 'bold' }}>{previewLang === 'ar' ? (tenantNameAr || `${contract?.tenant?.firstName || ''} ${contract?.tenant?.lastName || ''}`.trim()) : `${contract?.tenant?.firstName || ''} ${contract?.tenant?.lastName || ''}`.trim() || 'Tenant'}</span><br/>
                                                     <span className="pdf-data-label" style={{ marginTop: '8px' }}>{previewLang === 'en' ? 'National ID' : 'الرقم القومي'}:</span> <span className="pdf-data-value">{toArNum(contract?.tenantNationalId)}</span><br/>
                                                     <span className="pdf-data-label">{previewLang === 'en' ? 'Primary Address' : 'العنوان الحالي'}:</span> <span className="pdf-data-value">{contract?.tenantAddress || rental.address}</span>
                                                 </div>

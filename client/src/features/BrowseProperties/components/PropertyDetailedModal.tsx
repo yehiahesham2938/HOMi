@@ -1,5 +1,6 @@
 // client/src/features/BrowseProperties/components/PropertyDetailModal.tsx
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 
@@ -144,6 +145,7 @@ const PropertyDetailModal = ({
     isSaved = false,
     onToggleSave,
 }: PropertyDetailModalProps) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const isUserGuest = isGuest || !authService.isAuthenticated();
     const [showApplication, setShowApplication] = useState(false);
@@ -599,7 +601,7 @@ const PropertyDetailModal = ({
                                         maintenanceResponsibilities.map(
                                             (item: { area: string; responsible_party?: string }, index: number) => (
                                                 <div className="resp-row" key={`${item.area}-${index}`}>
-                                                    <span>{item.area}</span>
+                                                    <span>{t('myProperties.maintenanceTypes.' + item.area, item.area)}</span>
                                                     <span
                                                         className={`owner-badge ${(item.responsible_party || '').toLowerCase()}`}
                                                     >

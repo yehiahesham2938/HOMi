@@ -226,7 +226,8 @@
 
 .filter-group select,
 .filter-group input[type="number"],
-.filter-group input[type="date"] {
+.filter-group input[type="date"],
+.filter-group input[type="month"] {
     width: 100%;
     padding: 12px 16px;
     font-size: 0.95rem;
@@ -336,5 +337,54 @@
     .sidebar-clear-btn {
         width: 100%;
         flex: none;
+    }
+}
+
+/* Mobile filter collapse styling */
+.mobile-filter-toggle-btn {
+    display: none;
+}
+
+@media (max-width: 1024px) {
+    .mobile-filter-toggle-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        background: #0f172a; /* Sleek dark color to match app's primary buttons */
+        color: white;
+        border: none;
+        padding: 14px 20px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.15);
+        margin-bottom: 0px;
+    }
+    
+    .mobile-filter-toggle-btn:hover {
+        background: #2563eb;
+    }
+    
+    .search-hero-content-body {
+        display: none;
+        margin-top: 15px;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        background: #ffffff;
+    }
+    
+    .search-hero-content-body.show {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .leaflet-wrapper {
+        height: 240px !important; /* Shorter on mobile */
     }
 }

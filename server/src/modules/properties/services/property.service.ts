@@ -112,47 +112,31 @@ class PropertyService {
     }
 
     /**
-     * Resolve amenity names → verified Amenity records.
-     * Throws if any name does not exist in the database.
+     * Resolve amenity names → Amenity records.
+     * Creates any names that do not yet exist in the database (findOrCreate).
      */
     private async resolveAmenityNames(names: string[]): Promise<Amenity[]> {
         if (names.length === 0) return [];
 
-        const found = await Amenity.findAll({ where: { name: names } });
+        const results = await Promise.all(
+            names.map((name) => Amenity.findOrCreate({ where: { name } }))
+        );
 
-        if (found.length !== names.length) {
-            const foundNames = found.map((a) => a.name);
-            const invalid = names.filter((n) => !foundNames.includes(n));
-            throw new PropertyError(
-                `Invalid amenity name(s): ${invalid.join(', ')}. Please select from the available list.`,
-                400,
-                'INVALID_AMENITY_NAMES'
-            );
-        }
-
-        return found;
+        return results.map(([record]) => record);
     }
 
     /**
-     * Resolve house rule names → verified HouseRule records.
-     * Throws if any name does not exist in the database.
+     * Resolve house rule names → HouseRule records.
+     * Creates any names that do not yet exist in the database (findOrCreate).
      */
     private async resolveHouseRuleNames(names: string[]): Promise<HouseRule[]> {
         if (names.length === 0) return [];
 
-        const found = await HouseRule.findAll({ where: { name: names } });
+        const results = await Promise.all(
+            names.map((name) => HouseRule.findOrCreate({ where: { name } }))
+        );
 
-        if (found.length !== names.length) {
-            const foundNames = found.map((h) => h.name);
-            const invalid = names.filter((n) => !foundNames.includes(n));
-            throw new PropertyError(
-                `Invalid house rule name(s): ${invalid.join(', ')}. Please select from the available list.`,
-                400,
-                'INVALID_HOUSE_RULE_NAMES'
-            );
-        }
-
-        return found;
+        return results.map(([record]) => record);
     }
 
     /**

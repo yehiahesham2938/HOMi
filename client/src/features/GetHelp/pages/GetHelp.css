@@ -441,3 +441,107 @@
   .faq-grid { grid-template-columns: 1fr; }
   .faq-header { flex-direction: column; align-items: flex-start; gap: 20px; }
 }
+
+/* --- Mobile Responsive overrides (< 768px) --- */
+@media (max-width: 768px) {
+  .help-page-layout .help-container {
+    padding: 24px 16px !important;
+  }
+
+  .help-page-layout .help-hero {
+    padding: 40px 16px !important;
+  }
+
+  .help-page-layout .help-hero h1 {
+    font-size: 1.8rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .help-page-layout .help-hero p {
+    font-size: 0.95rem !important;
+    margin-bottom: 20px !important;
+  }
+
+  .help-page-layout .channel-card {
+    padding: 20px !important;
+    border-radius: 12px !important;
+  }
+
+  .help-page-layout .support-channels {
+    gap: 16px !important;
+  }
+
+  .help-page-layout .faq-card {
+    padding: 16px !important;
+    border-radius: 12px !important;
+  }
+
+  .help-page-layout .category-tabs {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .help-page-layout .urgent-banner {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 20px !important;
+    text-align: center !important;
+    padding: 24px 16px !important;
+  }
+
+  .help-page-layout .urgent-info {
+    flex-direction: column !important;
+    gap: 10px !important;
+    text-align: center !important;
+  }
+
+  .help-page-layout .hotline-number {
+    text-align: center !important;
+    display: block !important;
+  }
+}
+
+/* --- Small Mobile Responsive overrides (< 480px) --- */
+@media (max-width: 480px) {
+  .help-page-layout .help-hero h1 {
+    font-size: 1.5rem !important;
+  }
+
+  .help-page-layout .search-container {
+    flex-direction: column !important;
+    gap: 8px !important;
+    padding: 6px !important;
+    border-radius: 12px !important;
+  }
+
+  .help-page-layout .search-icon {
+    left: 16px !important;
+    top: 24px !important; /* adjust for stacked layout input height */
+  }
+
+  .help-page-layout .search-container input {
+    width: 100% !important;
+    padding: 10px 10px 10px 36px !important;
+    font-size: 0.9rem !important;
+  }
+
+  .help-page-layout .search-btn {
+    width: 100% !important;
+    padding: 12px !important;
+    text-align: center !important;
+    border-radius: 8px !important;
+  }
+
+  .help-page-layout .tab-btn {
+    padding: 8px 12px !important;
+    font-size: 0.82rem !important;
+  }
+
+  .help-page-layout .support-chat-panel {
+    max-height: 95vh !important;
+  }
+
+  .help-page-layout .support-chat-messages {
+    max-height: 50vh !important;
+  }
+}

@@ -1,15 +1,19 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import Header from '../../../components/global/header';
+import Sidebar from '../../../components/global/Landlord/sidebar';
+import Footer from '../../../components/global/footer';
 import {
     Wallet, TrendingUp, Calendar, Clock,
     ArrowUpRight, Building2, User, Landmark,
     Plus, Download, CheckCircle2, Search,
-    Filter, CreditCard, HandCoins, Lock
+    Filter, CreditCard, HandCoins, Lock, Wrench
 } from 'lucide-react';
 import './LandlordPayment.css';
 import authService from '../../../services/auth.service';
 import contractService, { type LandlordContract } from '../../../services/contract.service';
+import maintenanceService, { type MaintenanceRequest } from '../../../services/maintenance.service';
 
-type LandlordTab = 'earnings' | 'received' | 'payouts' | 'methods' | 'upcoming' | 'transfer' | 'deposits';
+type LandlordTab = 'earnings' | 'received' | 'payouts' | 'methods' | 'upcoming' | 'transfer' | 'deposits' | 'maintenance';
 
 interface StatCardProps {
     label: string;
@@ -161,6 +165,7 @@ const LandlordPayment: React.FC = () => {
 
     const [activeTab, setActiveTab] = useState<LandlordTab>('earnings');
     const [contracts, setContracts] = useState<LandlordContract[]>([]);
+    const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [pageError, setPageError] = useState<string | null>(null);
 
@@ -184,6 +189,7 @@ const LandlordPayment: React.FC = () => {
     const [transferAmount, setTransferAmount] = useState('');
     const [selectedMethodId, setSelectedMethodId] = useState('');
     const [transferError, setTransferError] = useState<string | null>(null);
+    const [dbWalletBalance, setDbWalletBalance] = useState<number | null>(null);
 
     const methodsStorageKey = userId ? `landlord-payout-methods-${userId}` : '';
     const payoutsStorageKey = userId ? `landlord-payouts-${userId}` : '';
@@ -203,11 +209,19 @@ const LandlordPayment: React.FC = () => {
             setPageError(null);
 
             try {
-                const contractsResponse = await contractService.getLandlordContracts({ page: 1, limit: 100 });
+                const [contractsResponse, walletRes, maintResponse] = await Promise.all([
+                    contractService.getLandlordContracts({ page: 1, limit: 100 }),
+                    contractService.getWalletBalance().catch(() => null),
+                    maintenanceService.listLandlordRequests().catch(() => [])
+                ]);
 
                 if (!isMounted) return;
 
                 setContracts(contractsResponse.data ?? []);
+                if (walletRes) {
+                    setDbWalletBalance(walletRes.balance);
+                }
+                setMaintenanceRequests(maintResponse ?? []);
 
                 const storedMethods = localStorage.getItem(methodsStorageKey);
                 if (storedMethods) {
@@ -344,6 +358,36 @@ const LandlordPayment: React.FC = () => {
             })
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }, [contracts]);
+    
+    const maintenancePayments = useMemo(() => {
+        return maintenanceRequests
+            .filter((req) => req.chargeParty === 'LANDLORD' && req.agreedPrice !== null)
+            .map((req) => {
+                const tenantName = req.tenant ? `${req.tenant.firstName ?? ''} ${req.tenant.lastName ?? ''}`.trim() : 'Tenant';
+                const propertyTitle = req.property?.title || 'Property';
+                const providerName = req.provider ? `${req.provider.firstName ?? ''} ${req.provider.lastName ?? ''}`.trim() : 'Provider';
+
+                let statusBadge = 'Escrowed';
+                if (req.status === 'COMPLETED' || req.status === 'RESOLVED_BY_ADMIN') {
+                    statusBadge = 'Released';
+                } else if (req.status === 'CANCELLED') {
+                    statusBadge = 'Refunded';
+                }
+
+                return {
+                    id: req.id,
+                    title: req.title,
+                    category: req.category,
+                    tenantName,
+                    propertyTitle,
+                    providerName,
+                    amount: req.agreedPrice ?? 0,
+                    date: req.providerCompletedAt || req.updatedAt || req.createdAt,
+                    statusBadge,
+                };
+            })
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }, [maintenanceRequests]);
 
     const totalEarnings = useMemo(() => {
         return receivedPayments.reduce((sum, payment) => sum + payment.amount, 0);
@@ -534,7 +578,8 @@ const LandlordPayment: React.FC = () => {
             return;
         }
 
-        if (amount > availableBalance) {
+        const currentBalance = dbWalletBalance !== null ? dbWalletBalance : availableBalance;
+        if (amount > currentBalance) {
             setTransferError('Transfer amount exceeds your available balance.');
             return;
         }
@@ -568,8 +613,8 @@ const LandlordPayment: React.FC = () => {
                 <StatCard
                     variant="featured"
                     label="Available Balance"
-                    amount={currencyFormatter.format(availableBalance)}
-                    subtext={availableBalance > 0 ? 'Ready for transfer' : 'No funds available'}
+                    amount={currencyFormatter.format(dbWalletBalance !== null ? dbWalletBalance : availableBalance)}
+                    subtext={(dbWalletBalance !== null ? dbWalletBalance : availableBalance) > 0 ? 'Ready for transfer' : 'No funds available'}
                     icon={<Wallet size={20} />}
                 />
                 <StatCard
@@ -802,6 +847,100 @@ const LandlordPayment: React.FC = () => {
         );
     };
 
+    const renderMaintenance = () => {
+        if (maintenancePayments.length === 0) {
+            return (
+                <div className="tab-viewport animate-fade-in">
+                    <EmptyState
+                        icon={<Wrench size={48} />}
+                        title="No maintenance payments"
+                        description="When you approve maintenance requests or release escrows for maintenance, those records will appear here."
+                    />
+                </div>
+            );
+        }
+
+        return (
+            <div className="tab-viewport animate-fade-in">
+                <div className="table-controls">
+                    <div className="search-box">
+                        <Search size={18} />
+                        <input
+                            type="text"
+                            placeholder="Search provider, property, or job..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                </div>
+                <div className="modern-table-wrapper">
+                    <table className="landlord-table">
+                        <thead>
+                            <tr>
+                                <th>Job Title / Category</th>
+                                <th>Property</th>
+                                <th>Provider</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th>Payment Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {maintenancePayments
+                                .filter((item) =>
+                                    item.providerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                    item.propertyTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                    item.title.toLowerCase().includes(searchTerm.toLowerCase())
+                                )
+                                .map((item) => {
+                                    let badgeStyle = {};
+                                    if (item.statusBadge === 'Released') {
+                                        badgeStyle = { background: '#e6fffa', color: '#007d51' };
+                                    } else if (item.statusBadge === 'Refunded') {
+                                        badgeStyle = { background: '#fef2f2', color: '#b91c1c' };
+                                    } else if (item.statusBadge === 'Escrowed') {
+                                        badgeStyle = { background: '#eff6ff', color: '#1d4ed8' };
+                                    }
+
+                                    return (
+                                        <tr key={item.id}>
+                                            <td>
+                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <span style={{ fontWeight: 600, color: '#1e293b' }}>{item.title}</span>
+                                                    <span style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'capitalize', marginTop: '2px' }}>
+                                                        {item.category}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="prop-cell">
+                                                    <Building2 size={14} style={{ flexShrink: 0 }} /> 
+                                                    <span>{item.propertyTitle}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="user-info-cell">
+                                                    <div className="avatar-mini">{item.providerName.charAt(0)}</div>
+                                                    <span>{item.providerName}</span>
+                                                </div>
+                                            </td>
+                                            <td className="font-bold">{currencyFormatter.format(item.amount)}</td>
+                                            <td>{formatDate(item.date)}</td>
+                                            <td>
+                                                <span className="badge-success" style={badgeStyle}>
+                                                    {item.statusBadge}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+    };
+
     const renderUpcoming = () => {
         if (upcomingPayments.length === 0) {
             return (
@@ -962,59 +1101,68 @@ const LandlordPayment: React.FC = () => {
     };
 
     return (
-        <main className="landlord-payment-page">
-            <header className="landlord-hub-header">
-                <div className="header-text">
-                    <h1>Financial Overview</h1>
-                </div>
-            </header>
+        <div className="dashboard-shell">
+            <Sidebar />
+            <div className="content-container">
+                <Header />
+                <main className="landlord-hub">
+                    <header className="landlord-hub-header">
+                        <div className="header-text">
+                            <h1>Financial Overview</h1>
+                        </div>
+                    </header>
 
-            {pageError && (
-                <div className="landlord-payment-error-banner">{pageError}</div>
-            )}
+                    {pageError && (
+                        <div className="landlord-payment-error-banner">{pageError}</div>
+                    )}
 
-            <div className="tabs-container">
-                <nav className="modern-tabs">
-                    {[
-                        { id: 'earnings', label: 'Earnings', icon: <TrendingUp size={16} /> },
-                        { id: 'received', label: 'Received', icon: <CheckCircle2 size={16} /> },
-                        { id: 'deposits', label: 'Deposits', icon: <Lock size={16} /> },
-                        { id: 'payouts', label: 'Payouts', icon: <ArrowUpRight size={16} /> },
-                        { id: 'upcoming', label: 'Upcoming', icon: <Clock size={16} /> },
-                        { id: 'methods', label: 'Methods', icon: <CreditCard size={16} /> },
-                        { id: 'transfer', label: 'Transfer', icon: <HandCoins size={16} /> },
-                    ].map((tab) => (
-                        <button
-                            key={tab.id}
-                            className={activeTab === tab.id ? 'active' : ''}
-                            onClick={() => setActiveTab(tab.id as LandlordTab)}
-                        >
-                            {tab.icon} {tab.label}
-                        </button>
-                    ))}
-                </nav>
-            </div>
-
-            <div className="viewport-container">
-                {isLoading ? (
-                    <div className="tab-viewport animate-fade-in">
-                        <EmptyState
-                            icon={<Clock size={48} />}
-                            title="Loading payment data"
-                            description="Please wait while we fetch your latest contracts and transactions."
-                        />
+                    <div className="tabs-container">
+                        <nav className="modern-tabs">
+                            {[
+                                { id: 'earnings', label: 'Earnings', icon: <TrendingUp size={16} /> },
+                                { id: 'received', label: 'Received', icon: <CheckCircle2 size={16} /> },
+                                { id: 'maintenance', label: 'Maintenance', icon: <Wrench size={16} /> },
+                                { id: 'deposits', label: 'Deposits', icon: <Lock size={16} /> },
+                                { id: 'payouts', label: 'Payouts', icon: <ArrowUpRight size={16} /> },
+                                { id: 'upcoming', label: 'Upcoming', icon: <Clock size={16} /> },
+                                { id: 'methods', label: 'Methods', icon: <CreditCard size={16} /> },
+                                { id: 'transfer', label: 'Transfer', icon: <HandCoins size={16} /> },
+                            ].map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    className={activeTab === tab.id ? 'active' : ''}
+                                    onClick={() => setActiveTab(tab.id as LandlordTab)}
+                                >
+                                    {tab.icon} {tab.label}
+                                </button>
+                            ))}
+                        </nav>
                     </div>
-                ) : (
-                    <>
-                        {activeTab === 'earnings' && renderEarnings()}
-                        {activeTab === 'received' && renderReceived()}
-                        {activeTab === 'deposits' && renderDeposits()}
-                        {activeTab === 'payouts' && renderPayouts()}
-                        {activeTab === 'methods' && renderMethods()}
-                        {activeTab === 'upcoming' && renderUpcoming()}
-                        {activeTab === 'transfer' && renderTransfer()}
-                    </>
-                )}
+
+                    <div className="viewport-container">
+                        {isLoading ? (
+                            <div className="tab-viewport animate-fade-in">
+                                <EmptyState
+                                    icon={<Clock size={48} />}
+                                    title="Loading payment data"
+                                    description="Please wait while we fetch your latest contracts and transactions."
+                                />
+                            </div>
+                        ) : (
+                            <>
+                                {activeTab === 'earnings' && renderEarnings()}
+                                {activeTab === 'received' && renderReceived()}
+                                {activeTab === 'maintenance' && renderMaintenance()}
+                                {activeTab === 'deposits' && renderDeposits()}
+                                {activeTab === 'payouts' && renderPayouts()}
+                                {activeTab === 'methods' && renderMethods()}
+                                {activeTab === 'upcoming' && renderUpcoming()}
+                                {activeTab === 'transfer' && renderTransfer()}
+                            </>
+                        )}
+                    </div>
+                </main>
+                <Footer />
             </div>
 
             {isMethodModalOpen && (
@@ -1115,7 +1263,7 @@ const LandlordPayment: React.FC = () => {
                     </div>
                 </div>
             )}
-        </main>
+        </div>
     );
 };
 

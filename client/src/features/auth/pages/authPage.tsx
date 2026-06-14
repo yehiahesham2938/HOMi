@@ -38,8 +38,8 @@ const AuthPage = () => {
 
         const userRole = currentUser?.user?.role;
         if (!userRole || userRole === 'USER' || userRole === '') {
-           navigate('/complete-profile', { replace: true });
-           return;
+          navigate('/complete-profile', { replace: true });
+          return;
         }
 
         const nextPath = authService.resolvePostAuthRoute();
@@ -75,22 +75,8 @@ const AuthPage = () => {
           <div className="glass-badge">{t('auth.premiumLiving')}</div>
           <h2>{t('auth.discoverArt')} <br /><span>{t('auth.modernLiving')}</span></h2>
           <p className="hero-desc">{t('auth.exclusiveProperties')}</p>
-          
-          <div className="hero-floating-card">
-            <div className="card-header">
-              <div className="avatars-group">
-                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&q=80" alt="User" className="avatar-img" />
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80" alt="User" className="avatar-img" />
-                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=80&q=80" alt="User" className="avatar-img" />
-                <div className="avatar-more">+10k</div>
-              </div>
-              <div className="badge-verified">✓ Active Tenants</div>
-            </div>
-            <div className="card-body">
-              <h3>Fast, Verified Renting</h3>
-              <p>Match with top landlords and finalize contracts in Cairo and Giza in under 24 hours.</p>
-            </div>
-          </div>
+
+
         </div>
       </div>
 
@@ -114,14 +100,14 @@ const AuthPage = () => {
 
           <div className="tab-switcher">
             <div className={`tab-glow-bg ${activeTab === "signup" ? "slide-right" : ""}`} />
-            <button 
-              className={activeTab === "signin" ? "active" : ""} 
+            <button
+              className={activeTab === "signin" ? "active" : ""}
               onClick={() => setActiveTab("signin")}
             >
               {t('auth.signIn')}
             </button>
-            <button 
-              className={activeTab === "signup" ? "active" : ""} 
+            <button
+              className={activeTab === "signup" ? "active" : ""}
               onClick={() => setActiveTab("signup")}
             >
               {t('auth.signUp')}

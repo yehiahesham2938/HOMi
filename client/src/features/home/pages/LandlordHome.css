@@ -113,9 +113,9 @@
   flex-direction: column;
 }
 
-.action-widget > *,
-.payment-widget > *,
-.notifications-widget > * {
+.action-widget>*,
+.payment-widget>*,
+.notifications-widget>* {
   height: 100%;
 }
 
@@ -212,6 +212,7 @@
     opacity: 0;
     transform: translateY(15px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -219,12 +220,16 @@
 }
 
 @keyframes floatBlob {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
   }
+
   33% {
     transform: translate(25px, -35px) scale(1.08);
   }
+
   66% {
     transform: translate(-20px, 25px) scale(0.92);
   }
@@ -589,7 +594,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     min-height: auto;
   }
-  
+
   .properties-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -597,38 +602,218 @@
 
 @media (max-width: 1024px) {
   .landlord-layout .main-content {
-    margin-left: 0;
-    width: 100%;
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding-bottom: 80px !important;
   }
 
   .dashboard-container {
-    padding-top: 80px;
+    padding: 0.75rem !important;
+    padding-top: 60px !important;
   }
 
   .lh-onboarding-split {
     grid-template-columns: 1fr;
+    gap: 1.25rem !important;
   }
 }
 
 @media (max-width: 768px) {
   .dashboard-top-row {
-    grid-template-columns: 1fr;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .action-widget,
+  .payment-widget,
+  .notifications-widget {
+    width: 100% !important;
+  }
+
+  .welcome-section {
+    padding: 0.85rem !important;
+    border-radius: 16px !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+    margin-bottom: -17px !important;
+
+  }
+
+  .welcome-text h1 {
+    font-size: 1.3rem !important;
+  }
+
+  .welcome-text p {
+    font-size: 0.8rem !important;
+  }
+
+  .properties-master-container {
+    padding: 0.85rem !important;
+    border-radius: 16px !important;
+    margin-top: 0.5rem !important;
+  }
+
+  .section-header {
+    margin-bottom: 1rem !important;
+    padding-bottom: 0.75rem !important;
+  }
+
+  .section-header h2 {
+    font-size: 1rem !important;
+  }
+
+  .status-badge {
+    font-size: 0.7rem !important;
+    padding: 2px 8px !important;
+  }
+
+  .btn-text-primary {
+    padding: 8px 14px !important;
+    font-size: 0.78rem !important;
+    border-radius: 8px !important;
   }
 
   .properties-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .lh-onboarding-wrapper {
+    gap: 1rem !important;
   }
 
   .lh-hero-banner {
-    padding: 2.25rem 1.5rem;
+    padding: 1.25rem !important;
+    border-radius: 18px !important;
+  }
+
+  .lh-hero-content h1 {
+    font-size: 1.3rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .lh-hero-content p {
+    font-size: 0.85rem !important;
+    margin-bottom: 1rem !important;
   }
 
   .lh-hero-actions {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.5rem !important;
   }
-  
+
+  .lh-btn-primary,
+  .lh-btn-secondary {
+    padding: 10px 18px !important;
+    font-size: 0.85rem !important;
+    border-radius: 8px !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+
+  .lh-getting-started h3 {
+    font-size: 1rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
   .lh-cards-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .lh-onboarding-card {
+    padding: 1rem !important;
+    border-radius: 14px !important;
+  }
+
+  .lh-card-icon {
+    display: none !important;
+  }
+
+  .lh-step-badge {
+    position: static !important;
+    align-self: flex-start !important;
+    margin-bottom: 0.5rem !important;
+    font-size: 0.65rem !important;
+    padding: 2px 6px !important;
+    border-radius: 6px !important;
+  }
+
+  .lh-onboarding-card h4 {
+    font-size: 0.95rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .lh-onboarding-card p {
+    font-size: 0.8rem !important;
+  }
+
+  .lh-empty-list-box {
+    padding: 1.5rem 1rem !important;
+    border-radius: 14px !important;
+  }
+
+  .lh-empty-icon-wrapper {
+    width: 44px !important;
+    height: 44px !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .lh-empty-icon-wrapper svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .lh-empty-list-box h3 {
+    font-size: 1rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .lh-empty-list-box p {
+    font-size: 0.8rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .lh-btn-outline {
+    padding: 8px 16px !important;
+    font-size: 0.8rem !important;
+    border-radius: 8px !important;
+  }
+
+  .lh-onboarding-sidebar {
+    gap: 0.75rem !important;
+  }
+
+  .lh-widget {
+    padding: 1rem !important;
+    border-radius: 14px !important;
+  }
+
+  .lh-welcome-widget h4,
+  .lh-tips-widget h4 {
+    font-size: 0.95rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .lh-welcome-widget p {
+    font-size: 0.8rem !important;
+  }
+
+  .lh-tips-list {
+    gap: 0.6rem !important;
+  }
+
+  .lh-tips-list li {
+    font-size: 0.8rem !important;
+    gap: 8px !important;
+  }
+
+  .lh-tip-icon {
+    font-size: 0.95rem !important;
   }
 }

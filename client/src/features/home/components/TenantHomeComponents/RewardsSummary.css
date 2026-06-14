@@ -213,3 +213,71 @@
     top: 100%;
   }
 }
+
+@media (max-width: 768px) {
+  .rewards-premium-container {
+    height: auto !important;
+    min-height: auto !important;
+    padding: 0.6rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .tier-badge {
+    padding: 3px 8px !important;
+    font-size: 0.65rem !important;
+  }
+
+  .star-ring {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 8px !important;
+    font-size: 1rem !important;
+  }
+
+  .rewards-main-display {
+    gap: 0.75rem !important;
+  }
+
+  .points-hero {
+    gap: 8px !important;
+  }
+
+  .points-value {
+    font-size: 1.8rem !important;
+  }
+
+  .points-label {
+    font-size: 0.7rem !important;
+    margin-top: 1px !important;
+  }
+
+  .tier-progress-section {
+    gap: 4px !important;
+  }
+
+  .progress-labels {
+    font-size: 0.68rem !important;
+  }
+
+  .tier-progress-bar {
+    height: 5px !important;
+  }
+
+  .perks-footer {
+    padding-top: 0.5rem !important;
+    gap: 4px !important;
+  }
+
+  .perk-tag {
+    padding: 3px 6px !important;
+    font-size: 0.68rem !important;
+    border-radius: 6px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .perk-tag {
+    padding: 2px 4px !important;
+    font-size: 0.62rem !important;
+  }
+}

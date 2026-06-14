@@ -51,13 +51,13 @@
     flex-direction: column;
     min-width: 0;
     margin-top: 40px;
+    margin-left: var(--sidebar-width, 260px);
 }
 
 .landlord-maintenance-hub-wrapper .maintenance-main-container {
     padding: 2.5rem;
     max-width: 1600px;
     margin: 0 auto;
-    margin-left: 250px;
     width: 100%;
 }
 
@@ -207,8 +207,7 @@
 .landlord-maintenance-hub-wrapper .l-tab-content-wrapper,
 .landlord-maintenance-hub-wrapper .l-tab-pane {
     animation: landlordSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    width: 1400px;
-    margin-left: 160px;
+    width: 100%;
 }
 
 @keyframes landlordSlideUp {
@@ -822,8 +821,11 @@
 
 /* Responsiveness adjustments */
 @media (max-width: 1200px) {
-    .landlord-maintenance-hub-wrapper .maintenance-main-container {
+    .landlord-maintenance-hub-wrapper .landlord-maintenance-content {
         margin-left: 0;
+    }
+
+    .landlord-maintenance-hub-wrapper .maintenance-main-container {
         padding: 1.5rem;
     }
 
@@ -862,4 +864,46 @@
         grid-template-columns: 1fr;
         gap: 1rem;
     }
+}
+
+/* Landlord Maintenance Details Modal Actions */
+.landlord-maintenance-hub-wrapper .modal-actions {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+}
+
+.landlord-maintenance-hub-wrapper .modal-bids-btn {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    padding: 0.85rem 1.75rem;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 14px var(--primary-glow);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 100%;
+}
+
+.landlord-maintenance-hub-wrapper .modal-bids-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+}
+
+.landlord-maintenance-hub-wrapper .modal-bids-btn:active {
+    transform: translateY(0);
+}
+
+/* Marketplace & Card grids */
+.landlord-maintenance-hub-wrapper .marketplace-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 2rem;
 }

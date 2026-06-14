@@ -25,6 +25,7 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
     const [phone, setPhone] = useState('');
     const [bio, setBio] = useState('');
     const [currentLocation, setCurrentLocation] = useState('');
+    const [arabicName, setArabicName] = useState('');
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -34,6 +35,7 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
     const originalPhone = profile?.phoneNumber ?? '';
     const originalBio = profile?.bio ?? '';
     const originalLocation = profile?.currentLocation ?? '';
+    const originalArabicName = user?.id ? (localStorage.getItem(`arabicName_${user.id}`) ?? '') : '';
     const hasChanges =
         (isMaintainer
             ? bio !== originalBio
@@ -42,7 +44,8 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                 lastName !== originalLastName ||
                 phone !== originalPhone ||
                 bio !== originalBio ||
-                currentLocation !== originalLocation
+                currentLocation !== originalLocation ||
+                arabicName !== originalArabicName
             ));
 
     useEffect(() => {
@@ -56,6 +59,10 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                 setPhone(data.profile.phoneNumber);
                 setBio(data.profile.bio ?? '');
                 setCurrentLocation(data.profile.currentLocation ?? '');
+                if (data.user?.id) {
+                    const savedAr = localStorage.getItem(`arabicName_${data.user.id}`);
+                    setArabicName(savedAr ?? '');
+                }
             } catch {
                 // Fall back to locally-cached data if the request fails
                 const cached = authService.getCurrentUser();
@@ -67,6 +74,10 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                     setPhone(cached.profile.phoneNumber);
                     setBio(cached.profile.bio ?? '');
                     setCurrentLocation(cached.profile.currentLocation ?? '');
+                    if (cached.user?.id) {
+                        const savedAr = localStorage.getItem(`arabicName_${cached.user.id}`);
+                        setArabicName(savedAr ?? '');
+                    }
                 }
             } finally {
                 setLoading(false);
@@ -174,7 +185,20 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                 payload.currentLocation = currentLocation.trim() || null;
             }
 
+            let arNameChanged = false;
+            if (user?.id && arabicName !== originalArabicName) {
+                localStorage.setItem(`arabicName_${user.id}`, arabicName.trim());
+                arNameChanged = true;
+            }
+
             if (Object.keys(payload).length === 0) {
+                if (arNameChanged) {
+                    setMessage({ type: 'success', text: 'Arabic name updated successfully!' });
+                    setSaving(false);
+                    setUser(prev => prev ? { ...prev } : null);
+                    setTimeout(() => setMessage(null), 3000);
+                    return;
+                }
                 setMessage({ type: 'success', text: 'No changes to save.' });
                 setSaving(false);
                 setTimeout(() => setMessage(null), 3000);
@@ -339,6 +363,22 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                             />
                         </div>
                     </div>
+                    {!isMaintainer && (
+                        <div className="modern-field">
+                            <FaIdBadge className="field-icon" />
+                            <div className="field-content">
+                                <label>Full Name (Arabic)</label>
+                                <input
+                                    type="text"
+                                    value={arabicName}
+                                    onChange={(e) => setArabicName(e.target.value)}
+                                    placeholder="الاسم الكامل باللغة العربية"
+                                    dir="rtl"
+                                    style={{ textAlign: 'right', fontFamily: 'inherit' }}
+                                />
+                            </div>
+                        </div>
+                    )}
                     <div className="modern-field">
                         <FaEnvelope className="field-icon" />
                         <div className="field-content">

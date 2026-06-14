@@ -4,14 +4,16 @@ import Header from '../../../components/global/header';
 import Sidebar from '../../../components/global/Tenant/sidebar';
 import Footer from '../../../components/global/footer';
 import ActiveLeaseContract from '../components/ActiveLeaseContract';
+import TerminatedLeaseContract from '../components/TerminatedLeaseContract';
+import ExpiredLeaseContract from '../components/ExpiredLeaseContract';
 
-import { FileText, Clock, Plus, Building2, ChevronRight } from 'lucide-react';
+import { FileText, Clock, Building2, ChevronRight } from 'lucide-react';
 import ContractDetailView from '../components/ContractDetailView';
 import contractService, { type LandlordContract as ContractApi } from '../../../services/contract.service';
 import { normalizeSignatureUrl } from '../../../shared/utils/signatureUrl';
 import './Contract.css';
 
-export type ContractStatus = 'PENDING_TENANT' | 'PENDING_PAYMENT' | 'ACTIVE' | 'EXPIRED';
+export type ContractStatus = 'PENDING_TENANT' | 'PENDING_PAYMENT' | 'ACTIVE' | 'EXPIRED' | 'TERMINATED';
 
 export interface LeaseContract {
     id: string;
@@ -49,6 +51,13 @@ export interface LeaseContract {
     permittedUse?: string;
     rightToEnter?: string;
     noticePeriod?: string;
+    terminationRequests?: Array<{
+        id: string;
+        status: string;
+        reason: string;
+        createdAt: string;
+        requesterId: string;
+    }>;
 }
 
 import { useTranslation } from 'react-i18next';
@@ -66,7 +75,8 @@ const Contract: React.FC = () => {
 
     const mapStatus = (status: ContractApi['status']): ContractStatus => {
         if (status === 'ACTIVE') return 'ACTIVE';
-        if (status === 'TERMINATED' || status === 'EXPIRED') return 'EXPIRED';
+        if (status === 'TERMINATED') return 'TERMINATED';
+        if (status === 'EXPIRED') return 'EXPIRED';
         if (status === 'PENDING_PAYMENT') return 'PENDING_PAYMENT';
         return 'PENDING_TENANT';
     };
@@ -104,14 +114,29 @@ const Contract: React.FC = () => {
         permittedUse: 'Residential Only',
         rightToEnter: 'With 24h Prior Notice',
         noticePeriod: '30 Days',
+        terminationRequests: contract.terminationRequests || [],
     });
 
     const fetchContracts = useCallback(async () => {
         try {
-            const response = await contractService.getTenantContracts({ page: 1, limit: 50 });
+            const [response, clock] = await Promise.all([
+                contractService.getTenantContracts({ page: 1, limit: 50 }),
+                contractService.getTestingClock()
+            ]);
+            const referenceDate = clock?.now ? new Date(clock.now) : new Date();
             const mapped = (response.data || [])
                 .map(mapContract)
-                .filter((c) => c.status === 'PENDING_TENANT' || c.status === 'PENDING_PAYMENT' || c.status === 'ACTIVE' || c.status === 'EXPIRED');
+                .filter((c) => c.status === 'PENDING_TENANT' || c.status === 'PENDING_PAYMENT' || c.status === 'ACTIVE' || c.status === 'EXPIRED' || c.status === 'TERMINATED')
+                .filter((c) => {
+                    const isPending = c.status === 'PENDING_TENANT' || c.status === 'PENDING_PAYMENT';
+                    if (isPending && c.createdAt) {
+                        const createdDate = new Date(c.createdAt);
+                        const diffTime = referenceDate.getTime() - createdDate.getTime();
+                        const diffDays = diffTime / (1000 * 60 * 60 * 24);
+                        if (diffDays > 10) return false;
+                    }
+                    return true;
+                });
             setContracts(mapped);
         } catch {
             setContracts([]);
@@ -133,11 +158,12 @@ const Contract: React.FC = () => {
     const hasContracts = contracts.length > 0;
 
     const getStatusInfo = (status: ContractStatus) => {
-        const map = {
+        const map: Record<ContractStatus, { label: string; color: string }> = {
             PENDING_TENANT: { label: t('tenantContract.pendingSignature'), color: 'blue' },
             PENDING_PAYMENT: { label: t('tenantContract.pendingPayment'), color: 'yellow' },
             ACTIVE: { label: t('tenantContract.activeLease'), color: 'green' },
             EXPIRED: { label: t('tenantContract.leaseEnded'), color: 'gray' },
+            TERMINATED: { label: 'Terminated', color: 'red' },
         };
         return map[status];
     };
@@ -174,17 +200,21 @@ const Contract: React.FC = () => {
                                             <div className="meta-item"><Clock size={14} /> {t('tenantContract.starts')} {contract.startDate}</div>
                                         </div>
                                         <div className="tenant-card-footer">
-                                            <div className="price-info">
-                                                <span className="label">{t('tenantContract.monthlyRent')}</span>
-                                                <span className="value">${contract.amount}</span>
+                                            <div className="tenant-footer-amounts">
+                                                <div className="price-info">
+                                                    <span className="label">{t('tenantContract.monthlyRent')}</span>
+                                                    <span className="value">${contract.amount}</span>
+                                                </div>
+                                                <div className="price-info">
+                                                    <span className="label">Security Deposit</span>
+                                                    <span className="value deposit-value">${contract.deposit}</span>
+                                                </div>
                                             </div>
                                             <button
                                                 className="btn-view-contract"
                                                 onClick={() => {
                                                     if (contract.status === 'PENDING_PAYMENT') {
                                                         globalThis.location.href = '/tenant-payment?tab=pending';
-                                                    } else if (contract.status === 'EXPIRED') {
-                                                        globalThis.location.href = '/tenant-payment?tab=upcoming';
                                                     } else {
                                                         setSelectedContract(contract);
                                                     }
@@ -194,7 +224,9 @@ const Contract: React.FC = () => {
                                                     ? t('tenantContract.payNow')
                                                     : contract.status === 'EXPIRED'
                                                         ? t('tenantContract.settleDues')
-                                                        : t('tenantContract.viewDetails')}
+                                                        : contract.status === 'TERMINATED'
+                                                            ? 'View Details'
+                                                            : t('tenantContract.viewDetails')}
                                                 <ChevronRight size={16} />
                                             </button>
                                         </div>
@@ -234,6 +266,20 @@ const Contract: React.FC = () => {
 
             {selectedContract?.status === 'ACTIVE' && (
                 <ActiveLeaseContract
+                    contract={selectedContract}
+                    onClose={() => setSelectedContract(null)}
+                />
+            )}
+
+            {selectedContract?.status === 'TERMINATED' && (
+                <TerminatedLeaseContract
+                    contract={selectedContract}
+                    onClose={() => setSelectedContract(null)}
+                />
+            )}
+
+            {selectedContract?.status === 'EXPIRED' && (
+                <ExpiredLeaseContract
                     contract={selectedContract}
                     onClose={() => setSelectedContract(null)}
                 />

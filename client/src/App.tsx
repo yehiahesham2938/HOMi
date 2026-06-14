@@ -68,6 +68,7 @@ import AddPropertyPage from "./features/home/pages/AddPropertyPage";
 import PropertyDetailPage from "./features/BrowseProperties/pages/PropertyDetailPage";
 import ApplicationPage from "./features/BrowseProperties/pages/ApplicationPage";
 import AdminMaintenanceConflicts from "./features/admin/pages/AdminMaintenanceConflicts";
+import NidMobileScan from "./features/auth/pages/NidMobileScan";
 
 
 
@@ -171,6 +172,9 @@ function App() {
         <Route path="/verify-email" element={<EmailVerificationPage />} />
         <Route path="/verify-email-callback" element={<VerifyEmailCallback />} />
         <Route path="/account-banned" element={<AccountBannedPage />} />
+
+        {/* NID Mobile Scan — public, accessed via QR code from desktop */}
+        <Route path="/nid-scan/:token" element={<NidMobileScan />} />
 
         {/* Unknown routes — must be last */}
         <Route path="*" element={<PageNotFound />} />

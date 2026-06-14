@@ -1,0 +1,344 @@
+/* ─── NidQrBridge — Desktop QR bridge ─────────────────────────────────────── */
+
+.nid-qr-bridge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    font-family: 'Inter', 'Outfit', system-ui, sans-serif;
+}
+
+/* ── Loading ── */
+.nid-qr-bridge__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 56px 32px;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.nid-qr-bridge__spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: nid-qr-spin 0.9s linear infinite;
+}
+
+@keyframes nid-qr-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Header ── */
+.nid-qr-bridge__header {
+    text-align: center;
+    padding: 8px 24px 0;
+}
+
+.nid-qr-bridge__header-icons {
+    display: flex;
+    justify-content: center;
+    color: #6366f1;
+    margin-bottom: 12px;
+}
+
+.nid-qr-bridge__header h2 {
+    margin: 0 0 6px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.nid-qr-bridge__header p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+/* ── Body ── */
+.nid-qr-bridge__body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    width: 100%;
+    padding: 20px 24px;
+}
+
+/* ── QR code wrapper ── */
+.nid-qr-bridge__qr-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: 0 4px 24px rgba(99, 102, 241, 0.08);
+}
+
+.nid-qr-bridge__qr-img {
+    display: block;
+    border-radius: 8px;
+}
+
+/* Animated corner accents */
+.nid-qr-bridge__qr-corner {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border-color: #6366f1;
+    border-style: solid;
+    border-radius: 3px;
+}
+
+.nid-qr-bridge__qr-corner--tl {
+    top: 8px; left: 8px;
+    border-width: 3px 0 0 3px;
+    animation: nid-qr-pulse 2s ease-in-out infinite;
+}
+.nid-qr-bridge__qr-corner--tr {
+    top: 8px; right: 8px;
+    border-width: 3px 3px 0 0;
+    animation: nid-qr-pulse 2s ease-in-out infinite 0.5s;
+}
+.nid-qr-bridge__qr-corner--bl {
+    bottom: 8px; left: 8px;
+    border-width: 0 0 3px 3px;
+    animation: nid-qr-pulse 2s ease-in-out infinite 1s;
+}
+.nid-qr-bridge__qr-corner--br {
+    bottom: 8px; right: 8px;
+    border-width: 0 3px 3px 0;
+    animation: nid-qr-pulse 2s ease-in-out infinite 1.5s;
+}
+
+@keyframes nid-qr-pulse {
+    0%, 100% { opacity: 1; border-color: #6366f1; }
+    50% { opacity: 0.4; border-color: #818cf8; }
+}
+
+/* ── Timer ── */
+.nid-qr-bridge__timer {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    transition: color 0.4s;
+}
+
+.nid-qr-bridge__timer span {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: #6366f1;
+}
+
+.nid-qr-bridge__timer--urgent .nid-qr-bridge__timer span {
+    color: #ef4444;
+    animation: nid-qr-blink 0.8s ease-in-out infinite;
+}
+
+@keyframes nid-qr-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* ── Socket status pill ── */
+.nid-qr-bridge__status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 5px 14px;
+    border-radius: 999px;
+    transition: all 0.3s;
+}
+
+.nid-qr-bridge__status--live {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.nid-qr-bridge__status--poll {
+    background: #fef9c3;
+    color: #a16207;
+}
+
+/* ── Steps list ── */
+.nid-qr-bridge__steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: 340px;
+}
+
+.nid-qr-bridge__steps li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 0.84rem;
+    color: #475569;
+    line-height: 1.5;
+}
+
+.nid-qr-bridge__step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    border-radius: 50%;
+    background: #6366f1;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+/* ── Warning banner ── */
+.nid-qr-bridge__warning {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 0.8rem;
+    color: #9a3412;
+    width: 100%;
+    max-width: 380px;
+    text-align: left;
+}
+
+/* ── Footer ── */
+.nid-qr-bridge__footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 24px 16px;
+}
+
+/* ── Buttons ── */
+.nid-qr-bridge__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.nid-qr-bridge__btn--primary {
+    background: #6366f1;
+    color: #fff;
+    padding: 12px 24px;
+    font-size: 0.95rem;
+}
+.nid-qr-bridge__btn--primary:hover { background: #4f46e5; transform: translateY(-1px); }
+
+.nid-qr-bridge__btn--secondary {
+    background: #eff6ff;
+    color: #3b82f6;
+    padding: 10px 18px;
+    font-size: 0.85rem;
+}
+.nid-qr-bridge__btn--secondary:hover { background: #dbeafe; }
+
+.nid-qr-bridge__btn--ghost {
+    background: transparent;
+    color: #94a3b8;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+}
+.nid-qr-bridge__btn--ghost:hover { color: #64748b; }
+
+.nid-qr-bridge__btn--sm {
+    padding: 8px 16px;
+    font-size: 0.82rem;
+}
+
+/* ── Success ── */
+.nid-qr-bridge__success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 40px 32px;
+    text-align: center;
+    animation: nid-qr-fadeIn 0.5s ease;
+}
+
+@keyframes nid-qr-fadeIn {
+    from { opacity: 0; transform: scale(0.92); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.nid-qr-bridge__success-icon {
+    color: #16a34a;
+    animation: nid-qr-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes nid-qr-pop {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.nid-qr-bridge__success h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.nid-qr-bridge__success-name {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #6366f1;
+    direction: rtl;
+    unicode-bidi: embed;
+}
+
+.nid-qr-bridge__success-hint {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+/* ── Expired / Error ── */
+.nid-qr-bridge__expired {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 40px 32px;
+    text-align: center;
+    color: #ef4444;
+}
+
+.nid-qr-bridge__expired h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.nid-qr-bridge__expired p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: #64748b;
+}

@@ -27,7 +27,9 @@ function resolveToken(socket: Socket): string | null {
 export function initSocketServer(server: HttpServer): Server {
     io = new Server(server, {
         cors: {
-            origin: env.CORS_ORIGINS,
+            origin: env.NODE_ENV === 'development'
+                ? (origin, callback) => callback(null, true)
+                : env.CORS_ORIGINS,
             credentials: true,
         },
     });
@@ -107,6 +109,19 @@ export function initSocketServer(server: HttpServer): Server {
         });
     });
 
+    // ─── NID Session namespace (unauthenticated) ─────────────────────────────
+    // Mobile phones scanning the QR code may not have an active HOMI session.
+    // We use a separate namespace and let clients join rooms by the session token.
+    const nidNs = io.of('/nid-session');
+    nidNs.on('connection', (socket) => {
+        socket.on('join', (payload: { token?: string }) => {
+            const token = payload?.token;
+            if (token && /^[0-9a-f]{64}$/.test(token)) {
+                socket.join(`nid:${token}`);
+            }
+        });
+    });
+
     return io;
 }
 
@@ -117,7 +132,17 @@ export function getIO(): Server {
     return io;
 }
 
+/** Emit a nid:completed event to all desktop clients waiting for this session token. */
+export function emitNidCompleted(
+    token: string,
+    payload: { nationalId: string; fullNameArabic: string }
+): void {
+    if (!io) return;
+    io.of('/nid-session').to(`nid:${token}`).emit('nid:completed', payload);
+}
+
 export default {
     initSocketServer,
     getIO,
+    emitNidCompleted,
 };

@@ -62,7 +62,9 @@ if (env.NODE_ENV === 'production') {
     app.use(helmet({ ...helmetOptions, contentSecurityPolicy: false }));
 }
 app.use(cors({
-    origin: env.CORS_ORIGINS,
+    origin: env.NODE_ENV === 'development'
+        ? (origin, callback) => callback(null, true)
+        : env.CORS_ORIGINS,
     credentials: true,
 }));
 

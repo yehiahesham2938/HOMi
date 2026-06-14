@@ -11,6 +11,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../../../services/auth.service';
 import type { Gender } from '../../../types/auth.types';
 import NidScanner from '../../auth/components/NidScanner';
+import NidQrBridge from '../../auth/components/NidQrBridge';
+
+/** Returns true when the current device is likely a desktop/laptop. */
+const isDesktopDevice = (): boolean => !/Mobi|Android|iPhone|iPad|iPod|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 type UserRole = 'tenant' | 'landlord' | null;
 
@@ -1035,26 +1039,135 @@ const CompleteProfile: React.FC = () => {
 
     return (
         <>
-        {/* NID Scanner mid-step overlay */}
+        {/* NID Scanner / QR Bridge mid-step overlay */}
         {showNidScanner && (
-            <NidScanner
-                onSuccess={(nationalId, fullNameArabic) => {
-                    setShowNidScanner(false);
-                    setStep1((s) => ({ ...s, nationalId, fullNameArabic }));
-                    // Immediately proceed with submission after scanner closes
-                    setError(null);
-                    // Small delay so state settles before calling goNextFromStep1
-                    setTimeout(() => {
-                        void (async () => {
-                            const cached = authService.getCurrentUser();
-                            const verificationComplete = !!cached?.profile?.isVerificationComplete;
-                            const nationalIdLocked = !!settingsOnlyFlow && verificationComplete;
+            isDesktopDevice() ? (
+                /* ─── Desktop: show QR code for phone to scan ─────────────── */
+                <div className="nid-overlay">
+                    <NidQrBridge
+                        onSuccess={(nationalId, fullNameArabic) => {
+                            setShowNidScanner(false);
+                            setStep1((s) => ({ ...s, nationalId, fullNameArabic }));
+                            setError(null);
+                            setTimeout(() => {
+                                void (async () => {
+                                    const cached = authService.getCurrentUser();
+                                    const verificationComplete = !!cached?.profile?.isVerificationComplete;
 
-                            if (settingsOnlyFlow) {
-                                setLoading(true);
-                                try {
+                                    if (settingsOnlyFlow) {
+                                        setLoading(true);
+                                        try {
+                                            if (alreadyLoggedIn && cached?.user) {
+                                                if (!verificationComplete) {
+                                                    await authService.completeVerification({
+                                                        nationalId,
+                                                        gender: step1.gender as Gender,
+                                                        birthdate: step1.birthdate,
+                                                        preferredLanguage: step1.preferredLanguage,
+                                                        fullNameArabic: fullNameArabic || undefined,
+                                                    });
+                                                } else if (step1.preferredLanguage) {
+                                                    await authService.updateProfile({ preferredLanguage: step1.preferredLanguage });
+                                                }
+                                                await authService.getProfile();
+                                                setHeaderAvatarUrl(authService.getCurrentUser()?.profile?.avatarUrl ?? null);
+                                            }
+                                            navigate('/settings');
+                                        } catch (err) {
+                                            let errorMessage = 'Could not save identity. Please try again.';
+                                            if (axios.isAxiosError(err) && err.response?.data) {
+                                                const data = err.response.data as { message?: string };
+                                                if (data.message) errorMessage = data.message;
+                                            }
+                                            setError(errorMessage);
+                                        } finally {
+                                            setLoading(false);
+                                        }
+                                        return;
+                                    }
+
                                     if (alreadyLoggedIn && cached?.user) {
-                                        if (!verificationComplete) {
+                                        if (!cached.profile?.onboardingStep2Completed) {
+                                            setLoading(true);
+                                            try {
+                                                await authService.completeVerification({
+                                                    nationalId,
+                                                    gender: step1.gender as Gender,
+                                                    birthdate: step1.birthdate,
+                                                    preferredLanguage: step1.preferredLanguage,
+                                                    fullNameArabic: fullNameArabic || undefined,
+                                                });
+                                                await authService.getProfile();
+                                                setHeaderAvatarUrl(authService.getCurrentUser()?.profile?.avatarUrl ?? null);
+                                            } catch (err) {
+                                                let errorMessage = 'Could not save identity. Please try again.';
+                                                if (axios.isAxiosError(err) && err.response?.data) {
+                                                    const data = err.response.data as { message?: string; code?: string };
+                                                    if (data.message) errorMessage = data.message;
+                                                }
+                                                setError(errorMessage);
+                                                setLoading(false);
+                                                return;
+                                            } finally {
+                                                setLoading(false);
+                                            }
+                                        }
+                                    }
+                                    setStep(2);
+                                })();
+                            }, 50);
+                        }}
+                        onCancel={() => setShowNidScanner(false)}
+                    />
+                </div>
+            ) : (
+                /* ─── Mobile: direct camera scanner ───────────────────────── */
+                <NidScanner
+                    onSuccess={(nationalId, fullNameArabic) => {
+                        setShowNidScanner(false);
+                        setStep1((s) => ({ ...s, nationalId, fullNameArabic }));
+                        setError(null);
+                        setTimeout(() => {
+                            void (async () => {
+                                const cached = authService.getCurrentUser();
+                                const verificationComplete = !!cached?.profile?.isVerificationComplete;
+
+                                if (settingsOnlyFlow) {
+                                    setLoading(true);
+                                    try {
+                                        if (alreadyLoggedIn && cached?.user) {
+                                            if (!verificationComplete) {
+                                                await authService.completeVerification({
+                                                    nationalId,
+                                                    gender: step1.gender as Gender,
+                                                    birthdate: step1.birthdate,
+                                                    preferredLanguage: step1.preferredLanguage,
+                                                    fullNameArabic: fullNameArabic || undefined,
+                                                });
+                                            } else if (step1.preferredLanguage) {
+                                                await authService.updateProfile({ preferredLanguage: step1.preferredLanguage });
+                                            }
+                                            await authService.getProfile();
+                                            setHeaderAvatarUrl(authService.getCurrentUser()?.profile?.avatarUrl ?? null);
+                                        }
+                                        navigate('/settings');
+                                    } catch (err) {
+                                        let errorMessage = 'Could not save identity. Please try again.';
+                                        if (axios.isAxiosError(err) && err.response?.data) {
+                                            const data = err.response.data as { message?: string };
+                                            if (data.message) errorMessage = data.message;
+                                        }
+                                        setError(errorMessage);
+                                    } finally {
+                                        setLoading(false);
+                                    }
+                                    return;
+                                }
+
+                                if (alreadyLoggedIn && cached?.user) {
+                                    if (!cached.profile?.onboardingStep2Completed) {
+                                        setLoading(true);
+                                        try {
                                             await authService.completeVerification({
                                                 nationalId,
                                                 gender: step1.gender as Gender,
@@ -1062,59 +1175,29 @@ const CompleteProfile: React.FC = () => {
                                                 preferredLanguage: step1.preferredLanguage,
                                                 fullNameArabic: fullNameArabic || undefined,
                                             });
-                                        } else if (step1.preferredLanguage) {
-                                            await authService.updateProfile({ preferredLanguage: step1.preferredLanguage });
+                                            await authService.getProfile();
+                                            setHeaderAvatarUrl(authService.getCurrentUser()?.profile?.avatarUrl ?? null);
+                                        } catch (err) {
+                                            let errorMessage = 'Could not save identity. Please try again.';
+                                            if (axios.isAxiosError(err) && err.response?.data) {
+                                                const data = err.response.data as { message?: string; code?: string };
+                                                if (data.message) errorMessage = data.message;
+                                            }
+                                            setError(errorMessage);
+                                            setLoading(false);
+                                            return;
+                                        } finally {
+                                            setLoading(false);
                                         }
-                                        await authService.getProfile();
-                                        setHeaderAvatarUrl(authService.getCurrentUser()?.profile?.avatarUrl ?? null);
-                                    }
-                                    navigate('/settings');
-                                } catch (err) {
-                                    let errorMessage = 'Could not save identity. Please try again.';
-                                    if (axios.isAxiosError(err) && err.response?.data) {
-                                        const data = err.response.data as { message?: string };
-                                        if (data.message) errorMessage = data.message;
-                                    }
-                                    setError(errorMessage);
-                                } finally {
-                                    setLoading(false);
-                                }
-                                return;
-                            }
-
-                            if (alreadyLoggedIn && cached?.user) {
-                                if (!cached.profile?.onboardingStep2Completed) {
-                                    setLoading(true);
-                                    try {
-                                        await authService.completeVerification({
-                                            nationalId,
-                                            gender: step1.gender as Gender,
-                                            birthdate: step1.birthdate,
-                                            preferredLanguage: step1.preferredLanguage,
-                                            fullNameArabic: fullNameArabic || undefined,
-                                        });
-                                        await authService.getProfile();
-                                        setHeaderAvatarUrl(authService.getCurrentUser()?.profile?.avatarUrl ?? null);
-                                    } catch (err) {
-                                        let errorMessage = 'Could not save identity. Please try again.';
-                                        if (axios.isAxiosError(err) && err.response?.data) {
-                                            const data = err.response.data as { message?: string; code?: string };
-                                            if (data.message) errorMessage = data.message;
-                                        }
-                                        setError(errorMessage);
-                                        setLoading(false);
-                                        return;
-                                    } finally {
-                                        setLoading(false);
                                     }
                                 }
-                            }
-                            setStep(2);
-                        })();
-                    }, 50);
-                }}
-                onCancel={() => setShowNidScanner(false)}
-            />
+                                setStep(2);
+                            })();
+                        }, 50);
+                    }}
+                    onCancel={() => setShowNidScanner(false)}
+                />
+            )
         )}
         <div
             className={`onboarding-viewport${step > 1 && !settingsOnlyFlow ? ' onboarding-viewport--step-back' : ''}`}

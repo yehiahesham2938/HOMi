@@ -1041,4 +1041,36 @@ router.post(
     authController.nidOcr.bind(authController)
 );
 
+/**
+ * POST /auth/nid-session
+ * Create a short-lived QR session token for cross-device NID scanning.
+ * Requires authentication.
+ */
+router.post(
+    '/nid-session',
+    protect,
+    authController.createNidSession.bind(authController)
+);
+
+/**
+ * POST /auth/nid-session/:token/complete
+ * Submit NID scan result from the mobile device.
+ * Public — the QR token itself is the credential.
+ */
+router.post(
+    '/nid-session/:token/complete',
+    authController.completeNidSession.bind(authController)
+);
+
+/**
+ * GET /auth/nid-session/:token
+ * Poll session status (fallback for environments where WebSocket is blocked).
+ * Public.
+ */
+router.get(
+    '/nid-session/:token',
+    authController.getNidSession.bind(authController)
+);
+
 export default router;
+

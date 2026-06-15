@@ -348,11 +348,15 @@ const TenantPayment: React.FC = () => {
                 const amount = Number(c.securityDeposit ?? c.property?.securityDeposit ?? 0);
                 const date = c.moveInDate || c.createdAt;
 
-                let status: 'HELD' | 'REFUNDED' | 'FORFEITED' | 'PENDING' = 'PENDING';
-                if (c.status === 'ACTIVE') status = 'HELD';
-                else if (c.status === 'EXPIRED') status = 'REFUNDED';
-                else if (c.status === 'TERMINATED') status = 'FORFEITED';
-                else if (c.status === 'PENDING_PAYMENT') status = 'PENDING';
+                let status: 'HELD' | 'REFUNDED' | 'FORFEITED' | 'PENDING' | 'SPLIT' = 'PENDING';
+                if (c.depositStatus) {
+                    status = c.depositStatus as any;
+                } else {
+                    if (c.status === 'ACTIVE') status = 'HELD';
+                    else if (c.status === 'EXPIRED') status = 'REFUNDED';
+                    else if (c.status === 'TERMINATED') status = 'FORFEITED';
+                    else if (c.status === 'PENDING_PAYMENT') status = 'PENDING';
+                }
 
                 return { id: c.id, propertyTitle, amount, status, date };
             })
@@ -1077,6 +1081,9 @@ const TenantPayment: React.FC = () => {
                                 } else if (item.status === 'FORFEITED') {
                                     badgeStyle = { background: '#fef2f2', color: '#dc2626', borderRadius: '6px', padding: '3px 10px', fontSize: '12px', fontWeight: 700 };
                                     statusText = 'Forfeited to Landlord';
+                                } else if (item.status === 'SPLIT') {
+                                    badgeStyle = { background: '#fef3c7', color: '#d97706', borderRadius: '6px', padding: '3px 10px', fontSize: '12px', fontWeight: 700 };
+                                    statusText = 'Split (Partial Refund)';
                                 } else {
                                     badgeStyle = { background: '#fffbeb', color: '#92400e', borderRadius: '6px', padding: '3px 10px', fontSize: '12px', fontWeight: 700 };
                                     statusText = 'Awaiting Payment';

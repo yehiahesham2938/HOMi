@@ -20,6 +20,7 @@ interface UpcomingPaymentProps {
      * the user knows to scroll down to the arrears section.
      */
     isInArrears?: boolean;
+    isTerminationApproved?: boolean;
 }
 
 /**
@@ -44,6 +45,7 @@ const UpcomingPayment = ({
     estimatedLateFee,
     totalDue,
     isInArrears = false,
+    isTerminationApproved = false,
 }: UpcomingPaymentProps) => {
     const cardState: 'paid' | 'arrears' | 'due' = (() => {
         if (isCurrentCyclePaid) return 'paid';
@@ -72,6 +74,23 @@ const UpcomingPayment = ({
                 <span className="currency">$</span>
                 <span className="value">{amount.toLocaleString()}</span>
             </div>
+
+            {isTerminationApproved && (
+                <div style={{
+                    backgroundColor: '#fffbeb',
+                    border: '1px solid #fef3c7',
+                    borderRadius: '8px',
+                    padding: '8px 12px',
+                    color: '#b45309',
+                    fontSize: '13px',
+                    lineHeight: '1.4',
+                    margin: '8px 0 16px 0',
+                    textAlign: 'center',
+                    fontWeight: 500
+                }}>
+                    (this is the last payment before termination, no upcoming payments)
+                </div>
+            )}
             <div className="payment-details">
                 <div className="detail-row">
                     <span>{cardState === 'paid' ? 'Next Due' : 'Due Date'}</span>

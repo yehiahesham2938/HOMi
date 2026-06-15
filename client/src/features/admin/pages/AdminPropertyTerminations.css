@@ -1,0 +1,491 @@
+/* AdminPropertyTerminations.css */
+
+.termination-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 8px;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    border: none;
+    background: none;
+    font-size: 15px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+.tab-btn:hover {
+    color: #3b82f6;
+    background-color: #f1f5f9;
+}
+
+.tab-btn.active {
+    color: #3b82f6;
+    background-color: #eff6ff;
+    box-shadow: inset 0 -2px 0 #3b82f6;
+}
+
+/* Table styles */
+.requests-table-wrapper {
+    overflow-x: auto;
+}
+
+.requests-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.requests-table th,
+.requests-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.requests-table th {
+    background-color: #f8fafc;
+    font-weight: 600;
+    color: #475569;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.table-property-cell strong,
+.table-requester-cell strong {
+    display: block;
+    font-size: 14px;
+    color: #1e293b;
+    margin-bottom: 2px;
+}
+
+.table-property-cell span,
+.table-requester-cell span {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.table-scenario-cell {
+    max-width: 320px;
+}
+
+.table-scenario-cell p {
+    margin: 4px 0 0 0;
+    font-size: 13px;
+    color: #475569;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Badges */
+.scenario-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.scenario-badge.early-exit {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.scenario-badge.property-uninhabitable {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.scenario-badge.landlord-breached-contract {
+    background-color: #ffedd5;
+    color: #ea580c;
+}
+
+.scenario-badge.mutual-agreement {
+    background-color: #dbeafe;
+    color: #2563eb;
+}
+
+.scenario-badge.landlord-initiated {
+    background-color: #f3e8ff;
+    color: #7c3aed;
+}
+
+.scenario-badge.property-damage {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.scenario-badge.lease-violation {
+    background-color: #fef2f2;
+    color: #ef4444;
+}
+
+.scenario-badge.unauthorized-occupancy {
+    background-color: #ffedd5;
+    color: #ea580c;
+}
+
+.status-pill {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-pill.pending {
+    background-color: #eff6ff;
+    color: #3b82f6;
+    border: 1px solid #dbeafe;
+}
+
+.status-pill.approved {
+    background-color: #ecfdf5;
+    color: #10b981;
+    border: 1px solid #d1fae5;
+}
+
+.status-pill.rejected {
+    background-color: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fee2e2;
+}
+
+.review-action-btn {
+    padding: 6px 12px;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.review-action-btn:hover {
+    background-color: #2563eb;
+}
+
+.review-action-btn.view {
+    background-color: #f1f5f9;
+    color: #475569;
+}
+
+.review-action-btn.view:hover {
+    background-color: #e2e8f0;
+}
+
+/* Modals */
+.termination-review-modal {
+    max-width: 800px !important;
+    width: 90% !important;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 85vh;
+}
+
+.close-modal-x {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #94a3b8;
+    transition: color 0.2s;
+}
+
+.close-modal-x:hover {
+    color: #475569;
+}
+
+.review-modal-body {
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.review-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 640px) {
+    .review-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.review-section h3 {
+    font-size: 15px;
+    color: #1e293b;
+    margin: 0 0 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.info-card-lite {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px;
+}
+
+.info-card-lite p {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    color: #475569;
+}
+
+.info-card-lite p:last-child {
+    margin-bottom: 0;
+}
+
+.info-card-lite p b {
+    color: #1e293b;
+}
+
+.request-reason-box {
+    margin-bottom: 20px;
+}
+
+.reason-text-area {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.scenario-label {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.scenario-label span {
+    font-weight: 700;
+    color: #3b82f6;
+}
+
+.explanation-bubble {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1e293b;
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 12px;
+}
+
+.halfway-info-box {
+    display: flex;
+    gap: 12px;
+    background-color: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 20px;
+    color: #1e3a8a;
+    font-size: 13px;
+}
+
+.halfway-info-box svg {
+    margin-top: 2px;
+    flex-shrink: 0;
+    color: #3b82f6;
+}
+
+.halfway-info-box strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.halfway-info-box p {
+    margin: 0;
+}
+
+.warning-text {
+    color: #d97706;
+    font-weight: 700;
+}
+
+.success-text {
+    color: #059669;
+    font-weight: 700;
+}
+
+/* Settlement Controls */
+.settlement-controls-box {
+    background-color: #fafafa;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 18px;
+}
+
+.controls-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+@media (max-width: 600px) {
+    .controls-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.control-group {
+    margin-bottom: 16px;
+}
+
+.control-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 6px;
+}
+
+.control-group input,
+.control-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.helper-text {
+    display: block;
+    margin-top: 4px;
+    font-size: 11px;
+    color: #64748b;
+}
+
+.auto-rent-disclaimer {
+    display: flex;
+    gap: 10px;
+    background-color: #fffbeb;
+    border: 1px solid #fef3c7;
+    padding: 12px;
+    border-radius: 6px;
+    color: #b45309;
+    font-size: 12px;
+    margin-bottom: 16px;
+}
+
+.auto-rent-disclaimer svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.rejection-reason-control {
+    margin-bottom: 20px;
+}
+
+.rejection-reason-control label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 6px;
+}
+
+.rejection-reason-control textarea {
+    width: 100%;
+    height: 70px;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 14px;
+    resize: vertical;
+}
+
+.review-action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.approve-action-btn,
+.reject-action-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.approve-action-btn {
+    background-color: #10b981;
+    color: white;
+}
+
+.approve-action-btn:hover {
+    background-color: #059669;
+}
+
+.reject-action-btn {
+    background-color: #ef4444;
+    color: white;
+}
+
+.reject-action-btn:hover {
+    background-color: #dc2626;
+}
+
+.processed-details-box {
+    background-color: #f1f5f9;
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+    color: #475569;
+}
+
+.processed-details-box h4 {
+    margin: 0 0 6px 0;
+    color: #1e293b;
+}
+
+.processed-details-box p {
+    margin: 0;
+    font-size: 13px;
+}
+
+/* Alerts Banners inside modal */
+.error-message-banner {
+    background-color: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fee2e2;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-bottom: 16px;
+}
+
+.success-message-banner {
+    background-color: #ecfdf5;
+    color: #059669;
+    border: 1px solid #d1fae5;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-bottom: 16px;
+}

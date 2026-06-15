@@ -349,6 +349,41 @@ class AdminController {
             next(error);
         }
     }
+
+    async getTerminationRequests(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const requests = await adminService.getTerminationRequests();
+            res.status(200).json({ success: true, data: requests });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async actionTerminationRequest(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const adminId = (req as any).user?.userId;
+            const { id } = req.params;
+            const { action, rejectionReason, damageDeduction, mutualDepositOption } = req.body;
+
+            if (!action || (action !== 'APPROVE' && action !== 'REJECT')) {
+                throw new AdminError("Action must be 'APPROVE' or 'REJECT'", 400);
+            }
+
+            await adminService.actionTerminationRequest(String(id), String(adminId), {
+                action,
+                rejectionReason,
+                damageDeduction: damageDeduction !== undefined ? Number(damageDeduction) : 0,
+                mutualDepositOption,
+            });
+
+            res.status(200).json({
+                success: true,
+                message: `Lease termination request has been ${action === 'APPROVE' ? 'approved' : 'rejected'}.`,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 export const adminController = new AdminController();

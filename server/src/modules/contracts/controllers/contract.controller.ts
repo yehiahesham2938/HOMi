@@ -493,10 +493,14 @@ class ContractController {
     async terminateLease(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const { id } = req.params;
-            const landlordId = (req as any).user?.userId as string;
-            const { reason } = req.body;
+            const userId = (req as any).user?.userId as string;
+            const { reason, scenario, details } = req.body;
             
-            const request = await contractService.requestLeaseTermination(id as string, landlordId, { reason });
+            const request = await contractService.requestLeaseTermination(
+                id as string,
+                userId,
+                { reason, scenario, details }
+            );
 
             res.status(200).json({
                 success: true,

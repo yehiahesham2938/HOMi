@@ -367,6 +367,84 @@ class AdminService {
         const response = await apiClient.post<{ success: boolean; message: string }>(`/admin/tenant-reports/${reportId}/ban`, { reason });
         return response.data;
     }
+
+    async getTerminationRequests() {
+        const response = await apiClient.get<{ success: boolean; data: AdminTerminationRequest[] }>('/admin/termination-requests');
+        return response.data.data;
+    }
+
+    async actionTerminationRequest(
+        id: string,
+        payload: {
+            action: 'APPROVE' | 'REJECT';
+            rejectionReason?: string;
+            damageDeduction?: number;
+            mutualDepositOption?: 'LANDLORD' | 'TENANT' | 'SPLIT';
+        }
+    ) {
+        const response = await apiClient.post<{ success: boolean; message: string }>(
+            `/admin/termination-requests/${id}/action`,
+            payload
+        );
+        return response.data;
+    }
+}
+
+export interface AdminTerminationRequest {
+    id: string;
+    contract_id: string;
+    requester_id: string;
+    reason: string;
+    scenario: string;
+    details: string;
+    status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    created_at: string;
+    updated_at: string;
+    requesterName?: string;
+    requester?: {
+        id: string;
+        email: string;
+        role: string;
+        profile: {
+            first_name: string;
+            last_name: string;
+        } | null;
+    };
+    contract?: {
+        id: string;
+        contractId: string;
+        leaseId: string | null;
+        status: string;
+        rentAmount: number;
+        securityDeposit: number;
+        moveInDate: string;
+        leaseDurationMonths: number;
+        tenantName?: string;
+        landlordName?: string;
+        property: {
+            id: string;
+            title: string;
+            address: string;
+            monthlyPrice: number;
+            securityDeposit: number;
+        } | null;
+        tenant?: {
+            id: string;
+            email: string;
+            profile: {
+                first_name: string;
+                last_name: string;
+            } | null;
+        };
+        landlord?: {
+            id: string;
+            email: string;
+            profile: {
+                first_name: string;
+                last_name: string;
+            } | null;
+        };
+    };
 }
 
 export interface AdminContractItem {

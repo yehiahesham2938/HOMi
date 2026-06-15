@@ -42,6 +42,7 @@ import AdminMaintainers from "./features/admin/pages/AdminMaintainers";
 import AdminRoommateMatching from "./features/admin/pages/AdminRoommateMatching";
 import AdminContracts from "./features/admin/pages/AdminContracts";
 import AdminPropertyDetails from "./features/admin/pages/AdminPropertyDetails";
+import AdminPropertyTerminations from "./features/admin/pages/AdminPropertyTerminations";
 
 import Contract from "./features/TenantContractView/pages/Contract";
 import LandlordContract from "./features/LandlordContractView/pages/Contract";
@@ -152,6 +153,7 @@ function App() {
         <Route path="/admin/auth/login" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AuthGuard allowedRoles={['ADMIN']}><AdminDashboard /></AuthGuard>} />
         <Route path="/admin/property-approvals" element={<AuthGuard allowedRoles={['ADMIN']}><AdminPropertyApprovals /></AuthGuard>} />
+        <Route path="/admin/property-terminations" element={<AuthGuard allowedRoles={['ADMIN']}><AdminPropertyTerminations /></AuthGuard>} />
         <Route path="/admin/properties" element={<AuthGuard allowedRoles={['ADMIN']}><AdminPropertyDetails /></AuthGuard>} />
         <Route path="/admin/contracts" element={<AuthGuard allowedRoles={['ADMIN']}><AdminContracts /></AuthGuard>} />
         <Route path="/admin/user-reports" element={<AuthGuard allowedRoles={['ADMIN']}><AdminUserReports /></AuthGuard>} />

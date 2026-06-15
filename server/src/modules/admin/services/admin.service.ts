@@ -9,7 +9,11 @@ import { Amenity } from '../../properties/models/Amenity.js';
 import { HouseRule } from '../../properties/models/HouseRule.js';
 import { PropertyReport, PropertyReportStatus } from '../../properties/models/PropertyReport.js';
 import { Contract, ContractStatus } from '../../contracts/models/Contract.js';
+import { LeaseTerminationRequest, LeaseTerminationStatus } from '../../contracts/models/LeaseTerminationRequest.js';
+import { contractService } from '../../contracts/services/contract.service.js';
 import { TenantReport, TenantReportStatus } from '../../contracts/models/TenantReport.js';
+import sequelize from '../../../config/database.js';
+import { testingClockService } from '../../../shared/services/testing-clock.service.js';
 import { emailService } from '../../../shared/services/email.service.js';
 import { Notification } from '../../notifications/models/Notification.js';
 import { Profile } from '../../auth/models/Profile.js';
@@ -1180,6 +1184,172 @@ class AdminService {
             entityId: tenant.id,
             description: `Admin banned tenant ${tenant.email} based on report ${reportId}.`,
         });
+    }
+
+    async getTerminationRequests(): Promise<any[]> {
+        const requests = await LeaseTerminationRequest.findAll({
+            include: [
+                {
+                    model: Contract,
+                    as: 'contract',
+                    include: [
+                        {
+                            model: Property,
+                            as: 'property',
+                            attributes: ['id', 'title', 'address', 'monthly_price', 'security_deposit'],
+                        },
+                        {
+                            model: User,
+                            as: 'tenant',
+                            attributes: ['id', 'email'],
+                            include: [{ model: Profile, as: 'profile', attributes: ['first_name', 'last_name'] }],
+                        },
+                        {
+                            model: User,
+                            as: 'landlord',
+                            attributes: ['id', 'email'],
+                            include: [{ model: Profile, as: 'profile', attributes: ['first_name', 'last_name'] }],
+                        },
+                    ],
+                },
+                {
+                    model: User,
+                    as: 'requester',
+                    attributes: ['id', 'email', 'role'],
+                    include: [{ model: Profile, as: 'profile', attributes: ['first_name', 'last_name'] }],
+                },
+            ],
+            order: [['created_at', 'DESC']],
+        });
+
+        return requests.map((req: any) => {
+            const data = req.get({ plain: true });
+            if (data.contract) {
+                if (data.contract.tenant?.profile) {
+                    data.contract.tenantName = `${data.contract.tenant.profile.first_name || ''} ${data.contract.tenant.profile.last_name || ''}`.trim();
+                }
+                if (data.contract.landlord?.profile) {
+                    data.contract.landlordName = `${data.contract.landlord.profile.first_name || ''} ${data.contract.landlord.profile.last_name || ''}`.trim();
+                }
+            }
+            if (data.requester?.profile) {
+                data.requesterName = `${data.requester.profile.first_name || ''} ${data.requester.profile.last_name || ''}`.trim();
+            }
+            return data;
+        });
+    }
+
+    async actionTerminationRequest(
+        requestId: string,
+        adminId: string,
+        payload: {
+            action: 'APPROVE' | 'REJECT';
+            rejectionReason?: string;
+            damageDeduction?: number;
+            mutualDepositOption?: 'LANDLORD' | 'TENANT' | 'SPLIT';
+        }
+    ): Promise<void> {
+        const request = await LeaseTerminationRequest.findByPk(requestId);
+        if (!request) {
+            throw new AdminError('Lease termination request not found', 404, 'REQUEST_NOT_FOUND');
+        }
+
+        if (request.status !== LeaseTerminationStatus.PENDING) {
+            throw new AdminError('This request has already been processed', 400, 'REQUEST_ALREADY_PROCESSED');
+        }
+
+        if (payload.action === 'REJECT') {
+            await request.update({
+                status: LeaseTerminationStatus.REJECTED,
+                reason: request.reason + (payload.rejectionReason ? ` (Rejected: ${payload.rejectionReason})` : '')
+            });
+
+            await activityLogService.log({
+                actor: { userId: adminId, role: 'ADMIN' },
+                action: 'LEASE_TERMINATION_REJECTED',
+                entityType: 'CONTRACT',
+                entityId: request.contract_id,
+                description: `Admin rejected lease termination request. Reason: ${payload.rejectionReason || 'No reason specified'}`,
+                metadata: { requestId: request.id },
+            });
+
+            // Send notification to requester
+            await Notification.create({
+                user_id: request.requester_id,
+                title: 'Lease Termination Request Rejected',
+                body: `Your lease termination request was reviewed and rejected. Feedback: ${payload.rejectionReason || 'None'}`,
+                type: 'SYSTEM',
+                is_read: false,
+            } as any);
+
+            return;
+        }
+
+        // Action is APPROVE
+        const contract = await Contract.findByPk(request.contract_id, {
+            include: [
+                {
+                    model: Property,
+                    as: 'property',
+                }
+            ]
+        });
+
+        if (!contract) {
+            throw new AdminError('Associated contract not found', 404, 'CONTRACT_NOT_FOUND');
+        }
+
+        if (contract.status !== ContractStatus.ACTIVE) {
+            throw new AdminError('Lease termination can only be processed for active contracts', 400, 'CONTRACT_NOT_ACTIVE');
+        }
+
+        const transaction = await sequelize.transaction();
+
+        try {
+            await request.update({
+                status: LeaseTerminationStatus.APPROVED,
+                damage_deduction: payload.damageDeduction ?? 0,
+                mutual_deposit_option: payload.mutualDepositOption ?? null,
+            }, { transaction });
+
+            // Logs and notifications
+            await activityLogService.log({
+                actor: { userId: adminId, role: 'ADMIN' },
+                action: 'LEASE_TERMINATION_APPROVED',
+                entityType: 'CONTRACT',
+                entityId: contract.id,
+                description: `Admin approved early lease termination request. The lease will terminate at the end of the current billing cycle once outstanding dues are paid.`,
+                metadata: {
+                    requestId: request.id,
+                    contractId: contract.id,
+                    damageDeduction: payload.damageDeduction ?? 0,
+                    mutualDepositOption: payload.mutualDepositOption ?? null,
+                },
+            });
+
+            const propTitle = contract.property?.title || 'Property';
+
+            await Notification.create({
+                user_id: contract.tenant_id,
+                title: 'Lease Termination Request Approved',
+                body: `Your early lease termination request for property "${propTitle}" has been approved. The lease will terminate at the end of the current billing cycle once outstanding rent is paid.`,
+                type: 'SYSTEM',
+                is_read: false,
+            } as any, { transaction });
+
+            await Notification.create({
+                user_id: contract.landlord_id,
+                title: 'Lease Termination Request Approved',
+                body: `The early lease termination request for property "${propTitle}" has been approved. The lease will terminate at the end of the current billing cycle once outstanding rent is paid and settled.`,
+                type: 'SYSTEM',
+                is_read: false,
+            } as any, { transaction });
+
+            await transaction.commit();
+        } catch (err) {
+            await transaction.rollback();
+            throw err;
+        }
     }
 }
 

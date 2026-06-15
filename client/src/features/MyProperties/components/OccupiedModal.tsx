@@ -23,6 +23,7 @@ const OccupiedModal: React.FC<OccupiedModalProps> = ({ contract, onClose }) => {
     // Reporting States
     const [reportView, setReportView] = useState<'none' | 'report' | 'terminate'>('none');
     const [reportReason, setReportReason] = useState('LATE_PAYMENT');
+    const [terminateScenario, setTerminateScenario] = useState('Property Damage');
     const [reportDetails, setReportDetails] = useState('');
     const [actionLoading, setActionLoading] = useState(false);
     const [successMsg, setSuccessMsg] = useState('');
@@ -72,20 +73,23 @@ const OccupiedModal: React.FC<OccupiedModalProps> = ({ contract, onClose }) => {
 
     const handleTerminateSubmit = async () => {
         if (!reportDetails.trim()) {
-            setErrorMsg('Please provide reasons for early termination.');
+            setErrorMsg('Please provide details or reasons for early termination.');
             return;
         }
         setActionLoading(true);
         setErrorMsg('');
         try {
             await contractService.terminateLease(contract.id, {
-                reason: reportDetails
+                scenario: terminateScenario,
+                details: reportDetails,
+                reason: `Landlord early termination (${terminateScenario}): ${reportDetails}`
             });
             setSuccessMsg('Lease termination request submitted to administration.');
             setTimeout(() => {
                 setReportView('none');
                 setSuccessMsg('');
                 setReportDetails('');
+                setTerminateScenario('Property Damage');
             }, 3000);
         } catch (err: any) {
             setErrorMsg(err.response?.data?.message || 'Failed to submit request.');
@@ -236,8 +240,20 @@ const OccupiedModal: React.FC<OccupiedModalProps> = ({ contract, onClose }) => {
                                         </div>
                                     )}
 
+                                    {reportView === 'terminate' && (
+                                        <div className="occ-form-group">
+                                            <label>Termination Reason</label>
+                                            <select className="occ-select" value={terminateScenario} onChange={(e) => setTerminateScenario(e.target.value)}>
+                                                <option value="Property Damage">Property Damage</option>
+                                                <option value="Lease Violation">Lease Violation (Illegal Activity)</option>
+                                                <option value="Unauthorized Occupancy">Unauthorized Occupancy</option>
+                                                <option value="LANDLORD_INITIATED">Early Exit (No tenant fault)</option>
+                                            </select>
+                                        </div>
+                                    )}
+
                                     <div className="occ-form-group">
-                                        <label>{reportView === 'report' ? 'Details' : 'Reason for Termination'}</label>
+                                        <label>{reportView === 'report' ? 'Details' : 'Additional Details & Explanation'}</label>
                                         <textarea
                                             className="occ-textarea"
                                             placeholder="Please provide details for the administration..."

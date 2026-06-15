@@ -149,6 +149,7 @@ export interface ContractInstallments {
     nextPayableTotal: number;
     items: RentInstallmentItem[];
     now: string;
+    isTerminationApproved?: boolean;
 }
 
 interface ContractInstallmentsApiResponse {
@@ -235,12 +236,17 @@ export interface LandlordContract {
     maintenanceResponsibilities?: ContractMaintenanceResponsibility[];
     landlordSignature?: string;
     tenantSignature?: string;
+    depositStatus?: 'PENDING' | 'HELD' | 'REFUNDED' | 'FORFEITED' | 'RELEASED' | 'SPLIT';
     terminationRequests?: Array<{
         id: string;
         status: string;
         reason: string;
         createdAt: string;
         requesterId: string;
+        scenario?: string;
+        details?: string;
+        damageDeduction?: number | null;
+        mutualDepositOption?: string | null;
     }>;
 }
 
@@ -519,7 +525,9 @@ class ContractService {
     }
 
     async terminateLease(contractId: string, payload: {
-        reason: string;
+        reason?: string;
+        scenario?: string;
+        details?: string;
     }): Promise<{ success: boolean; message: string; data: any }> {
         const response = await apiClient.post<{ success: boolean; message: string; data: any }>(
             `/contracts/${contractId}/terminate`,

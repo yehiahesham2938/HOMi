@@ -653,6 +653,14 @@ class AuthService {
         const response = await apiClient.post('/auth/nid-ocr', { frontImg, backImg }, { timeout: 90_000 });
         return response.data;
     }
+
+    /**
+     * Proxy Egyptian NID OCR to Valify via the HOMI backend for mobile phones.
+     */
+    async nidSessionOcr(token: string, frontImg: string, backImg: string): Promise<any> {
+        const response = await apiClient.post(`/auth/nid-session/${token}/ocr`, { frontImg, backImg }, { timeout: 90_000 });
+        return response.data;
+    }
 }
 
 export const authService = new AuthService();

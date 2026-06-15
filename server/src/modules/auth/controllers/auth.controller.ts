@@ -747,6 +747,46 @@ export class AuthController {
             next(error);
         }
     }
+
+    /**
+     * POST /auth/nid-session/:token/ocr
+     * Perform OCR using the session token (mobile phone flow).
+     */
+    async nidSessionOcr(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { token } = req.params as { token: string };
+            if (!token || !/^[0-9a-f]{64}$/.test(token)) {
+                throw new AuthError('Invalid session token', 400, 'INVALID_NID_TOKEN');
+            }
+
+            const session = nidSessions.get(token);
+            if (!session) {
+                throw new AuthError('Session not found or expired', 404, 'NID_SESSION_NOT_FOUND');
+            }
+            if (session.expiresAt < Date.now()) {
+                nidSessions.delete(token);
+                throw new AuthError('QR session has expired. Please refresh the QR code.', 410, 'NID_SESSION_EXPIRED');
+            }
+
+            const { frontImg, backImg } = req.body as { frontImg?: string; backImg?: string };
+            if (!frontImg || !backImg) {
+                throw new AuthError('Both frontImg and backImg are required.', 400, 'MISSING_IMAGES');
+            }
+
+            const result = await performNidOcr(frontImg, backImg);
+            res.status(200).json(result);
+        } catch (error) {
+            if (error instanceof Error && 'isAxiosError' in error && !(error instanceof AuthError)) {
+                res.status(502).json({
+                    success: false,
+                    message: 'ID verification service is temporarily unavailable. Please try again.',
+                    code: 'VALIFY_ERROR',
+                });
+                return;
+            }
+            next(error);
+        }
+    }
 }
 
 // Export singleton instance

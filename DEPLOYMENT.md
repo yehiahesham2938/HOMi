@@ -37,21 +37,24 @@ to boot). Optional: SMTP (email), Google OAuth, Paymob, Gemini.
    ```
    NODE_ENV=production
    DATABASE_URL=${{ Postgres.DATABASE_URL }}
-   CORS_ORIGINS=https://<your-app>.vercel.app
    JWT_SECRET=<openssl rand -hex 32>
    JWT_REFRESH_SECRET=<openssl rand -hex 32>
    ENCRYPTION_KEY=<openssl rand -hex 32>          # 64 hex chars
    REDIS_ENABLED=true
    UPSTASH_REDIS_REST_URL=<from Upstash>
    UPSTASH_REDIS_REST_TOKEN=<from Upstash>
-   CLIENT_URL=https://<your-app>.vercel.app
    ```
+
+   `CLIENT_URL`, `CORS_ORIGINS`, and the `WEBAUTHN_*` vars default to the production
+   frontend (`https://homi-platform.com`) in [server/config/production.ts](server/config/production.ts),
+   so you don't need to set them. Set them only to point at a different frontend.
 
    Do **not** set `PORT` — Railway injects it and the server reads it.
    Add SMTP_*, VITE-side Google OAuth, Paymob, and Gemini vars if those features
    are used.
-6. **Generate a domain**: *Settings* → *Networking* → *Generate Domain*. Note the
-   URL, e.g. `https://homi-api.up.railway.app`. You'll feed this to the frontend.
+6. **Domain**: the backend is served in production at `https://api.homi-platform.com`
+   (custom domain on the Railway service). The frontend is already pointed at it
+   (see step 3); use Railway's generated URL only if you deploy a different backend.
 
 ---
 
@@ -66,12 +69,16 @@ to boot). Optional: SMTP (email), Google OAuth, Paymob, Gemini.
    [client/.env.example](client/.env.example):
 
    ```
-   VITE_API_BASE_URL=https://homi-api.up.railway.app/api   # NOTE the trailing /api
    VITE_GOOGLE_CLIENT_ID=<your google oauth client id>     # if using Google sign-in
    ```
 
-   > Socket.IO derives its origin by stripping `/api`, so the value must end in `/api`.
-4. **Deploy**. Vercel gives you a URL like `https://homi.vercel.app`.
+   `VITE_API_BASE_URL` is baked into the build via [client/.env.production](client/.env.production)
+   as `https://api.homi-platform.com/api`, so you don't need to set it. Set it only
+   to override (must end in `/api` — Socket.IO derives its origin by stripping it).
+   A `VITE_*` var set in the Vercel dashboard takes precedence over `.env.production`,
+   so make sure no stale `VITE_API_BASE_URL` (e.g. an old Railway URL) is set there.
+4. **Deploy**. The frontend is served in production at `https://homi-platform.com`
+   (custom domain configured on the Vercel project).
 
 ---
 
@@ -79,16 +86,21 @@ to boot). Optional: SMTP (email), Google OAuth, Paymob, Gemini.
 
 After both are live, make sure each knows the other's URL:
 
-- **Railway** `CORS_ORIGINS` (and `CLIENT_URL`) = the Vercel URL. Multiple origins
-  are comma-separated. This drives both Express CORS and Socket.IO CORS.
-- **Vercel** `VITE_API_BASE_URL` = the Railway URL **+ `/api`**.
+- **Railway** already defaults `CORS_ORIGINS`/`CLIENT_URL` to `https://homi-platform.com`
+  (see [server/config/production.ts](server/config/production.ts)), which drives both
+  Express CORS and Socket.IO CORS. Override via env only to point at a different
+  frontend; multiple origins are comma-separated.
+- **Vercel** already targets `https://api.homi-platform.com/api` via
+  [client/.env.production](client/.env.production). Override only to point at a
+  different backend (Railway URL **+ `/api`**).
 
 Changing a Railway variable redeploys automatically. Changing a Vercel variable
 requires a redeploy (*Deployments* → *Redeploy*) since `VITE_*` values are baked
 into the build.
 
-If you later add a custom domain, also set `WEBAUTHN_RP_ID` (host, no scheme) and
-`WEBAUTHN_ORIGIN` (full URL) on Railway for passkeys.
+Passkeys (WebAuthn) are pre-configured for `homi-platform.com`. If you move the
+frontend to a different host, override `WEBAUTHN_RP_ID` (host, no scheme) and
+`WEBAUTHN_ORIGIN` (full URL) on Railway.
 
 ---
 
@@ -114,7 +126,7 @@ not by Actions, so no deploy tokens/secrets live in GitHub.
 ## 5. Post-deploy smoke test
 
 ```bash
-curl https://homi-api.up.railway.app/health        # -> { success: true, ... }
+curl https://api.homi-platform.com/health        # -> { success: true, ... }
 ```
 
 Then open the Vercel URL, register/log in, and confirm API calls and the chat

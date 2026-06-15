@@ -336,15 +336,20 @@ const LandlordPayment: React.FC = () => {
                 const amount = Number(c.securityDeposit ?? c.property?.securityDeposit ?? 0);
                 const date = c.moveInDate || c.createdAt;
 
-                let status: 'HELD' | 'REFUNDED' | 'RELEASED' | 'PENDING' = 'PENDING';
-                if (c.status === 'ACTIVE') {
-                    status = 'HELD';
-                } else if (c.status === 'EXPIRED') {
-                    status = 'REFUNDED';
-                } else if (c.status === 'TERMINATED') {
-                    status = 'RELEASED';
-                } else if (c.status === 'PENDING_PAYMENT') {
-                    status = 'PENDING';
+                let status: 'HELD' | 'REFUNDED' | 'RELEASED' | 'PENDING' | 'SPLIT' = 'PENDING';
+                if (c.depositStatus) {
+                    status = c.depositStatus as any;
+                    if (status === 'FORFEITED') status = 'RELEASED'; // Map forfeited to released on landlord side
+                } else {
+                    if (c.status === 'ACTIVE') {
+                        status = 'HELD';
+                    } else if (c.status === 'EXPIRED') {
+                        status = 'REFUNDED';
+                    } else if (c.status === 'TERMINATED') {
+                        status = 'RELEASED';
+                    } else if (c.status === 'PENDING_PAYMENT') {
+                        status = 'PENDING';
+                    }
                 }
 
                 return {
@@ -1064,6 +1069,9 @@ const LandlordPayment: React.FC = () => {
                                 } else if (item.status === 'RELEASED') {
                                     badgeStyle = { background: '#e6fffa', color: '#007d51' };
                                     statusText = 'Released to Landlord';
+                                } else if (item.status === 'SPLIT') {
+                                    badgeStyle = { background: '#fffbeb', color: '#b45309' };
+                                    statusText = 'Split (Partial Release)';
                                 } else if (item.status === 'PENDING') {
                                     badgeStyle = { background: '#fffbeb', color: '#92400e' };
                                     statusText = 'Awaiting Payment';

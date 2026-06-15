@@ -13,6 +13,7 @@ import {
     TenantReport,
     TenantReportReason,
     LeaseTerminationRequest,
+    LeaseTerminationStatus,
 } from '../models/index.js';
 import { paymobService } from '../../../shared/services/paymob.service.js';
 import { env } from '../../../config/env.js';
@@ -1290,6 +1291,36 @@ class ContractService {
                 },
             });
 
+            // Check for approved lease termination request
+            const approvedRequest = await LeaseTerminationRequest.findOne({
+                where: {
+                    contract_id: contract.id,
+                    status: LeaseTerminationStatus.APPROVED,
+                },
+                transaction,
+                lock: transaction.LOCK.UPDATE,
+            });
+
+            if (approvedRequest) {
+                const dueDates = this.getContractDueDates(contract);
+                const moveIn = new Date(contract.move_in_date);
+                const currentIdx = dueDates.findIndex((dueDate, idx) => {
+                    const periodStart = idx === 0 ? moveIn : dueDates[idx - 1]!;
+                    return now >= periodStart;
+                });
+
+                if (currentIdx !== -1) {
+                    const currentMonthDueDate = dueDates[currentIdx]!;
+                    const isMonthEnded = now >= currentMonthDueDate;
+                    const newPaidInstallments = paidInstallments + outstandingInstallments;
+                    const isPaid = newPaidInstallments >= currentIdx + 1;
+
+                    if (isMonthEnded && isPaid) {
+                        await this.executeApprovedLeaseTermination(contract, approvedRequest, transaction);
+                    }
+                }
+            }
+
             await transaction.commit();
 
             const refreshedContract = await Contract.findByPk(contract.id, {
@@ -1730,6 +1761,14 @@ class ContractService {
         const nextPayableTotal = netRentAmount + lateFee;
         const nextPayableIndex = paidInstallments < dueDates.length ? paidInstallments : null;
 
+        const approvedReq = await LeaseTerminationRequest.findOne({
+            where: {
+                contract_id: contract.id,
+                status: LeaseTerminationStatus.APPROVED
+            }
+        });
+        const isTerminationApproved = !!approvedReq;
+
         return {
             contractId: contract.id,
             rentAmount,
@@ -1747,6 +1786,7 @@ class ContractService {
             nextPayableTotal,
             items,
             now: now.toISOString(),
+            isTerminationApproved,
         };
     }
 
@@ -2199,6 +2239,11 @@ class ContractService {
                     },
                 ],
             },
+            {
+                model: LeaseTerminationRequest,
+                as: 'terminationRequests',
+                attributes: ['id', 'status', 'reason', 'scenario', 'details', 'created_at', 'updated_at', 'damage_deduction', 'mutual_deposit_option'],
+            },
         ];
     }
 
@@ -2246,7 +2291,7 @@ class ContractService {
             {
                 model: LeaseTerminationRequest,
                 as: 'terminationRequests',
-                attributes: ['id', 'status', 'reason', 'created_at', 'requester_id'],
+                attributes: ['id', 'status', 'reason', 'scenario', 'details', 'created_at', 'updated_at', 'damage_deduction', 'mutual_deposit_option', 'requester_id'],
             },
         ];
     }
@@ -2292,31 +2337,57 @@ class ContractService {
     /**
      * Request lease termination
      */
-    async requestLeaseTermination(contractId: string, landlordId: string, data: { reason: string }) {
+    async requestLeaseTermination(contractId: string, userId: string, data: { reason?: string; scenario?: string; details?: string }) {
         const contract = await Contract.findByPk(contractId);
         if (!contract) throw new ContractError('Contract not found', 404, 'CONTRACT_NOT_FOUND');
-        if (contract.landlord_id !== landlordId) throw new ContractError('You do not have permission to modify this contract', 403, 'FORBIDDEN');
+        
+        const isLandlord = contract.landlord_id === userId;
+        const isTenant = contract.tenant_id === userId;
+        if (!isLandlord && !isTenant) {
+            throw new ContractError('You do not have permission to modify this contract', 403, 'FORBIDDEN');
+        }
+        
         if (contract.status !== ContractStatus.ACTIVE) {
             throw new ContractError('You can only request lease termination for active contracts', 400, 'INVALID_CONTRACT_STATUS');
         }
 
+        const existingRequest = await LeaseTerminationRequest.findOne({
+            where: {
+                contract_id: contract.id,
+                status: 'PENDING'
+            }
+        });
+        if (existingRequest) {
+            throw new ContractError('There is already a pending lease termination request for this contract.', 400, 'PENDING_REQUEST_EXISTS');
+        }
+
+        const scenario = data.scenario || (isLandlord ? 'LANDLORD_INITIATED' : 'TENANT_INITIATED');
+        const details = data.details || data.reason || '';
+        const reason = data.reason || `${scenario}: ${details}`;
+
         const request = await LeaseTerminationRequest.create({
             contract_id: contract.id,
-            requester_id: landlordId,
-            reason: data.reason,
-        });
+            requester_id: userId,
+            reason,
+            scenario,
+            details,
+            status: 'PENDING' as any,
+        } as any);
+
+        const actorRole = isLandlord ? 'LANDLORD' : 'TENANT';
 
         await activityLogService.log({
-            actor: { userId: landlordId, role: 'LANDLORD' },
+            actor: { userId: userId, role: actorRole },
             action: 'LEASE_TERMINATION_REQUESTED',
             entityType: 'CONTRACT',
             entityId: contract.id,
-            description: 'Landlord requested an early lease termination.',
-            metadata: { requestId: request.id },
+            description: `${actorRole === 'LANDLORD' ? 'Landlord' : 'Tenant'} requested an early lease termination.`,
+            metadata: { requestId: request.id, scenario },
         });
 
         return request;
     }
+
 
     async runDailyLeaseCycleCheck(now: Date): Promise<void> {
         const activeContracts = await Contract.findAll({
@@ -2325,6 +2396,12 @@ class ContractService {
                 {
                     model: Property,
                     as: 'property',
+                },
+                {
+                    model: LeaseTerminationRequest,
+                    as: 'terminationRequests',
+                    where: { status: LeaseTerminationStatus.APPROVED },
+                    required: false,
                 }
             ]
         });
@@ -2354,6 +2431,38 @@ class ContractService {
                 if (Number.isFinite(byInstallments) && byInstallments > 0) return sum + byInstallments;
                 return sum + 1;
             }, prepaidInstallments);
+
+            const approvedRequest = (contract as any).terminationRequests?.find(
+                (tr: any) => tr.status === LeaseTerminationStatus.APPROVED
+            );
+
+            if (approvedRequest) {
+                const currentIdx = dueDates.findIndex((dueDate, idx) => {
+                    const periodStart = idx === 0 ? moveIn : dueDates[idx - 1]!;
+                    return now >= periodStart;
+                });
+
+                if (currentIdx !== -1) {
+                    const currentMonthDueDate = dueDates[currentIdx]!;
+                    const isMonthEnded = now >= currentMonthDueDate;
+                    const isPaid = paidInstallments >= currentIdx + 1;
+
+                    if (isMonthEnded && isPaid) {
+                        const transaction = await sequelize.transaction();
+                        try {
+                            const fullRequest = await LeaseTerminationRequest.findByPk(approvedRequest.id, { transaction });
+                            if (fullRequest) {
+                                await this.executeApprovedLeaseTermination(contract, fullRequest, transaction);
+                            }
+                            await transaction.commit();
+                        } catch (err) {
+                            await transaction.rollback();
+                            console.error(`Failed to execute termination for contract ${contract.id}`, err);
+                        }
+                    }
+                }
+                continue;
+            }
 
             if (paidInstallments < N) {
                 const unpaidPeriodStart = paidInstallments === 0 ? moveIn : dueDates[paidInstallments - 1]!;
@@ -2447,6 +2556,193 @@ class ContractService {
                 }
             }
         }
+    }
+
+    private async executeApprovedLeaseTermination(
+        contract: Contract,
+        request: LeaseTerminationRequest,
+        transaction: any
+    ): Promise<void> {
+        const now = testingClockService.getNow();
+
+        // Calculate unpaid rent up to now (or rather, the current billing cycle end)
+        const installments = await this.getContractInstallments(contract.id, contract.tenant_id);
+        const unpaidDues = installments.items.filter(item => !item.isPaid && new Date(item.dueDate) <= now);
+        const unpaidRentAmount = unpaidDues.reduce((sum, item) => sum + item.rentAmount, 0);
+
+        // Determine deposit distribution
+        const depositAmount = Number(contract.security_deposit ?? 0);
+        let tenantDepositRefund = 0;
+        let landlordDepositCredit = 0;
+
+        const scenario = request.scenario;
+
+        if (scenario === 'LANDLORD_INITIATED') {
+            // Landlord early termination: full deposit to tenant, no penalty
+            tenantDepositRefund = depositAmount;
+            landlordDepositCredit = 0;
+        } else if (scenario === 'Property Damage' || scenario === 'Lease Violation' || scenario === 'Unauthorized Occupancy') {
+            // Landlord early termination due to tenant breach: deposit goes to landlord
+            tenantDepositRefund = 0;
+            landlordDepositCredit = depositAmount;
+        } else if (scenario === 'Early exit') {
+            // Early exit, no landlord fault
+            const dueDates = this.getContractDueDates(contract);
+            const moveIn = new Date(contract.move_in_date);
+            // Find current cycle due date as the termination reference date
+            const currentIdx = dueDates.findIndex((dueDate, idx) => {
+                const periodStart = idx === 0 ? moveIn : dueDates[idx - 1]!;
+                return now >= periodStart;
+            });
+            const termReferenceDate = currentIdx !== -1 ? dueDates[currentIdx]! : now;
+
+            const halfwayDate = new Date(moveIn);
+            halfwayDate.setMonth(halfwayDate.getMonth() + (Number(contract.lease_duration_months ?? 0) / 2));
+
+            if (termReferenceDate < halfwayDate) {
+                // Before halfway: penalty applies, deposit goes to landlord
+                tenantDepositRefund = 0;
+                landlordDepositCredit = depositAmount;
+            } else {
+                // After halfway: refund after deductions (damages)
+                const damages = Number(request.damage_deduction ?? 0);
+                const actualDamage = Math.min(damages, depositAmount);
+                tenantDepositRefund = depositAmount - actualDamage;
+                landlordDepositCredit = actualDamage;
+            }
+        } else if (scenario === 'Property uninhabitable' || scenario === 'Landlord breached contract') {
+            // Property uninhabitable or Landlord breached: full deposit returned to tenant, no penalty
+            tenantDepositRefund = depositAmount;
+            landlordDepositCredit = 0;
+        } else if (scenario === 'Mutual Agreement') {
+            // Mutual Agreement: option decides
+            const option = request.mutual_deposit_option;
+            const damages = Number(request.damage_deduction ?? 0);
+            const actualDamage = Math.min(damages, depositAmount);
+
+            let baseTenant = 0;
+            let baseLandlord = 0;
+            if (option === 'LANDLORD') {
+                baseTenant = 0;
+                baseLandlord = depositAmount;
+            } else if (option === 'TENANT') {
+                baseTenant = depositAmount;
+                baseLandlord = 0;
+            } else if (option === 'SPLIT') {
+                baseTenant = depositAmount / 2;
+                baseLandlord = depositAmount / 2;
+            } else {
+                baseTenant = depositAmount / 2;
+                baseLandlord = depositAmount / 2;
+            }
+
+            if (actualDamage > 0) {
+                if (baseTenant >= actualDamage) {
+                    tenantDepositRefund = baseTenant - actualDamage;
+                    landlordDepositCredit = baseLandlord + actualDamage;
+                } else {
+                    tenantDepositRefund = 0;
+                    landlordDepositCredit = baseLandlord + baseTenant;
+                }
+            } else {
+                tenantDepositRefund = baseTenant;
+                landlordDepositCredit = baseLandlord;
+            }
+        } else {
+            // Fallback
+            tenantDepositRefund = depositAmount;
+            landlordDepositCredit = 0;
+        }
+
+        // Wallet adjustments
+        const tenantProfile = await Profile.findOne({ where: { user_id: contract.tenant_id }, transaction });
+        const landlordProfile = await Profile.findOne({ where: { user_id: contract.landlord_id }, transaction });
+
+        let finalUnpaidRentPaid = 0;
+        let finalRentDeductedFromDeposit = 0;
+
+        if (tenantProfile && landlordProfile) {
+            // 1. Deduct unpaid rent from tenant wallet first
+            const tenantWalletBalance = Number(tenantProfile.wallet_balance ?? 0);
+            const rentPaidFromWallet = Math.min(tenantWalletBalance, unpaidRentAmount);
+            finalUnpaidRentPaid = rentPaidFromWallet;
+            let remainingUnpaidRent = unpaidRentAmount - rentPaidFromWallet;
+
+            tenantProfile.wallet_balance = Number(tenantProfile.wallet_balance) - rentPaidFromWallet;
+            landlordProfile.wallet_balance = Number(landlordProfile.wallet_balance) + rentPaidFromWallet;
+
+            // 2. If there's still unpaid rent, deduct from the tenant's deposit refund
+            if (remainingUnpaidRent > 0 && tenantDepositRefund > 0) {
+                const rentDeductedFromDeposit = Math.min(tenantDepositRefund, remainingUnpaidRent);
+                finalRentDeductedFromDeposit = rentDeductedFromDeposit;
+                tenantDepositRefund -= rentDeductedFromDeposit;
+                landlordDepositCredit += rentDeductedFromDeposit;
+                remainingUnpaidRent -= rentDeductedFromDeposit;
+            }
+
+            // 3. Add the resolved deposit refund and credit to the respective wallets
+            tenantProfile.wallet_balance = Number(tenantProfile.wallet_balance) + tenantDepositRefund;
+            landlordProfile.wallet_balance = Number(landlordProfile.wallet_balance) + landlordDepositCredit;
+
+            // 4. For Unauthorized Occupancy, apply damage deductions in addition to deposit forfeiture
+            if (request.scenario === 'Unauthorized Occupancy') {
+                const damages = Number(request.damage_deduction ?? 0);
+                if (damages > 0) {
+                    tenantProfile.wallet_balance = Number(tenantProfile.wallet_balance) - damages;
+                    landlordProfile.wallet_balance = Number(landlordProfile.wallet_balance) + damages;
+                }
+            }
+
+            await tenantProfile.save({ transaction });
+            await landlordProfile.save({ transaction });
+        }
+
+        // Update statuses
+        await contract.update({ status: ContractStatus.TERMINATED }, { transaction });
+
+        if (contract.property_id) {
+            await Property.update(
+                { status: PropertyStatus.AVAILABLE },
+                { where: { id: contract.property_id }, transaction }
+            );
+        }
+
+        // Update termination request status to APPROVED (should already be APPROVED, but let's make sure it is updated)
+        await request.update({ status: LeaseTerminationStatus.APPROVED }, { transaction });
+
+        // Logs and notifications
+        await activityLogService.log({
+            actor: { userId: 'SYSTEM', role: 'ADMIN' },
+            action: 'LEASE_TERMINATED',
+            entityType: 'CONTRACT',
+            entityId: contract.id,
+            description: `Lease terminated early (approved request). Deposit refunded: $${tenantDepositRefund}, Landlord credit: $${landlordDepositCredit}. Unpaid rent settled: $${finalUnpaidRentPaid + finalRentDeductedFromDeposit}.`,
+            metadata: {
+                requestId: request.id,
+                contractId: contract.id,
+                tenantRefund: tenantDepositRefund,
+                landlordCredit: landlordDepositCredit,
+                unpaidRentSettled: finalUnpaidRentPaid + finalRentDeductedFromDeposit,
+            },
+        });
+
+        const propTitle = contract.property?.title || 'Property';
+
+        await Notification.create({
+            user_id: contract.tenant_id,
+            title: 'Lease Terminated',
+            body: `Your lease for property "${propTitle}" has been terminated. Deposit refunded: $${tenantDepositRefund}.`,
+            type: 'SYSTEM',
+            is_read: false,
+        } as any, { transaction });
+
+        await Notification.create({
+            user_id: contract.landlord_id,
+            title: 'Lease Terminated',
+            body: `The lease for property "${propTitle}" has been terminated. Wallet credited: $${landlordDepositCredit} (from deposit/settlements).`,
+            type: 'SYSTEM',
+            is_read: false,
+        } as any, { transaction });
     }
 
     /**
@@ -2567,7 +2863,86 @@ class ContractService {
                 reason: tr.reason,
                 createdAt: tr.created_at || tr.createdAt,
                 requesterId: tr.requester_id || tr.requesterId,
+                scenario: tr.scenario,
+                details: tr.details,
+                damageDeduction: tr.damage_deduction ? Number(tr.damage_deduction) : null,
+                mutualDepositOption: tr.mutual_deposit_option,
             }));
+        }
+
+        let depositStatus: 'PENDING' | 'HELD' | 'REFUNDED' | 'FORFEITED' | 'RELEASED' | 'SPLIT' | undefined;
+        if (contract.status === ContractStatus.ACTIVE) {
+            depositStatus = 'HELD';
+        } else if (contract.status === ContractStatus.PENDING_PAYMENT || contract.status === ContractStatus.PENDING_TENANT || contract.status === ContractStatus.PENDING_LANDLORD) {
+            depositStatus = 'PENDING';
+        } else if (contract.status === ContractStatus.EXPIRED) {
+            depositStatus = 'REFUNDED';
+        } else if (contract.status === ContractStatus.TERMINATED) {
+            // Find approved LeaseTerminationRequest
+            const approvedRequest = (contract as any).terminationRequests?.find(
+                (tr: any) => tr.status === 'APPROVED'
+            );
+
+            if (!approvedRequest) {
+                // Non-payment auto-termination
+                depositStatus = 'FORFEITED'; // Maps to RELEASED on Landlord side in UI
+            } else {
+                const scenario = approvedRequest.scenario;
+                if (scenario === 'LANDLORD_INITIATED') {
+                    depositStatus = 'REFUNDED';
+                } else if (scenario === 'Property Damage' || scenario === 'Lease Violation' || scenario === 'Unauthorized Occupancy') {
+                    depositStatus = 'FORFEITED';
+                } else {
+                    if (scenario === 'Early exit') {
+                        const dueDates = this.getContractDueDates(contract);
+                        const moveIn = new Date(contract.move_in_date);
+                        const termReferenceDate = new Date(approvedRequest.updated_at || approvedRequest.created_at || contract.updated_at);
+                        const halfwayDate = new Date(moveIn);
+                        halfwayDate.setMonth(halfwayDate.getMonth() + (Number(contract.lease_duration_months ?? 0) / 2));
+
+                        if (termReferenceDate < halfwayDate) {
+                            depositStatus = 'FORFEITED';
+                        } else {
+                            const damages = Number(approvedRequest.damage_deduction ?? 0);
+                            const depositAmount = Number(contract.security_deposit ?? 0);
+                            if (damages >= depositAmount) {
+                                depositStatus = 'FORFEITED';
+                            } else if (damages > 0) {
+                                depositStatus = 'SPLIT';
+                            } else {
+                                depositStatus = 'REFUNDED';
+                            }
+                        }
+                    } else if (scenario === 'Property uninhabitable' || scenario === 'Landlord breached contract') {
+                        depositStatus = 'REFUNDED';
+                    } else if (scenario === 'Mutual Agreement') {
+                        const option = approvedRequest.mutual_deposit_option;
+                        const damages = Number(approvedRequest.damage_deduction ?? 0);
+                        const depositAmount = Number(contract.security_deposit ?? 0);
+
+                        if (option === 'LANDLORD') {
+                            depositStatus = 'FORFEITED';
+                        } else if (option === 'TENANT') {
+                            if (damages >= depositAmount) {
+                                depositStatus = 'FORFEITED';
+                            } else if (damages > 0) {
+                                depositStatus = 'SPLIT';
+                            } else {
+                                depositStatus = 'REFUNDED';
+                            }
+                        } else if (option === 'SPLIT') {
+                            depositStatus = 'SPLIT';
+                        } else {
+                            depositStatus = 'SPLIT';
+                        }
+                    } else {
+                        depositStatus = 'REFUNDED';
+                    }
+                }
+            }
+        }
+        if (depositStatus) {
+            response.depositStatus = depositStatus;
         }
 
         return response;

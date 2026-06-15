@@ -44,6 +44,12 @@ const ActiveRental: React.FC = () => {
     const [showSupportChat, setShowSupportChat] = useState(false);
     const [installmentsData, setInstallmentsData] = useState<ContractInstallments | null>(null);
     const [preferredContractId, setPreferredContractId] = useState<string>('');
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [cancelScenario, setCancelScenario] = useState('Early exit');
+    const [cancelDetails, setCancelDetails] = useState('');
+    const [submittingCancel, setSubmittingCancel] = useState(false);
+    const [cancelError, setCancelError] = useState('');
+    const [cancelSuccess, setCancelSuccess] = useState('');
 
     const loadContracts = useCallback(async () => {
         setIsLoading(true);
@@ -339,6 +345,7 @@ const ActiveRental: React.FC = () => {
                                         isPaying={isPayingRent}
                                         isCurrentCyclePaid={outstandingInstallments <= 0}
                                         isInArrears={isInArrears}
+                                        isTerminationApproved={installmentsData?.isTerminationApproved}
                                     />
 
                                     <div className="support-card">
@@ -347,11 +354,11 @@ const ActiveRental: React.FC = () => {
                                         <button className="secondary-btn" onClick={() => setShowSupportChat(true)}>Contact Support</button>
                                     </div>
 
-                                    <div className="cancel-rental-card">
+                                     <div className="cancel-rental-card">
                                         <h4>Terminate Lease</h4>
                                         <p>Review terms or initiate the move-out process early.</p>
-                                        <button className="cancel-btn">Cancel Rental</button>
-                                    </div>
+                                        <button className="cancel-btn" onClick={() => setShowCancelModal(true)}>Cancel Rental</button>
+                                     </div>
                                 </aside>
                             </div>
                             {isInArrears && installmentsData && (
@@ -381,6 +388,127 @@ const ActiveRental: React.FC = () => {
                     isOpen={showSupportChat}
                     onClose={() => setShowSupportChat(false)}
                 />
+            )}
+            {showCancelModal && selectedContract && (
+                <div className="modal-backdrop" onClick={() => setShowCancelModal(false)}>
+                    <div className="modal-card cancel-lease-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px', display: 'flex', flexDirection: 'column' }}>
+                        <div className="modal-head">
+                            <h2>Request Lease Termination</h2>
+                            <button type="button" className="close-btn" onClick={() => setShowCancelModal(false)} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}>&times;</button>
+                        </div>
+                        <div className="modal-body" style={{ padding: '20px', overflowY: 'auto' }}>
+                            <p style={{ marginBottom: '16px', color: '#64748b', fontSize: '14px' }}>
+                                Please select the option that describes your reason for leaving. Your request will be reviewed by the administration.
+                            </p>
+                            {cancelError && <div className="error-message" style={{ color: '#ef4444', marginBottom: '12px', fontSize: '13px', background: '#fef2f2', padding: '8px 12px', borderRadius: '6px' }}>{cancelError}</div>}
+                            {cancelSuccess && <div className="success-message" style={{ color: '#10b981', marginBottom: '12px', fontSize: '13px', background: '#ecfdf5', padding: '8px 12px', borderRadius: '6px' }}>{cancelSuccess}</div>}
+
+                            <div className="form-group" style={{ marginBottom: '16px' }}>
+                                <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '8px', fontSize: '14px' }}>Termination Reason</label>
+                                <select 
+                                    value={cancelScenario} 
+                                    onChange={(e) => setCancelScenario(e.target.value)}
+                                    style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '14px' }}
+                                >
+                                    <option value="Early exit">Early exit (No landlord fault)</option>
+                                    <option value="Property uninhabitable">Property uninhabitable</option>
+                                    <option value="Landlord breached contract">Landlord breached contract</option>
+                                    <option value="Mutual Agreement">Mutual Agreement</option>
+                                </select>
+                            </div>
+
+                            {/* Settlement breakdowns */}
+                            <div className="settlement-preview-card" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px', marginBottom: '16px' }}>
+                                <h4 style={{ margin: '0 0 8px 0', fontSize: '12px', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Expected Settlement Terms</h4>
+                                {cancelScenario === 'Early exit' && (
+                                    <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '13px', color: '#334155', lineHeight: '1.6' }}>
+                                        <li>You pay all unpaid rent up to the termination date (current month).</li>
+                                        <li>Security deposit goes to landlord if terminated before halfway through the lease duration.</li>
+                                        <li>Otherwise, deposit is refunded after deductions for damages.</li>
+                                    </ul>
+                                )}
+                                {cancelScenario === 'Property uninhabitable' && (
+                                    <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '13px', color: '#334155', lineHeight: '1.6' }}>
+                                        <li>You pay rent only until last occupied day (current month).</li>
+                                        <li>Full security deposit returned to you.</li>
+                                        <li>No termination penalty.</li>
+                                    </ul>
+                                )}
+                                {cancelScenario === 'Landlord breached contract' && (
+                                    <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '13px', color: '#334155', lineHeight: '1.6' }}>
+                                        <li>You pay rent only until your move-out date.</li>
+                                        <li>Full security deposit returned to you.</li>
+                                        <li>No termination penalty.</li>
+                                    </ul>
+                                )}
+                                {cancelScenario === 'Mutual Agreement' && (
+                                    <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '13px', color: '#334155', lineHeight: '1.6' }}>
+                                        <li>Rent calculated until agreed date.</li>
+                                        <li>Security deposit distribution decided by admin (Tenant, Landlord, or Split).</li>
+                                        <li>No penalties.</li>
+                                    </ul>
+                                )}
+                            </div>
+
+                            <div className="form-group" style={{ marginBottom: '20px' }}>
+                                <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '8px', fontSize: '14px' }}>Details & Explanation</label>
+                                <textarea
+                                    value={cancelDetails}
+                                    onChange={(e) => setCancelDetails(e.target.value)}
+                                    placeholder="Explain your situation in detail (e.g. relocation details, description of uninhabitable conditions, landlord actions, etc.)"
+                                    style={{ width: '100%', height: '100px', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', resize: 'vertical', fontSize: '14px' }}
+                                />
+                            </div>
+
+                            <div className="modal-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                                <button 
+                                    className="secondary-btn" 
+                                    type="button" 
+                                    onClick={() => setShowCancelModal(false)}
+                                    disabled={submittingCancel}
+                                    style={{ padding: '10px 16px', background: '#e2e8f0', color: '#334155', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px' }}
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    className="cancel-btn" 
+                                    type="button" 
+                                    onClick={async () => {
+                                        if (!cancelDetails.trim()) {
+                                            setCancelError('Please enter details or reasons.');
+                                            return;
+                                        }
+                                        setSubmittingCancel(true);
+                                        setCancelError('');
+                                        setCancelSuccess('');
+                                        try {
+                                            await contractService.terminateLease(selectedContract.id, {
+                                                scenario: cancelScenario,
+                                                details: cancelDetails
+                                            });
+                                            setCancelSuccess('Lease termination request submitted successfully.');
+                                            setTimeout(() => {
+                                                setShowCancelModal(false);
+                                                setCancelDetails('');
+                                                setCancelScenario('Early exit');
+                                                setCancelSuccess('');
+                                                void loadContracts();
+                                            }, 2500);
+                                        } catch (err: any) {
+                                            setCancelError(err.response?.data?.message || 'Failed to submit termination request.');
+                                        } finally {
+                                            setSubmittingCancel(false);
+                                        }
+                                    }}
+                                    disabled={submittingCancel}
+                                    style={{ padding: '10px 16px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px' }}
+                                >
+                                    {submittingCancel ? 'Submitting...' : 'Submit Request'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

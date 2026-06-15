@@ -421,5 +421,7 @@ router.get('/properties', adminController.getAllProperties.bind(adminController)
 router.get('/tenant-reports', adminController.getTenantReports.bind(adminController));
 router.post('/tenant-reports/:reportId/warn', adminController.warnTenantFromReport.bind(adminController));
 router.post('/tenant-reports/:reportId/ban', adminController.banTenantFromReport.bind(adminController));
+router.get('/termination-requests', adminController.getTerminationRequests.bind(adminController));
+router.post('/termination-requests/:id/action', adminController.actionTerminationRequest.bind(adminController));
 
 export default router;

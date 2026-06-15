@@ -20,7 +20,8 @@ const AdminSidebar = () => {
         || location.pathname.startsWith('/admin/tenant-reports')
         || location.pathname.startsWith('/admin/support-inbox');
     const propertiesOpen = location.pathname.startsWith('/admin/property-approvals')
-        || location.pathname.startsWith('/admin/properties');
+        || location.pathname.startsWith('/admin/properties')
+        || location.pathname.startsWith('/admin/property-terminations');
     const maintenanceOpen = location.pathname.startsWith('/admin/maintenance-approvals')
         || location.pathname.startsWith('/admin/maintainers')
         || location.pathname.startsWith('/admin/maintenance-conflicts');
@@ -66,6 +67,7 @@ const AdminSidebar = () => {
                     </summary>
                     <div className="admin-nav-sub">
                         <NavLink to="/admin/property-approvals"><FiFileText /> Property Approvals</NavLink>
+                        <NavLink to="/admin/property-terminations"><FiFileText /> Lease Terminations</NavLink>
                         <NavLink to="/admin/properties"><FiHome /> Property Details</NavLink>
                     </div>
                 </details>

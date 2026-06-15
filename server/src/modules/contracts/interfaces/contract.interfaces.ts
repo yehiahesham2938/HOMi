@@ -145,6 +145,7 @@ export interface ContractInstallmentsResponse {
     nextPayableTotal: number;
     items: RentInstallmentItem[];
     now: string;
+    isTerminationApproved?: boolean;
 }
 
 export interface AutopayUpdateInput {
@@ -213,12 +214,17 @@ export interface ContractResponse {
     tenantEmergencyPhone: string | null;
     createdAt: Date;
     updatedAt: Date;
+    depositStatus?: 'PENDING' | 'HELD' | 'REFUNDED' | 'FORFEITED' | 'RELEASED' | 'SPLIT';
     terminationRequests?: Array<{
         id: string;
         status: string;
         reason: string;
         createdAt: Date | string;
         requesterId: string;
+        scenario?: string;
+        details?: string;
+        damageDeduction?: number | null;
+        mutualDepositOption?: string | null;
     }>;
     maintenanceResponsibilities?: MaintenanceResponsibilityResponse[];
     landlord?: {

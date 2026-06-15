@@ -153,6 +153,7 @@ const NidMobileScan: React.FC = () => {
         return (
             <div className="nid-mobile-scan nid-mobile-scan--scan-mode">
                 <NidScanner
+                    sessionToken={token}
                     onSuccess={handleScanSuccess}
                     onCancel={handleScanCancel}
                 />

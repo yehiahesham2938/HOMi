@@ -26,6 +26,7 @@ interface OcrResult {
 }
 
 interface NidScannerProps {
+    sessionToken?: string;
     onSuccess: (nationalId: string, fullNameArabic: string) => void;
     onCancel: () => void;
 }
@@ -75,7 +76,7 @@ function maskNid(nid: string): string {
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
-const NidScanner: React.FC<NidScannerProps> = ({ onSuccess, onCancel }) => {
+const NidScanner: React.FC<NidScannerProps> = ({ sessionToken, onSuccess, onCancel }) => {
     const [phase, setPhase]                   = useState<ScannerPhase>('permission');
     const [error, setError]                   = useState<string | null>(null);
     const [flashOn, setFlashOn]               = useState(false);
@@ -87,7 +88,6 @@ const NidScanner: React.FC<NidScannerProps> = ({ onSuccess, onCancel }) => {
     const videoRef    = useRef<HTMLVideoElement>(null);
     const canvasRef   = useRef<HTMLCanvasElement>(null);
     const streamRef   = useRef<MediaStream | null>(null);
-    const fileRef     = useRef<HTMLInputElement>(null);
 
     // ── Camera ──────────────────────────────────────────────────────────────
 
@@ -123,9 +123,9 @@ const NidScanner: React.FC<NidScannerProps> = ({ onSuccess, onCancel }) => {
         } catch (err) {
             console.error('Camera error:', err);
             if (err instanceof DOMException && err.name === 'NotAllowedError') {
-                setError('Camera access denied. Please allow camera access in your browser settings, or use the upload option.');
+                setError('Camera access denied. Please allow camera access in your browser settings.');
             } else {
-                setError('Could not start camera. Please use the upload option below.');
+                setError('Could not start camera. Please ensure no other app is using it.');
             }
         }
     }, []);
@@ -163,10 +163,15 @@ const NidScanner: React.FC<NidScannerProps> = ({ onSuccess, onCancel }) => {
         if (!track) return;
         try {
             const newOn = !flashOn;
-            await track.applyConstraints({ advanced: [{ torch: newOn } as MediaTrackConstraintSet] });
+            try {
+                await track.applyConstraints({ advanced: [{ torch: newOn }] } as any);
+            } catch (e1) {
+                await track.applyConstraints({ torch: newOn } as any);
+            }
             setFlashOn(newOn);
-        } catch {
-            // torch unsupported — ignore silently
+        } catch (err) {
+            console.error('Torch unsupported:', err);
+            alert('Flash is not supported on your device or browser.');
         }
     };
 
@@ -197,44 +202,6 @@ const NidScanner: React.FC<NidScannerProps> = ({ onSuccess, onCancel }) => {
         }
     }, [phase, frontImg, stopCamera]);
 
-    // ── File upload fallback ──────────────────────────────────────────────────
-
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        e.target.value = '';
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = async (ev) => {
-            const dataUrl = ev.target?.result as string;
-            // Resize/compress via canvas for consistent quality
-            const img = new Image();
-            img.onload = () => {
-                const cvs = canvasRef.current || document.createElement('canvas');
-                const MAX_W = 1400;
-                const scale = img.width > MAX_W ? MAX_W / img.width : 1;
-                cvs.width  = Math.round(img.width  * scale);
-                cvs.height = Math.round(img.height * scale);
-                const ctx = cvs.getContext('2d', { alpha: false })!;
-                ctx.drawImage(img, 0, 0, cvs.width, cvs.height);
-                const b64 = cvs.toDataURL('image/jpeg', 0.88).split(',')[1];
-
-                if (phase === 'front') {
-                    setFrontImg(b64);
-                    stopCamera();
-                    setFlipDone(false);
-                    setPhase('flipping');
-                    setTimeout(() => { setFlipDone(true); setTimeout(() => setPhase('back'), 500); }, 900);
-                } else if (phase === 'back') {
-                    stopCamera();
-                    void runOcr(frontImg!, b64);
-                }
-            };
-            img.src = dataUrl;
-        };
-        reader.readAsDataURL(file);
-    };
-
     // ── OCR ───────────────────────────────────────────────────────────────────
 
     const runOcr = async (front: string, back: string) => {
@@ -246,7 +213,9 @@ const NidScanner: React.FC<NidScannerProps> = ({ onSuccess, onCancel }) => {
         const t2 = setTimeout(() => setProcessingStep(2), 3500);
 
         try {
-            const data = await authService.nidOcr(front, back);
+            const data = sessionToken
+                ? await authService.nidSessionOcr(sessionToken, front, back)
+                : await authService.nidOcr(front, back);
 
             clearTimeout(t1);
             clearTimeout(t2);
@@ -532,7 +501,6 @@ const NidScanner: React.FC<NidScannerProps> = ({ onSuccess, onCancel }) => {
         <div className="nid-overlay">
             {/* Hidden canvas for frame capture */}
             <canvas ref={canvasRef} className="nid-capture-canvas" aria-hidden />
-            <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={handleFileUpload} />
 
             <div className="nid-card">
                 <div className="nid-header">
@@ -558,6 +526,7 @@ const NidScanner: React.FC<NidScannerProps> = ({ onSuccess, onCancel }) => {
                         playsInline
                         muted
                         disablePictureInPicture
+                        style={{ pointerEvents: 'none' }}
                     />
 
                     {/* Corner brackets */}
@@ -590,9 +559,9 @@ const NidScanner: React.FC<NidScannerProps> = ({ onSuccess, onCancel }) => {
                             <button
                                 className="nid-btn-primary"
                                 style={{ marginTop: 8 }}
-                                onClick={() => fileRef.current?.click()}
+                                onClick={startCamera}
                             >
-                                <Upload size={16} /> Upload Photo Instead
+                                <RotateCcw size={16} /> Retry Camera
                             </button>
                         </div>
                     )}
@@ -622,9 +591,7 @@ const NidScanner: React.FC<NidScannerProps> = ({ onSuccess, onCancel }) => {
                     </button>
                     <span className="nid-capture-label">Tap to Capture</span>
 
-                    <button className="nid-upload-link" onClick={() => fileRef.current?.click()} type="button">
-                        Or upload a photo instead
-                    </button>
+                    {/* Upload link removed */}
                     <button className="nid-btn-secondary" style={{ marginTop: 4, maxWidth: 200 }} onClick={onCancel}>
                         Cancel
                     </button>

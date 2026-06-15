@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   FaTwitter,
@@ -13,9 +13,11 @@ import './footer.css';
 
 const Footer = () => {
   const { t } = useTranslation();
+  const location = useLocation();
   const currentYear = new Date().getFullYear();
   const currentUser = authService.getCurrentUser();
   const role = currentUser?.user?.role?.toUpperCase();
+  const isGuestPage = location.pathname === '/guest-home' || location.pathname === '/guest-search';
 
   return (
     <footer className="site-footer">
@@ -96,7 +98,7 @@ const Footer = () => {
               <a href="tel:+18005550199"><FaPhoneAlt /> +1 (800) 555-0199</a>
             </div>
             <div className="footer-divider"></div>
-            <Link to="/terms">{t('footer.terms')}</Link>
+            <Link to={`/terms?hideSidebar=true${isGuestPage ? '&fromGuest=true' : ''}`}>{t('footer.terms')}</Link>
             {/* <Link to="/privacy">{t('footer.privacy')}</Link>
             <Link to="/trust">{t('footer.trust')}</Link> */}
           </div>

@@ -7,8 +7,7 @@
     box-shadow: 
         0 20px 45px -12px rgba(15, 23, 42, 0.06), 
         0 4px 12px rgba(15, 23, 42, 0.02);
-    height: 380px;
-    margin-bottom: 2rem;
+    min-height: 380px;
     position: relative;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -446,6 +445,58 @@
     margin-right: 8px;
 }
 
+/* Contract actions container */
+.contract-actions-container {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.contract-action-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.contract-action-item .action-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.action-button-group {
+    display: flex;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.action-pill-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: transparent;
+    border: none;
+    color: #475569;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-pill-btn:hover {
+    background: rgba(37, 99, 235, 0.06);
+    color: #2563eb;
+}
+
+.action-pill-btn:not(:last-child) {
+    border-right: 1px solid #e2e8f0;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 900px) {
     .premium-detailed-card {
@@ -466,19 +517,23 @@
     .card-actions-row {
         flex-direction: column;
         align-items: stretch;
+        gap: 12px;
+    }
+    .contract-actions-container {
+        flex-direction: column;
+        align-items: stretch;
         gap: 10px;
     }
-    .pdf-buttons-group {
+    .contract-action-item {
+        width: 100%;
+    }
+    .action-button-group {
+        width: 100%;
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 8px;
     }
-    .download-contract-btn {
-        padding: 8px 10px;
-        font-size: 0.75rem;
-        border-radius: 10px;
+    .action-pill-btn {
         justify-content: center;
-        gap: 6px;
     }
     .rules-trigger-btn {
         padding: 8px 10px;

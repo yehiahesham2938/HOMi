@@ -14,7 +14,6 @@ import ActiveRentalsCard from '../components/TenantHomeComponents/ActiveRentalsC
 import { UpcomingPayments } from '../components/TenantHomeComponents/UpcomingPayments';
 import MaintenanceRequests from '../components/TenantHomeComponents/MaintenanceRequests';
 import Notifications from '../components/TenantHomeComponents/Notifications';
-import RewardsSummary from '../components/TenantHomeComponents/RewardsSummary';
 import { authService } from '../../../services/auth.service';
 import contractService from '../../../services/contract.service';
 import type { LandlordContract } from '../../../services/contract.service';
@@ -207,9 +206,6 @@ const TenantHome: React.FC = () => {
               </section>
               <section className="grid-col-1 active-maintenance-card-slot">
                 <MaintenanceRequests contract={activeContract} />
-              </section>
-              <section className="grid-col-1 active-rewards-card-slot">
-                <RewardsSummary contracts={tenantContracts} />
               </section>
             </div>
           ) : (

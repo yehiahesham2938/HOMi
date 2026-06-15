@@ -107,6 +107,26 @@
     font-size: 1.05rem;
 }
 
+.legal-section ul,
+.legal-section ol {
+    margin: 8px 0 20px 0;
+    padding-left: 1.5rem;
+}
+
+[dir="rtl"] .legal-section ul,
+[dir="rtl"] .legal-section ol {
+    padding-left: 0;
+    padding-right: 1.5rem;
+}
+
+.legal-section ul li,
+.legal-section ol li {
+    line-height: 1.7;
+    color: #475569;
+    margin-bottom: 10px;
+    font-size: 1.02rem;
+}
+
 @media (max-width: 992px) {
     .terms-root .main-wrapper {
         margin-left: 0;

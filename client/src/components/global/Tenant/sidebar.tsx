@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   FaHome, FaBuilding, FaSearch, FaUserFriends,
-  FaTools, FaCreditCard, FaEnvelope, FaStar,
+  FaTools, FaCreditCard, FaEnvelope,
   FaSignOutAlt, FaSignature, FaIdCard, FaHeart
 } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
@@ -82,7 +82,6 @@ const Sidebar = () => {
           <li><a href="/tenant-payment" className={location.pathname === "/tenant-payment" ? "active" : ""}><FaCreditCard /> <span>{t('sidebar.payments')}</span></a></li>
           <li><a href="/tenant-contracts" className={location.pathname === "/tenant-contracts" ? "active" : ""}><FaSignature /> <span>{t('sidebar.contracts')}</span></a></li>
           <li><a href="/messages" className={location.pathname === "/messages" ? "active" : ""}><FaEnvelope /> <span className="badge-wrap">{t('sidebar.messages')} {hasMessagingUnread ? <em className="notif-dot" aria-hidden /> : null}</span></a></li>
-          <li><a href="/rewards" className={location.pathname === "/rewards" ? "active" : ""}><FaStar /> <span>{t('sidebar.rewards')}</span></a></li>
         </ul>
       </nav>
 

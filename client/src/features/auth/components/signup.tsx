@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, UserPlus, PhoneCall, Loader2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { authService } from '../../../services/auth.service';
@@ -239,7 +239,7 @@ const SignUp: React.FC = () => {
         />
         <span className="remember-me-text">
           {t('auth.agreeToTerms')}{' '}
-          <a href="#terms" className="terms-inline-link">{t('auth.termsAndConditions')}</a>
+          <Link to="/terms?hideSidebar=true&fromGuest=true" target="_blank" className="terms-inline-link">{t('auth.termsAndConditions')}</Link>
         </span>
       </label>
 

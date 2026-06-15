@@ -14,6 +14,10 @@ const options: Options = {
         },
         servers: [
             {
+                url: 'https://api.homi-platform.com/api',
+                description: 'Production server',
+            },
+            {
                 url: 'http://localhost:3000/api',
                 description: 'Development server',
             },

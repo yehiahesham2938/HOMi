@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import SignIn from '../components/signin.tsx';
@@ -123,6 +123,18 @@ const AuthPage = () => {
             ) : (
               <SignUp />
             )}
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px', color: 'var(--auth-text-muted, #94a3b8)' }}>
+            {t('auth.byUsing', { defaultValue: 'By using HOMi, you agree to our' })}{' '}
+            <Link
+              to="/terms?hideSidebar=true&fromGuest=true"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: 'var(--auth-accent, #60a5fa)', textDecoration: 'underline', fontWeight: 600 }}
+            >
+              {t('auth.termsAndConditions', { defaultValue: 'Terms & Conditions' })}
+            </Link>
           </div>
         </div>
       </div>

@@ -181,51 +181,6 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
             </div>
 
             <div className="card-content-side">
-                <div className="card-actions-row">
-                    <div className="pdf-buttons-group">
-                        <button className="download-contract-btn" onClick={() => handleDownloadPDF('en')}>
-                            <FaFileDownload />
-                            <span>{t('activeLease.downloadPDF')} (EN)</span>
-                        </button>
-                        <button className="download-contract-btn" onClick={() => handleDownloadPDF('ar')}>
-                            <FaFileDownload />
-                            <span>{t('activeLease.downloadPDF')} (AR)</span>
-                        </button>
-                        <button className="download-contract-btn" onClick={() => setPreviewLang('en')}>
-                            <FaEye />
-                            <span>{t('activeLease.viewContract')} (EN)</span>
-                        </button>
-                        <button className="download-contract-btn" onClick={() => setPreviewLang('ar')}>
-                            <FaEye />
-                            <span>{t('activeLease.viewContract')} (AR)</span>
-                        </button>
-                    </div>
-
-                    <div className="rules-wrapper">
-                        <button
-                            className={`rules-trigger-btn ${showRules ? 'active' : ''}`}
-                            onClick={() => setShowRules(!showRules)}
-                        >
-                            <FaGavel />
-                            <span>{t('activeLease.houseRules')}</span>
-                        </button>
-
-                        {showRules && (
-                            <div className="mini-rules-modal" ref={modalRef}>
-                                <div className="rules-header">
-                                    <span>{t('activeLease.propertyRules')}</span>
-                                    <FaTimes className="close-rules" onClick={() => setShowRules(false)} />
-                                </div>
-                                <ul className="rules-list">
-                                    {(houseRules.length > 0 ? houseRules : [t('landlordHomeComponents.noHouseRulesProvided')]).map((rule) => (
-                                        <li key={rule}>{rule}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
                 <header className="rental-header">
                     <div className="location-row">
                         <div className="location-badge">
@@ -243,6 +198,24 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
                     <h2>{rental.title}</h2>
                     <p className="full-address">{rental.address}</p>
                 </header>
+
+                <div className="property-specs-chips">
+                    {bedrooms > 0 && (
+                        <div className="spec-chip">
+                            <FaBed /> <span>{bedrooms} {bedrooms === 1 ? 'Bed' : 'Beds'}</span>
+                        </div>
+                    )}
+                    {bathrooms > 0 && (
+                        <div className="spec-chip">
+                            <FaBath /> <span>{bathrooms} {bathrooms === 1 ? 'Bath' : 'Baths'}</span>
+                        </div>
+                    )}
+                    {areaSqft > 0 && (
+                        <div className="spec-chip">
+                            <FaRulerCombined /> <span>{areaSqft.toLocaleString()} sqft</span>
+                        </div>
+                    )}
+                </div>
 
                 <div className="info-grid-modern">
                     <div className="landlord-profile-card">
@@ -268,6 +241,57 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
                             <span>Start ({rental.leaseStart})</span>
                             <span>End ({rental.leaseEnd})</span>
                         </div>
+                    </div>
+                </div>
+
+                <div className="card-actions-row">
+                    <div className="contract-actions-container">
+                        <div className="contract-action-item">
+                            <span className="action-label">Agreement (PDF)</span>
+                            <div className="action-button-group">
+                                <button className="action-pill-btn" onClick={() => handleDownloadPDF('en')} title="Download English PDF">
+                                    <FaFileDownload /> EN
+                                </button>
+                                <button className="action-pill-btn" onClick={() => handleDownloadPDF('ar')} title="Download Arabic PDF">
+                                    <FaFileDownload /> AR
+                                </button>
+                            </div>
+                        </div>
+                        <div className="contract-action-item">
+                            <span className="action-label">Digital Lease</span>
+                            <div className="action-button-group">
+                                <button className="action-pill-btn" onClick={() => setPreviewLang('en')} title="View English Lease">
+                                    <FaEye /> EN
+                                </button>
+                                <button className="action-pill-btn" onClick={() => setPreviewLang('ar')} title="View Arabic Lease">
+                                    <FaEye /> AR
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="rules-wrapper">
+                        <button
+                            className={`rules-trigger-btn ${showRules ? 'active' : ''}`}
+                            onClick={() => setShowRules(!showRules)}
+                        >
+                            <FaGavel />
+                            <span>{t('activeLease.houseRules')}</span>
+                        </button>
+
+                        {showRules && (
+                            <div className="mini-rules-modal" ref={modalRef}>
+                                <div className="rules-header">
+                                    <span>{t('activeLease.propertyRules')}</span>
+                                    <FaTimes className="close-rules" onClick={() => setShowRules(false)} />
+                                </div>
+                                <ul className="rules-list">
+                                    {(houseRules.length > 0 ? houseRules : [t('landlordHomeComponents.noHouseRulesProvided')]).map((rule) => (
+                                        <li key={rule}>{rule}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

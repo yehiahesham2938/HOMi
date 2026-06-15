@@ -1063,6 +1063,15 @@ router.post(
 );
 
 /**
+ * POST /auth/nid-session/:token/ocr
+ * Perform OCR using the session token (mobile phone flow).
+ */
+router.post(
+    '/nid-session/:token/ocr',
+    authController.nidSessionOcr.bind(authController)
+);
+
+/**
  * GET /auth/nid-session/:token
  * Poll session status (fallback for environments where WebSocket is blocked).
  * Public.

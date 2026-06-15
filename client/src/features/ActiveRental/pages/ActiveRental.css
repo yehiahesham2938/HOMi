@@ -1,8 +1,8 @@
 /* Container and Layout Base */
 .active-rentals-container {
-    padding: 2.5rem 3.5rem;
+    padding: 2rem 3.5rem;
     max-width: 1900px;
-    margin: 120px auto 0 auto;
+    margin: 85px auto 0 auto;
     background-color: #f8fafc;
     min-height: 100vh;
 }
@@ -127,14 +127,20 @@
 .active-rental-content {
     display: grid;
     grid-template-columns: 1fr 410px;
-    gap: 3rem;
+    gap: 2rem;
     align-items: start;
+}
+
+.main-rental-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
 .payment-sidebar {
     display: flex;
     flex-direction: column;
-    gap: 1.75rem;
+    gap: 1.25rem;
     position: sticky;
     top: 2rem;
 }
@@ -142,12 +148,12 @@
 /* Support Card - Refined gradients and transitions */
 .support-card {
     background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
-    padding: 2.25rem 2rem;
-    border-radius: 28px;
+    padding: 1.25rem 1.5rem;
+    border-radius: 24px;
     border: 1px solid rgba(59, 130, 246, 0.15);
     text-align: center;
     box-shadow:
-        0 20px 40px -15px rgba(59, 130, 246, 0.08),
+        0 15px 30px -15px rgba(59, 130, 246, 0.08),
         0 4px 12px rgba(15, 23, 42, 0.01);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -155,35 +161,37 @@
 .support-card:hover {
     transform: translateY(-2px);
     box-shadow:
-        0 28px 50px -15px rgba(59, 130, 246, 0.12),
+        0 24px 40px -15px rgba(59, 130, 246, 0.12),
         0 8px 16px rgba(15, 23, 42, 0.02);
     border-color: rgba(59, 130, 246, 0.3);
 }
 
 .support-card h4 {
     color: #0f172a;
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     font-weight: 800;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.35rem;
     letter-spacing: -0.01em;
+    margin-top: 0;
 }
 
 .support-card p {
     color: #64748b;
-    font-size: 0.88rem;
-    line-height: 1.45;
-    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+    margin-top: 0;
 }
 
 /* Cancel Rental Card */
 .cancel-rental-card {
     background: linear-gradient(135deg, #ffffff 0%, #fff1f2 100%);
-    padding: 2.25rem 2rem;
-    border-radius: 28px;
+    padding: 1.25rem 1.5rem;
+    border-radius: 24px;
     border: 1px solid rgba(244, 63, 94, 0.15);
     text-align: center;
     box-shadow:
-        0 20px 40px -15px rgba(244, 63, 94, 0.05),
+        0 15px 30px -15px rgba(244, 63, 94, 0.05),
         0 4px 12px rgba(15, 23, 42, 0.01);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -191,63 +199,65 @@
 .cancel-rental-card:hover {
     transform: translateY(-2px);
     box-shadow:
-        0 28px 50px -15px rgba(244, 63, 94, 0.08),
+        0 24px 40px -15px rgba(244, 63, 94, 0.08),
         0 8px 16px rgba(15, 23, 42, 0.02);
     border-color: rgba(244, 63, 94, 0.3);
 }
 
 .cancel-rental-card h4 {
     color: #9f1239;
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     font-weight: 800;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.35rem;
     letter-spacing: -0.01em;
+    margin-top: 0;
 }
 
 .cancel-rental-card p {
     color: #b91c1c;
-    font-size: 0.88rem;
-    line-height: 1.45;
+    font-size: 0.85rem;
+    line-height: 1.4;
     opacity: 0.85;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+    margin-top: 0;
 }
 
 .cancel-btn {
     width: 100%;
-    padding: 14px;
+    padding: 11px;
     background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
     color: white;
     border: none;
-    border-radius: 16px;
+    border-radius: 12px;
     font-weight: 800;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     cursor: pointer;
-    box-shadow: 0 8px 16px rgba(225, 29, 72, 0.2);
+    box-shadow: 0 6px 12px rgba(225, 29, 72, 0.15);
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .cancel-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 12px 24px rgba(225, 29, 72, 0.35);
+    box-shadow: 0 10px 20px rgba(225, 29, 72, 0.25);
 }
 
 .secondary-btn {
     width: 100%;
-    padding: 14px;
+    padding: 11px;
     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     border: none;
-    border-radius: 16px;
+    border-radius: 12px;
     font-weight: 800;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: white;
     cursor: pointer;
-    box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
+    box-shadow: 0 6px 12px rgba(37, 99, 235, 0.15);
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .secondary-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 12px 24px rgba(37, 99, 235, 0.35);
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.25);
 }
 
 /* State Boxes */

@@ -614,8 +614,7 @@
   .active-dashboard-grid .active-home-card-slot,
   .active-dashboard-grid .active-payment-card-slot,
   .active-dashboard-grid .active-maintenance-card-slot,
-  .active-dashboard-grid .active-notifications-card-slot,
-  .active-dashboard-grid .active-rewards-card-slot {
+  .active-dashboard-grid .active-notifications-card-slot {
     width: 100% !important;
   }
 

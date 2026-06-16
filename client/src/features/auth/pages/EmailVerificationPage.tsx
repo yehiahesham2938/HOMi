@@ -74,6 +74,21 @@ const EmailVerificationPage: React.FC = () => {
     const [verifyError, setVerifyError] = useState<string | null>(null);
 
     useEffect(() => {
+        const autoSend = async () => {
+            try {
+                await authService.sendVerificationEmail();
+            } catch (err) {
+                if (axios.isAxiosError(err) && err.response?.status === 429) {
+                    console.log('OTP already sent recently, rate limit hit (cooldown active).');
+                    return;
+                }
+                console.error('Failed to auto-send OTP on mount:', err);
+            }
+        };
+        autoSend();
+    }, []);
+
+    useEffect(() => {
         if (countdown <= 0) {
             setCanResend(true);
             return;

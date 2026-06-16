@@ -110,6 +110,7 @@ export const CompleteVerificationSchema = z.object({
             return age >= 18;
         }, 'You must be at least 18 years old'),
     preferredLanguage: z.string().min(2).max(10).optional(),
+    fullNameArabic: z.string().trim().optional(),
 });
 
 export type CompleteVerificationInput = z.infer<typeof CompleteVerificationSchema>;

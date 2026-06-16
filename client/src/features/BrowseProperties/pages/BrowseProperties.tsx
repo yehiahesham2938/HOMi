@@ -4,7 +4,6 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import './BrowseProperties.css';
 import Header from '../../../components/global/header';
 import Sidebar from '../../../components/global/Tenant/sidebar';
-import Footer from '../../../components/global/footer';
 import PropertyCard from '../components/PropertyCard';
 import SearchHero from '../components/SearchHero';
 import {
@@ -171,7 +170,6 @@ const BrowseProperties: React.FC = () => {
                         {!loading && !error && properties.length > 0 && (
                             renderMainSections()
                         )}
-                        <Footer />
                     </div>
 
                     <div className="filters-right-pane">

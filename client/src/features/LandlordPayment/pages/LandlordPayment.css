@@ -22,35 +22,35 @@
     min-height: 100vh;
 }
 
-.content-container { 
-    flex: 1; 
-    display: flex; 
-    flex-direction: column; 
-    background: #fcfcfc; 
+.content-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #fcfcfc;
 }
 
 /* Unified Spacing with Tenant Page */
-.landlord-hub { 
-    padding: 40px 60px; 
-    max-width: 1300px; 
-    margin: 50px auto 0; 
-    width: 100%; 
+.landlord-hub {
+    padding: 40px 60px;
+    max-width: 1300px;
+    margin: 50px auto 0;
+    width: 100%;
 }
 
 /* --- HEADER & NAVIGATION (Synced with Tenant) --- */
-.landlord-hub-header { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: flex-end; 
-    margin-bottom:37px;
+.landlord-hub-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 37px;
     margin-top: 10px;
 }
 
-.header-text h1 { 
-    font-size: 36px; 
-    font-weight: 800; 
-    letter-spacing: -1.5px; 
-    color: var(--fg); 
+.header-text h1 {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    color: var(--fg);
     margin-bottom: 4px;
 }
 
@@ -60,45 +60,78 @@
     font-weight: 500;
 }
 
-.tabs-container { 
-    border-bottom: 1px solid var(--accents-2); 
-    margin-bottom: 32px; 
+.tabs-container {
+    border-bottom: 1px solid var(--accents-2);
+    margin-bottom: 32px;
 }
 
-.modern-tabs { display: flex; gap: 32px; }
+.modern-tabs {
+    display: flex;
+    gap: 32px;
+}
 
 .modern-tabs button {
-    background: none; border: none; padding: 12px 0; font-size: 14px; font-weight: 600;
-    color: var(--accents-4); cursor: pointer; display: flex; align-items: center; gap: 8px;
-    position: relative; transition: color 0.2s;
+    background: none;
+    border: none;
+    padding: 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accents-4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    transition: color 0.2s;
 }
 
-.modern-tabs button.active { color: var(--fg); }
+.modern-tabs button.active {
+    color: var(--fg);
+}
+
 .modern-tabs button.active::after {
-    content: ''; position: absolute; bottom: -1px; left: 0; right: 0;
-    height: 2px; background: var(--fg);
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--fg);
 }
 
 /* --- STATS MOSAIC (Consistent with Tenant Overview) --- */
-.stats-grid { 
-    display: grid; 
-    grid-template-columns: 1.5fr 1fr 1fr 1fr; 
-    gap: 24px; 
-    margin-bottom: 32px; 
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
 }
 
 .stat-card-featured {
-    background: var(--fg); color: white; border-radius: 20px; padding: 32px;
-    position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    background: var(--fg);
+    color: white;
+    border-radius: 20px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
 .stat-card-white {
-    background: white; border: 1px solid var(--accents-2); border-radius: 20px;
-    padding: 24px; display: flex; flex-direction: column; justify-content: space-between;
+    background: white;
+    border: 1px solid var(--accents-2);
+    border-radius: 20px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     transition: transform 0.2s ease;
 }
 
-.stat-card-white:hover { transform: translateY(-4px); border-color: var(--fg); }
+.stat-card-white:hover {
+    transform: translateY(-4px);
+    border-color: var(--fg);
+}
 
 .stat-amount {
     font-size: 2.2rem;
@@ -107,15 +140,31 @@
     margin: 8px 0;
 }
 
-.stat-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accents-4); }
-.stat-card-featured .stat-label { color: rgba(255,255,255,0.6); }
+.stat-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--accents-4);
+}
+
+.stat-card-featured .stat-label {
+    color: rgba(255, 255, 255, 0.6);
+}
 
 /* --- TABLES (Unified with History Tab) --- */
 .modern-table-wrapper {
-    background: white; border: 1px solid var(--accents-2); border-radius: 16px; overflow: hidden;
+    background: white;
+    border: 1px solid var(--accents-2);
+    border-radius: 16px;
+    overflow: hidden;
 }
 
-.landlord-table { width: 100%; border-collapse: collapse; text-align: left; }
+.landlord-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
 
 .landlord-table th {
     background: var(--accents-1);
@@ -134,61 +183,134 @@
     border-bottom: 1px solid var(--accents-1);
 }
 
-.user-info-cell { display: flex; align-items: center; gap: 12px; font-weight: 600; color: var(--fg); }
+.user-info-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+    color: var(--fg);
+}
+
 .avatar-mini {
-    width: 32px; height: 32px; border-radius: 50%; background: var(--accents-2);
-    display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accents-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
 }
 
 /* --- PAYOUTS & METHODS (Card Style) --- */
 .payout-row {
-    background: white; border: 1px solid var(--accents-2); padding: 20px 24px;
-    border-radius: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
+    background: white;
+    border: 1px solid var(--accents-2);
+    padding: 20px 24px;
+    border-radius: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     transition: 0.2s;
 }
 
-.payout-row:hover { border-color: var(--fg); box-shadow: var(--shadow); }
+.payout-row:hover {
+    border-color: var(--fg);
+    box-shadow: var(--shadow);
+}
 
-.methods-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 24px; }
+.methods-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 24px;
+}
 
 .method-card {
-    background: white; border: 1px solid var(--accents-2); border-radius: 20px;
-    padding: 32px; position: relative; transition: 0.3s;
+    background: white;
+    border: 1px solid var(--accents-2);
+    border-radius: 20px;
+    padding: 32px;
+    position: relative;
+    transition: 0.3s;
 }
 
-.method-card.active { border: 2px solid var(--fg); box-shadow: var(--shadow); }
+.method-card.active {
+    border: 2px solid var(--fg);
+    box-shadow: var(--shadow);
+}
 
 .add-method-card {
-    border: 2px dashed var(--accents-2); border-radius: 20px; background: none;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 16px; cursor: pointer; color: var(--accents-3); transition: 0.2s;
+    border: 2px dashed var(--accents-2);
+    border-radius: 20px;
+    background: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    cursor: pointer;
+    color: var(--accents-3);
+    transition: 0.2s;
 }
 
-.add-method-card:hover { border-color: var(--fg); color: var(--fg); background: var(--accents-1); }
+.add-method-card:hover {
+    border-color: var(--fg);
+    color: var(--fg);
+    background: var(--accents-1);
+}
 
 /* --- UPCOMING GRID (Airbnb Style) --- */
-.upcoming-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
-
-.upcoming-card {
-    background: white; border: 1px solid var(--accents-2); border-radius: 20px;
-    padding: 24px; transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+.upcoming-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
 }
 
-.upcoming-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); border-color: var(--fg); }
+.upcoming-card {
+    background: white;
+    border: 1px solid var(--accents-2);
+    border-radius: 20px;
+    padding: 24px;
+    transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.upcoming-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow);
+    border-color: var(--fg);
+}
 
 .due-tag {
-    background: #fffaf0; color: #9c4221; padding: 4px 12px; border-radius: 100px;
-    font-size: 11px; font-weight: 800; text-transform: uppercase;
+    background: #fffaf0;
+    color: #9c4221;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
 }
 
 /* --- BUTTONS & ANIMATIONS --- */
 .btn-payout-main {
-    background: var(--fg); color: white; border: none;
-    padding: 14px 28px; border-radius: 10px; font-weight: 700;
-    display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s;
+    background: var(--fg);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: 0.2s;
 }
 
-.btn-payout-main:hover { background: #333; transform: translateY(-2px); }
+.btn-payout-main:hover {
+    background: #333;
+    transform: translateY(-2px);
+}
 
 .btn-payout-main:disabled {
     opacity: 0.5;
@@ -197,8 +319,12 @@
 }
 
 .badge-success {
-    background: #e6fffa; color: #007d51; padding: 4px 12px; border-radius: 100px;
-    font-size: 12px; font-weight: 700;
+    background: #e6fffa;
+    color: #007d51;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 700;
 }
 
 .animate-fade-in {
@@ -206,14 +332,26 @@
 }
 
 @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Response for smaller screens */
 @media (max-width: 1100px) {
-    .stats-grid { grid-template-columns: 1fr 1fr; }
-    .landlord-hub { padding: 20px; }
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .landlord-hub {
+        padding: 20px;
+    }
 }
 
 /* --- 2. RECEIVED TAB (Table Controls) --- */
@@ -252,7 +390,7 @@
 .search-box input:focus {
     outline: none;
     border-color: var(--fg);
-    box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
 }
 
 .btn-filter {
@@ -269,7 +407,9 @@
     transition: 0.2s;
 }
 
-.btn-filter:hover { background: var(--accents-1); }
+.btn-filter:hover {
+    background: var(--accents-1);
+}
 
 .prop-cell {
     display: flex;
@@ -319,8 +459,15 @@
     text-transform: uppercase;
 }
 
-.status-pill.completed { background: #e6fffa; color: #007d51; }
-.status-pill.processing { background: #fffbeb; color: #92400e; }
+.status-pill.completed {
+    background: #e6fffa;
+    color: #007d51;
+}
+
+.status-pill.processing {
+    background: #fffbeb;
+    color: #92400e;
+}
 
 .icon-btn-sm {
     background: none;
@@ -332,7 +479,10 @@
     transition: 0.2s;
 }
 
-.icon-btn-sm:hover { color: var(--fg); border-color: var(--fg); }
+.icon-btn-sm:hover {
+    color: var(--fg);
+    border-color: var(--fg);
+}
 
 /* --- 4. METHODS TAB (Refined Card) --- */
 .method-card-head {
@@ -437,6 +587,7 @@
     gap: 40px;
     align-items: flex-start;
     padding-top: 10px;
+    margin-left: 100px;
 }
 
 /* The High-End Card Visual */
@@ -477,14 +628,17 @@
     right: 0;
     width: 60%;
     height: 100%;
-    background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.16) 100%);
+    background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.16) 100%);
 }
 
 .card-visual.bank-account::after {
     content: '';
     position: absolute;
-    top: 0; right: 0; width: 60%; height: 100%;
-    background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.08) 100%);
+    top: 0;
+    right: 0;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.08) 100%);
 }
 
 .card-top-row {
@@ -791,10 +945,12 @@
         flex-direction: column;
         align-items: center;
     }
+
     .card-visual.bank-account {
         width: 100%;
         max-width: 380px;
     }
+
     .transfer-shell {
         grid-template-columns: 1fr;
     }

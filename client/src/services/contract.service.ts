@@ -535,6 +535,14 @@ class ContractService {
         );
         return response.data;
     }
+
+    async withdrawWalletBalance(amount: number): Promise<{ balance: number; currency: string }> {
+        const response = await apiClient.post<{ success: boolean; data: { balance: number; currency: string } }>(
+            '/contracts/payments/wallet/withdraw',
+            { amount }
+        );
+        return response.data.data;
+    }
 }
 
 export const contractService = new ContractService();

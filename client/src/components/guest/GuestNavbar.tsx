@@ -21,11 +21,7 @@ const GuestNavbar: React.FC = () => {
 
 
   const howItWorksLink = '/how-it-works-choose';
-
-  const getHelpFromGuest = {
-    pathname: '/get-help',
-    state: { fromGuestHome: true },
-  };
+  const getHelpLink = '/get-help';
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 10);
@@ -47,8 +43,8 @@ const GuestNavbar: React.FC = () => {
 
         <div className="nav-links desktop-only">
           <Link to="/guest-search">{t('guestNavbar.browseHomes')}</Link>
-          <Link to={howItWorksLink}>{t('guestNavbar.howItWorks')}</Link>
-          <Link to={getHelpFromGuest}>{t('guestNavbar.helpCenter')}</Link>
+          <Link to={howItWorksLink} state={{ fromGuestHome: true }}>{t('guestNavbar.howItWorks')}</Link>
+          <Link to={getHelpLink} state={{ fromGuestHome: true }}>{t('guestNavbar.helpCenter')}</Link>
         </div>
 
         <div className="nav-actions desktop-only">
@@ -79,10 +75,10 @@ const GuestNavbar: React.FC = () => {
           <Link to="/guest-search" onClick={() => setMobileMenuOpen(false)}>
             {t('guestNavbar.browseHomes')}
           </Link>
-          <Link to={howItWorksLink} onClick={() => setMobileMenuOpen(false)}>
+          <Link to={howItWorksLink} state={{ fromGuestHome: true }} onClick={() => setMobileMenuOpen(false)}>
             {t('guestNavbar.howItWorks')}
           </Link>
-          <Link to={getHelpFromGuest} onClick={() => setMobileMenuOpen(false)}>
+          <Link to={getHelpLink} state={{ fromGuestHome: true }} onClick={() => setMobileMenuOpen(false)}>
             {t('guestNavbar.helpCenter')}
           </Link>
           <div style={{ padding: '12px 20px', borderTop: '1px solid #eee', marginTop: '8px' }}>

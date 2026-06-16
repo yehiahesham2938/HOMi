@@ -250,7 +250,7 @@ const HowItWorks: React.FC = () => {
                   <Link to="/auth" className="how-btn-primary">
                     Get started
                   </Link>
-                  <Link to="/get-help" className="how-btn-secondary">
+                  <Link to="/get-help" state={{ fromGuestHome: true }} className="how-btn-secondary">
                     See how support works
                   </Link>
                 </div>

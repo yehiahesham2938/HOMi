@@ -335,6 +335,22 @@ class ContractController {
         }
     }
 
+    async withdrawWalletBalance(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const userId = (req as any).user.userId;
+            const amount = Number((req.body as any)?.amount ?? 0);
+            const balance = await contractService.withdrawWalletBalance(userId, amount);
+
+            res.status(200).json({
+                success: true,
+                message: 'Wallet withdrawal completed successfully.',
+                data: balance,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     /**
      * POST /api/contracts/:id/payments/balance/pay
      */

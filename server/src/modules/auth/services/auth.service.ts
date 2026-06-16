@@ -1263,7 +1263,11 @@ export class AuthService {
         const emailSent = await emailService.sendVerificationEmail(user.email, otp);
 
         if (!emailSent) {
-            console.warn('Failed to send verification email, but OTP was generated');
+            throw new AuthError(
+                'Failed to send verification email. Please check your mail settings or try again later.',
+                500,
+                'EMAIL_SEND_FAILED'
+            );
         }
 
         return {

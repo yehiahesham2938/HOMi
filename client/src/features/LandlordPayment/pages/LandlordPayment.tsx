@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import Header from '../../../components/global/header';
 import Sidebar from '../../../components/global/Landlord/sidebar';
 import Footer from '../../../components/global/footer';
@@ -6,14 +7,15 @@ import {
     Wallet, TrendingUp, Calendar, Clock,
     ArrowUpRight, Building2, User, Landmark,
     Plus, Download, CheckCircle2, Search,
-    Filter, CreditCard, HandCoins, Lock, Wrench
+    Filter, CreditCard, HandCoins, Lock, Wrench,
+    X
 } from 'lucide-react';
 import './LandlordPayment.css';
 import authService from '../../../services/auth.service';
 import contractService, { type LandlordContract } from '../../../services/contract.service';
 import maintenanceService, { type MaintenanceRequest } from '../../../services/maintenance.service';
 
-type LandlordTab = 'earnings' | 'received' | 'payouts' | 'methods' | 'upcoming' | 'transfer' | 'deposits' | 'maintenance';
+type LandlordTab = 'earnings' | 'received' | 'payouts' | 'methods' | 'upcoming' | 'withdraw' | 'topup' | 'deposits' | 'maintenance';
 
 interface StatCardProps {
     label: string;
@@ -163,6 +165,8 @@ const LandlordPayment: React.FC = () => {
     const currentUser = authService.getCurrentUser();
     const userId = currentUser?.user?.id ?? '';
 
+    const location = useLocation();
+
     const [activeTab, setActiveTab] = useState<LandlordTab>('earnings');
     const [contracts, setContracts] = useState<LandlordContract[]>([]);
     const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
@@ -185,11 +189,29 @@ const LandlordPayment: React.FC = () => {
     const [walletMethodName, setWalletMethodName] = useState('');
     const [methodError, setMethodError] = useState<string | null>(null);
 
-    const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
-    const [transferAmount, setTransferAmount] = useState('');
     const [selectedMethodId, setSelectedMethodId] = useState('');
-    const [transferError, setTransferError] = useState<string | null>(null);
     const [dbWalletBalance, setDbWalletBalance] = useState<number | null>(null);
+
+    // Wallet Topup State
+    const [isTopupModalOpen, setIsTopupModalOpen] = useState(false);
+    const [topupAmount, setTopupAmount] = useState('');
+    const [topupMethod, setTopupMethod] = useState<'CARD' | 'WALLET'>('CARD');
+    const [topupSaveCard, setTopupSaveCard] = useState(false);
+    const [topupError, setTopupError] = useState<string | null>(null);
+    const [isTopupStarting, setIsTopupStarting] = useState(false);
+    const [isTopupVerifying, setIsTopupVerifying] = useState(false);
+    const topupVerifiedRef = useRef(false);
+
+    // Wallet Withdraw State
+    const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+    const [withdrawAmount, setWithdrawAmount] = useState('');
+    const [withdrawType, setWithdrawType] = useState<'ALL' | 'PARTIAL'>('PARTIAL');
+    const [withdrawError, setWithdrawError] = useState<string | null>(null);
+    const [isWithdrawStarting, setIsWithdrawStarting] = useState(false);
+
+    // Success Toast State
+    const [showSuccessToast, setShowSuccessToast] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('Operation completed successfully.');
 
     const methodsStorageKey = userId ? `landlord-payout-methods-${userId}` : '';
     const payoutsStorageKey = userId ? `landlord-payouts-${userId}` : '';
@@ -248,6 +270,79 @@ const LandlordPayment: React.FC = () => {
             isMounted = false;
         };
     }, [methodsStorageKey, payoutsStorageKey, userId]);
+
+    useEffect(() => {
+        if (topupVerifiedRef.current) return;
+
+        const params = new URLSearchParams(location.search);
+        const walletTopupFlag = params.get('walletTopup');
+
+        if (walletTopupFlag !== '1') return;
+
+        const transactionIdRaw = params.get('id') || params.get('transaction_id') || '';
+        const transactionId = Number(transactionIdRaw);
+
+        setActiveTab('topup');
+
+        if (!transactionIdRaw || !Number.isFinite(transactionId) || transactionId <= 0) {
+            setTopupError('Payment callback is missing the transaction ID. Please contact support.');
+            const cleanUrl = `${location.pathname}`;
+            globalThis.history.replaceState({}, document.title, cleanUrl);
+            return;
+        }
+
+        topupVerifiedRef.current = true;
+
+        const doVerify = async () => {
+            let accessToken = localStorage.getItem('accessToken');
+            if (!accessToken) {
+                await new Promise<void>((resolve) => setTimeout(resolve, 2000));
+                accessToken = localStorage.getItem('accessToken');
+            }
+
+            if (!accessToken) {
+                setTopupError('Session expired. Please log in and try again.');
+                const cleanUrl = `${location.pathname}`;
+                globalThis.history.replaceState({}, document.title, cleanUrl);
+                return;
+            }
+
+            setIsTopupVerifying(true);
+            try {
+                let response = await contractService.verifyWalletTopup(transactionId);
+                setDbWalletBalance(Number(response.balance ?? 0));
+                setTopupError(null);
+                setSuccessMessage('Wallet top-up completed successfully.');
+                setShowSuccessToast(true);
+                
+                // Reload data
+                const [contractsResponse, walletRes, maintResponse] = await Promise.all([
+                    contractService.getLandlordContracts({ page: 1, limit: 100 }),
+                    contractService.getWalletBalance().catch(() => null),
+                    maintenanceService.listLandlordRequests().catch(() => [])
+                ]);
+                setContracts(contractsResponse.data ?? []);
+                if (walletRes) {
+                    setDbWalletBalance(walletRes.balance);
+                }
+                setMaintenanceRequests(maintResponse ?? []);
+            } catch (err: unknown) {
+                const ex = err as { response?: { data?: { message?: string } } };
+                const serverMsg = ex.response?.data?.message;
+                setTopupError(
+                    typeof serverMsg === 'string' && serverMsg.trim()
+                        ? serverMsg
+                        : 'Wallet top-up verification failed. Please retry.'
+                );
+            } finally {
+                setIsTopupVerifying(false);
+                const cleanUrl = `${location.pathname}`;
+                globalThis.history.replaceState({}, document.title, cleanUrl);
+            }
+        };
+
+        void doVerify();
+    }, [location.pathname, location.search]);
 
     const persistMethods = (next: PayoutMethod[]) => {
         setPayoutMethods(next);
@@ -338,8 +433,8 @@ const LandlordPayment: React.FC = () => {
 
                 let status: 'HELD' | 'REFUNDED' | 'RELEASED' | 'PENDING' | 'SPLIT' = 'PENDING';
                 if (c.depositStatus) {
-                    status = c.depositStatus as any;
-                    if (status === 'FORFEITED') status = 'RELEASED'; // Map forfeited to released on landlord side
+                    const depStatus = c.depositStatus as string;
+                    status = (depStatus === 'FORFEITED' ? 'RELEASED' : depStatus) as any;
                 } else {
                     if (c.status === 'ACTIVE') {
                         status = 'HELD';
@@ -394,36 +489,7 @@ const LandlordPayment: React.FC = () => {
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }, [maintenanceRequests]);
 
-    const totalEarnings = useMemo(() => {
-        return receivedPayments.reduce((sum, payment) => sum + payment.amount, 0);
-    }, [receivedPayments]);
 
-    const totalTransferred = useMemo(() => {
-        return payouts.reduce((sum, payout) => sum + payout.amount, 0);
-    }, [payouts]);
-
-    const availableBalance = Math.max(totalEarnings - totalTransferred, 0);
-
-    const pendingPayouts = useMemo(() => {
-        return payouts
-            .filter((item) => item.status === 'Processing')
-            .reduce((sum, item) => sum + item.amount, 0);
-    }, [payouts]);
-
-    const nextPayoutDate = useMemo(() => {
-        const processing = payouts
-            .filter((item) => item.status === 'Processing')
-            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-        if (processing.length === 0) return null;
-
-        const baseDate = new Date(processing[0].date);
-        if (Number.isNaN(baseDate.getTime())) return null;
-
-        const payoutDate = new Date(baseDate);
-        payoutDate.setDate(payoutDate.getDate() + 2);
-        return payoutDate;
-    }, [payouts]);
 
     const filteredReceivedPayments = useMemo(() => {
         const q = searchTerm.trim().toLowerCase();
@@ -443,41 +509,7 @@ const LandlordPayment: React.FC = () => {
         );
     }, [propertyDeposits, depositSearchTerm]);
 
-    const hasRecentGrowth = receivedPayments.length >= 2;
 
-    const earningsGrowthText = useMemo(() => {
-        if (!hasRecentGrowth) return 'Not enough paid records yet to calculate growth trends.';
-
-        const now = new Date();
-        const thisMonth = now.getMonth();
-        const thisYear = now.getFullYear();
-
-        const currentMonthTotal = receivedPayments
-            .filter((item) => {
-                const d = new Date(item.date);
-                return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
-            })
-            .reduce((sum, item) => sum + item.amount, 0);
-
-        const prevMonthDate = new Date(thisYear, thisMonth - 1, 1);
-        const prevMonth = prevMonthDate.getMonth();
-        const prevYear = prevMonthDate.getFullYear();
-
-        const prevMonthTotal = receivedPayments
-            .filter((item) => {
-                const d = new Date(item.date);
-                return d.getMonth() === prevMonth && d.getFullYear() === prevYear;
-            })
-            .reduce((sum, item) => sum + item.amount, 0);
-
-        if (prevMonthTotal <= 0) {
-            return 'Paid income is growing with no comparable previous month baseline.';
-        }
-
-        const growth = ((currentMonthTotal - prevMonthTotal) / prevMonthTotal) * 100;
-        const direction = growth >= 0 ? 'higher' : 'lower';
-        return `This month is ${Math.abs(growth).toFixed(1)}% ${direction} than last month.`;
-    }, [hasRecentGrowth, receivedPayments]);
 
     const setPrimaryMethod = (id: string) => {
         const updated = payoutMethods.map((method) => ({
@@ -561,101 +593,139 @@ const LandlordPayment: React.FC = () => {
         setIsMethodModalOpen(false);
     };
 
-    const handleOpenTransferModal = () => {
-        setTransferError(null);
-        const primary = payoutMethods.find((m) => m.isPrimary) || payoutMethods[0];
-        setSelectedMethodId(primary?.id ?? '');
-        setTransferAmount('');
-        setIsTransferModalOpen(true);
+
+
+    const handleStartTopup = async () => {
+        const amount = Number(topupAmount);
+
+        if (!Number.isFinite(amount) || amount <= 0) {
+            setTopupError('Please enter a valid amount greater than 0.');
+            return;
+        }
+
+        setTopupError(null);
+        setIsTopupStarting(true);
+
+        try {
+            const checkout = await contractService.initiateWalletTopup(amount, topupMethod, topupSaveCard);
+            globalThis.location.href = checkout.checkoutUrl;
+        } catch (error: unknown) {
+            const ex = error as { response?: { data?: { message?: string } } };
+            const backendMessage = ex.response?.data?.message;
+            const fallback = 'Could not start Paymob top-up. Please try again.';
+            setTopupError(typeof backendMessage === 'string' && backendMessage.trim() ? backendMessage : fallback);
+        } finally {
+            setIsTopupStarting(false);
+        }
     };
 
-    const handleTransferSubmit = () => {
-        setTransferError(null);
+    const handleOpenWithdrawModal = () => {
+        setWithdrawError(null);
+        const primary = payoutMethods.find((m) => m.isPrimary) || payoutMethods[0];
+        setSelectedMethodId(primary?.id ?? '');
+        setWithdrawAmount('');
+        setWithdrawType('PARTIAL');
+        setIsWithdrawModalOpen(true);
+    };
+
+    const handleWithdrawSubmit = async () => {
+        setWithdrawError(null);
 
         if (payoutMethods.length === 0) {
-            setTransferError('Add at least one bank account before creating a transfer.');
+            setWithdrawError('Add at least one payout method before creating a withdrawal.');
             return;
         }
 
-        const amount = Number(transferAmount);
-        if (!transferAmount || Number.isNaN(amount) || amount <= 0) {
-            setTransferError('Please enter a valid transfer amount greater than 0.');
+        const currentBalance = dbWalletBalance !== null ? dbWalletBalance : 0;
+        const amount = withdrawType === 'ALL' ? currentBalance : Number(withdrawAmount);
+
+        if (withdrawType !== 'ALL' && (!withdrawAmount || Number.isNaN(amount) || amount <= 0)) {
+            setWithdrawError('Please enter a valid withdrawal amount greater than 0.');
             return;
         }
 
-        const currentBalance = dbWalletBalance !== null ? dbWalletBalance : availableBalance;
         if (amount > currentBalance) {
-            setTransferError('Transfer amount exceeds your available balance.');
+            setWithdrawError('Withdrawal amount exceeds your available balance.');
+            return;
+        }
+
+        if (amount <= 0) {
+            setWithdrawError('Withdrawal amount must be greater than 0.');
             return;
         }
 
         const selectedMethod = payoutMethods.find((method) => method.id === selectedMethodId);
         if (!selectedMethod) {
-            setTransferError('Please choose a bank account for this transfer.');
+            setWithdrawError('Please choose a payout method for this withdrawal.');
             return;
         }
 
-        const record: TransferRecord = {
-            id: `TR-${Date.now().toString().slice(-6)}`,
-            amount,
-            status: 'Processing',
-            date: new Date().toISOString(),
-            bankMethodId: selectedMethod.id,
-            bankLabel:
-                selectedMethod.methodType === 'BANK_ACCOUNT'
-                    ? `${selectedMethod.bankName} ••••${selectedMethod.accountLast4}`
-                    : `${selectedMethod.walletProvider} • ${maskPhoneNumber(selectedMethod.walletPhone || '')}`,
-        };
+        setIsWithdrawStarting(true);
 
-        persistPayouts([record, ...payouts]);
-        setIsTransferModalOpen(false);
-        setActiveTab('payouts');
+        try {
+            await contractService.withdrawWalletBalance(amount);
+            
+            // Create a payout record for history
+            const record: TransferRecord = {
+                id: `TR-${Date.now().toString().slice(-6)}`,
+                amount,
+                status: 'Completed',
+                date: new Date().toISOString(),
+                bankMethodId: selectedMethod.id,
+                bankLabel:
+                    selectedMethod.methodType === 'BANK_ACCOUNT'
+                        ? `${selectedMethod.bankName} ••••${selectedMethod.accountLast4}`
+                        : `${selectedMethod.walletProvider} • ${maskPhoneNumber(selectedMethod.walletPhone || '')}`,
+            };
+
+            persistPayouts([record, ...payouts]);
+            
+            // Refresh wallet balance
+            const wallet = await contractService.getWalletBalance().catch(() => null);
+            if (wallet) {
+                setDbWalletBalance(wallet.balance);
+            } else {
+                setDbWalletBalance(prev => prev !== null ? Math.max(prev - amount, 0) : 0);
+            }
+
+            setSuccessMessage(`Withdrawal of $${amount.toFixed(2)} completed successfully.`);
+            setShowSuccessToast(true);
+            setIsWithdrawModalOpen(false);
+            setActiveTab('payouts');
+        } finally {
+            setIsWithdrawStarting(false);
+        }
     };
 
     const renderEarnings = () => (
         <div className="tab-viewport animate-fade-in">
-            <div className="stats-grid">
+            <div className="stats-grid" style={{ gridTemplateColumns: '1.5fr', maxWidth: '400px' }}>
                 <StatCard
                     variant="featured"
-                    label="Available Balance"
-                    amount={currencyFormatter.format(dbWalletBalance !== null ? dbWalletBalance : availableBalance)}
-                    subtext={(dbWalletBalance !== null ? dbWalletBalance : availableBalance) > 0 ? 'Ready for transfer' : 'No funds available'}
+                    label="Wallet Balance"
+                    amount={currencyFormatter.format(dbWalletBalance !== null ? dbWalletBalance : 0)}
+                    subtext="Available for withdrawal or payments"
                     icon={<Wallet size={20} />}
-                />
-                <StatCard
-                    label="Pending Payouts"
-                    amount={currencyFormatter.format(pendingPayouts)}
-                    subtext={pendingPayouts > 0 ? 'Processing by bank' : 'No pending transfers'}
-                    icon={<Clock size={20} />}
-                />
-                <StatCard
-                    label="Total Earnings (YTD)"
-                    amount={currencyFormatter.format(totalEarnings)}
-                    subtext={receivedPayments.length > 0 ? `${receivedPayments.length} paid contract records` : 'No earnings yet'}
-                    icon={<TrendingUp size={20} />}
-                />
-                <StatCard
-                    label="Next Payout Date"
-                    amount={nextPayoutDate ? formatDate(nextPayoutDate.toISOString()) : 'N/A'}
-                    subtext={nextPayoutDate ? 'Estimated settlement date' : 'No scheduled payouts'}
-                    icon={<Calendar size={20} />}
                 />
             </div>
 
-            <div className="recent-activity-section">
-                <div className="section-header">
-                    <h3>Recent Growth</h3>
-                    {receivedPayments.length > 0 && <button className="btn-text">View Full Report</button>}
+            <div className="stripe-style-banner" style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                    <div style={{ background: '#eff6ff', color: '#1d4ed8', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <HandCoins size={24} />
+                    </div>
+                    <div>
+                        <h4 style={{ margin: '0 0 4px', fontSize: '1.1rem', fontWeight: 700 }}>Withdraw or Top Up funds</h4>
+                        <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>Manage your funds instantly using connected bank accounts or mobile wallets.</p>
+                    </div>
                 </div>
-                <div className="placeholder-chart-area" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                    {hasRecentGrowth ? (
-                        <>
-                            <div className="chart-bar-mock"></div>
-                            <p>{earningsGrowthText}</p>
-                        </>
-                    ) : (
-                        <p style={{ color: '#94a3b8' }}>{earningsGrowthText}</p>
-                    )}
+                <div style={{ display: 'flex', gap: '12px' }}>
+                    <button className="btn-payout-main" onClick={() => setActiveTab('topup')} style={{ background: '#0f172a', color: 'white', border: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                        Top Up <Plus size={16} />
+                    </button>
+                    <button className="btn-payout-main" onClick={() => setActiveTab('withdraw')} style={{ background: '#fff', color: '#0f172a', border: '1px solid #cbd5e1', padding: '10px 16px', borderRadius: '8px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                        Withdraw <ArrowUpRight size={16} />
+                    </button>
                 </div>
             </div>
         </div>
@@ -982,26 +1052,54 @@ const LandlordPayment: React.FC = () => {
         );
     };
 
-    const renderTransfer = () => (
+    const renderTopUp = () => (
+        <div className="tab-viewport animate-fade-in">
+            <div className="transfer-shell" style={{ gridTemplateColumns: '1fr', maxWidth: '500px', margin: '0 auto' }}>
+                <div className="transfer-balance-card" style={{ padding: '32px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                        <div>
+                            <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700 }}>Wallet Balance</h3>
+                            <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '0.85rem' }}>Top up with Paymob instantly.</p>
+                        </div>
+                        <div style={{ background: '#f1f5f9', color: '#0f172a', fontWeight: 800, padding: '8px 16px', borderRadius: '20px', fontFamily: 'JetBrains Mono', fontSize: '1.1rem' }}>
+                            {currencyFormatter.format(dbWalletBalance !== null ? dbWalletBalance : 0)}
+                        </div>
+                    </div>
+
+                    <button className="btn-payout-main" style={{ width: '100%', justifyContent: 'center', padding: '14px' }} onClick={() => setIsTopupModalOpen(true)}>
+                        <Plus size={16} /> Add Funds
+                    </button>
+
+                    {(topupError || isTopupVerifying) && (
+                        <div className="landlord-payment-error-banner" style={{ marginTop: '20px', marginBottom: 0 }}>
+                            {isTopupVerifying ? 'Verifying top-up transaction...' : topupError}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderWithdraw = () => (
         <div className="tab-viewport animate-fade-in">
             <div className="transfer-shell">
                 <div className="transfer-balance-card">
-                    <h3>Available to Transfer</h3>
-                    <h2>{currencyFormatter.format(availableBalance)}</h2>
-                    <p>{payoutMethods.length > 0 ? 'Choose a payout method and transfer funds instantly.' : 'Add a payout method first to begin transfers.'}</p>
+                    <h3>Available to Withdraw</h3>
+                    <h2>{currencyFormatter.format(dbWalletBalance !== null ? dbWalletBalance : 0)}</h2>
+                    <p>{payoutMethods.length > 0 ? 'Choose a payout method and withdraw funds instantly.' : 'Add a payout method first to begin withdrawals.'}</p>
                     <button
                         className="btn-payout-main"
-                        onClick={handleOpenTransferModal}
-                        disabled={payoutMethods.length === 0 || availableBalance <= 0}
+                        onClick={handleOpenWithdrawModal}
+                        disabled={payoutMethods.length === 0 || (dbWalletBalance ?? 0) <= 0}
                     >
-                        <HandCoins size={18} /> Transfer Funds
+                        <HandCoins size={18} /> Withdraw Funds
                     </button>
                 </div>
 
                 <div className="transfer-quick-list">
-                    <h4>Recent Transfer Requests</h4>
+                    <h4>Recent Withdrawal Requests</h4>
                     {payouts.length === 0 ? (
-                        <p className="transfer-empty-note">No transfer requests yet.</p>
+                        <p className="transfer-empty-note">No withdrawals yet.</p>
                     ) : (
                         payouts.slice(0, 5).map((item) => (
                             <div className="transfer-row" key={item.id}>
@@ -1128,13 +1226,14 @@ const LandlordPayment: React.FC = () => {
                         <nav className="modern-tabs">
                             {[
                                 { id: 'earnings', label: 'Earnings', icon: <TrendingUp size={16} /> },
+                                { id: 'topup', label: 'Top Up', icon: <Wallet size={16} /> },
+                                { id: 'withdraw', label: 'Withdraw', icon: <HandCoins size={16} /> },
                                 { id: 'received', label: 'Received', icon: <CheckCircle2 size={16} /> },
                                 { id: 'maintenance', label: 'Maintenance', icon: <Wrench size={16} /> },
                                 { id: 'deposits', label: 'Deposits', icon: <Lock size={16} /> },
                                 { id: 'payouts', label: 'Payouts', icon: <ArrowUpRight size={16} /> },
                                 { id: 'upcoming', label: 'Upcoming', icon: <Clock size={16} /> },
                                 { id: 'methods', label: 'Methods', icon: <CreditCard size={16} /> },
-                                { id: 'transfer', label: 'Transfer', icon: <HandCoins size={16} /> },
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
@@ -1159,13 +1258,14 @@ const LandlordPayment: React.FC = () => {
                         ) : (
                             <>
                                 {activeTab === 'earnings' && renderEarnings()}
+                                {activeTab === 'topup' && renderTopUp()}
+                                {activeTab === 'withdraw' && renderWithdraw()}
                                 {activeTab === 'received' && renderReceived()}
                                 {activeTab === 'maintenance' && renderMaintenance()}
                                 {activeTab === 'deposits' && renderDeposits()}
                                 {activeTab === 'payouts' && renderPayouts()}
                                 {activeTab === 'methods' && renderMethods()}
                                 {activeTab === 'upcoming' && renderUpcoming()}
-                                {activeTab === 'transfer' && renderTransfer()}
                             </>
                         )}
                     </div>
@@ -1231,22 +1331,44 @@ const LandlordPayment: React.FC = () => {
                 </div>
             )}
 
-            {isTransferModalOpen && (
+            {isWithdrawModalOpen && (
                 <div className="lp-modal-overlay">
                     <div className="lp-modal">
-                        <h3>Transfer Funds</h3>
-                        <p>Enter the amount to transfer and choose the destination payout method.</p>
+                        <h3>Withdraw Funds</h3>
+                        <p>Withdraw all or part of your balance to your connected method.</p>
 
-                        <label htmlFor="lp-transfer-amount">Transfer Amount</label>
-                        <input
-                            id="lp-transfer-amount"
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={transferAmount}
-                            onChange={(e) => setTransferAmount(e.target.value)}
-                            placeholder="0.00"
-                        />
+                        <label htmlFor="withdraw-type">Withdrawal Option</label>
+                        <select
+                            id="withdraw-type"
+                            value={withdrawType}
+                            onChange={(e) => {
+                                const val = e.target.value as 'ALL' | 'PARTIAL';
+                                setWithdrawType(val);
+                                if (val === 'ALL') {
+                                    setWithdrawAmount(String(dbWalletBalance ?? 0));
+                                } else {
+                                    setWithdrawAmount('');
+                                }
+                            }}
+                        >
+                            <option value="PARTIAL">Withdraw part of it</option>
+                            <option value="ALL">Withdraw all money</option>
+                        </select>
+
+                        {withdrawType === 'PARTIAL' && (
+                            <>
+                                <label htmlFor="lp-withdraw-amount">Amount (USD)</label>
+                                <input
+                                    id="lp-withdraw-amount"
+                                    type="number"
+                                    min="0.01"
+                                    step="0.01"
+                                    value={withdrawAmount}
+                                    onChange={(e) => setWithdrawAmount(e.target.value)}
+                                    placeholder="0.00"
+                                />
+                            </>
+                        )}
 
                         <label htmlFor="lp-bank-select">Payout Method</label>
                         <select id="lp-bank-select" value={selectedMethodId} onChange={(e) => setSelectedMethodId(e.target.value)}>
@@ -1260,14 +1382,84 @@ const LandlordPayment: React.FC = () => {
                             ))}
                         </select>
 
-                        <div className="lp-balance-hint">Available balance: {currencyFormatter.format(availableBalance)}</div>
+                        <div className="lp-balance-hint">Available balance: {currencyFormatter.format(dbWalletBalance !== null ? dbWalletBalance : 0)}</div>
 
-                        {transferError && <div className="lp-modal-error">{transferError}</div>}
+                        {withdrawError && <div className="lp-modal-error">{withdrawError}</div>}
 
                         <div className="lp-modal-actions">
-                            <button className="lp-btn-secondary" onClick={() => setIsTransferModalOpen(false)}>Cancel</button>
-                            <button className="lp-btn-primary" onClick={handleTransferSubmit}>Confirm Transfer</button>
+                            <button className="lp-btn-secondary" onClick={() => setIsWithdrawModalOpen(false)}>Cancel</button>
+                            <button className="lp-btn-primary" onClick={handleWithdrawSubmit} disabled={isWithdrawStarting}>
+                                {isWithdrawStarting ? 'Processing...' : 'Confirm Withdrawal'}
+                            </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {isTopupModalOpen && (
+                <div className="lp-modal-overlay">
+                    <div className="lp-modal">
+                        <h3>Add Funds to Wallet</h3>
+                        <p>Enter the amount you want to add. You will be redirected to Paymob to complete payment securely.</p>
+                        
+                        <label htmlFor="topup-method">Payment Method</label>
+                        <select
+                            id="topup-method"
+                            value={topupMethod}
+                            onChange={(e) => {
+                                const selected = e.target.value as 'CARD' | 'WALLET';
+                                setTopupMethod(selected);
+                                if (selected !== 'CARD') setTopupSaveCard(false);
+                            }}
+                        >
+                            <option value="CARD">Card</option>
+                            <option value="WALLET">Mobile Wallet</option>
+                        </select>
+                        {topupMethod === 'CARD' && (
+                            <label htmlFor="topup-save-card" style={{ display: 'flex', gap: '8px', alignItems: 'center', margin: '4px 0' }}>
+                                <input
+                                    id="topup-save-card"
+                                    type="checkbox"
+                                    checked={topupSaveCard}
+                                    onChange={(e) => setTopupSaveCard(e.target.checked)}
+                                />{' '}
+                                Save card for future use
+                            </label>
+                        )}
+                        <label htmlFor="topup-amount">Amount (EGP)</label>
+                        <input
+                            id="topup-amount"
+                            type="number"
+                            min="1"
+                            step="0.01"
+                            value={topupAmount}
+                            onChange={(e) => setTopupAmount(e.target.value)}
+                            placeholder="e.g. 2500"
+                        />
+
+                        {topupError && <div className="lp-modal-error">{topupError}</div>}
+
+                        <div className="lp-modal-actions">
+                            <button className="lp-btn-secondary" onClick={() => setIsTopupModalOpen(false)}>Cancel</button>
+                            <button className="lp-btn-primary" onClick={handleStartTopup} disabled={isTopupStarting}>
+                                {isTopupStarting ? 'Starting...' : 'Continue to Paymob'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showSuccessToast && (
+                <div className="toast-success-overlay" style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 3000 }}>
+                    <div className="toast-card" style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px 20px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}>
+                        <div className="toast-icon" style={{ color: '#10b981', display: 'flex', alignItems: 'center' }}><CheckCircle2 size={24} /></div>
+                        <div className="toast-body">
+                            <h6 style={{ margin: '0 0 2px', fontWeight: 700, fontSize: '0.95rem' }}>Success</h6>
+                            <p style={{ margin: 0, color: '#64748b', fontSize: '0.85rem' }}>{successMessage}</p>
+                        </div>
+                        <button className="toast-close" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', marginLeft: '12px' }} onClick={() => setShowSuccessToast(false)}>
+                            <X size={16} />
+                        </button>
                     </div>
                 </div>
             )}

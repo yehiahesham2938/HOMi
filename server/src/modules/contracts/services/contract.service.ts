@@ -1064,6 +1064,63 @@ class ContractService {
         };
     }
 
+    async withdrawWalletBalance(userId: string, amount: number): Promise<WalletBalanceResponse> {
+        if (!Number.isFinite(amount) || amount <= 0) {
+            throw new ContractError('Withdrawal amount must be greater than zero', 400, 'INVALID_WITHDRAW_AMOUNT');
+        }
+
+        const transaction = await sequelize.transaction();
+
+        try {
+            const profile = await Profile.findOne({
+                where: { user_id: userId },
+                transaction,
+                lock: transaction.LOCK.UPDATE,
+            });
+
+            if (!profile) {
+                throw new ContractError('Profile not found', 404, 'PROFILE_NOT_FOUND');
+            }
+
+            const currentBalance = Number((profile as any).wallet_balance ?? 0);
+
+            if (currentBalance < amount) {
+                throw new ContractError('Insufficient wallet balance to complete this withdrawal', 400, 'INSUFFICIENT_WALLET_BALANCE');
+            }
+
+            const remainingBalance = Math.max(currentBalance - amount, 0);
+
+            await profile.update(
+                {
+                    wallet_balance: remainingBalance,
+                },
+                { transaction }
+            );
+
+            await activityLogService.log({
+                actor: { userId, role: 'USER' },
+                action: 'WALLET_WITHDRAWAL',
+                entityType: 'PROFILE',
+                entityId: userId,
+                description: `Wallet withdrawal of ${amount.toFixed(2)} EGP.`,
+                metadata: {
+                    amount,
+                    newBalance: remainingBalance,
+                },
+            });
+
+            await transaction.commit();
+
+            return {
+                balance: remainingBalance,
+                currency: 'EGP',
+            };
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+    }
+
     async payContractFromBalance(contractId: string, tenantId: string): Promise<ContractBalancePaymentResponse> {
         const transaction = await sequelize.transaction();
 
@@ -1371,14 +1428,15 @@ class ContractService {
 
         const tenantUser = await User.findByPk(tenantId, {
             include: [{ model: Profile, as: 'profile', attributes: ['first_name', 'last_name', 'phone_number'] }],
-            attributes: ['id', 'email'],
+            attributes: ['id', 'email', 'role'],
         });
 
         if (!tenantUser) {
             throw new ContractError('Tenant user not found', 404, 'USER_NOT_FOUND');
         }
 
-        const callbackUrl = `${env.CLIENT_URL.replace(/\/$/, '')}/tenant-payment?walletTopup=1`;
+        const pagePath = tenantUser.role === 'LANDLORD' ? 'landlord-payment' : 'tenant-payment';
+        const callbackUrl = `${env.CLIENT_URL.replace(/\/$/, '')}/${pagePath}?walletTopup=1`;
         const profile = (tenantUser as any).profile;
         const checkout = await paymobService.createCheckoutSession({
             amountCents,

@@ -9,6 +9,7 @@ import env from '../../config/env.js';
 class EmailService {
     private transporter: Transporter | null = null;
     private initialized = false;
+    private isMockMode = false;
 
     /**
      * Initialize the email transporter
@@ -18,8 +19,9 @@ class EmailService {
         if (this.initialized) return;
 
         // Check if SMTP credentials are configured
-        if (!env.SMTP_USER || !env.SMTP_PASS) {
+        if (!env.SMTP_USER || !env.SMTP_PASS || !env.SMTP_HOST) {
             console.log('📧 [EMAIL SERVICE] SMTP not configured - emails will be mocked to console');
+            this.isMockMode = true;
             this.initialized = true;
             return;
         }
@@ -33,16 +35,21 @@ class EmailService {
                     user: env.SMTP_USER,
                     pass: env.SMTP_PASS,
                 },
+                tls: {
+                    rejectUnauthorized: false
+                }
             });
 
             // Verify connection
             await this.transporter.verify();
             console.log('✅ [EMAIL SERVICE] SMTP connection established');
+            this.isMockMode = false;
             this.initialized = true;
         } catch (error) {
             console.error('❌ [EMAIL SERVICE] Failed to initialize SMTP:', error);
             this.transporter = null;
-            this.initialized = true;
+            this.isMockMode = false;
+            this.initialized = false; // keep false so we retry on next call
         }
     }
 
@@ -288,7 +295,7 @@ class EmailService {
         const text = this.generatePlainTextEmail(content);
 
         // If no transporter, mock the email
-        if (!this.transporter) {
+        if (this.isMockMode) {
             console.log('\n📧 ═══════════════════════════════════════════════════════════');
             console.log('📧 [MOCK EMAIL] Sending email to:', to);
             console.log('📧 [MOCK EMAIL] Subject:', subject);
@@ -299,6 +306,11 @@ class EmailService {
             }
             console.log('📧 ═══════════════════════════════════════════════════════════\n');
             return true;
+        }
+
+        if (!this.transporter) {
+            console.error('❌ [EMAIL SERVICE] Transporter not available (SMTP initialization failed)');
+            return false;
         }
 
         try {

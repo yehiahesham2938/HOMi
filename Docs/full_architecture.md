@@ -1,6 +1,6 @@
 # 🏠 HOMi — Full System Architecture & Business Logic
 
-> **Last Updated:** May 2026 &nbsp;|&nbsp; **Stack:** Vite + React · Node.js/Express · PostgreSQL (Supabase) · Upstash Redis · Socket.IO
+> **Last Updated:** June 2026 &nbsp;|&nbsp; **Stack:** Vite + React · Node.js/Express · PostgreSQL (Supabase) · Upstash Redis · Socket.IO
 
 ---
 
@@ -124,6 +124,22 @@ Every protected endpoint validates:
 | `RATE_LIMIT_ENABLED` | `false` | `true` | Upstash sliding-window |
 | `NODE_ENV` | `development` | `production` | Picks config file |
 
+### 🌐 Production Deployment Architecture
+
+HOMi is deployed as a monorepo setup:
+1. **Frontend (Vite + React SPA):** Hosted on **Vercel**.
+   - Build Command: `vite build` (compiles to static files in `dist/`).
+   - Deep Linking: Configuration in [vercel.json](client/vercel.json) rewrites all deep route requests to `index.html` to allow React Router SPA routing.
+   - Env Vars: `VITE_GOOGLE_CLIENT_ID` for Google sign-in. `VITE_API_BASE_URL` points to the production backend.
+2. **Backend (Node.js/Express):** Hosted on **Railway**.
+   - Build Tool: Nixpacks automatically detects dependencies and runs `npm start`.
+   - Production Engine: Uses `tsx` in production to run TypeScript directly without pre-compile steps.
+   - Database & Cache Plugins: Deploys a managed PostgreSQL database instance and connects to Upstash Redis.
+   - SSL Verification: Automatically enabled for PostgreSQL connections in production via SSL connection pooling.
+3. **CI/CD Pipeline:** Fully automated via GitHub Actions:
+   - Verification: On push and PR, runs backend test suite (fully mocked, 97 tests) and compiles the frontend build.
+   - CD Hook: After CI passes, Railway and Vercel fetch changes from `main` to push to staging/production.
+
 ---
 
 ## 4. Client Layer (SPA)
@@ -220,17 +236,17 @@ Route requested
 
 | Prefix | Module |
 |---|---|
-| `/api/auth/*` | Auth (register, login, OAuth, WebAuthn) |
-| `/api/properties/*` | Properties CRUD & search |
+| `/api/auth/*` | Auth (register, login, OAuth, WebAuthn, Valify NID OCR) |
+| `/api/properties/*` | Properties CRUD, search & reporting |
 | `/api/rental-requests/*` | Rental request lifecycle |
-| `/api/contracts/*` | Contract signing & payment |
-| `/api/payments/*` | Wallet top-up, Paymob webhooks |
-| `/api/maintenance/*` | Maintenance full lifecycle |
+| `/api/contracts/*` | Contract signing, wallet payments/withdrawals, tenant reporting, early lease termination |
+| `/api/payment-methods/*` | Saved credit cards/wallets management |
+| `/api/maintenance/*` | Maintenance full lifecycle, bidding, conflicts & ratings |
 | `/api/messages/*` | Conversations & messages |
 | `/api/notifications/*` | Push & in-app notifications |
-| `/api/roommate/*` | Habit quiz & AI matching |
-| `/api/saved/*` | Saved properties |
-| `/api/admin/*` | Admin-only operations |
+| `/api/roommate-matching/*` | Smart habit compatibility matching, AI roommate wish, connection requests, lease workspace |
+| `/api/saved-properties/*` | Saved properties |
+| `/api/admin/*` | Admin-only verification, ban/unban, dispute resolution, tenant reports, termination requests |
 
 ---
 
@@ -320,6 +336,26 @@ Route requested
   POST /api/auth/webauthn/register/verify   → store credential
   POST /api/auth/webauthn/login/options     → generate challenge
   POST /api/auth/webauthn/login/verify      → verify + issue JWT
+```
+
+### 6.6 Egyptian National ID OCR Verification (Valify Proxy)
+
+To safely authenticate and extract profile details from Egyptian National Identity Cards without exposing API credentials to the client side, HOMi proxies scanning queries to the **Valify OCR API**.
+
+```
+  Client POST /api/auth/verify-nid  { image }  (base64 image scan)
+         │
+         ▼
+  ┌────────────────────────────────────────────────────────┐
+  │  1. Check authentic user session                       │
+  │  2. Request OAuth2 access token from Valify Stage API  │
+  │     POST /api/o/token/  (credentials cached/stored)    │
+  │  3. Proxy base64 NID image to Valify OCR API           │
+  │     POST /api/v1.5/ocr/                                │
+  └────────────────────────────────────────────────────────┘
+         │
+         ▼
+  200 OK  { success: true, ocrData: { nationalId, birthdate, gender, firstName, lastName... } }
 ```
 
 ---
@@ -652,17 +688,52 @@ Route requested
 ### 9.6 Lease Termination & Expiry
 
 ```
-  Termination:
+  Termination Request:
   POST /api/contracts/:id/terminate
        ├─ Only LANDLORD or TENANT on contract
        ├─ Only ACTIVE contracts can be terminated
-       └─ status → TERMINATED, terminated_at = now
+       └─ status → PENDING request created in LeaseTerminationRequests table
 
   Expiry (automatic):
   expireCompletedLeases()  — called at the top of every list fetch
        ├─ Finds ACTIVE contracts where:
        │    move_in_date + lease_duration_months < today
        └─ Updates status → EXPIRED
+
+### 9.6 Early Lease Termination Request & Execution Flow
+
+To ensure fair resolution of early exits and dispute handling, terminations undergo admin review.
+
+1. **Request Submission:**
+   - **Endpoint:** `POST /api/contracts/:id/terminate`
+   - **Payload:** `{ reason, scenario, details }` (scenario defines lease breach, landlord fault, or mutual exits)
+   - **Action:** Creates a `LeaseTerminationRequest` in the `PENDING` state.
+
+2. **Admin Review:**
+   - **Approve/Reject:** Admin actions request via `POST /api/admin/termination-requests/:id/action`.
+   - **If Approved:** Sets request to `APPROVED`, specifying `damageDeduction` and `mutualDepositOption` (if mutual).
+
+3. **Lease Execution (Daily Cron):**
+   - The cron task `runDailyLeaseCycleCheck()` searches for active contracts with approved termination requests.
+   - At the end of the current billing cycle, if rent is fully paid, the system triggers `executeApprovedLeaseTermination()` atomically:
+     - **Unpaid Rent:** Calculates unpaid rent for the final cycle and transfers it from the tenant's wallet to the landlord. If the tenant's wallet is short, the rent is deducted directly from the security deposit refund.
+     - **Deposit Refund / Forfeiture Scenarios:**
+       - `LANDLORD_INITIATED` / `Property uninhabitable` / `Landlord breached contract`: Full deposit refunded to tenant.
+       - `Property Damage` / `Lease Violation` / `Unauthorized Occupancy`: Full deposit forfeited and credited to the landlord's wallet.
+       - `Early exit` (Tenant early exit, no landlord fault):
+         - *Before Halfway Point:* Deposit is forfeited to the landlord as a penalty.
+         - *After Halfway Point:* Deposit is refunded to the tenant, minus `damage_deduction`.
+       - `Mutual Agreement`: Deposit is distributed based on the selected choice (`LANDLORD`, `TENANT`, or `SPLIT`), adjusted for damages.
+     - **Lease Closeout:** The contract status is updated to `TERMINATED`, and the property status returns to `AVAILABLE`.
+
+### 9.8 Tenant Reporting (Landlord-to-Admin)
+
+Landlords can submit formal reports against tenants for lease violations.
+
+- **Endpoint:** `POST /api/contracts/:id/report-tenant`
+- **Payload:** `{ reason: TenantReportReason, details: string }`
+- **Reasons:** `LATE_PAYMENT`, `PROPERTY_DAMAGE`, `NOISE_COMPLAINT`, `UNAUTHORIZED_OCCUPANTS`, `OTHER`.
+- **Workflow:** Validates that the contract is ACTIVE or EXPIRED, creates an `OPEN` `TenantReport` record, and pushes it to the admin moderation queue.
 ```
 
 ### 9.7 Contract Data Model (key fields)
@@ -747,11 +818,31 @@ Route requested
 
 | Field | Where stored | Notes |
 |---|---|---|
-| `wallet_balance` | `Profile.wallet_balance` | Tenant's EGP balance |
+| `wallet_balance` | `Profile.wallet_balance` | User's (Tenant/Landlord/Provider) EGP balance |
 | `wallet_pending_order_id` | `Profile` | Paymob order during top-up |
 | `wallet_pending_amount_cents` | `Profile` | Expected amount (cents) |
 | `paymob_order_id` | `Contract` | BIGINT (normalized to Number) |
 | `paymob_transaction_id` | `Contract` | Paymob tx reference |
+
+### 10.4 Wallet Withdrawal Flow
+
+Landlords and Maintenance Providers can withdraw their earnings/balances back to their registered bank accounts:
+
+```
+  User POST /api/contracts/payments/wallet/withdraw  { amount }
+         │
+         ▼
+  ┌────────────────────────────────────────────────────────┐
+  │  1. Initiate Sequelize database transaction            │
+  │  2. Fetch user Profile with row-level lock (FOR UPDATE)│
+  │  3. Verify amount > 0 and wallet_balance >= amount     │
+  │  4. Deduct amount from wallet_balance                  │
+  │  5. Log WALLET_WITHDRAWAL in ActivityLog               │
+  └────────────────────────────────────────────────────────┘
+         │
+         ▼
+  200 OK  { balance: remainingBalance, currency: "EGP" }
+```
 
 ---
 
@@ -1057,35 +1148,44 @@ Route requested
 
 ## 14. Roommate Matching Module
 
+HOMi features a complete roommate matching system under the `/api/roommate-matching/*` routes. It helps tenants find compatible roommates or list individual rooms in their active lease using non-AI filtering, AI compatibility, and a dedicated lease partition workspace.
+
+### 14.1 Habit Profile Quiz
 ```
-  POST /api/roommate/quiz
+  POST /api/roommate-matching/requests
   { habits: { sleepSchedule, noiseLevel, guestPolicy,
               cleanlinessLevel, smokingPolicy, petsPolicy,
               workFromHome, sharingCommonAreas } }
          │
          ├─ Save habits to Profile (JSONB column)
          └─ 200 OK
-
-  GET /api/roommate/matches
-         │
-         ├─ Fetch current user's habits from Profile
-         ├─ Fetch all other tenants' habits (same city filter)
-         │
-         └─ For each candidate:
-              Build prompt for Google Gemini AI:
-              "Given these two habit profiles, score compatibility
-               0-100 and explain in 2 sentences."
-                    │
-                    ▼
-              gemini.generateContent(prompt)
-                    │
-                    ▼
-              Parse score + explanation
-         │
-         └─ Return sorted list of matches with:
-              { userId, name, avatar, score, explanation,
-                property: { title, address, price } }
 ```
+
+### 14.2 Matching Strategies
+
+#### 👥 A. Smart Matches (Non-AI Habit Compatibility)
+- **Endpoint:** `GET /api/roommate-matching/smart-matches`
+- **Workflow:**
+  1. Computes matching scores mathematically (0-100) by comparing user lifestyle habits against candidate profiles in the same city.
+  2. Supports filters: `city`, `area`, `gender`, `minScore`.
+
+#### 🔮 B. HOMi Wish AI Matching (Google Gemini AI)
+- **Endpoint:** `POST /api/roommate-matching/wish`
+- **Payload:** `{ wishText }` (e.g. "Seeking an early-sleeping medical student, clean and feline-friendly.")
+- **Workflow:**
+  1. Compiles a roster of all active roommate seekers in the same city.
+  2. Sends the candidate roster along with the user's free-text `wishText` to Google Gemini.
+  3. Gemini computes a personalized compatibility score and provides a 2-sentence rationale.
+  4. Returns the candidate list sorted by the AI compatibility score.
+
+### 14.3 Roommate Connections
+- **Send Connection:** `POST /api/roommate-matching/connect` sends a roommate invitation to a target user, creating a pending `RoommateMatch` and triggering a system notification.
+- **Mutual Accept:** If the target accepts (via `PATCH /api/roommate-matching/matches/:id/respond` with action `ACCEPTED`), the match status updates to `MUTUAL` and enables chat options.
+
+### 14.4 Lease Workspace & Room Partitions
+Active leaseholders can configure and divide their active properties to recruit roommates:
+- **Get Active Leases:** `GET /api/roommate-matching/leases` returns the user's active contracts, auto-generating a default room config (e.g., Master Room ensuite vs. standard rooms, splitting the monthly rent amount evenly across bedrooms).
+- **Save Config:** `PUT /api/roommate-matching/leases/:contractId/config` saves `{ roommatesWanted, rooms: [{ name, rent, ensuite, listed }] }`. This creates/updates an active `SEARCH_ROOMMATE` `RoommateRequest` listing in the database, publicizing the vacant rooms.
 
 ---
 
@@ -1120,6 +1220,24 @@ Route requested
   │  GET  /api/admin/maintenance/conflicts                          │
   │  POST /api/admin/maintenance/conflicts/:id/resolve              │
   │       { resolution, adminNotes, splitRatio? }                   │
+  ├─────────────────────────────────────────────────────────────────┤
+  │  TENANT COMPLAINT MODERATION                                    │
+  │  GET  /api/admin/tenant-reports      — list tenant reports      │
+  │  POST /api/admin/tenant-reports/:id/warn                        │
+  │       → sends warning email + system notification to tenant     │
+  │       → updates report status to ACTIONED                       │
+  │  POST /api/admin/tenant-reports/:id/ban                         │
+  │       → bans tenant account (is_banned = true)                  │
+  │       → sends ban email, destroys active Redis sessions         │
+  │       → updates report status to ACTIONED                       │
+  ├─────────────────────────────────────────────────────────────────┤
+  │  LEASE TERMINATION REQUESTS                                     │
+  │  GET  /api/admin/termination-requests — list early exit requests│
+  │  POST /api/admin/termination-requests/:id/action                │
+  │       { action: "APPROVE" | "REJECT", rejectionReason?,         │
+  │         damageDeduction?, mutualDepositOption? }                │
+  │       → APPROVE: status → APPROVED, triggers cron execution     │
+  │       → REJECT: status → REJECTED, sends user notification      │
   ├─────────────────────────────────────────────────────────────────┤
   │  ACTIVITY LOGS (Audit Trail)                                    │
   │  GET  /api/admin/activity-logs                                  │
@@ -1281,6 +1399,7 @@ Route requested
 | **Google OAuth 2.0** | Social login, user info fetch | OAuth2 client credentials |
 | **Google Gemini AI** | Roommate habit compatibility scoring | API key |
 | **Gmail SMTP** | Email verification OTPs, system emails | App password (Nodemailer) |
+| **Valify OCR** | Egyptian National ID scan & OCR verification stage APIs | Client credentials + Bundle key |
 
 ---
 
@@ -1304,6 +1423,7 @@ Route requested
                               └────▶ Upstash Redis (session HSET)
                               └────▶ Gmail SMTP (OTP email)
                               └────▶ Google OAuth API (social login)
+                              └────▶ Valify OCR API (NID scanning verification proxy)
 
   PROPERTY BROWSING
   ─────────────────
@@ -1326,6 +1446,12 @@ Route requested
 
   Monthly rent   ──▶ Check installments ──▶ Apply credits ──▶ wallet debit ──▶ ActivityLog
 
+  Withdrawal     ──▶ POST /payments/wallet/withdraw ──▶ Atomic wallet debit ──▶ ActivityLog
+
+  Landlord Report──▶ POST /report-tenant ──▶ TenantReport (OPEN) ──▶ Admin Queue
+
+  Lease Terminate──▶ POST /terminate ──▶ LeaseTerminationRequest (PENDING) ──▶ Admin Queue
+
   MAINTENANCE PIPELINE
   ────────────────────
   Tenant posts issue    ──▶ DB (OPEN) ──▶ Notify landlord + providers
@@ -1344,15 +1470,20 @@ Route requested
   Send message  ──▶ DB (persist) ──▶ Redis LPUSH (chat history)
                     Socket.IO emit new_message to conversation room
 
-  AI MATCHING
-  ───────────
-  GET /roommate/matches ──▶ Fetch habits ──▶ Google Gemini AI ──▶ Scored list
+  AI & SMART ROOMMATE MATCHING
+  ────────────────────────────
+  GET /smart-matches ──▶ Fetch candidate pool ──▶ Habit compatibility scoring ──▶ Response
+  POST /wish         ──▶ Fetch candidate pool ──▶ Google Gemini AI (wish text rank) ──▶ Response
+  POST /connect      ──▶ Create RoommateMatch (PENDING) ──▶ System Notification to target
+  PUT /leases/:id/config ──▶ Save rooms layout ──▶ RoommateRequest (SEARCH_ROOMMATE)
 
   ADMIN
   ─────
   Property verify ──▶ DB (status=AVAILABLE) ──▶ Cache invalidate ──▶ Notify
   User ban        ──▶ DB (is_banned=true)   ──▶ Session destroy (Redis DEL)
   Dispute resolve ──▶ Wallet transfers      ──▶ DB (RESOLVED)    ──▶ Notify
+  Tenant report   ──▶ Warn (warning email + system notify) / Ban ──▶ Status (ACTIONED)
+  Termination     ──▶ Approve/Reject request ──▶ Run execution in cycle cron
 
   ┌──────────────────────────────────────────────────────────────────────────────────┐
   │  LEGEND                                                                          │

@@ -1,0 +1,47 @@
+# Artillery + Socket.IO load test for HOMi chat (the real single-instance bottleneck).
+#   docs: https://www.artillery.io/docs
+# Install: npm i -g artillery artillery-engine-socketio-v3
+# Run:    artillery run socketio-load.yml --target wss://staging-api.homi-platform.com
+#
+# This opens many concurrent authenticated WebSocket connections to measure how many
+# simultaneous chat sessions one Railway instance holds (no Redis adapter = single box).
+# Socket.IO auth here expects a JWT in handshake.auth.token (see socket.ts resolveToken).
+
+config:
+  # --target overrides this; left as a placeholder.
+  target: "wss://staging-api.homi-platform.com"
+  phases:
+    - duration: 120
+      arrivalRate: 20      # +20 new connections/sec
+      name: "ramp"
+    - duration: 300
+      arrivalCount: 0
+      maxVusers: 2500      # hold up to 2,500 concurrent sockets
+      name: "hold"
+  engines:
+    socketio-v3: {}
+  # Provide one JWT per virtual user via a CSV (column: token).
+  # Generate it by logging your seeded test users in and dumping their access tokens.
+  payload:
+    path: "tokens.csv"
+    fields:
+      - "token"
+
+scenarios:
+  - name: "connect, join, idle"
+    engine: socketio-v3
+    flow:
+      - emit:
+          channel: "connect"        # connection carries auth.token; configured below
+      # Keep the socket open to simulate a user with chat live.
+      - think: 30
+      - emit:
+          channel: "conversation:join"
+          data:
+            conversationId: "{{ $env.TEST_CONVERSATION_ID }}"
+      - think: 240                   # hold the connection open for the test window
+
+# NOTE: passing handshake auth (auth.token) with the socketio engine requires
+# setting it in config.engines or via a custom function. If your Artillery version
+# doesn't support auth in the YAML, use a processor:
+#   config.processor: "./socket-auth.js"  and set socketio options there.

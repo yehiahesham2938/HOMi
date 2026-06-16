@@ -37,7 +37,13 @@ class EmailService {
                 },
                 tls: {
                     rejectUnauthorized: false
-                }
+                },
+                // Fail fast instead of hanging if SMTP is unreachable/blocked
+                // (e.g. Railway blocking outbound SMTP). Without these, nodemailer's
+                // long defaults let a stuck send stall any request that awaits it.
+                connectionTimeout: 10_000,
+                greetingTimeout: 10_000,
+                socketTimeout: 15_000,
             });
 
             // Verify connection

@@ -19,6 +19,9 @@ const Footer = () => {
   const role = currentUser?.user?.role?.toUpperCase();
   const isGuestPage = location.pathname === '/guest-home' || location.pathname === '/guest-search';
 
+  const getHelpLink = '/get-help';
+  const listPropertyLink = '/for-landlords';
+
   return (
     <footer className="site-footer">
 
@@ -72,7 +75,7 @@ const Footer = () => {
             ) : (
               <>
                 <Link to="/browse-properties">{t('footer.browseHomes')}</Link>
-                <Link to="/for-landlords">{t('footer.listProperty')}</Link>
+                <Link to={listPropertyLink} state={isGuestPage ? { fromGuestHome: true } : undefined}>{t('footer.listProperty')}</Link>
                 <Link to="/homi-pro">{t('footer.homiPro')}</Link>
                 <Link to="/pricing">{t('footer.pricingFees')}</Link>
                 <Link to="/roommate-matching">{t('footer.roommateMatching')}</Link>
@@ -85,7 +88,7 @@ const Footer = () => {
           <div className="footer-links">
             <h4>{t('footer.resources')}</h4>
             <Link to="/about-us">{t('footer.aboutUs')}</Link>
-            <Link to="/get-help">{t('footer.helpCenter')}</Link>
+            <Link to={getHelpLink} state={isGuestPage ? { fromGuestHome: true } : undefined}>{t('footer.helpCenter')}</Link>
             <Link to="/blog">{t('footer.blog')}</Link>
             <Link to="/careers">{t('footer.careers')}</Link>
           </div>

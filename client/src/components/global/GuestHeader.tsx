@@ -21,10 +21,8 @@ export const GuestHeader: React.FC<GuestHeaderProps> = ({ showBackToHome = false
     document.documentElement.lang = newLang;
   };
 
-  const getHelpFromGuest = {
-    pathname: '/get-help',
-    state: { fromGuestHome: true },
-  };
+  const getHelpLink = '/get-help';
+  const howItWorksChooseLink = '/how-it-works-choose';
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 40);
@@ -49,8 +47,8 @@ export const GuestHeader: React.FC<GuestHeaderProps> = ({ showBackToHome = false
 
         <div className="nav-links desktop-only">
           <Link to="/guest-search">{t('guestHome.browseHomes', { defaultValue: 'Browse Homes' })}</Link>
-          <Link to="/how-it-works-choose">{t('guestHome.howItWorks', { defaultValue: 'How It Works' })}</Link>
-          <Link to={getHelpFromGuest}>{t('guestHome.helpCenter', { defaultValue: 'Help Center' })}</Link>
+          <Link to={howItWorksChooseLink} state={{ fromGuestHome: true }}>{t('guestHome.howItWorks', { defaultValue: 'How It Works' })}</Link>
+          <Link to={getHelpLink} state={{ fromGuestHome: true }}>{t('guestHome.helpCenter', { defaultValue: 'Help Center' })}</Link>
         </div>
 
         <div className="nav-actions desktop-only">
@@ -70,8 +68,8 @@ export const GuestHeader: React.FC<GuestHeaderProps> = ({ showBackToHome = false
       {mobileMenuOpen && (
         <div className="mobile-nav-panel">
           <Link to="/guest-search" onClick={() => setMobileMenuOpen(false)}>{t('guestHome.browseHomes', { defaultValue: 'Browse Homes' })}</Link>
-          <Link to="/how-it-works-choose" onClick={() => setMobileMenuOpen(false)}>{t('guestHome.howItWorks', { defaultValue: 'How It Works' })}</Link>
-          <Link to={getHelpFromGuest} onClick={() => setMobileMenuOpen(false)}>{t('guestHome.helpCenter', { defaultValue: 'Help Center' })}</Link>
+          <Link to={howItWorksChooseLink} state={{ fromGuestHome: true }} onClick={() => setMobileMenuOpen(false)}>{t('guestHome.howItWorks', { defaultValue: 'How It Works' })}</Link>
+          <Link to={getHelpLink} state={{ fromGuestHome: true }} onClick={() => setMobileMenuOpen(false)}>{t('guestHome.helpCenter', { defaultValue: 'Help Center' })}</Link>
           <div className="mobile-lang-row">
             <button className="lang-toggle-btn" onClick={() => { toggleLanguage(); setMobileMenuOpen(false); }}>
               <Globe size={18} />

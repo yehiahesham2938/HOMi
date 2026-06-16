@@ -41,9 +41,9 @@ export default {
             enabled: true,
         },
         rateLimit: {
-            enabled: true,
-            windowSeconds: 600,
-            maxRequests: 50, 
+            enabled: process.env.RATE_LIMIT_ENABLED === 'true',
+            windowSeconds: process.env.RATE_LIMIT_WINDOW_SECONDS ? Number(process.env.RATE_LIMIT_WINDOW_SECONDS) : 600,
+            maxRequests: process.env.RATE_LIMIT_MAX_REQUESTS ? Number(process.env.RATE_LIMIT_MAX_REQUESTS) : 1000, 
         },
         cache: {
             enabled: true,

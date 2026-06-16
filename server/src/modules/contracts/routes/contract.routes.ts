@@ -575,6 +575,12 @@ router.get(
     contractController.getWalletBalance.bind(contractController)
 );
 
+router.post(
+    '/payments/wallet/withdraw',
+    protect,
+    contractController.withdrawWalletBalance.bind(contractController)
+);
+
 router.get(
     '/payments/history',
     protect,

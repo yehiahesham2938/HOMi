@@ -1,22 +1,23 @@
 // client/src/features/Settings/components/Security.tsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import './Security.css';
 import { FaShieldVirus, FaFingerprint, FaHistory, FaKey, FaTimes, FaEye, FaEyeSlash, FaCheck, FaTimesCircle, FaGoogle } from 'react-icons/fa';
 import { authService } from '../../../services/auth.service';
 import { passkeyService } from '../../../services/passkey.service';
 
 // Password requirement checks
-const checks = [
-    { key: 'length',    label: 'At least 8 characters',           test: (p: string) => p.length >= 8 },
-    { key: 'upper',     label: 'At least one uppercase letter',    test: (p: string) => /[A-Z]/.test(p) },
-    { key: 'lower',     label: 'At least one lowercase letter',    test: (p: string) => /[a-z]/.test(p) },
-    { key: 'number',    label: 'At least one number',              test: (p: string) => /\d/.test(p) },
-    { key: 'special',   label: 'At least one special character',   test: (p: string) => /[@$!%*?&#^()_+\-=[\]{};':"\\|,.<>/]/.test(p) },
+const getChecks = (t: any) => [
+    { key: 'length',    label: t('settings.checkLength', 'At least 8 characters'),           test: (p: string) => p.length >= 8 },
+    { key: 'upper',     label: t('settings.checkUpper', 'At least one uppercase letter'),    test: (p: string) => /[A-Z]/.test(p) },
+    { key: 'lower',     label: t('settings.checkLower', 'At least one lowercase letter'),    test: (p: string) => /[a-z]/.test(p) },
+    { key: 'number',    label: t('settings.checkNumber', 'At least one number'),              test: (p: string) => /\d/.test(p) },
+    { key: 'special',   label: t('settings.checkSpecial', 'At least one special character'),   test: (p: string) => /[@$!%*?&#^()_+\-=[\]{};':"\\|,.<>/]/.test(p) },
 ];
 
 // Parse ZodError-style errors[] from the backend into a single readable string
-function parseApiError(err: unknown): string {
+function parseApiError(err: unknown, t: any): string {
     const e = err as {
         response?: {
             data?: {
@@ -28,18 +29,18 @@ function parseApiError(err: unknown): string {
     };
 
     const data = e?.response?.data;
-    if (!data) return 'Failed to change password. Please try again.';
+    if (!data) return t('settings.errFailedChangePassword', 'Failed to change password. Please try again.');
 
     // Map backend error codes to user-friendly messages
-    if (data.code === 'INVALID_CURRENT_PASSWORD') return 'Current password is incorrect.';
-    if (data.code === 'SAME_PASSWORD') return 'New password must be different from your current one.';
+    if (data.code === 'INVALID_CURRENT_PASSWORD') return t('settings.errInvalidCurrentPassword', 'Current password is incorrect.');
+    if (data.code === 'SAME_PASSWORD') return t('settings.errSamePassword', 'New password must be different from your current one.');
 
     // Parse Zod validation errors (code === 'VALIDATION_ERROR')
     if (data.errors && data.errors.length > 0) {
         return data.errors[0].message;
     }
 
-    return data.message || 'Failed to change password. Please try again.';
+    return data.message || t('settings.errFailedChangePassword', 'Failed to change password. Please try again.');
 }
 
 interface SecurityProps {
@@ -47,6 +48,7 @@ interface SecurityProps {
 }
 
 const Security: React.FC<SecurityProps> = ({ role }) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const isMaintainer = role === 'MAINTENANCE_PROVIDER';
     const isGoogleUser = localStorage.getItem('authProvider') === 'google';
@@ -91,7 +93,11 @@ const Security: React.FC<SecurityProps> = ({ role }) => {
     const securityScore = isMaintainer
         ? (isPasswordProtected ? 80 : 0) + (isPasskeyEnabled ? 20 : 0)
         : (isPasswordProtected ? 40 : 0) + (isProfileComplete ? 45 : 0) + (isPasskeyEnabled ? 15 : 0);
-    const scoreLabel = securityScore >= 100 ? 'Excellent' : securityScore >= 70 ? 'Good' : 'Needs attention';
+    const scoreLabel = securityScore >= 100 
+        ? t('settings.excellent', 'Excellent') 
+        : securityScore >= 70 
+            ? t('settings.good', 'Good') 
+            : t('settings.needsAttention', 'Needs attention');
     const isPerfectScore = securityScore === 100;
     const scoreStrokeColor = isPerfectScore ? '#22c55e' : '#2563eb';
 
@@ -125,12 +131,13 @@ const Security: React.FC<SecurityProps> = ({ role }) => {
 
     // Track whether the user has started typing the new password (to show checklist)
     const newPasswordTouched = newPassword.length > 0;
+    const checks = getChecks(t);
     const allChecksPassed = checks.every(c => c.test(newPassword));
 
     const handlePasskeySetup = async () => {
         setPasskeyMessage(null);
         if (!passkeyService.isSupported()) {
-            setPasskeyMessage({ type: 'error', text: 'This browser/device does not support biometric/passkey auth.' });
+            setPasskeyMessage({ type: 'error', text: t('settings.errPasskeyNotSupported', 'This browser/device does not support biometric/passkey auth.') });
             return;
         }
 
@@ -138,9 +145,9 @@ const Security: React.FC<SecurityProps> = ({ role }) => {
         try {
             await passkeyService.registerPasskeyForCurrentUser();
             setIsPasskeyEnabled(true);
-            setPasskeyMessage({ type: 'success', text: 'Biometric authentication is now enabled for this device.' });
+            setPasskeyMessage({ type: 'success', text: t('settings.msgPasskeyEnabledSuccess', 'Biometric authentication is now enabled for this device.') });
         } catch (err) {
-            const text = err instanceof Error ? err.message : 'Failed to enable biometric authentication.';
+            const text = err instanceof Error ? err.message : t('settings.errFailedEnablePasskey', 'Failed to enable biometric authentication.');
             setPasskeyMessage({ type: 'error', text });
         } finally {
             setPasskeyBusy(false);
@@ -153,9 +160,9 @@ const Security: React.FC<SecurityProps> = ({ role }) => {
         try {
             await passkeyService.disablePasskeyForCurrentUser();
             setIsPasskeyEnabled(false);
-            setPasskeyMessage({ type: 'success', text: 'Passkeys have been removed from your account.' });
+            setPasskeyMessage({ type: 'success', text: t('settings.msgPasskeyDisabledSuccess', 'Passkeys have been removed from your account.') });
         } catch (err) {
-            const text = err instanceof Error ? err.message : 'Failed to disable passkeys.';
+            const text = err instanceof Error ? err.message : t('settings.errFailedDisablePasskey', 'Failed to disable passkeys.');
             setPasskeyMessage({ type: 'error', text });
         } finally {
             setPasskeyBusy(false);
@@ -181,24 +188,24 @@ const Security: React.FC<SecurityProps> = ({ role }) => {
 
         // ── Client-side validation ──────────────────────────────────────────
         if (!currentPassword) {
-            setMessage({ type: 'error', text: 'Please enter your current password.' });
+            setMessage({ type: 'error', text: t('settings.errEnterCurrentPassword', 'Please enter your current password.') });
             return;
         }
         if (!newPassword) {
-            setMessage({ type: 'error', text: 'Please enter a new password.' });
+            setMessage({ type: 'error', text: t('settings.errEnterNewPassword', 'Please enter a new password.') });
             return;
         }
         if (!allChecksPassed) {
             const failed = checks.filter(c => !c.test(newPassword)).map(c => c.label);
-            setMessage({ type: 'error', text: `Password must have: ${failed.join(', ')}.` });
+            setMessage({ type: 'error', text: `${t('settings.errPasswordRequirementsPrefix', 'Password must have:')} ${failed.join(', ')}.` });
             return;
         }
         if (currentPassword === newPassword) {
-            setMessage({ type: 'error', text: 'New password must be different from your current one.' });
+            setMessage({ type: 'error', text: t('settings.errSamePassword', 'New password must be different from your current one.') });
             return;
         }
         if (newPassword !== confirmPassword) {
-            setMessage({ type: 'error', text: 'New passwords do not match.' });
+            setMessage({ type: 'error', text: t('settings.errPasswordsDoNotMatch', 'New passwords do not match.') });
             return;
         }
 
@@ -206,10 +213,10 @@ const Security: React.FC<SecurityProps> = ({ role }) => {
         setSaving(true);
         try {
             await authService.changePassword({ currentPassword, newPassword });
-            setMessage({ type: 'success', text: 'Password changed successfully!' });
+            setMessage({ type: 'success', text: t('settings.msgPasswordChangedSuccess', 'Password changed successfully!') });
             setTimeout(() => handleClose(), 2000);
         } catch (err: unknown) {
-            setMessage({ type: 'error', text: parseApiError(err) });
+            setMessage({ type: 'error', text: parseApiError(err, t) });
         } finally {
             setSaving(false);
         }
@@ -231,13 +238,13 @@ const Security: React.FC<SecurityProps> = ({ role }) => {
                     <div className="percentage">{securityScore}%</div>
                 </div>
                 <div className="status-meta">
-                    <h3>Security Score: {scoreLabel}</h3>
+                    <h3>{t('settings.securityScore')}: {scoreLabel}</h3>
                     <p>
                         {isPerfectScore
-                            ? 'Excellent! Your account protections are fully enabled.'
+                            ? t('settings.excellentScore')
                             : isPasskeyEnabled
-                                ? 'Great progress. Finish remaining steps to reach 100%.'
-                                : 'Your account is well protected. Enable biometric auth to reach 100%.'}
+                                ? t('settings.goodScore')
+                                : t('settings.attentionScore')}
                     </p>
                 </div>
             </div>
@@ -245,11 +252,11 @@ const Security: React.FC<SecurityProps> = ({ role }) => {
             <div className="security-tools-grid">
                 <div className="tool-card">
                     <div className="tool-icon-box"><FaKey /></div>
-                    <h4>Password</h4>
+                    <h4>{t('settings.changePassword')}</h4>
                     {isGoogleUser ? (
                         <>
                             <p style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.5 }}>
-                                You signed in with Google. Your password is managed by Google and cannot be changed here.
+                                {t('settings.googleUserDesc')}
                             </p>
                             <div style={{
                                 display: 'flex', alignItems: 'center', gap: 6,
@@ -257,30 +264,30 @@ const Security: React.FC<SecurityProps> = ({ role }) => {
                                 color: '#4285F4',
                             }}>
                                 <FaGoogle style={{ fontSize: 13 }} />
-                                Google Account
+                                {t('settings.googleAccount')}
                             </div>
                         </>
                     ) : (
                         <>
-                            <p>Change your secure passphrase</p>
-                            <button className="tool-btn" onClick={handleOpen}>Update</button>
+                            <p>{t('settings.passwordCardDesc')}</p>
+                            <button className="tool-btn" onClick={handleOpen}>{t('settings.update')}</button>
                         </>
                     )}
                 </div>
                 <div className={`tool-card ${isPasskeyEnabled ? 'tool-card-complete' : ''}`}>
                     <div className="tool-icon-box"><FaFingerprint /></div>
-                    <h4>2FA Auth</h4>
+                    <h4>{t('settings.security2fa')}</h4>
                     <p>
                         {isPasskeyEnabled
-                            ? 'Fingerprint/Face ID enabled on this device.'
-                            : 'Use fingerprint or Face ID via secure passkey.'}
+                            ? t('settings.passkeyEnabledText')
+                            : t('settings.passkeySetupText')}
                     </p>
                     <button
                         className="tool-btn"
                         disabled={passkeyBusy}
                         onClick={isPasskeyEnabled ? handlePasskeyDisable : handlePasskeySetup}
                     >
-                        {passkeyBusy ? 'Please wait...' : isPasskeyEnabled ? 'Disable' : 'Enable'}
+                        {passkeyBusy ? t('settings.pleaseWait') : isPasskeyEnabled ? t('settings.disable') : t('settings.enable')}
                     </button>
                     {passkeyMessage && (
                         <p className={`security-inline-note ${passkeyMessage.type}`}>{passkeyMessage.text}</p>
@@ -289,13 +296,13 @@ const Security: React.FC<SecurityProps> = ({ role }) => {
                 {!isMaintainer && (
                     <div className={`tool-card ${isProfileComplete ? 'tool-card-complete' : ''}`}>
                         <div className="tool-icon-box"><FaHistory /></div>
-                        <h4>{isProfileComplete ? 'Profile Complete' : 'Complete Profile'}</h4>
+                        <h4>{isProfileComplete ? t('settings.profileComplete') : t('settings.completeProfile', 'Complete Profile')}</h4>
                         <p>
                             {isProfileComplete
-                                ? 'Your profile and preferences are fully set up.'
+                                ? t('settings.profileCompleteDesc')
                                 : isStep1Complete
-                                    ? 'Almost there! Add your rental preferences to unlock all features.'
-                                    : 'Finish setting up your identity to access all features.'}
+                                    ? t('settings.step1CompleteDesc')
+                                    : t('settings.step1IncompleteDesc')}
                         </p>
                         <button
                             className="tool-btn"
@@ -311,7 +318,7 @@ const Security: React.FC<SecurityProps> = ({ role }) => {
                                 });
                             }}
                         >
-                            {isProfileComplete ? 'Completed ✓' : isStep1Complete ? 'Add Preferences' : 'Continue Setup'}
+                            {isProfileComplete ? t('settings.completedBadge') : isStep1Complete ? t('settings.addPreferencesBtn') : t('settings.continueSetupBtn')}
                         </button>
                     </div>
                 )}
@@ -362,8 +369,8 @@ const Security: React.FC<SecurityProps> = ({ role }) => {
                                 <FaShieldVirus style={{ color: '#fff', fontSize: 18 }} />
                             </div>
                             <div>
-                                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Change Password</h3>
-                                <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted, #94a3b8)' }}>Keep your account secure</p>
+                                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>{t('settings.changePassword')}</h3>
+                                <p style={{ margin: 0, fontSize: 13, color: 'var(--text-muted, #94a3b8)' }}>{t('settings.keepAccountSecure', 'Keep your account secure')}</p>
                             </div>
                         </div>
 
@@ -383,7 +390,7 @@ const Security: React.FC<SecurityProps> = ({ role }) => {
                         <form onSubmit={handleSubmit}>
                             {/* Current Password */}
                             <PasswordField
-                                label="Current Password"
+                                label={t('settings.currentPassword')}
                                 value={currentPassword}
                                 onChange={setCurrentPassword}
                                 show={showCurrent}
@@ -392,7 +399,7 @@ const Security: React.FC<SecurityProps> = ({ role }) => {
 
                             {/* New Password */}
                             <PasswordField
-                                label="New Password"
+                                label={t('settings.newPassword')}
                                 value={newPassword}
                                 onChange={setNewPassword}
                                 show={showNew}
@@ -431,14 +438,14 @@ const Security: React.FC<SecurityProps> = ({ role }) => {
 
                             {/* Confirm New Password */}
                             <PasswordField
-                                label="Confirm New Password"
+                                label={t('settings.confirmNewPassword')}
                                 value={confirmPassword}
                                 onChange={setConfirmPassword}
                                 show={showConfirm}
                                 toggle={() => setShowConfirm(v => !v)}
                                 hint={
                                     confirmPassword.length > 0 && confirmPassword !== newPassword
-                                        ? 'Passwords do not match'
+                                        ? t('settings.passwordsDoNotMatch')
                                         : undefined
                                 }
                             />
@@ -456,7 +463,7 @@ const Security: React.FC<SecurityProps> = ({ role }) => {
                                         cursor: 'pointer', fontSize: 14, fontWeight: 500,
                                     }}
                                 >
-                                    Cancel
+                                    {t('settings.cancel')}
                                 </button>
                                 <button
                                     type="submit"
@@ -472,7 +479,7 @@ const Security: React.FC<SecurityProps> = ({ role }) => {
                                         transition: 'opacity 0.2s',
                                     }}
                                 >
-                                    {saving ? 'Updating…' : 'Update Password'}
+                                    {saving ? t('settings.updating') : t('settings.updatePasswordBtn', 'Update Password')}
                                 </button>
                             </div>
                         </form>

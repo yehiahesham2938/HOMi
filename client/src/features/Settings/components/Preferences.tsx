@@ -1,12 +1,14 @@
 // client/src/features/Settings/components/Preferences.tsx
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import './Preferences.css';
 import { FaMoon, FaSun, FaDesktop, FaGlobe, FaBell } from 'react-icons/fa';
 
 const Preferences: React.FC = () => {
+  const { t, i18n } = useTranslation();
   // Load preferences from localStorage or use defaults
   const [theme, setTheme] = useState(() => localStorage.getItem('homi_theme') || 'light');
-  const [lang, setLang] = useState(() => localStorage.getItem('homi_lang') || 'English (US)');
+  const [lang, setLang] = useState(() => i18n.language || 'en');
   const [notifsEnabled, setNotifsEnabled] = useState(() => {
     const val = localStorage.getItem('homi_desktop_notifs');
     return val !== 'false'; // Default to true
@@ -23,9 +25,11 @@ const Preferences: React.FC = () => {
     }
   }, [theme]);
 
-  useEffect(() => {
-    localStorage.setItem('homi_lang', lang);
-  }, [lang]);
+  const handleLangChange = (newLang: string) => {
+    setLang(newLang);
+    i18n.changeLanguage(newLang);
+    localStorage.setItem('homi_lang', newLang);
+  };
 
   useEffect(() => {
     localStorage.setItem('homi_desktop_notifs', String(notifsEnabled));
@@ -34,12 +38,12 @@ const Preferences: React.FC = () => {
   return (
     <div className="pref-container">
       <div className="pref-header">
-        <h2>System Preferences</h2>
-        <p>Tailor your ActiveRentals interface to your liking.</p>
+        <h2>{t('settings.systemPreferences')}</h2>
+        <p>{t('settings.prefSubtitle')}</p>
       </div>
 
       <section className="pref-section">
-        <label className="pref-label">Appearance</label>
+        <label className="pref-label">{t('settings.appearance')}</label>
         <div className="theme-selector">
           <div 
             className={`theme-option ${theme === 'light' ? 'active' : ''}`}
@@ -48,7 +52,7 @@ const Preferences: React.FC = () => {
             <div className="theme-preview light">
               <FaSun />
             </div>
-            <span>Light</span>
+            <span>{t('settings.light')}</span>
           </div>
           <div 
             className={`theme-option ${theme === 'dark' ? 'active' : ''}`}
@@ -57,7 +61,7 @@ const Preferences: React.FC = () => {
             <div className="theme-preview dark">
               <FaMoon />
             </div>
-            <span>Dark</span>
+            <span>{t('settings.dark')}</span>
           </div>
           <div 
             className={`theme-option ${theme === 'system' ? 'active' : ''}`}
@@ -66,7 +70,7 @@ const Preferences: React.FC = () => {
             <div className="theme-preview system">
               <FaDesktop />
             </div>
-            <span>System</span>
+            <span>{t('settings.system')}</span>
           </div>
         </div>
       </section>
@@ -76,19 +80,17 @@ const Preferences: React.FC = () => {
           <div className="pref-info">
             <div className="pref-icon-bg"><FaGlobe /></div>
             <div>
-              <h4>Language</h4>
-              <p>Select your preferred dashboard language</p>
+              <h4>{t('settings.language')}</h4>
+              <p>{t('settings.langSubtitle')}</p>
             </div>
           </div>
           <select 
             className="pref-select"
             value={lang}
-            onChange={(e) => setLang(e.target.value)}
+            onChange={(e) => handleLangChange(e.target.value)}
           >
-            <option value="English (US)">English (US)</option>
-            <option value="Spanish (ES)">Spanish (ES)</option>
-            <option value="French (FR)">French (FR)</option>
-            <option value="Arabic (AR)">Arabic (AR)</option>
+            <option value="en">English</option>
+            <option value="ar">العربية (Arabic)</option>
           </select>
         </div>
 
@@ -96,8 +98,8 @@ const Preferences: React.FC = () => {
           <div className="pref-info">
             <div className="pref-icon-bg bell"><FaBell /></div>
             <div>
-              <h4>Desktop Notifications</h4>
-              <p>Receive real-time alerts on your browser</p>
+              <h4>{t('settings.desktopNotifications')}</h4>
+              <p>{t('settings.desktopNotifSubtitle')}</p>
             </div>
           </div>
           <label className="pref-toggle">

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { FaStar, FaMapMarkerAlt, FaToolbox, FaCheckCircle, FaChevronRight } from 'react-icons/fa';
 import './ProviderCard.css';
 
@@ -29,6 +30,7 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
     completedJobs,
     onViewProfile
 }) => {
+    const { t } = useTranslation();
     return (
         <div className="provider-card">
             <div className="provider-image-wrapper">
@@ -46,13 +48,13 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
                     <div className="provider-rating">
                         <FaStar className="star-icon" />
                         <span>{rating.toFixed(1)}</span>
-                        <span className="review-count">({reviewCount})</span>
+                        <span className="review-count">({t('maintenance.reviewsCount', { count: reviewCount })})</span>
                     </div>
                 </div>
                 
                 <div className="provider-specialty">
                     <FaToolbox className="info-icon" />
-                    <span>{specialty}</span>
+                    <span>{t('myProperties.maintenanceTypes.' + specialty, specialty)}</span>
                 </div>
                 
                 <div className="provider-location">
@@ -63,16 +65,16 @@ const ProviderCard: React.FC<ProviderCardProps> = ({
                 <div className="provider-stats">
                     <div className="stat-item">
                         <span className="stat-value">{completedJobs}+</span>
-                        <span className="stat-label">Jobs Done</span>
+                        <span className="stat-label">{t('maintenance.jobsCompleted')}</span>
                     </div>
                     <div className="stat-item">
                         <span className="stat-value">{priceRange}</span>
-                        <span className="stat-label">Starting From</span>
+                        <span className="stat-label">{t('maintenance.startingFrom')}</span>
                     </div>
                 </div>
                 
                 <button className="view-profile-btn" onClick={() => onViewProfile(id)}>
-                    View Profile
+                    {t('maintenance.viewProfile')}
                     <FaChevronRight className="btn-icon" />
                 </button>
             </div>

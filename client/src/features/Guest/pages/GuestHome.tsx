@@ -360,23 +360,23 @@ const GuestHome: React.FC = () => {
       <div className="stats-strip reveal">
         <div className="stat">
           <div className="stat-num">100%</div>
-          <div className="stat-label">Digital Process</div>
+          <div className="stat-label">{t('guestHome.statsDigitalProcess')}</div>
         </div>
         <div className="stat">
-          <div className="stat-num">3 Roles</div>
-          <div className="stat-label">Tenant, Landlord & Provider</div>
+          <div className="stat-num">{t('guestHome.statsRolesCount')}</div>
+          <div className="stat-label">{t('guestHome.statsRolesLabel')}</div>
         </div>
         <div className="stat">
-          <div className="stat-num">6 Steps</div>
-          <div className="stat-label">Apply to Move-In</div>
+          <div className="stat-num">{t('guestHome.statsStepsCount')}</div>
+          <div className="stat-label">{t('guestHome.statsStepsLabel')}</div>
         </div>
         <div className="stat">
-          <div className="stat-num">24/7</div>
-          <div className="stat-label">Maintenance Reporting</div>
+          <div className="stat-num">{t('guestHome.statsSupport247')}</div>
+          <div className="stat-label">{t('guestHome.statsMaintenanceReporting')}</div>
         </div>
         <div className="stat">
-          <div className="stat-num">Safe</div>
-          <div className="stat-label">Encrypted Wallet</div>
+          <div className="stat-num">{t('guestHome.statsSafe')}</div>
+          <div className="stat-label">{t('guestHome.statsEncryptedWallet')}</div>
         </div>
       </div>
 
@@ -385,8 +385,8 @@ const GuestHome: React.FC = () => {
         <div className="props-inner">
           {/* Header */}
           <div className="guest-section-header reveal" style={{ padding: '0 0 0', textAlign: 'left' }}>
-            <div className="section-tag">Browse & Discover</div>
-            <h2 className="section-title" style={{ maxWidth: '560px' }}>Find Your Next Home</h2>
+            <div className="section-tag">{t('guestHome.browseDiscover')}</div>
+            <h2 className="section-title" style={{ maxWidth: '560px' }}>{t('guestHome.findNextHome')}</h2>
 
           </div>
 
@@ -394,7 +394,7 @@ const GuestHome: React.FC = () => {
           <div className="props-search-wrap reveal">
             <div className="props-search-row">
               <div className="search-field" style={{ gridColumn: '1/-1', display: 'block' }}>
-                <label>Search Location or Property Name</label>
+                <label>{t('guestHome.searchLabel')}</label>
               </div>
               <div className="search-field" style={{ gridColumn: '1/-1' }}>
                 <div className="search-input-wrap">
@@ -402,7 +402,7 @@ const GuestHome: React.FC = () => {
                   <input
                     type="text"
                     className="props-input"
-                    placeholder="e.g. Cairo, Maadi, Zamalek, New Cairo…"
+                    placeholder={t('guestHome.searchPlaceholder')}
                     value={searchQuery}
                     onChange={(e) => {
                       setSearchQuery(e.target.value);
@@ -413,7 +413,7 @@ const GuestHome: React.FC = () => {
               </div>
 
               <div className="search-field">
-                <label>Type</label>
+                <label>{t('guestHome.propertyType')}</label>
                 <select
                   className="props-select"
                   value={selectedType}
@@ -422,16 +422,16 @@ const GuestHome: React.FC = () => {
                     setCurrentPage(1);
                   }}
                 >
-                  <option value="">All Types</option>
-                  <option value="APARTMENT">Apartment</option>
-                  <option value="STUDIO">Studio</option>
-                  <option value="VILLA">Villa</option>
-                  <option value="DUPLEX">Duplex</option>
+                  <option value="">{t('guestHome.allTypes')}</option>
+                  <option value="APARTMENT">{t('guestHome.apartment')}</option>
+                  <option value="STUDIO">{t('guestHome.studio')}</option>
+                  <option value="VILLA">{t('guestHome.villa')}</option>
+                  <option value="DUPLEX">{t('guestHome.duplex')}</option>
                 </select>
               </div>
 
               <div className="search-field">
-                <label>Bedrooms</label>
+                <label>{t('guestHome.bedrooms')}</label>
                 <select
                   className="props-select"
                   value={selectedBeds}
@@ -440,16 +440,16 @@ const GuestHome: React.FC = () => {
                     setCurrentPage(1);
                   }}
                 >
-                  <option value="">Any</option>
-                  <option value="1">1 Bed</option>
-                  <option value="2">2 Beds</option>
-                  <option value="3">3 Beds</option>
-                  <option value="4">4+ Beds</option>
+                  <option value="">{t('guestHome.any')}</option>
+                  <option value="1">{t('guestHome.bedsCount', { count: 1 })}</option>
+                  <option value="2">{t('guestHome.bedsCount_plural', { count: 2 })}</option>
+                  <option value="3">{t('guestHome.bedsCount_plural', { count: 3 })}</option>
+                  <option value="4">{t('guestHome.bedsCountPlus')}</option>
                 </select>
               </div>
 
               <div className="search-field">
-                <label>Max Price / mo</label>
+                <label>{t('guestHome.maxPriceLabel')}</label>
                 <select
                   className="props-select"
                   value={selectedPrice}
@@ -458,18 +458,18 @@ const GuestHome: React.FC = () => {
                     setCurrentPage(1);
                   }}
                 >
-                  <option value="">Any Price</option>
-                  <option value="5000">Up to 5,000</option>
-                  <option value="8000">Up to 8,000</option>
-                  <option value="12000">Up to 12,000</option>
-                  <option value="20000">Up to 20,000</option>
+                  <option value="">{t('guestHome.anyPrice')}</option>
+                  <option value="5000">{t('guestHome.upTo', { price: '5,000' })}</option>
+                  <option value="8000">{t('guestHome.upTo', { price: '8,000' })}</option>
+                  <option value="12000">{t('guestHome.upTo', { price: '12,000' })}</option>
+                  <option value="20000">{t('guestHome.upTo', { price: '20,000' })}</option>
                 </select>
               </div>
 
               <div className="search-field" style={{ justifyContent: 'flex-end' }}>
                 <label style={{ visibility: 'hidden' }}>Search</label>
                 <button className="search-btn">
-                  <span>🔍</span> Search
+                  <span>🔍</span> {t('guestHome.searchBtn')}
                 </button>
               </div>
             </div>
@@ -477,20 +477,20 @@ const GuestHome: React.FC = () => {
             {/* Filter Chips */}
             <div className="props-filter-chips">
               <span style={{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-muted)', alignSelf: 'center', marginRight: '4px' }}>
-                Quick:
+                {t('guestHome.quick')}
               </span>
               {[
-                { label: 'All', value: '' },
-                { label: 'Furnished', value: 'furnished' },
-                { label: 'Parking', value: 'parking' },
-                { label: 'Gym', value: 'gym' },
-                { label: 'Pool', value: 'pool' },
-                { label: 'Pet-Friendly', value: 'pets' },
-                { label: 'Balcony', value: 'balcony' },
-                { label: 'Security', value: 'security' },
+                { label: t('guestHome.filterAll'), value: '' },
+                { label: t('guestHome.filterFurnished'), value: 'furnished' },
+                { label: t('guestHome.filterParking'), value: 'parking' },
+                { label: t('guestHome.filterGym'), value: 'gym' },
+                { label: t('guestHome.filterPool'), value: 'pool' },
+                { label: t('guestHome.filterPetFriendly'), value: 'pets' },
+                { label: t('guestHome.filterBalcony'), value: 'balcony' },
+                { label: t('guestHome.filterSecurity'), value: 'security' },
               ].map((chip) => (
                 <button
-                  key={chip.label}
+                  key={chip.value}
                   className={`filter-chip ${activeChip === chip.value ? 'active' : ''}`}
                   onClick={() => {
                     setActiveChip(chip.value);
@@ -506,19 +506,19 @@ const GuestHome: React.FC = () => {
           {/* Results Header */}
           <div className="props-results-header">
             <div className="props-count">
-              <strong>{totalFilteredCount}</strong> properties found
+              <strong>{totalFilteredCount}</strong> {t('guestHome.propertiesFound', { count: totalFilteredCount })}
             </div>
             <div className="props-sort-wrap">
-              <label>Sort by:</label>
+              <label>{t('guestHome.sortByLabel')}</label>
               <select
                 className="sort-select"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
               >
-                <option value="featured">Featured</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="newest">Newest</option>
+                <option value="featured">{t('guestHome.sortFeatured')}</option>
+                <option value="price-asc">{t('guestHome.sortPriceAsc')}</option>
+                <option value="price-desc">{t('guestHome.sortPriceDesc')}</option>
+                <option value="newest">{t('guestHome.sortNewest')}</option>
               </select>
             </div>
           </div>
@@ -527,23 +527,23 @@ const GuestHome: React.FC = () => {
           {loading ? (
             <div style={{ textAlign: 'center', padding: '4rem 0' }}>
               <div className="loading-spinner" style={{ margin: '0 auto 1rem' }}></div>
-              <p>Loading properties...</p>
+              <p>{t('guestHome.loadingProperties')}</p>
             </div>
           ) : paginatedProperties.length === 0 ? (
             <div id="no-results" style={{ textAlign: 'center', padding: '4rem 0' }}>
               <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔍</div>
               <div style={{ fontFamily: '"Clash Display", sans-serif', fontSize: '1.3rem', fontWeight: '700', color: 'var(--gray-900)', marginBottom: '0.5rem' }}>
-                No properties found
+                {t('guestHome.noPropertiesFound')}
               </div>
               <div style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
-                Try adjusting your filters or search term.
+                {t('guestHome.adjustFilters')}
               </div>
             </div>
           ) : (
             <div className="props-grid">
               {paginatedProperties.map((property) => {
                 const isFeatured = property.tags && property.tags.some(t => t.toLowerCase() === 'featured' || t.toLowerCase() === '⭐ featured');
-                const badge = isFeatured ? '⭐ Featured' : '✓ Available';
+                const badge = isFeatured ? t('guestHome.featuredBadge') : t('guestHome.availableBadge');
                 const badgeClass = isFeatured ? 'featured' : 'available';
 
                 return (
@@ -569,7 +569,7 @@ const GuestHome: React.FC = () => {
                     </div>
                     <div className="prop-body">
                       <div className="prop-price">
-                        {property.price.toLocaleString()} <em>EGP / month</em>
+                        {property.price.toLocaleString()} <em>{t('guestHome.egpMonth')}</em>
                       </div>
                       <div className="prop-title">{property.title}</div>
                       <div className="prop-location">
@@ -578,13 +578,13 @@ const GuestHome: React.FC = () => {
                       </div>
                       <div className="prop-specs">
                         <div className="prop-spec">
-                          <strong>{property.beds}</strong>Beds
+                          <strong>{property.beds}</strong>{t('guestHome.bedsSpec')}
                         </div>
                         <div className="prop-spec">
-                          <strong>{property.baths}</strong>Baths
+                          <strong>{property.baths}</strong>{t('guestHome.bathsSpec')}
                         </div>
                         <div className="prop-spec">
-                          <strong>{property.sqft}</strong>m²
+                          <strong>{property.sqft}</strong>{t('guestHome.sqmSpec')}
                         </div>
 
                       </div>
@@ -595,7 +595,7 @@ const GuestHome: React.FC = () => {
                           alt="Landlord"
                         />
                         <div className="prop-landlord-name">
-                          <strong>{property.ownerName}</strong>Verified Landlord
+                          <strong>{property.ownerName}</strong>{t('guestHome.verifiedLandlord')}
                         </div>
                         <button
                           className="prop-apply-btn"
@@ -604,7 +604,7 @@ const GuestHome: React.FC = () => {
                             navigate('/auth');
                           }}
                         >
-                          Apply Now
+                          {t('guestHome.applyNow')}
                         </button>
                       </div>
                     </div>
@@ -648,8 +648,8 @@ const GuestHome: React.FC = () => {
       {/* 4. Platform Overview */}
       <section id="how">
         <div className="guest-section-header reveal">
-          <div className="section-tag">Platform Overview</div>
-          <h2 className="section-title">Everything In One Place</h2>
+          <div className="section-tag">{t('guestHome.platformOverview')}</div>
+          <h2 className="section-title">{t('guestHome.everythingOnePlace')}</h2>
         </div>
 
         <div className="tabs-container">
@@ -658,19 +658,19 @@ const GuestHome: React.FC = () => {
               className={`guest-tab-btn ${activeTab === 'tenant' ? 'active' : ''}`}
               onClick={() => setActiveTab('tenant')}
             >
-              I'm a Tenant
+              {t('guestHome.imTenant')}
             </button>
             <button
               className={`guest-tab-btn ${activeTab === 'landlord' ? 'active' : ''}`}
               onClick={() => setActiveTab('landlord')}
             >
-              I'm a Landlord
+              {t('guestHome.imLandlord')}
             </button>
             <button
               className={`guest-tab-btn ${activeTab === 'provider' ? 'active' : ''}`}
               onClick={() => setActiveTab('provider')}
             >
-              I'm a Provider
+              {t('guestHome.imProvider')}
             </button>
           </div>
 
@@ -679,43 +679,43 @@ const GuestHome: React.FC = () => {
             <div className="feature-grid">
               <div className="feature-card wide reveal">
                 <div className="feature-icon">🔍</div>
-                <div className="feature-title">Find Your Perfect Home</div>
-                <div className="feature-desc">Browse verified listings with smart filters. Every property shows full details, photos, and pricing. Apply directly through the platform with a single click.</div>
+                <div className="feature-title">{t('guestHome.tenantTitle')}</div>
+                <div className="feature-desc">{t('guestHome.tenantDesc')}</div>
                 <div className="step-list">
                   <div className="step-item">
                     <div className="step-num">1</div>
-                    <div className="step-text"><strong>Create your account</strong> — build a verified tenant profile with your details and preferences.</div>
+                    <div className="step-text" dangerouslySetInnerHTML={{ __html: t('guestHome.tenantStep1') }} />
                   </div>
                   <div className="step-item">
                     <div className="step-num">2</div>
-                    <div className="step-text"><strong>Search properties</strong> — filter by area, price, size, and amenities to find the right fit.</div>
+                    <div className="step-text" dangerouslySetInnerHTML={{ __html: t('guestHome.tenantStep2') }} />
                   </div>
                   <div className="step-item">
                     <div className="step-num">3</div>
-                    <div className="step-text"><strong>Apply online</strong> — submit your rental application instantly, no paperwork needed.</div>
+                    <div className="step-text" dangerouslySetInnerHTML={{ __html: t('guestHome.tenantStep3') }} />
                   </div>
                 </div>
               </div>
               <div className="feature-card reveal">
                 <div className="feature-icon">🤝</div>
-                <div className="feature-title">Roommate Matching</div>
-                <div className="feature-desc">Post a profile, set your preferences, and connect with compatible co-tenants based on lifestyle, budget, and preferred area.</div>
+                <div className="feature-title">{t('guestHome.tenantRoommateTitle')}</div>
+                <div className="feature-desc">{t('guestHome.tenantRoommateDesc')}</div>
               </div>
 
               <div className="feature-card reveal">
                 <div className="feature-icon">💳</div>
-                <div className="feature-title">Pay Rent via Wallet</div>
-                <div className="feature-desc">Top up your HOMI wallet and pay monthly rent in seconds. Full payment history and automatic reminders included.</div>
+                <div className="feature-title">{t('guestHome.tenantPayWalletTitle')}</div>
+                <div className="feature-desc">{t('guestHome.tenantPayWalletDesc')}</div>
               </div>
               <div className="feature-card reveal">
                 <div className="feature-icon">🏡</div>
-                <div className="feature-title">Manage Active Rental</div>
-                <div className="feature-desc">View lease details, rental duration, contact your landlord, and stay on top of your active tenancy — all from one dashboard.</div>
+                <div className="feature-title">{t('guestHome.tenantManageTitle')}</div>
+                <div className="feature-desc">{t('guestHome.tenantManageDesc')}</div>
               </div>
               <div className="feature-card reveal">
                 <div className="feature-icon">🔧</div>
-                <div className="feature-title">Maintenance Requests</div>
-                <div className="feature-desc">Report issues instantly, track resolution in real time, and communicate directly with maintenance providers through the app.</div>
+                <div className="feature-title">{t('guestHome.tenantMaintenanceTitle')}</div>
+                <div className="feature-desc">{t('guestHome.tenantMaintenanceDesc')}</div>
               </div>
             </div>
           </div>
@@ -725,42 +725,42 @@ const GuestHome: React.FC = () => {
             <div className="feature-grid">
               <div className="feature-card wide reveal">
                 <div className="feature-icon">🏗️</div>
-                <div className="feature-title">Manage All Your Properties</div>
-                <div className="feature-desc">List unlimited properties with photos, pricing, and availability. Edit anytime, mark units as occupied, and control every listing from your central dashboard.</div>
+                <div className="feature-title">{t('guestHome.landlordTitle')}</div>
+                <div className="feature-desc">{t('guestHome.landlordDesc')}</div>
                 <div className="step-list">
                   <div className="step-item">
                     <div className="step-num">1</div>
-                    <div className="step-text"><strong>Create your landlord account</strong> — verify identity and set up your management profile.</div>
+                    <div className="step-text" dangerouslySetInnerHTML={{ __html: t('guestHome.landlordStep1') }} />
                   </div>
                   <div className="step-item">
                     <div className="step-num">2</div>
-                    <div className="step-text"><strong>List properties</strong> — add details, photos, and pricing in minutes.</div>
+                    <div className="step-text" dangerouslySetInnerHTML={{ __html: t('guestHome.landlordStep2') }} />
                   </div>
                   <div className="step-item">
                     <div className="step-num">3</div>
-                    <div className="step-text"><strong>Review & accept</strong> — view applicant profiles and decide who moves in.</div>
+                    <div className="step-text" dangerouslySetInnerHTML={{ __html: t('guestHome.landlordStep3') }} />
                   </div>
                 </div>
               </div>
               <div className="feature-card reveal">
                 <div className="feature-icon">👥</div>
-                <div className="feature-title">Review Applications</div>
-                <div className="feature-desc">See complete tenant profiles, rental history, and application details. Accept or reject with one tap — all communication stays in the platform.</div>
+                <div className="feature-title">{t('guestHome.landlordReviewAppsTitle')}</div>
+                <div className="feature-desc">{t('guestHome.landlordReviewAppsDesc')}</div>
               </div>
               <div className="feature-card reveal">
                 <div className="feature-icon">✍️</div>
-                <div className="feature-title">Sign Lease Contracts</div>
-                <div className="feature-desc">Generate, review, and digitally sign leases. Both parties receive secure, stored copies accessible anytime.</div>
+                <div className="feature-title">{t('guestHome.landlordSignLeaseTitle')}</div>
+                <div className="feature-desc">{t('guestHome.landlordSignLeaseDesc')}</div>
               </div>
               <div className="feature-card reveal">
                 <div className="feature-icon">💰</div>
-                <div className="feature-title">Receive & Withdraw Rent</div>
-                <div className="feature-desc">Monthly rent lands in your HOMI wallet automatically. Withdraw to your bank at any time with a full earnings history.</div>
+                <div className="feature-title">{t('guestHome.landlordReceiveRentTitle')}</div>
+                <div className="feature-desc">{t('guestHome.landlordReceiveRentDesc')}</div>
               </div>
               <div className="feature-card reveal">
                 <div className="feature-icon">🔩</div>
-                <div className="feature-title">Maintenance Oversight</div>
-                <div className="feature-desc">Monitor all tenant-reported issues across your properties. Assign providers, track status, and resolve efficiently.</div>
+                <div className="feature-title">{t('guestHome.landlordMaintenanceTitle')}</div>
+                <div className="feature-desc">{t('guestHome.landlordMaintenanceDesc')}</div>
               </div>
             </div>
           </div>
@@ -770,42 +770,42 @@ const GuestHome: React.FC = () => {
             <div className="feature-grid">
               <div className="feature-card wide reveal">
                 <div className="feature-icon">🛠️</div>
-                <div className="feature-title">Grow Your Maintenance Business</div>
-                <div className="feature-desc">Create your provider profile, upload legal credentials, and access a steady stream of verified property maintenance jobs in your service areas.</div>
+                <div className="feature-title">{t('guestHome.providerTitle')}</div>
+                <div className="feature-desc">{t('guestHome.providerDesc')}</div>
                 <div className="step-list">
                   <div className="step-item">
                     <div className="step-num">1</div>
-                    <div className="step-text"><strong>Create provider account</strong> — register as an individual technician or a company service.</div>
+                    <div className="step-text" dangerouslySetInnerHTML={{ __html: t('guestHome.providerStep1') }} />
                   </div>
                   <div className="step-item">
                     <div className="step-num">2</div>
-                    <div className="step-text"><strong>Upload legal credentials</strong> — verify your business or skill certificates for safety and assurance.</div>
+                    <div className="step-text" dangerouslySetInnerHTML={{ __html: t('guestHome.providerStep2') }} />
                   </div>
                   <div className="step-item">
                     <div className="step-num">3</div>
-                    <div className="step-text"><strong>Find & apply for jobs</strong> — browse posted maintenance issues, review descriptions/photos, and apply to take over.</div>
+                    <div className="step-text" dangerouslySetInnerHTML={{ __html: t('guestHome.providerStep3') }} />
                   </div>
                 </div>
               </div>
               <div className="feature-card reveal">
                 <div className="feature-icon">📄</div>
-                <div className="feature-title">Verify Safety Credentials</div>
-                <div className="feature-desc">Upload registration documents, trade licenses, and IDs. Safe and assured service keeps landlords and tenants confident.</div>
+                <div className="feature-title">{t('guestHome.providerVerifySafetyTitle')}</div>
+                <div className="feature-desc">{t('guestHome.providerVerifySafetyDesc')}</div>
               </div>
               <div className="feature-card reveal">
                 <div className="feature-icon">🔍</div>
-                <div className="feature-title">Browse Local Issues</div>
-                <div className="feature-desc">Filter and search for plumbing, electrical, HVAC, and cleaning jobs near you. Review full issue details and photos.</div>
+                <div className="feature-title">{t('guestHome.providerBrowseLocalTitle')}</div>
+                <div className="feature-desc">{t('guestHome.providerBrowseLocalDesc')}</div>
               </div>
               <div className="feature-card reveal">
                 <div className="feature-icon">💰</div>
-                <div className="feature-title">Secure Payments & Wallet</div>
-                <div className="feature-desc">Once a job is resolved and the report is submitted, funds are deposited directly into your secure HOMI wallet for easy withdrawal.</div>
+                <div className="feature-title">{t('guestHome.providerSecurePaymentsTitle')}</div>
+                <div className="feature-desc">{t('guestHome.providerSecurePaymentsDesc')}</div>
               </div>
               <div className="feature-card reveal">
                 <div className="feature-icon">📋</div>
-                <div className="feature-title">Submit Reports & Track Balance</div>
-                <div className="feature-desc">Take photos of completed repairs, write details of the fix, submit report directly to the landlord for quick release of funds, and monitor your earnings.</div>
+                <div className="feature-title">{t('guestHome.providerSubmitReportsTitle')}</div>
+                <div className="feature-desc">{t('guestHome.providerSubmitReportsDesc')}</div>
               </div>
             </div>
           </div>
@@ -815,8 +815,8 @@ const GuestHome: React.FC = () => {
       {/* 5. Step-by-Step Breakdown */}
       <section id="steps" className="steps-section">
         <div className="guest-section-header reveal" style={{ paddingTop: '5rem' }}>
-          <div className="section-tag">Step-by-Step Guide</div>
-          <h2 className="section-title">How HOMI Works</h2>
+          <div className="section-tag">{t('guestHome.stepByStepGuide')}</div>
+          <h2 className="section-title">{t('guestHome.howHomiWorks')}</h2>
         </div>
 
         <div className="steps-tabs-bar">
@@ -824,19 +824,19 @@ const GuestHome: React.FC = () => {
             className={`steps-tab ${activeStepsTab === 'tenant-steps' ? 'active' : ''}`}
             onClick={() => setActiveStepsTab('tenant-steps')}
           >
-            Tenant Journey
+            {t('guestHome.tenantJourney')}
           </button>
           <button
             className={`steps-tab ${activeStepsTab === 'landlord-steps' ? 'active' : ''}`}
             onClick={() => setActiveStepsTab('landlord-steps')}
           >
-            Landlord Journey
+            {t('guestHome.landlordJourney')}
           </button>
           <button
             className={`steps-tab ${activeStepsTab === 'provider-steps' ? 'active' : ''}`}
             onClick={() => setActiveStepsTab('provider-steps')}
           >
-            Maintenance Provider Journey
+            {t('guestHome.providerJourney')}
           </button>
         </div>
 
@@ -847,25 +847,24 @@ const GuestHome: React.FC = () => {
             <div className="step-content">
               <div className="step-number-badge">
                 <div className="snb-circle">1</div>
-                <div className="snb-label">Step One</div>
+                <div className="snb-label">{t('guestHome.stepOne')}</div>
               </div>
-              <div className="step-content-title">Create Your Tenant Account</div>
-              <div className="step-content-desc">Start your journey by registering as a tenant on HOMI. Your profile becomes your trusted digital identity across the platform — landlords will review it when you apply.</div>
+              <div className="step-content-title">{t('forTenants.step1Title')}</div>
+              <div className="step-content-desc">{t('forTenants.step1Desc')}</div>
               <div className="step-bullets">
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Enter your personal information and contact details</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Upload an ID for profile verification</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Set your rental preferences (area, budget, size)</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Receive a verified badge on your profile</div>
+                {(t('forTenants.step1Bullets', { returnObjects: true }) as string[] || []).map((bullet, idx) => (
+                  <div className="step-bullet" key={idx}><div className="step-bullet-icon">✓</div>{bullet}</div>
+                ))}
               </div>
               <div className="step-tags">
-                <span className="step-tag">Registration</span>
-                <span className="step-tag">Verification</span>
-                <span className="step-tag">Profile Setup</span>
+                {(t('forTenants.step1Tags', { returnObjects: true }) as string[] || []).map((tag, idx) => (
+                  <span className="step-tag" key={idx}>{tag}</span>
+                ))}
               </div>
             </div>
             <div className="step-photo">
               <img src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&q=80&fit=crop" alt="Person setting up account on laptop" />
-              <div className="step-photo-caption"><strong>Account Registration</strong><span>Quick sign-up — ready in under 2 minutes</span></div>
+              <div className="step-photo-caption"><strong>{t('forTenants.step1CapTitle')}</strong><span>{t('forTenants.step1CapSub')}</span></div>
             </div>
           </div>
 
@@ -874,25 +873,24 @@ const GuestHome: React.FC = () => {
             <div className="step-content">
               <div className="step-number-badge">
                 <div className="snb-circle">2</div>
-                <div className="snb-label">Step Two</div>
+                <div className="snb-label">{t('guestHome.stepTwo')}</div>
               </div>
-              <div className="step-content-title">Search & Browse Properties</div>
-              <div className="step-content-desc">Explore a wide marketplace of verified rental listings. Use powerful filters to narrow down properties by location, price range, number of rooms, amenities, and availability date.</div>
+              <div className="step-content-title">{t('forTenants.step2Title')}</div>
+              <div className="step-content-desc">{t('forTenants.step2Desc')}</div>
               <div className="step-bullets">
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Filter by area, price, size, and amenities</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>View high-resolution photos of every property</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Read full property descriptions and landlord details</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Save favorites and compare multiple listings</div>
+                {(t('forTenants.step2Bullets', { returnObjects: true }) as string[] || []).map((bullet, idx) => (
+                  <div className="step-bullet" key={idx}><div className="step-bullet-icon">✓</div>{bullet}</div>
+                ))}
               </div>
               <div className="step-tags">
-                <span className="step-tag">Property Search</span>
-                <span className="step-tag">Smart Filters</span>
-                <span className="step-tag">Favorites</span>
+                {(t('forTenants.step2Tags', { returnObjects: true }) as string[] || []).map((tag, idx) => (
+                  <span className="step-tag" key={idx}>{tag}</span>
+                ))}
               </div>
             </div>
             <div className="step-photo">
               <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80&fit=crop" alt="Apartment building exterior" />
-              <div className="step-photo-caption"><strong>Browse Verified Listings</strong><span>Hundreds of properties across all areas</span></div>
+              <div className="step-photo-caption"><strong>{t('forTenants.step2CapTitle')}</strong><span>{t('forTenants.step2CapSub')}</span></div>
             </div>
           </div>
 
@@ -901,25 +899,24 @@ const GuestHome: React.FC = () => {
             <div className="step-content">
               <div className="step-number-badge">
                 <div className="snb-circle">3</div>
-                <div className="snb-label">Step Three</div>
+                <div className="snb-label">{t('guestHome.stepThree')}</div>
               </div>
-              <div className="step-content-title">Find a Roommate (Optional)</div>
-              <div className="step-content-desc">Looking to share? Use HOMI's roommate matching system to connect with compatible people. Post your profile with your lifestyle preferences and let the platform surface suitable matches.</div>
+              <div className="step-content-title">{t('forTenants.step3Title')}</div>
+              <div className="step-content-desc">{t('forTenants.step3Desc')}</div>
               <div className="step-bullets">
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Create a roommate profile with your preferences</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Browse and filter compatible roommate profiles</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Contact matches directly through the platform</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Apply for a shared unit together</div>
+                {(t('forTenants.step3Bullets', { returnObjects: true }) as string[] || []).map((bullet, idx) => (
+                  <div className="step-bullet" key={idx}><div className="step-bullet-icon">✓</div>{bullet}</div>
+                ))}
               </div>
               <div className="step-tags">
-                <span className="step-tag">Roommate Matching</span>
-                <span className="step-tag">Shared Rentals</span>
-                <span className="step-tag">Messaging</span>
+                {(t('forTenants.step3Tags', { returnObjects: true }) as string[] || []).map((tag, idx) => (
+                  <span className="step-tag" key={idx}>{tag}</span>
+                ))}
               </div>
             </div>
             <div className="step-photo">
               <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80&fit=crop" alt="Two people discussing housing" />
-              <div className="step-photo-caption"><strong>Roommate Matching</strong><span>Find someone compatible, not just available</span></div>
+              <div className="step-photo-caption"><strong>{t('forTenants.step3CapTitle')}</strong><span>{t('forTenants.step3CapSub')}</span></div>
             </div>
           </div>
 
@@ -928,25 +925,24 @@ const GuestHome: React.FC = () => {
             <div className="step-content">
               <div className="step-number-badge">
                 <div className="snb-circle">4</div>
-                <div className="snb-label">Step Four</div>
+                <div className="snb-label">{t('guestHome.stepFour')}</div>
               </div>
-              <div className="step-content-title">Submit a Rental Application</div>
-              <div className="step-content-desc">Found the right place? Apply with a single click. Your tenant profile is automatically attached so the landlord sees everything they need — no forms to fill, no documents to scan.</div>
+              <div className="step-content-title">{t('forTenants.step4Title')}</div>
+              <div className="step-content-desc">{t('forTenants.step4Desc')}</div>
               <div className="step-bullets">
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Submit your application directly from the listing</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Your verified profile is attached automatically</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Add a personal note or message to the landlord</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Track your application status in real time</div>
+                {(t('forTenants.step4Bullets', { returnObjects: true }) as string[] || []).map((bullet, idx) => (
+                  <div className="step-bullet" key={idx}><div className="step-bullet-icon">✓</div>{bullet}</div>
+                ))}
               </div>
               <div className="step-tags">
-                <span className="step-tag">Rental Application</span>
-                <span className="step-tag">One-Click Apply</span>
-                <span className="step-tag">Status Tracking</span>
+                {(t('forTenants.step4Tags', { returnObjects: true }) as string[] || []).map((tag, idx) => (
+                  <span className="step-tag" key={idx}>{tag}</span>
+                ))}
               </div>
             </div>
             <div className="step-photo">
               <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80&fit=crop" alt="Person filling rental application" />
-              <div className="step-photo-caption"><strong>Apply Instantly</strong><span>No paperwork — everything is digital</span></div>
+              <div className="step-photo-caption"><strong>{t('forTenants.step4CapTitle')}</strong><span>{t('forTenants.step4CapSub')}</span></div>
             </div>
           </div>
 
@@ -955,25 +951,24 @@ const GuestHome: React.FC = () => {
             <div className="step-content">
               <div className="step-number-badge">
                 <div className="snb-circle">5</div>
-                <div className="snb-label">Step Five</div>
+                <div className="snb-label">{t('guestHome.stepFive')}</div>
               </div>
-              <div className="step-content-title">Review & Sign Your Lease</div>
-              <div className="step-content-desc">Once accepted, your lease contract is generated on the platform. Read every term in detail, ask questions, and sign digitally when you're ready — fully legal and secure.</div>
+              <div className="step-content-title">{t('forTenants.step5Title')}</div>
+              <div className="step-content-desc">{t('forTenants.step5Desc')}</div>
               <div className="step-bullets">
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>View the full contract with all terms and clauses</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Both tenant and landlord sign digitally</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Signed copy stored securely in your account</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Access your contract anytime from your dashboard</div>
+                {(t('forTenants.step5Bullets', { returnObjects: true }) as string[] || []).map((bullet, idx) => (
+                  <div className="step-bullet" key={idx}><div className="step-bullet-icon">✓</div>{bullet}</div>
+                ))}
               </div>
               <div className="step-tags">
-                <span className="step-tag">Lease Contract</span>
-                <span className="step-tag">Digital Signature</span>
-                <span className="step-tag">Secure Storage</span>
+                {(t('forTenants.step5Tags', { returnObjects: true }) as string[] || []).map((tag, idx) => (
+                  <span className="step-tag" key={idx}>{tag}</span>
+                ))}
               </div>
             </div>
             <div className="step-photo">
               <img src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&q=80&fit=crop" alt="Signing a rental contract" />
-              <div className="step-photo-caption"><strong>Digital Lease Signing</strong><span>Legally binding — no printing needed</span></div>
+              <div className="step-photo-caption"><strong>{t('forTenants.step5CapTitle')}</strong><span>{t('forTenants.step5CapSub')}</span></div>
             </div>
           </div>
 
@@ -982,25 +977,24 @@ const GuestHome: React.FC = () => {
             <div className="step-content">
               <div className="step-number-badge">
                 <div className="snb-circle">6</div>
-                <div className="snb-label">Step Six</div>
+                <div className="snb-label">{t('guestHome.stepSix')}</div>
               </div>
-              <div className="step-content-title">Pay Rent Through Your Wallet</div>
-              <div className="step-content-desc">Top up your HOMI wallet and pay monthly rent in just a few taps. No bank transfers, no cash — everything is tracked, timestamped, and confirmed automatically.</div>
+              <div className="step-content-title">{t('forTenants.step6Title')}</div>
+              <div className="step-content-desc">{t('forTenants.step6Desc')}</div>
               <div className="step-bullets">
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Add funds to your wallet with ease</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Pay your monthly rent directly to the landlord</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Receive payment confirmations and receipts</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Full transaction history always available</div>
+                {(t('forTenants.step6Bullets', { returnObjects: true }) as string[] || []).map((bullet, idx) => (
+                  <div className="step-bullet" key={idx}><div className="step-bullet-icon">✓</div>{bullet}</div>
+                ))}
               </div>
               <div className="step-tags">
-                <span className="step-tag">Wallet Rent Payment</span>
-                <span className="step-tag">Instant Payment</span>
-                <span className="step-tag">Receipts</span>
+                {(t('forTenants.step6Tags', { returnObjects: true }) as string[] || []).map((tag, idx) => (
+                  <span className="step-tag" key={idx}>{tag}</span>
+                ))}
               </div>
             </div>
             <div className="step-photo">
               <img src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80&fit=crop" alt="Digital payment on phone" />
-              <div className="step-photo-caption"><strong>Wallet Rent Payment</strong><span>Instant, trackable, and always confirmed</span></div>
+              <div className="step-photo-caption"><strong>{t('forTenants.step6CapTitle')}</strong><span>{t('forTenants.step6CapSub')}</span></div>
             </div>
           </div>
 
@@ -1009,25 +1003,24 @@ const GuestHome: React.FC = () => {
             <div className="step-content">
               <div className="step-number-badge">
                 <div className="snb-circle">7</div>
-                <div className="snb-label">Step Seven</div>
+                <div className="snb-label">{t('guestHome.stepSeven')}</div>
               </div>
-              <div className="step-content-title">Manage Your Active Rental</div>
-              <div className="step-content-desc">You're in! Your active rental dashboard gives you a complete view of your tenancy — lease dates, upcoming payments, landlord contact, and everything about your current home.</div>
+              <div className="step-content-title">{t('forTenants.step7Title')}</div>
+              <div className="step-content-desc">{t('forTenants.step7Desc')}</div>
               <div className="step-bullets">
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>View lease start date, end date, and monthly rent</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>See upcoming due dates and payment schedule</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Access landlord contact directly from the dashboard</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>View full rental history and all past payments</div>
+                {(t('forTenants.step7Bullets', { returnObjects: true }) as string[] || []).map((bullet, idx) => (
+                  <div className="step-bullet" key={idx}><div className="step-bullet-icon">✓</div>{bullet}</div>
+                ))}
               </div>
               <div className="step-tags">
-                <span className="step-tag">Rental Dashboard</span>
-                <span className="step-tag">Lease Details</span>
-                <span className="step-tag">Payment History</span>
+                {(t('forTenants.step7Tags', { returnObjects: true }) as string[] || []).map((tag, idx) => (
+                  <span className="step-tag" key={idx}>{tag}</span>
+                ))}
               </div>
             </div>
             <div className="step-photo">
               <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80&fit=crop" alt="Modern apartment interior living" />
-              <div className="step-photo-caption"><strong>Your Home Dashboard</strong><span>Everything about your tenancy, in one view</span></div>
+              <div className="step-photo-caption"><strong>{t('forTenants.step7CapTitle')}</strong><span>{t('forTenants.step7CapSub')}</span></div>
             </div>
           </div>
 
@@ -1036,25 +1029,24 @@ const GuestHome: React.FC = () => {
             <div className="step-content">
               <div className="step-number-badge">
                 <div className="snb-circle">8</div>
-                <div className="snb-label">Step Eight</div>
+                <div className="snb-label">{t('guestHome.stepEight')}</div>
               </div>
-              <div className="step-content-title">Report Maintenance Issues</div>
-              <div className="step-content-desc">Spot a problem in your unit? Submit a maintenance request instantly. Describe the issue, attach photos, and track the resolution in real time — with direct contact to the assigned provider.</div>
+              <div className="step-content-title">{t('forTenants.step8Title')}</div>
+              <div className="step-content-desc">{t('forTenants.step8Desc')}</div>
               <div className="step-bullets">
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Post a request with description and urgency level</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Attach photos to document the issue clearly</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Track the status from submitted to resolved</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Contact the assigned maintenance provider directly</div>
+                {(t('forTenants.step8Bullets', { returnObjects: true }) as string[] || []).map((bullet, idx) => (
+                  <div className="step-bullet" key={idx}><div className="step-bullet-icon">✓</div>{bullet}</div>
+                ))}
               </div>
               <div className="step-tags">
-                <span className="step-tag">Maintenance Request</span>
-                <span className="step-tag">Status Tracking</span>
-                <span className="step-tag">Provider Contact</span>
+                {(t('forTenants.step8Tags', { returnObjects: true }) as string[] || []).map((tag, idx) => (
+                  <span className="step-tag" key={idx}>{tag}</span>
+                ))}
               </div>
             </div>
             <div className="step-photo">
               <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&q=80&fit=crop" alt="Maintenance worker repairing apartment" />
-              <div className="step-photo-caption"><strong>Maintenance Reporting</strong><span>Fast response, real-time updates</span></div>
+              <div className="step-photo-caption"><strong>{t('forTenants.step8CapTitle')}</strong><span>{t('forTenants.step8CapSub')}</span></div>
             </div>
           </div>
         </div>
@@ -1066,25 +1058,24 @@ const GuestHome: React.FC = () => {
             <div className="step-content">
               <div className="step-number-badge">
                 <div className="snb-circle">1</div>
-                <div className="snb-label">Step One</div>
+                <div className="snb-label">{t('guestHome.stepOne')}</div>
               </div>
-              <div className="step-content-title">Create Your Landlord Account</div>
-              <div className="step-content-desc">Register as a landlord and set up your verified profile. Your account is the control center for all your properties, tenants, and rental income.</div>
+              <div className="step-content-title">{t('howItWorks.step1Title')}</div>
+              <div className="step-content-desc">{t('howItWorks.step1Desc')}</div>
               <div className="step-bullets">
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Register with your name, contact info, and ID</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Verify your account for landlord trust badge</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Set up your property management profile</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Access your central landlord dashboard</div>
+                {(t('howItWorks.step1Bullets', { returnObjects: true }) as string[] || []).map((bullet, idx) => (
+                  <div className="step-bullet" key={idx}><div className="step-bullet-icon">✓</div>{bullet}</div>
+                ))}
               </div>
               <div className="step-tags">
-                <span className="step-tag">Landlord Registration</span>
-                <span className="step-tag">Verification</span>
-                <span className="step-tag">Dashboard</span>
+                {(t('howItWorks.step1Tags', { returnObjects: true }) as string[] || []).map((tag, idx) => (
+                  <span className="step-tag" key={idx}>{tag}</span>
+                ))}
               </div>
             </div>
             <div className="step-photo">
               <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80&fit=crop" alt="Real estate professional" />
-              <div className="step-photo-caption"><strong>Account Setup</strong><span>Setup your property profile in minutes</span></div>
+              <div className="step-photo-caption"><strong>{t('howItWorks.step1CapTitle')}</strong><span>{t('howItWorks.step1CapSub')}</span></div>
             </div>
           </div>
 
@@ -1093,25 +1084,24 @@ const GuestHome: React.FC = () => {
             <div className="step-content">
               <div className="step-number-badge">
                 <div className="snb-circle">2</div>
-                <div className="snb-label">Step Two</div>
+                <div className="snb-label">{t('guestHome.stepTwo')}</div>
               </div>
-              <div className="step-content-title">List Your Properties</div>
-              <div className="step-content-desc">Add details, pricing, photos, and ownership documents for your properties. Our team will verify the listing to publish it to eager renters.</div>
+              <div className="step-content-title">{t('howItWorks.step2Title')}</div>
+              <div className="step-content-desc">{t('howItWorks.step2Desc')}</div>
               <div className="step-bullets">
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Specify rooms, bathrooms, amenities, and rent</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Upload high-quality images and legal documents</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Pin location on the map for renters to browse</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Listing goes live upon successful verification</div>
+                {(t('howItWorks.step2Bullets', { returnObjects: true }) as string[] || []).map((bullet, idx) => (
+                  <div className="step-bullet" key={idx}><div className="step-bullet-icon">✓</div>{bullet}</div>
+                ))}
               </div>
               <div className="step-tags">
-                <span className="step-tag">List Properties</span>
-                <span className="step-tag">Verification</span>
-                <span className="step-tag">Active Listings</span>
+                {(t('howItWorks.step2Tags', { returnObjects: true }) as string[] || []).map((tag, idx) => (
+                  <span className="step-tag" key={idx}>{tag}</span>
+                ))}
               </div>
             </div>
             <div className="step-photo">
               <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80&fit=crop" alt="Keys in front of house" />
-              <div className="step-photo-caption"><strong>List Units</strong><span>Upload property parameters and photos</span></div>
+              <div className="step-photo-caption"><strong>{t('howItWorks.step2CapTitle')}</strong><span>{t('howItWorks.step2CapSub')}</span></div>
             </div>
           </div>
 
@@ -1120,25 +1110,24 @@ const GuestHome: React.FC = () => {
             <div className="step-content">
               <div className="step-number-badge">
                 <div className="snb-circle">3</div>
-                <div className="snb-label">Step Three</div>
+                <div className="snb-label">{t('guestHome.stepThree')}</div>
               </div>
-              <div className="step-content-title">Review Tenant Applications</div>
-              <div className="step-content-desc">Incoming rental applications show up on your dashboard. Read tenant resumes, check match compatibility scores, and accept applicants with a click.</div>
+              <div className="step-content-title">{t('howItWorks.step3Title')}</div>
+              <div className="step-content-desc">{t('howItWorks.step3Desc')}</div>
               <div className="step-bullets">
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Check verified profile details and message history</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Review compatibility and tenant background summaries</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Accept or reject application directly in portal</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Generate contract terms once approved</div>
+                {(t('howItWorks.step3Bullets', { returnObjects: true }) as string[] || []).map((bullet, idx) => (
+                  <div className="step-bullet" key={idx}><div className="step-bullet-icon">✓</div>{bullet}</div>
+                ))}
               </div>
               <div className="step-tags">
-                <span className="step-tag">Applications</span>
-                <span className="step-tag">Background Info</span>
-                <span className="step-tag">Match Scores</span>
+                {(t('howItWorks.step3Tags', { returnObjects: true }) as string[] || []).map((tag, idx) => (
+                  <span className="step-tag" key={idx}>{tag}</span>
+                ))}
               </div>
             </div>
             <div className="step-photo">
               <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&q=80&fit=crop" alt="Reviewing document on tablet" />
-              <div className="step-photo-caption"><strong>Review Tenant Info</strong><span>Screen applicant resumes safely online</span></div>
+              <div className="step-photo-caption"><strong>{t('howItWorks.step3CapTitle')}</strong><span>{t('howItWorks.step3CapSub')}</span></div>
             </div>
           </div>
 
@@ -1147,25 +1136,24 @@ const GuestHome: React.FC = () => {
             <div className="step-content">
               <div className="step-number-badge">
                 <div className="snb-circle">4</div>
-                <div className="snb-label">Step Four</div>
+                <div className="snb-label">{t('guestHome.stepFour')}</div>
               </div>
-              <div className="step-content-title">Sign the Digital Lease Agreement</div>
-              <div className="step-content-desc">Customize lease parameters like rent amount, deposit, late fees, and maintenance responsibilities. Review and sign the digital lease agreement, then send it to the tenant.</div>
+              <div className="step-content-title">{t('howItWorks.step4Title')}</div>
+              <div className="step-content-desc">{t('howItWorks.step4Desc')}</div>
               <div className="step-bullets">
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Set start dates, end dates, and custom clauses</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Allocate maintenance responsibilities transparently</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Sign digitally to execute contract legally</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Automatic notification sent to tenant to sign</div>
+                {(t('howItWorks.step4Bullets', { returnObjects: true }) as string[] || []).map((bullet, idx) => (
+                  <div className="step-bullet" key={idx}><div className="step-bullet-icon">✓</div>{bullet}</div>
+                ))}
               </div>
               <div className="step-tags">
-                <span className="step-tag">Lease Agreement</span>
-                <span className="step-tag">Digital Signatures</span>
-                <span className="step-tag">Custom Clauses</span>
+                {(t('howItWorks.step4Tags', { returnObjects: true }) as string[] || []).map((tag, idx) => (
+                  <span className="step-tag" key={idx}>{tag}</span>
+                ))}
               </div>
             </div>
             <div className="step-photo">
               <img src="https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?w=800&q=80&fit=crop" alt="Analytics on laptop screen" />
-              <div className="step-photo-caption"><strong>Legal Setup</strong><span>Legally binding contracts stored securely</span></div>
+              <div className="step-photo-caption"><strong>{t('howItWorks.step4CapTitle')}</strong><span>{t('howItWorks.step4CapSub')}</span></div>
             </div>
           </div>
 
@@ -1174,25 +1162,24 @@ const GuestHome: React.FC = () => {
             <div className="step-content">
               <div className="step-number-badge">
                 <div className="snb-circle">5</div>
-                <div className="snb-label">Step Five</div>
+                <div className="snb-label">{t('guestHome.stepFive')}</div>
               </div>
-              <div className="step-content-title">Receive Rent in Your Wallet</div>
-              <div className="step-content-desc">Tenant rent is processed directly on the platform and deposited into your secure HOMI wallet. Keep track of current payments and withdraw earnings anytime.</div>
+              <div className="step-content-title">{t('howItWorks.step5Title')}</div>
+              <div className="step-content-desc">{t('howItWorks.step5Desc')}</div>
               <div className="step-bullets">
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Receive rent automatically at the start of each month</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Track due payments and send automatic reminders</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Withdraw funds directly to your verified bank account</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Full accounting records and invoices provided</div>
+                {(t('howItWorks.step5Bullets', { returnObjects: true }) as string[] || []).map((bullet, idx) => (
+                  <div className="step-bullet" key={idx}><div className="step-bullet-icon">✓</div>{bullet}</div>
+                ))}
               </div>
               <div className="step-tags">
-                <span className="step-tag">Rent Collection</span>
-                <span className="step-tag">HOMI Wallet</span>
-                <span className="step-tag">Bank Withdrawal</span>
+                {(t('howItWorks.step5Tags', { returnObjects: true }) as string[] || []).map((tag, idx) => (
+                  <span className="step-tag" key={idx}>{tag}</span>
+                ))}
               </div>
             </div>
             <div className="step-photo">
               <img src="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=800&q=80&fit=crop" alt="Wallet and money on table" />
-              <div className="step-photo-caption"><strong>Automatic Payouts</strong><span>No rent collection hassle — fully trackable</span></div>
+              <div className="step-photo-caption"><strong>{t('howItWorks.step5CapTitle')}</strong><span>{t('howItWorks.step5CapSub')}</span></div>
             </div>
           </div>
 
@@ -1201,25 +1188,24 @@ const GuestHome: React.FC = () => {
             <div className="step-content">
               <div className="step-number-badge">
                 <div className="snb-circle">6</div>
-                <div className="snb-label">Step Six</div>
+                <div className="snb-label">{t('guestHome.stepSix')}</div>
               </div>
-              <div className="step-content-title">Manage Maintenance Responsibilities</div>
-              <div className="step-content-desc">Stay informed about your properties. Review, delegate, and monitor resolution of tenant-reported maintenance issues directly from the dashboard.</div>
+              <div className="step-content-title">{t('howItWorks.step6Title')}</div>
+              <div className="step-content-desc">{t('howItWorks.step6Desc')}</div>
               <div className="step-bullets">
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Get instant notifications when a tenant submits a request</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Assign verified service providers in just a click</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Track progress live from submitted to complete</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Direct messaging logs for all property events</div>
+                {(t('howItWorks.step6Bullets', { returnObjects: true }) as string[] || []).map((bullet, idx) => (
+                  <div className="step-bullet" key={idx}><div className="step-bullet-icon">✓</div>{bullet}</div>
+                ))}
               </div>
               <div className="step-tags">
-                <span className="step-tag">Maintenance Control</span>
-                <span className="step-tag">Provider Match</span>
-                <span className="step-tag">Event Logs</span>
+                {(t('howItWorks.step6Tags', { returnObjects: true }) as string[] || []).map((tag, idx) => (
+                  <span className="step-tag" key={idx}>{tag}</span>
+                ))}
               </div>
             </div>
             <div className="step-photo">
               <img src="https://images.unsplash.com/photo-1421789665209-c9b2a435e3dc?w=800&q=80&fit=crop" alt="Tools on table" />
-              <div className="step-photo-caption"><strong>Oversight Dashboard</strong><span>Resolve issues fast, keep tenants happy</span></div>
+              <div className="step-photo-caption"><strong>{t('howItWorks.step6CapTitle')}</strong><span>{t('howItWorks.step6CapSub')}</span></div>
             </div>
           </div>
         </div>
@@ -1231,25 +1217,24 @@ const GuestHome: React.FC = () => {
             <div className="step-content">
               <div className="step-number-badge">
                 <div className="snb-circle">1</div>
-                <div className="snb-label">Step One</div>
+                <div className="snb-label">{t('guestHome.stepOne')}</div>
               </div>
-              <div className="step-content-title">Create Maintenance Provider Account</div>
-              <div className="step-content-desc">Start your journey by registering as a maintenance provider on HOMI. You can sign up as an individual service or as a company service, specifying your specialties and service areas.</div>
+              <div className="step-content-title">{t('forMaintenance.step1Title')}</div>
+              <div className="step-content-desc">{t('forMaintenance.step1Desc')}</div>
               <div className="step-bullets">
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Choose individual technician or company service type</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>List your primary maintenance specialties and skills</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Define your geographic service coverage areas</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Set up your professional business profile</div>
+                {(t('forMaintenance.step1Bullets', { returnObjects: true }) as string[] || []).map((bullet, idx) => (
+                  <div className="step-bullet" key={idx}><div className="step-bullet-icon">✓</div>{bullet}</div>
+                ))}
               </div>
               <div className="step-tags">
-                <span className="step-tag">Registration</span>
-                <span className="step-tag">Specialties</span>
-                <span className="step-tag">Service Areas</span>
+                {(t('forMaintenance.step1Tags', { returnObjects: true }) as string[] || []).map((tag, idx) => (
+                  <span className="step-tag" key={idx}>{tag}</span>
+                ))}
               </div>
             </div>
             <div className="step-photo">
               <img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=800&q=80&fit=crop" alt="Technician setting up profile" />
-              <div className="step-photo-caption"><strong>Account Registration</strong><span>Register specialties and setup business profile</span></div>
+              <div className="step-photo-caption"><strong>{t('forMaintenance.step1CapTitle')}</strong><span>{t('forMaintenance.step1CapSub')}</span></div>
             </div>
           </div>
 
@@ -1258,25 +1243,24 @@ const GuestHome: React.FC = () => {
             <div className="step-content">
               <div className="step-number-badge">
                 <div className="snb-circle">2</div>
-                <div className="snb-label">Step Two</div>
+                <div className="snb-label">{t('guestHome.stepTwo')}</div>
               </div>
-              <div className="step-content-title">Upload Legal Papers for Verification</div>
-              <div className="step-content-desc">Verify your profile by uploading your legal documents. Providing trade licenses, business registrations, or certifications is critical to build trust and ensure maximum safety and assurance.</div>
+              <div className="step-content-title">{t('forMaintenance.step2Title')}</div>
+              <div className="step-content-desc">{t('forMaintenance.step2Desc')}</div>
               <div className="step-bullets">
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Upload national ID or company tax card documentation</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Provide trade licenses or business registration certificates</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Submit professional certifications or qualifications</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Get verified by the HOMI security & admin team</div>
+                {(t('forMaintenance.step2Bullets', { returnObjects: true }) as string[] || []).map((bullet, idx) => (
+                  <div className="step-bullet" key={idx}><div className="step-bullet-icon">✓</div>{bullet}</div>
+                ))}
               </div>
               <div className="step-tags">
-                <span className="step-tag">Verification</span>
-                <span className="step-tag">Legal Papers</span>
-                <span className="step-tag">Safety & Trust</span>
+                {(t('forMaintenance.step2Tags', { returnObjects: true }) as string[] || []).map((tag, idx) => (
+                  <span className="step-tag" key={idx}>{tag}</span>
+                ))}
               </div>
             </div>
             <div className="step-photo">
               <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80&fit=crop" alt="Legal papers verification" />
-              <div className="step-photo-caption"><strong>Safety Verification</strong><span>Fast document verification for profile trust badge</span></div>
+              <div className="step-photo-caption"><strong>{t('forMaintenance.step2CapTitle')}</strong><span>{t('forMaintenance.step2CapSub')}</span></div>
             </div>
           </div>
 
@@ -1285,25 +1269,24 @@ const GuestHome: React.FC = () => {
             <div className="step-content">
               <div className="step-number-badge">
                 <div className="snb-circle">3</div>
-                <div className="snb-label">Step Three</div>
+                <div className="snb-label">{t('guestHome.stepThree')}</div>
               </div>
-              <div className="step-content-title">Search & Review Posted Issues</div>
-              <div className="step-content-desc">Browse through maintenance issues posted by tenants and landlords on our live job board. Filter listings by category, location, and urgency to find the right projects for your business.</div>
+              <div className="step-content-title">{t('forMaintenance.step3Title')}</div>
+              <div className="step-content-desc">{t('forMaintenance.step3Desc')}</div>
               <div className="step-bullets">
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Browse live maintenance issues in real-time</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Filter issues by category (plumbing, electrical, HVAC, etc.)</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Review comprehensive descriptions and tenant photos</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Check job location details and landlord requirements</div>
+                {(t('forMaintenance.step3Bullets', { returnObjects: true }) as string[] || []).map((bullet, idx) => (
+                  <div className="step-bullet" key={idx}><div className="step-bullet-icon">✓</div>{bullet}</div>
+                ))}
               </div>
               <div className="step-tags">
-                <span className="step-tag">Job Search</span>
-                <span className="step-tag">Issues Board</span>
-                <span className="step-tag">Filters</span>
+                {(t('forMaintenance.step3Tags', { returnObjects: true }) as string[] || []).map((tag, idx) => (
+                  <span className="step-tag" key={idx}>{tag}</span>
+                ))}
               </div>
             </div>
             <div className="step-photo">
               <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&q=80&fit=crop" alt="Searching posted issues on tablet" />
-              <div className="step-photo-caption"><strong>Browse Live Issues</strong><span>Find open maintenance issues in your area</span></div>
+              <div className="step-photo-caption"><strong>{t('forMaintenance.step3CapTitle')}</strong><span>{t('forMaintenance.step3CapSub')}</span></div>
             </div>
           </div>
 
@@ -1312,25 +1295,24 @@ const GuestHome: React.FC = () => {
             <div className="step-content">
               <div className="step-number-badge">
                 <div className="snb-circle">4</div>
-                <div className="snb-label">Step Four</div>
+                <div className="snb-label">{t('guestHome.stepFour')}</div>
               </div>
-              <div className="step-content-title">Apply for Issues to Take Over</div>
-              <div className="step-content-desc">Express interest in resolving the issues by submitting your application. Propose cost estimates, list parts required, and suggest scheduling options directly to the property landlord.</div>
+              <div className="step-content-title">{t('forMaintenance.step4Title')}</div>
+              <div className="step-content-desc">{t('forMaintenance.step4Desc')}</div>
               <div className="step-bullets">
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Submit application to take over the work order</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Include cost estimates and labor fee quotes</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Propose preferred visit times and scheduling</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Chat directly with landlords about job details</div>
+                {(t('forMaintenance.step4Bullets', { returnObjects: true }) as string[] || []).map((bullet, idx) => (
+                  <div className="step-bullet" key={idx}><div className="step-bullet-icon">✓</div>{bullet}</div>
+                ))}
               </div>
               <div className="step-tags">
-                <span className="step-tag">Job Application</span>
-                <span className="step-tag">Estimates</span>
-                <span className="step-tag">Landlord Chat</span>
+                {(t('forMaintenance.step4Tags', { returnObjects: true }) as string[] || []).map((tag, idx) => (
+                  <span className="step-tag" key={idx}>{tag}</span>
+                ))}
               </div>
             </div>
             <div className="step-photo">
               <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&q=80&fit=crop" alt="Sending proposal on laptop" />
-              <div className="step-photo-caption"><strong>Submit Proposals</strong><span>Offer pricing estimates and schedule visits</span></div>
+              <div className="step-photo-caption"><strong>{t('forMaintenance.step4CapTitle')}</strong><span>{t('forMaintenance.step4CapSub')}</span></div>
             </div>
           </div>
 
@@ -1339,25 +1321,24 @@ const GuestHome: React.FC = () => {
             <div className="step-content">
               <div className="step-number-badge">
                 <div className="snb-circle">5</div>
-                <div className="snb-label">Step Five</div>
+                <div className="snb-label">{t('guestHome.stepFive')}</div>
               </div>
-              <div className="step-content-title">Start Repairing After Acceptance</div>
-              <div className="step-content-desc">Once the landlord accepts your proposal, you are officially assigned to the issue. Get direct access to coordinate with the tenant, visit the property, and perform the high-quality repair.</div>
+              <div className="step-content-title">{t('forMaintenance.step5Title')}</div>
+              <div className="step-content-desc">{t('forMaintenance.step5Desc')}</div>
               <div className="step-bullets">
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Receive instant notification upon job assignment</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Get tenant contact info and schedule visit details</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Perform diagnostics and execute the repair work on-site</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Follow strict safety standards and build quality trust</div>
+                {(t('forMaintenance.step5Bullets', { returnObjects: true }) as string[] || []).map((bullet, idx) => (
+                  <div className="step-bullet" key={idx}><div className="step-bullet-icon">✓</div>{bullet}</div>
+                ))}
               </div>
               <div className="step-tags">
-                <span className="step-tag">Job Execution</span>
-                <span className="step-tag">On-Site Repair</span>
-                <span className="step-tag">Tenant Coordination</span>
+                {(t('forMaintenance.step5Tags', { returnObjects: true }) as string[] || []).map((tag, idx) => (
+                  <span className="step-tag" key={idx}>{tag}</span>
+                ))}
               </div>
             </div>
             <div className="step-photo">
               <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&q=80&fit=crop" alt="Technician performing repair work" />
-              <div className="step-photo-caption"><strong>Job Execution</strong><span>Visit site and complete quality repairs</span></div>
+              <div className="step-photo-caption"><strong>{t('forMaintenance.step5CapTitle')}</strong><span>{t('forMaintenance.step5CapSub')}</span></div>
             </div>
           </div>
 
@@ -1366,25 +1347,24 @@ const GuestHome: React.FC = () => {
             <div className="step-content">
               <div className="step-number-badge">
                 <div className="snb-circle">6</div>
-                <div className="snb-label">Step Six</div>
+                <div className="snb-label">{t('guestHome.stepSix')}</div>
               </div>
-              <div className="step-content-title">Submit Report & Track Wallet Balance</div>
-              <div className="step-content-desc">Once the issue is fully fixed, take 'after' photos and submit a detailed repair report through the app. Funds are released from escrow directly into your HOMI secure wallet.</div>
+              <div className="step-content-title">{t('forMaintenance.step6Title')}</div>
+              <div className="step-content-desc">{t('forMaintenance.step6Desc')}</div>
               <div className="step-bullets">
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Document repair results with photos and notes</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Submit the work report for landlord confirmation</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Receive instant payout to your secure HOMI wallet</div>
-                <div className="step-bullet"><div className="step-bullet-icon">✓</div>Track your balance and withdraw earnings to your bank</div>
+                {(t('forMaintenance.step6Bullets', { returnObjects: true }) as string[] || []).map((bullet, idx) => (
+                  <div className="step-bullet" key={idx}><div className="step-bullet-icon">✓</div>{bullet}</div>
+                ))}
               </div>
               <div className="step-tags">
-                <span className="step-tag">Issue Report</span>
-                <span className="step-tag">Secure Payout</span>
-                <span className="step-tag">Wallet Balance</span>
+                {(t('forMaintenance.step6Tags', { returnObjects: true }) as string[] || []).map((tag, idx) => (
+                  <span className="step-tag" key={idx}>{tag}</span>
+                ))}
               </div>
             </div>
             <div className="step-photo">
               <img src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80&fit=crop" alt="Tracking balance on mobile phone" />
-              <div className="step-photo-caption"><strong>Earnings & Wallet</strong><span>Get paid instantly upon work approval</span></div>
+              <div className="step-photo-caption"><strong>{t('forMaintenance.step6CapTitle')}</strong><span>{t('forMaintenance.step6CapSub')}</span></div>
             </div>
           </div>
         </div>
@@ -1395,44 +1375,44 @@ const GuestHome: React.FC = () => {
         <div className="roles-grid">
           {/* Tenant Card */}
           <div className="role-card tenant" data-emoji="🏠">
-            <div className="role-badge-pill">For Tenants</div>
-            <h3 className="role-title">Find Your Happy Place</h3>
-            <p className="role-desc">Browse thousands of verified listings with high-quality photos. Apply digitally, match with roommates, sign your lease contract online, pay your monthly rent via credit card, and report repairs instantly.</p>
+            <div className="role-badge-pill">{t('guestHome.roleTenant')}</div>
+            <h3 className="role-title">{t('guestHome.roleTenantTitle')}</h3>
+            <p className="role-desc">{t('guestHome.roleTenantDesc')}</p>
             <div className="role-features">
-              <div className="role-feat"><span className="check">✓</span> 100% verified listings and landlords accounts</div>
-              <div className="role-feat"><span className="check">✓</span> Zero hidden broker fees or surprise commissions</div>
-              <div className="role-feat"><span className="check">✓</span> Legally binding digital lease agreements</div>
-              <div className="role-feat"><span className="check">✓</span> Monthly rent payments through credit/debit card</div>
+              <div className="role-feat"><span className="check">✓</span> {t('guestHome.roleTenantFeat1')}</div>
+              <div className="role-feat"><span className="check">✓</span> {t('guestHome.roleTenantFeat2')}</div>
+              <div className="role-feat"><span className="check">✓</span> {t('guestHome.roleTenantFeat3')}</div>
+              <div className="role-feat"><span className="check">✓</span> {t('guestHome.roleTenantFeat4')}</div>
             </div>
-            <button onClick={() => navigate('/auth')} className="btn-outline">Get Started Now ›</button>
+            <button onClick={() => navigate('/auth')} className="btn-outline">{t('guestHome.roleTenantBtn')}</button>
           </div>
 
           {/* Landlord Card */}
           <div className="role-card landlord" data-emoji="🏗️">
-            <div className="role-badge-pill">For Landlords</div>
-            <h3 className="role-title">Manage Your Units on Autopilot</h3>
-            <p className="role-desc">Maximize your portfolio's occupancy and yield. List properties, screen tenant profiles and backgrounds, draft and sign lease agreements online, receive direct rent deposits into your wallet, and assign maintenance providers.</p>
+            <div className="role-badge-pill">{t('guestHome.roleLandlord')}</div>
+            <h3 className="role-title">{t('guestHome.roleLandlordTitle')}</h3>
+            <p className="role-desc">{t('guestHome.roleLandlordDesc')}</p>
             <div className="role-features">
-              <div className="role-feat"><span className="check">✓</span> Secure identity and profile checks for tenants</div>
-              <div className="role-feat"><span className="check">✓</span> Automated lease drafting and secure signature storage</div>
-              <div className="role-feat"><span className="check">✓</span> Direct tenant rent payouts to your bank account</div>
-              <div className="role-feat"><span className="check">✓</span> Full oversight of active maintenance work orders</div>
+              <div className="role-feat"><span className="check">✓</span> {t('guestHome.roleLandlordFeat1')}</div>
+              <div className="role-feat"><span className="check">✓</span> {t('guestHome.roleLandlordFeat2')}</div>
+              <div className="role-feat"><span className="check">✓</span> {t('guestHome.roleLandlordFeat3')}</div>
+              <div className="role-feat"><span className="check">✓</span> {t('guestHome.roleLandlordFeat4')}</div>
             </div>
-            <button onClick={() => navigate('/auth')} className="btn-outline" style={{ color: '#16a34a', borderColor: '#16a34a' }}>List Your Property ›</button>
+            <button onClick={() => navigate('/auth')} className="btn-outline" style={{ color: '#16a34a', borderColor: '#16a34a' }}>{t('guestHome.roleLandlordBtn')}</button>
           </div>
 
           {/* Maintenance Provider Card */}
           <div className="role-card provider" data-emoji="🛠️">
-            <div className="role-badge-pill">For Providers</div>
-            <h3 className="role-title">Grow Your Business</h3>
-            <p className="role-desc">Access a steady stream of maintenance jobs. Create your profile, upload your credentials, browse posted issues, submit estimates, complete the job, and track your wallet balance.</p>
+            <div className="role-badge-pill">{t('guestHome.roleProvider')}</div>
+            <h3 className="role-title">{t('guestHome.roleProviderTitle')}</h3>
+            <p className="role-desc">{t('guestHome.roleProviderDesc')}</p>
             <div className="role-features">
-              <div className="role-feat"><span className="check">✓</span> Register as an individual or company service</div>
-              <div className="role-feat"><span className="check">✓</span> Verified badges to build trust with landlords</div>
-              <div className="role-feat"><span className="check">✓</span> Direct wallet payouts immediately after job reports</div>
-              <div className="role-feat"><span className="check">✓</span> Easy communication with tenants and landlords</div>
+              <div className="role-feat"><span className="check">✓</span> {t('guestHome.roleProviderFeat1')}</div>
+              <div className="role-feat"><span className="check">✓</span> {t('guestHome.roleProviderFeat2')}</div>
+              <div className="role-feat"><span className="check">✓</span> {t('guestHome.roleProviderFeat3')}</div>
+              <div className="role-feat"><span className="check">✓</span> {t('guestHome.roleProviderFeat4')}</div>
             </div>
-            <button onClick={() => navigate('/maintenance-providers')} className="btn-outline" style={{ color: '#d97706', borderColor: '#d97706' }}>Join as Provider ›</button>
+            <button onClick={() => navigate('/maintenance-providers')} className="btn-outline" style={{ color: '#d97706', borderColor: '#d97706' }}>{t('guestHome.roleProviderBtn')}</button>
           </div>
         </div>
       </section>
@@ -1440,46 +1420,46 @@ const GuestHome: React.FC = () => {
       {/* 7. Wallet Showcase (Pay Rent / Withdraw redirecting to /auth) */}
       <section id="wallet" className="wallet-section">
         <div className="guest-section-header reveal">
-          <div className="section-tag">Secure Wallet</div>
-          <h2 className="section-title">Built-in Financial Control</h2>
+          <div className="section-tag">{t('guestHome.walletTitle')}</div>
+          <h2 className="section-title">{t('guestHome.walletSubtitle')}</h2>
         </div>
 
         <div className="wallet-card reveal">
           <div className="wallet-left">
-            <div className="wallet-balance-label">Available Balance</div>
+            <div className="wallet-balance-label">{t('guestHome.walletBalanceLabel')}</div>
             <div className="wallet-balance">25,800.00 <em>EGP</em></div>
             <div className="wallet-actions">
-              <button onClick={() => navigate('/auth')} className="wallet-btn pay">Pay Rent</button>
-              <button onClick={() => navigate('/auth')} className="wallet-btn">Withdraw</button>
+              <button onClick={() => navigate('/auth')} className="wallet-btn pay">{t('tenantHomeComponents.payNow')}</button>
+              <button onClick={() => navigate('/auth')} className="wallet-btn">{t('myProperties.labels.withdraw', 'Withdraw')}</button>
             </div>
             <div className="wallet-tx">
-              <div className="tx-label">Recent Transactions</div>
+              <div className="tx-label">{t('guestHome.walletTxLabel')}</div>
               <div className="tx-row">
-                <span className="tx-name">Rent Payment — Unit 401</span>
+                <span className="tx-name">{t('guestHome.walletTx1')}</span>
                 <span className="tx-amount out">-12,000 EGP</span>
               </div>
               <div className="tx-row">
-                <span className="tx-name">Security Deposit Ref.</span>
+                <span className="tx-name">{t('guestHome.walletTx2')}</span>
                 <span className="tx-amount in">+8,000 EGP</span>
               </div>
               <div className="tx-row">
-                <span className="tx-name">Wallet Top-Up</span>
+                <span className="tx-name">{t('guestHome.walletTx3')}</span>
                 <span className="tx-amount in">+15,000 EGP</span>
               </div>
             </div>
           </div>
 
           <div className="wallet-right">
-            <h3>Fast, Safe, and Automated</h3>
-            <p>HOMI's secure billing system guarantees that rent collection and payment processing runs without friction. Say goodbye to manual bank transfers and cash collections.</p>
+            <h3>{t('guestHome.walletRightTitle')}</h3>
+            <p>{t('guestHome.walletRightDesc')}</p>
             <div className="wallet-points">
               <div className="wp">
                 <div className="wp-icon">🏦</div>
-                <div>Withdraw your earnings to your registered bank account at any time.</div>
+                <div>{t('guestHome.walletRightPoint1')}</div>
               </div>
               <div className="wp">
                 <div className="wp-icon">📋</div>
-                <div>All transactions are logged, timestamped, and fully traceable for your records.</div>
+                <div>{t('guestHome.walletRightPoint2')}</div>
               </div>
             </div>
           </div>
@@ -1489,77 +1469,77 @@ const GuestHome: React.FC = () => {
       {/* 8. FAQ accordion */}
       <section id="faq">
         <div className="guest-section-header reveal">
-          <div className="section-tag">Common Questions</div>
-          <h2 className="section-title">Frequently Asked</h2>
+          <div className="section-tag">{t('guestHome.commonQuestions')}</div>
+          <h2 className="section-title">{t('guestHome.frequentlyAsked')}</h2>
         </div>
         <div className="faq reveal">
           <div className={`faq-item ${openFaqIndex === 0 ? 'open' : ''}`}>
             <div className="faq-q" onClick={() => setOpenFaqIndex(openFaqIndex === 0 ? null : 0)}>
-              Is HOMI free to use?
+              {t('guestHome.faqQ1')}
               <span className="faq-toggle">+</span>
             </div>
             <div className="faq-a">
-              Creating an account is completely free for both tenants and landlords. All core features are available at no cost. You'll always know what's free and what isn't before using any feature.
+              {t('guestHome.faqA1')}
             </div>
           </div>
 
           <div className={`faq-item ${openFaqIndex === 1 ? 'open' : ''}`}>
             <div className="faq-q" onClick={() => setOpenFaqIndex(openFaqIndex === 1 ? null : 1)}>
-              How does digital lease signing work?
+              {t('guestHome.faqQ2')}
               <span className="faq-toggle">+</span>
             </div>
             <div className="faq-a">
-              Once an application is accepted, a lease contract is auto-generated with all agreed terms. Both the tenant and landlord review and sign digitally on the platform. Signed copies are stored securely and accessible to both parties forever.
+              {t('guestHome.faqA2')}
             </div>
           </div>
 
           <div className={`faq-item ${openFaqIndex === 2 ? 'open' : ''}`}>
             <div className="faq-q" onClick={() => setOpenFaqIndex(openFaqIndex === 2 ? null : 2)}>
-              How secure is the wallet and my payments?
+              {t('guestHome.faqQ3')}
               <span className="faq-toggle">+</span>
             </div>
             <div className="faq-a">
-              Your wallet is protected with industry-standard encryption. All transactions are logged and auditable. Funds can only be sent to verified landlords, and withdrawals go only to your registered bank account.
+              {t('guestHome.faqA3')}
             </div>
           </div>
 
           <div className={`faq-item ${openFaqIndex === 3 ? 'open' : ''}`}>
             <div className="faq-q" onClick={() => setOpenFaqIndex(openFaqIndex === 3 ? null : 3)}>
-              Can I list multiple properties as a landlord?
+              {t('guestHome.faqQ4')}
               <span className="faq-toggle">+</span>
             </div>
             <div className="faq-a">
-              Yes — landlords can list and manage as many properties as they own. Each property has its own dedicated page, applications queue, and tenant management tools.
+              {t('guestHome.faqA4')}
             </div>
           </div>
 
           <div className={`faq-item ${openFaqIndex === 4 ? 'open' : ''}`}>
             <div className="faq-q" onClick={() => setOpenFaqIndex(openFaqIndex === 4 ? null : 4)}>
-              How does the roommate matching feature work?
+              {t('guestHome.faqQ5')}
               <span className="faq-toggle">+</span>
             </div>
             <div className="faq-a">
-              Tenants create a roommate profile with their preferences — lifestyle habits, budget, preferred area, and schedule. HOMI surfaces compatible profiles and lets you message potential roommates directly through the platform.
+              {t('guestHome.faqA5')}
             </div>
           </div>
 
           <div className={`faq-item ${openFaqIndex === 5 ? 'open' : ''}`}>
             <div className="faq-q" onClick={() => setOpenFaqIndex(openFaqIndex === 5 ? null : 5)}>
-              What happens after I submit a maintenance request?
+              {t('guestHome.faqQ6')}
               <span className="faq-toggle">+</span>
             </div>
             <div className="faq-a">
-              Your request becomes immediately visible to your landlord. You can include photos and urgency level. You'll be notified as the status changes — from submitted → assigned → resolved. You can also contact the assigned maintenance provider directly.
+              {t('guestHome.faqA6')}
             </div>
           </div>
 
           <div className={`faq-item ${openFaqIndex === 6 ? 'open' : ''}`}>
             <div className="faq-q" onClick={() => setOpenFaqIndex(openFaqIndex === 6 ? null : 6)}>
-              How long does the rental application process take?
+              {t('guestHome.faqQ7')}
               <span className="faq-toggle">+</span>
             </div>
             <div className="faq-a">
-              Applying takes under a minute — just click Apply on any listing and your profile is attached automatically. The landlord is notified instantly and you'll receive their decision as a notification on the platform.
+              {t('guestHome.faqA7')}
             </div>
           </div>
         </div>
@@ -1569,12 +1549,12 @@ const GuestHome: React.FC = () => {
       <section id="start" className="cta-section">
         <div className="cta-box reveal">
           <div style={{ fontSize: '3rem', marginBottom: '1rem', position: 'relative' }}>🏠</div>
-          <h2>Ready to Get Started?</h2>
-          <p>Join HOMI today and experience rental management the way it should be — simple, transparent, and fully digital.</p>
+          <h2>{t('guestHome.ctaReadyToGetStarted')}</h2>
+          <p>{t('guestHome.ctaDesc')}</p>
           <div className="cta-btns">
-            <button onClick={() => navigate('/auth')} className="btn-white">Create Tenant Account ›</button>
-            <button onClick={() => navigate('/auth')} className="btn-white-outline">List Your Property</button>
-            <button onClick={() => navigate('/maintenance-providers')} className="btn-white-outline" style={{ borderStyle: 'dashed' }}>Join as Provider</button>
+            <button onClick={() => navigate('/auth')} className="btn-white">{t('guestHome.ctaCreateTenant')}</button>
+            <button onClick={() => navigate('/auth')} className="btn-white-outline">{t('guestHome.ctaListProperty')}</button>
+            <button onClick={() => navigate('/maintenance-providers')} className="btn-white-outline" style={{ borderStyle: 'dashed' }}>{t('guestHome.ctaJoinProvider')}</button>
           </div>
         </div>
       </section>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Header from '../../../components/global/header';
 import TenantSidebar from '../../../components/global/Tenant/sidebar';
 import LandlordSidebar from '../../../components/global/Landlord/sidebar';
@@ -21,6 +22,7 @@ interface TeamMember {
 }
 
 const AboutUs: React.FC = () => {
+  const { t } = useTranslation();
   const role = authService.getCurrentUser()?.user?.role;
   const showSidebar = role === 'LANDLORD' || role === 'TENANT';
   const SidebarComponent = role === 'LANDLORD' ? LandlordSidebar : TenantSidebar;
@@ -35,33 +37,33 @@ const AboutUs: React.FC = () => {
     {
       id: 1,
       name: "Mohy Eldeen",
-      role: "Chief Technology Officer",
+      role: t('aboutUs.teamMohyRole', 'Chief Technology Officer'),
       image: "/mohyy.jpeg",
-      bio: "Leading technical strategy, cloud infrastructure and architecting high-performance SaaS solutions.",
+      bio: t('aboutUs.teamMohyBio', 'Leading technical strategy, cloud infrastructure and architecting high-performance SaaS solutions.'),
       socials: { github: "https://github.com", linkedin: "https://linkedin.com", email: "mohy@homi.com" }
     },
     {
       id: 2,
       name: "Yehia Hesham",
-      role: "Lead Systems Architect",
+      role: t('aboutUs.teamYehiaRole', 'Lead Systems Architect'),
       image: "/yehia.jpeg",
-      bio: "Expert in scalable microservices, backend reliability, and low-latency database queries.",
+      bio: t('aboutUs.teamYehiaBio', 'Expert in scalable microservices, backend reliability, and low-latency database queries.'),
       socials: { github: "https://github.com", linkedin: "https://linkedin.com" }
     },
     {
       id: 3,
       name: "Kareem El7a2i2y",
-      role: "Senior Fullstack Engineer",
+      role: t('aboutUs.teamKareemRole', 'Senior Fullstack Engineer'),
       image: "/kareem.jpeg",
-      bio: "Specializing in secure API integrations, web security protocols, and dynamic user interfaces.",
+      bio: t('aboutUs.teamKareemBio', 'Specializing in secure API integrations, web security protocols, and dynamic user interfaces.'),
       socials: { github: "https://github.com", email: "kareem@homi.com" }
     },
     {
       id: 4,
       name: "Haneen Elghawy",
-      role: "Lead UI/UX Designer",
+      role: t('aboutUs.teamHaneenRole', 'Lead UI/UX Designer'),
       image: "/Hanen.jpeg",
-      bio: "Crafting modern design systems, intuitive co-living user journeys, and premium dark layouts.",
+      bio: t('aboutUs.teamHaneenBio', 'Crafting modern design systems, intuitive co-living user journeys, and premium dark layouts.'),
       socials: { linkedin: "https://linkedin.com", github: "https://github.com" }
     }
   ];
@@ -69,90 +71,90 @@ const AboutUs: React.FC = () => {
   const platformPillars = [
     {
       icon: <Users size={28} />,
-      title: "Smart Roommate Finder",
-      desc: "Complete lifestyle compatibility surveys to matches roommates based on habits, budgets, and schedules."
+      title: t('aboutUs.pillarRoommateTitle', 'Smart Roommate Finder'),
+      desc: t('aboutUs.pillarRoommateDesc', 'Complete lifestyle compatibility surveys to matches roommates based on habits, budgets, and schedules.')
     },
     {
       icon: <Clock size={28} />,
-      title: "Verified Visit Booking",
-      desc: "Instantly schedule physical property viewings with landlords, complete with real-time slot confirmations."
+      title: t('aboutUs.pillarBookingTitle', 'Verified Visit Booking'),
+      desc: t('aboutUs.pillarBookingDesc', 'Instantly schedule physical property viewings with landlords, complete with real-time slot confirmations.')
     },
     {
       icon: <FileText size={28} />,
-      title: "Automated Lease Contracts",
-      desc: "Generate custom, legally compliant lease agreements directly on-platform and sign them electronically."
+      title: t('aboutUs.pillarContractsTitle', 'Automated Lease Contracts'),
+      desc: t('aboutUs.pillarContractsDesc', 'Generate custom, legally compliant lease agreements directly on-platform and sign them electronically.')
     },
     {
       icon: <DollarSign size={28} />,
-      title: "Integrated Payments Ledger",
-      desc: "Manage security deposits, pay rent online, and track transaction history in a clear digital ledger."
+      title: t('aboutUs.pillarPaymentsTitle', 'Integrated Payments Ledger'),
+      desc: t('aboutUs.pillarPaymentsDesc', 'Manage security deposits, pay rent online, and track transaction history in a clear digital ledger.')
     },
     {
       icon: <Wrench size={28} />,
-      title: "Live Maintenance Tracking",
-      desc: "Submit requests with pictures, dispatch local technicians, and resolve issues via an integrated dispute log."
+      title: t('aboutUs.pillarMaintenanceTitle', 'Live Maintenance Tracking'),
+      desc: t('aboutUs.pillarMaintenanceDesc', 'Submit requests with pictures, dispatch local technicians, and resolve issues via an integrated dispute log.')
     },
     {
       icon: <MessageSquare size={28} />,
-      title: "Real-time Messaging",
-      desc: "Negotiate lease terms, coordinates roommate details, and coordinate with landlords via instant chats."
+      title: t('aboutUs.pillarMessagingTitle', 'Real-time Messaging'),
+      desc: t('aboutUs.pillarMessagingDesc', 'Negotiate lease terms, coordinates roommate details, and coordinate with landlords via instant chats.')
     }
   ];
 
   const journeySteps = [
     {
       year: "2024",
-      title: "The Seed of HOMi",
-      desc: "Founded by a team of engineers frustrated with the offline, fragmented renting process. Set out to digitize leasing and roommates matching.",
+      title: t('aboutUs.timeline2024Title', 'The Seed of HOMi'),
+      desc: t('aboutUs.timeline2024Desc', 'Founded by a team of engineers frustrated with the offline, fragmented renting process. Set out to digitize leasing and roommates matching.'),
       icon: <Shield size={18} />
     },
     {
       year: "2025",
-      title: "SaaS Launch & Verification",
-      desc: "Released automated contract generation and digital ledgers. Launched landlord validation to eliminate rental listing scams.",
+      title: t('aboutUs.timeline2025Title', 'SaaS Launch & Verification'),
+      desc: t('aboutUs.timeline2025Desc', 'Released automated contract generation and digital ledgers. Launched landlord validation to eliminate rental listing scams.'),
       icon: <Rocket size={18} />
     },
     {
       year: "2026",
-      title: "Real-time Ecosystem",
-      desc: "Introduced live maintenance ticket dispatching, roommate compatibility metrics, and real-time viewing bookings.",
+      title: t('aboutUs.timeline2026Title', 'Real-time Ecosystem'),
+      desc: t('aboutUs.timeline2026Desc', 'Introduced live maintenance ticket dispatching, roommate compatibility metrics, and real-time viewing bookings.'),
       icon: <Compass size={18} />
     }
   ];
 
   const faqs = [
     {
-      question: "What is HOMi and how does it simplify renting?",
-      answer: "HOMi is a unified, end-to-end rental platform that merges listing discovery, viewing bookings, lease contract signing, monthly rent payments, and maintenance request dispatching. Instead of coordinating across separate platforms, both tenants and landlords manage their entire leasing relationship inside one single, secure portal."
+      question: t('aboutUs.faqQ1', 'What is HOMi and how does it simplify renting?', { defaultValue: 'What is HOMi and how does it simplify renting?' }),
+      answer: t('aboutUs.faqA1', 'HOMi is a unified, end-to-end rental platform that merges listing discovery, viewing bookings, lease contract signing, monthly rent payments, and maintenance request dispatching. Instead of coordinating across separate platforms, both tenants and landlords manage their entire leasing relationship inside one single, secure portal.', { defaultValue: 'HOMi is a unified, end-to-end rental platform that merges listing discovery, viewing bookings, lease contract signing, monthly rent payments, and maintenance request dispatching. Instead of coordinating across separate platforms, both tenants and landlords manage their entire leasing relationship inside one single, secure portal.' })
     },
     {
-      question: "Are the property listings verified for safety?",
-      answer: "Yes, security is a core pillar of HOMi. Landlords must upload official property ownership documentation. These documents are manually reviewed and approved by HOMi administrators before listing publications are authorized."
+      question: t('aboutUs.faqQ2', 'Are the property listings verified for safety?', { defaultValue: 'Are the property listings verified for safety?' }),
+      answer: t('aboutUs.faqA2', 'Yes, security is a core pillar of HOMi. Landlords must upload official property ownership documentation. These documents are manually reviewed and approved by HOMi administrators before listing publications are authorized.', { defaultValue: 'Yes, security is a core pillar of HOMi. Landlords must upload official property ownership documentation. These documents are manually reviewed and approved by HOMi administrators before listing publications are authorized.' })
     },
     {
-      question: "How does roommate matching compatibility work?",
-      answer: "HOMi uses a comprehensive survey analyzing habits (sleep schedule, guests policy, smoking, pets) and budget boundaries. Our roommate matching engine compiles compatibility scores to suggest co-living arrangements with high success rates."
+      question: t('aboutUs.faqQ3', 'How roommate matching compatibility work?', { defaultValue: 'How roommate matching compatibility work?' }),
+      answer: t('aboutUs.faqA3', 'HOMi uses a comprehensive survey analyzing habits (sleep schedule, guests policy, smoking, pets) and budget boundaries. Our roommate matching engine compiles compatibility scores to suggest co-living arrangements with high success rates.', { defaultValue: 'HOMi uses a comprehensive survey analyzing habits (sleep schedule, guests policy, smoking, pets) and budget boundaries. Our roommate matching engine compiles compatibility scores to suggest co-living arrangements with high success rates.' })
     },
     {
-      question: "How legally binding are the automated lease contracts?",
-      answer: "Every contract generated on HOMi is constructed from validated legal frameworks. Once signed digitally by both the tenant and landlord, they represent fully binding electronic agreements, complete with custom house rules and payment terms."
+      question: t('aboutUs.faqQ4', 'How legally binding are the automated lease contracts?', { defaultValue: 'How legally binding are the automated lease contracts?' }),
+      answer: t('aboutUs.faqA4', 'Every contract generated on HOMi is constructed from validated legal frameworks. Once signed digitally by both the tenant and landlord, they represent fully binding electronic agreements, complete with custom house rules and payment terms.', { defaultValue: 'Every contract generated on HOMi is constructed from validated legal frameworks. Once signed digitally by both the tenant and landlord, they represent fully binding electronic agreements, complete with custom house rules and payment terms.' })
     },
     {
-      question: "How are maintenance disputes and payments resolved?",
-      answer: "Tenants can log maintenance issues with photos and severity tags. Landlords assign them to local providers. Rent payments are securely tracked, and landlords can approve charges for damages or request service payouts transparently."
+      question: t('aboutUs.faqQ5', 'How are maintenance disputes and payments resolved?', { defaultValue: 'How are maintenance disputes and payments resolved?' }),
+      answer: t('aboutUs.faqA5', 'Tenants can log maintenance issues with photos and severity tags. Landlords assign them to local providers. Rent payments are securely tracked, and landlords can approve charges for damages or request service payouts transparently.', { defaultValue: 'Tenants can log maintenance issues with photos and severity tags. Landlords assign them to local providers. Rent payments are securely tracked, and landlords can approve charges for damages or request service payouts transparently.' })
     }
   ];
 
   const testimonials = [
     {
-      name: "Marcus Thorne",
-      role: "Property Manager (50+ units)",
-      quote: "HOMi completely revolutionized my workflow. Automatic lease signatures and the integrated payments ledger saved me hours of administrative work."
+      name: t('aboutUs.testimonial1Name', 'Marcus Thorne', { defaultValue: 'Marcus Thorne' }),
+      role: t('aboutUs.testimonial1Role', 'Property Manager (50+ units)', { defaultValue: 'Property Manager (50+ units)' }),
+      quote: t('aboutUs.testimonial1Quote', 'HOMi completely revolutionized my workflow. Automatic lease signatures and the integrated payments ledger saved me hours of administrative work.', { defaultValue: 'HOMi completely revolutionized my workflow. Automatic lease signatures and the integrated payments ledger saved me hours of administrative work.' })
     },
     {
-      name: "Sophia Lang",
-      role: "Medical Student & Tenant",
-      quote: "The roommate finder was incredibly accurate. Finding both a verified apartment and a compatible flatmate took me less than three days!"
+      name: t('aboutUs.testimonial2Name', 'Sophia Lang', { defaultValue: 'Sophia Lang' }),
+      role: t('aboutUs.testimonial2Role', 'Medical Student & Tenant', { defaultValue: 'Medical Student & Tenant' }),
+      quote: t('aboutUs.testimonial2Quote', 'The roommate finder was incredibly accurate. Finding both a verified apartment and a compatible flatmate took me less than three days!', { defaultValue: 'The roommate finder was incredibly accurate. Finding both a verified apartment and a compatible flatmate took me less than three days!' })
     }
   ];
 
@@ -169,14 +171,14 @@ const AboutUs: React.FC = () => {
           <div className="hero-glow-2"></div>
           <div className="hero-content-wrapper">
             <span className="about-badge">
-              <Info size={14} style={{ marginRight: '6px' }} /> The Future of Renting
+              <Info size={14} style={{ marginRight: '6px' }} /> {t('aboutUs.badge', 'The Future of Renting')}
             </span>
             <h1>
-              Redefining the rental lifecycle, <br />
-              <span className="gradient-text">from match to move-in.</span>
+              {t('aboutUs.title', 'Redefining the rental lifecycle,')} <br />
+              <span className="gradient-text">{t('aboutUs.gradientText', 'from match to move-in.')}</span>
             </h1>
             <p className="hero-subtitle">
-              HOMi is the all-in-one SaaS platform built to automate property listings, schedule viewings, sign smart contracts, and handle maintenance—all in one place.
+              {t('aboutUs.subtitle', 'HOMi is the all-in-one SaaS platform built to automate property listings, schedule viewings, sign smart contracts, and handle maintenance—all in one place.')}
             </p>
           </div>
         </section>
@@ -186,22 +188,22 @@ const AboutUs: React.FC = () => {
           <div className="container">
             <div className="origin-grid">
               <div className="origin-text">
-                <span className="section-pretitle">The Core Concept</span>
-                <h2>Why we built HOMi</h2>
+                <span className="section-pretitle">{t('aboutUs.coreConceptPretitle', 'The Core Concept')}</span>
+                <h2>{t('aboutUs.coreConceptTitle', 'Why we built HOMi')}</h2>
                 <p>
-                  Traditional renting is broken. It is a highly fragmented journey requiring tenants and landlords to communicate across dozens of disconnected channels: unvetted Facebook listings, offline paper contracts, random bank transfers, and paper-based maintenance disputes.
+                  {t('aboutUs.coreConceptDesc1', 'Traditional renting is broken. It is a highly fragmented journey requiring tenants and landlords to communicate across dozens of disconnected channels: unvetted Facebook listings, offline paper contracts, random bank transfers, and paper-based maintenance disputes.')}
                 </p>
                 <p>
-                  We built HOMi to unify the entire lifecycle. By merging roommate compatibility scoring, digital listing discovery, verified document uploads, e-signatures, ledger payments, and live maintenance workflows, we've replaced chaos with complete transparency.
+                  {t('aboutUs.coreConceptDesc2', 'We built HOMi to unify the entire lifecycle. By merging roommate compatibility scoring, digital listing discovery, verified document uploads, e-signatures, ledger payments, and live maintenance workflows, we\'ve replaced chaos with complete transparency.')}
                 </p>
                 <div className="stats-container-grid">
                   <div className="stat-card">
                     <h3>15k+</h3>
-                    <p>Verified Users</p>
+                    <p>{t('aboutUs.statVerifiedUsers', 'Verified Users')}</p>
                   </div>
                   <div className="stat-card">
                     <h3>4.2k+</h3>
-                    <p>Signed Leases</p>
+                    <p>{t('aboutUs.statSignedLeases', 'Signed Leases')}</p>
                   </div>
 
                 </div>
@@ -213,24 +215,24 @@ const AboutUs: React.FC = () => {
                     <span className="dot red"></span>
                     <span className="dot yellow"></span>
                     <span className="dot green"></span>
-                    <span className="panel-title">HOMi SaaS Engine</span>
+                    <span className="panel-title">{t('aboutUs.visualHeaderTitle', 'HOMi SaaS Engine')}</span>
                   </div>
                   <div className="visual-body">
                     <div className="visual-row">
                       <CheckCircle2 size={16} className="checked-icon" />
-                      <span>Property Vetting & Admin Approval</span>
+                      <span>{t('aboutUs.visualRowVetting', 'Property Vetting & Admin Approval')}</span>
                     </div>
                     <div className="visual-row">
                       <CheckCircle2 size={16} className="checked-icon" />
-                      <span>Automated Legally Compliant Contracts</span>
+                      <span>{t('aboutUs.visualRowContracts', 'Automated Legally Compliant Contracts')}</span>
                     </div>
                     <div className="visual-row">
                       <CheckCircle2 size={16} className="checked-icon" />
-                      <span>Tenant-Landlord Balance Ledgers</span>
+                      <span>{t('aboutUs.visualRowLedgers', 'Tenant-Landlord Balance Ledgers')}</span>
                     </div>
                     <div className="visual-row">
                       <CheckCircle2 size={16} className="checked-icon" />
-                      <span>Viewing Bookings & Calendar Sync</span>
+                      <span>{t('aboutUs.visualRowBookings', 'Viewing Bookings & Calendar Sync')}</span>
                     </div>
                   </div>
                 </div>
@@ -243,9 +245,9 @@ const AboutUs: React.FC = () => {
         <section className="pillars-section">
           <div className="container">
             <div className="section-header-centered">
-              <span className="section-pretitle">Platform Architecture</span>
-              <h2>Built to power every step of the journey</h2>
-              <p>Everything you need to discover, secure, pay, and maintain, in one clean design.</p>
+              <span className="section-pretitle">{t('aboutUs.pillarsPretitle', 'Platform Architecture')}</span>
+              <h2>{t('aboutUs.pillarsTitle', 'Built to power every step of the journey')}</h2>
+              <p>{t('aboutUs.pillarsSubtitle', 'Everything you need to discover, secure, pay, and maintain, in one clean design.')}</p>
             </div>
 
             <div className="pillars-grid">
@@ -266,9 +268,9 @@ const AboutUs: React.FC = () => {
         <section className="roadmap-section">
           <div className="container">
             <div className="section-header-centered">
-              <span className="section-pretitle">The Roadmap</span>
-              <h2>Our journey towards rental simplicity</h2>
-              <p>Where we started and where we are heading next.</p>
+              <span className="section-pretitle">{t('aboutUs.timelinePretitle', 'The Roadmap')}</span>
+              <h2>{t('aboutUs.timelineTitle', 'Our journey towards rental simplicity')}</h2>
+              <p>{t('aboutUs.timelineSubtitle', 'Where we started and where we are heading next.')}</p>
             </div>
 
             <div className="roadmap-timeline">
@@ -293,9 +295,9 @@ const AboutUs: React.FC = () => {
         <section className="founders-section">
           <div className="container">
             <div className="section-header-centered">
-              <span className="section-pretitle">The Team</span>
-              <h2>Meet the Architects of HOMi</h2>
-              <p>The core engineers and designers behind the code and user experience.</p>
+              <span className="section-pretitle">{t('aboutUs.teamPretitle', 'The Team')}</span>
+              <h2>{t('aboutUs.teamTitle', 'Meet the Architects of HOMi')}</h2>
+              <p>{t('aboutUs.teamSubtitle', 'The core engineers and designers behind the code and user experience.')}</p>
             </div>
 
             <div className="founders-grid">
@@ -357,9 +359,9 @@ const AboutUs: React.FC = () => {
         <section className="faq-section">
           <div className="container">
             <div className="section-header-centered">
-              <span className="section-pretitle">Common Questions</span>
-              <h2>Everything you need to know about HOMi</h2>
-              <p>Got questions about verification, lease terms, or roommate finding? We've got answers.</p>
+              <span className="section-pretitle">{t('aboutUs.faqPretitle', 'Common Questions')}</span>
+              <h2>{t('aboutUs.faqTitle', 'Everything you need to know about HOMi')}</h2>
+              <p>{t('aboutUs.faqSubtitle', 'Got questions about verification, lease terms, or roommate finding? We\'ve got answers.')}</p>
             </div>
 
             <div className="faq-accordion-container">
@@ -392,14 +394,14 @@ const AboutUs: React.FC = () => {
           <div className="container">
             <div className="cta-glassmorphic-card">
               <div className="cta-glow"></div>
-              <h2>Ready to experience a frictionless rental cycle?</h2>
-              <p>Join thousands of tenants and landlords already using HOMi to simplify property management.</p>
+              <h2>{t('aboutUs.ctaTitle', 'Ready to experience a frictionless rental cycle?')}</h2>
+              <p>{t('aboutUs.ctaSubtitle', 'Join thousands of tenants and landlords already using HOMi to simplify property management.')}</p>
               <div className="cta-button-group">
                 <button className="cta-btn-primary" onClick={() => window.location.href = '/browse-properties'}>
-                  Browse Properties
+                  {t('aboutUs.ctaBrowseBtn', 'Browse Properties')}
                 </button>
                 <button className="cta-btn-secondary" onClick={() => window.location.href = '/settings'}>
-                  Configure Profile
+                  {t('aboutUs.ctaConfigBtn', 'Configure Profile')}
                 </button>
               </div>
             </div>

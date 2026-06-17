@@ -49,30 +49,33 @@ import {
     getRentCycleSummary,
     getRentInstallmentStats,
 } from '../utils/rentSchedule';
+import { useTranslation } from 'react-i18next';
 
 type TabType = 'overview' | 'upcoming' | 'history' | 'topup' | 'methods' | 'pending' | 'receipt' | 'deposits' | 'maintenance';
 
-const formatMoney = (amount: number): string =>
-    `$${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const formatMoney = (amount: number, locale?: string): string =>
+    `$${amount.toLocaleString(locale ?? undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-const formatShortDate = (isoDate: string): string => {
+const formatShortDate = (isoDate: string, locale?: string): string => {
     const parsed = new Date(isoDate);
     if (Number.isNaN(parsed.getTime())) return 'N/A';
-    return parsed.toLocaleDateString(undefined, { month: 'short', day: '2-digit' });
+    return parsed.toLocaleDateString(locale ?? undefined, { month: 'short', day: '2-digit' });
 };
 
-const formatLongDate = (isoDate: string): string => {
+const formatLongDate = (isoDate: string, locale?: string): string => {
     const parsed = new Date(isoDate);
     if (Number.isNaN(parsed.getTime())) return 'N/A';
-    return parsed.toLocaleDateString(undefined, { month: 'short', day: '2-digit', year: 'numeric' });
+    return parsed.toLocaleDateString(locale ?? undefined, { month: 'short', day: '2-digit', year: 'numeric' });
 };
 
 const TenantPayment: React.FC = () => {
+    const { t, i18n } = useTranslation();
+    const locale = i18n.language === 'ar' ? 'ar-EG' : 'en-US';
     const [isMethodModalOpen, setIsMethodModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<TabType>('overview');
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
     const [showSuccessToast, setShowSuccessToast] = useState(false);
-    const [successMessage, setSuccessMessage] = useState('Payment completed successfully.');
+    const [successMessage, setSuccessMessage] = useState('');
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -400,9 +403,9 @@ const TenantPayment: React.FC = () => {
     }, [maintenanceRequests]);
 
     const getNextDueDateLabel = (): string => {
-        if (!nextUnpaidRent) return 'No active lease';
+        if (!nextUnpaidRent) return t('tenantPayment.noActiveLease');
         const nextCycle = nextUnpaidRent.cycle;
-        return `Due in ${nextCycle.daysUntilDue} day${nextCycle.daysUntilDue === 1 ? '' : 's'} (${formatShortDate(nextCycle.dueDate.toISOString())})`;
+        return t('tenantPayment.dueInDays', { count: nextCycle.daysUntilDue, date: formatShortDate(nextCycle.dueDate.toISOString(), locale) });
     };
 
     const upcomingPayments = useMemo(() => {
@@ -422,9 +425,9 @@ const TenantPayment: React.FC = () => {
         if (pendingPaymentContract) {
             rows.push({
                 contractId: pendingPaymentContract.id,
-                title: 'Initial Contract Payment',
+                title: t('tenantPayment.initialContractPayment'),
                 propertyTitle: pendingPaymentContract.property?.title ?? 'Property',
-                date: formatShortDate(new Date().toISOString()),
+                date: formatShortDate(new Date().toISOString(), locale),
                 amount: getTotalContractCharge(pendingPaymentContract),
                 status: 'Active',
                 dueAt: Date.now(),
@@ -456,14 +459,14 @@ const TenantPayment: React.FC = () => {
             const estimatedLateFee = overdueOutstanding * lateFeePerInstallment;
             const totalAmount = Math.max(outstandingInstallments, 1) * amount + estimatedLateFee;
             const isEnded = contract.status === 'EXPIRED';
-            const titleSuffix = isEnded ? ' (Lease Ended)' : '';
+            const titleSuffix = isEnded ? ` (${t('tenantPayment.leaseEnded')})` : '';
             rows.push({
                 contractId: contract.id,
                 title: (outstandingInstallments > 1
-                    ? `${outstandingInstallments} Unpaid Rent Installments`
-                    : `${cycle.dueDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })} Rent`) + titleSuffix,
+                    ? t('tenantPayment.unpaidInstallments', { count: outstandingInstallments })
+                    : `${cycle.dueDate.toLocaleDateString(locale, { month: 'long', year: 'numeric' })} ${t('tenantPayment.rent')}`) + titleSuffix,
                 propertyTitle: contract.property?.title ?? 'Property',
-                date: formatShortDate(cycle.dueDate.toISOString()),
+                date: formatShortDate(cycle.dueDate.toISOString(), locale),
                 amount: totalAmount,
                 status: isEnded ? 'Ended' : 'Scheduled',
                 dueAt: cycle.dueDate.getTime(),
@@ -479,11 +482,11 @@ const TenantPayment: React.FC = () => {
     const historyRows = [...paymentHistory]
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         .map((row) => ({
-            date: formatLongDate(row.createdAt),
+            date: formatLongDate(row.createdAt, locale),
             ref: row.description || row.reference,
             amount: Number(row.amount ?? 0),
             direction: row.direction,
-            status: row.status === 'SUCCESS' ? 'Success' : 'Failed',
+            status: row.status === 'SUCCESS' ? t('tenantPayment.success') : t('tenantPayment.failed'),
         }));
 
     const contractsByRentalRequestId = useMemo(() => {
@@ -531,7 +534,7 @@ const TenantPayment: React.FC = () => {
             };
         });
 
-    const successfulPaymentsLabel = `${historyRows.length} successful payment${historyRows.length === 1 ? '' : 's'}`;
+    const successfulPaymentsLabel = t('tenantPayment.successfulPayments', { count: historyRows.length });
     const hasSavedMethods = savedMethods.length > 0;
     const primaryMethod = savedMethods.find((m) => m.isDefault) ?? savedMethods[0] ?? null;
 
@@ -565,14 +568,14 @@ const TenantPayment: React.FC = () => {
                 result = await contractService.payContractFromBalance(targetContractId);
             }
             setWalletBalance(Number(result.remainingBalance ?? 0));
-            setSuccessMessage(`Payment of ${formatMoney(Number(result.debitedAmount ?? 0))} deducted from your wallet successfully.`);
+            setSuccessMessage(t('tenantPayment.paymentDeducted', { amount: formatMoney(Number(result.debitedAmount ?? 0), locale) }));
             setShowSuccessToast(true);
             setPaymentReviewData(null);
             await loadPaymentData();
             setActiveTab('history');
         } catch (error: unknown) {
             const ex = error as { response?: { data?: { message?: string } } };
-            const message = ex.response?.data?.message || 'Could not complete payment from balance.';
+            const message = ex.response?.data?.message || t('tenantPayment.couldNotCompletePayment');
             setPaymentActionError(message);
         } finally {
             setIsProcessingPayment(false);
@@ -600,44 +603,44 @@ const TenantPayment: React.FC = () => {
                     <div className="checkout-main-content">
                         <header className="checkout-page-header">
                             <button className="back-button-link" onClick={() => { setPaymentReviewData(null); setActiveTab(isMonthlyInstallment ? 'upcoming' : 'pending'); }}>
-                                <ArrowLeft size={16} /> Back to {isMonthlyInstallment ? 'Upcoming Payments' : 'Applications'}
+                                <ArrowLeft size={16} /> {t('tenantPayment.backTo')} {isMonthlyInstallment ? t('tenantPayment.upcomingPayments') : t('tenantPayment.applications')}
                             </button>
-                            <h2>Complete Your Payment</h2>
-                            <p>{isMonthlyInstallment ? 'Review your monthly rent installment details and confirm payment.' : 'Review the breakdown below and confirm your lease execution.'}</p>
+                            <h2>{t('tenantPayment.completeYourPayment')}</h2>
+                            <p>{isMonthlyInstallment ? t('tenantPayment.reviewMonthlyRent') : t('tenantPayment.reviewLeaseExecution')}</p>
                         </header>
 
                         <div className="checkout-sections-stack">
                             <section className="checkout-block">
                                 <div className="block-header">
                                     <div className="icon-circle"><FileSearch size={18} /></div>
-                                    <h3>Lease Details</h3>
+                                    <h3>{t('tenantPayment.leaseDetails')}</h3>
                                 </div>
                                 <div className="property-summary-box">
                                     <div className="prop-details">
-                                        <span className="prop-label">Contract For</span>
+                                        <span className="prop-label">{t('tenantPayment.contractFor')}</span>
                                         <span className="prop-name">{propertyTitle}</span>
                                     </div>
-                                    <div className="prop-status-badge">{isMonthlyInstallment ? 'Active Lease' : 'Approved'}</div>
+                                    <div className="prop-status-badge">{isMonthlyInstallment ? t('tenantPayment.activeLease') : t('tenantPayment.approved')}</div>
                                 </div>
                             </section>
 
                             <section className="checkout-block">
                                 <div className="block-header">
                                     <div className="icon-circle"><Wallet size={18} /></div>
-                                    <h3>Payment Source</h3>
+                                    <h3>{t('tenantPayment.paymentSource')}</h3>
                                 </div>
                                 <div className="wallet-summary-box">
                                     <div className="wallet-balance-info">
-                                        <span className="balance-label">HOMi Wallet Balance</span>
+                                        <span className="balance-label">{t('tenantPayment.homiWalletBalance')}</span>
                                         <span className="balance-value">{formatMoney(walletBalance)}</span>
                                     </div>
                                     <div className="wallet-status-indicator">
                                         {walletBalance < total ? (
                                             <button className="btn-topup-inline" onClick={() => { setPaymentReviewData(null); setActiveTab('topup'); }}>
-                                                Add Funds
+                                                {t('tenantPayment.addFunds')}
                                             </button>
                                         ) : (
-                                            <span className="ready-to-pay"><CheckCircle2 size={16} /> Sufficient Funds</span>
+                                            <span className="ready-to-pay"><CheckCircle2 size={16} /> {t('tenantPayment.sufficientFunds')}</span>
                                         )}
                                     </div>
                                 </div>
@@ -646,13 +649,13 @@ const TenantPayment: React.FC = () => {
                             <section className="checkout-block">
                                 <div className="block-header">
                                     <div className="icon-circle"><ShieldCheck size={18} /></div>
-                                    <h3>Execution Terms</h3>
+                                    <h3>{t('tenantPayment.executionTerms')}</h3>
                                 </div>
                                 <div className="execution-terms-box">
                                     <p>
                                         {isMonthlyInstallment
-                                            ? 'By clicking "Pay Rent", you authorize HOMi to settle the outstanding rent installment(s) from your wallet balance.'
-                                            : 'By clicking "Pay & Execute", you agree to the lease terms and authorize HOMi to transfer the security deposit to the landlord\'s escrow account.'}
+                                            ? t('tenantPayment.payRentTerms')
+                                            : t('tenantPayment.payExecuteTerms')}
                                     </p>
                                 </div>
                             </section>
@@ -661,24 +664,24 @@ const TenantPayment: React.FC = () => {
 
                     <aside className="checkout-order-summary">
                         <div className="summary-sticky-card">
-                            <h3 className="summary-title">Payment Summary</h3>
+                            <h3 className="summary-title">{t('tenantPayment.paymentSummary')}</h3>
 
                             <div className="summary-rows">
                                 {isMonthlyInstallment ? (
                                     <>
                                         <div className="summary-row-item">
-                                            <span>Rent ({payableCount} month{payableCount === 1 ? '' : 's'})</span>
+                                            <span>{t('tenantPayment.rentMonths', { count: payableCount })}</span>
                                             <span>{formatMoney(rent)}</span>
                                         </div>
                                         {lateFee > 0 && (
                                             <div className="summary-row-item text-danger" style={{ color: '#ef4444' }}>
-                                                <span>Late Fees</span>
+                                                <span>{t('tenantPayment.lateFees')}</span>
                                                 <span>{formatMoney(lateFee)}</span>
                                             </div>
                                         )}
                                         {credit > 0 && (
                                             <div className="summary-row-item text-success" style={{ color: '#10b981' }}>
-                                                <span>Maintenance Credit</span>
+                                                <span>{t('tenantPayment.maintenanceCredit')}</span>
                                                 <span>−{formatMoney(credit)}</span>
                                             </div>
                                         )}
@@ -686,15 +689,15 @@ const TenantPayment: React.FC = () => {
                                 ) : (
                                     <>
                                         <div className="summary-row-item">
-                                            <span>First Month Rent</span>
+                                            <span>{t('tenantPayment.firstMonthRent')}</span>
                                             <span>{formatMoney(rent)}</span>
                                         </div>
                                         <div className="summary-row-item">
-                                            <span>Security Deposit</span>
+                                            <span>{t('tenantPayment.securityDeposit')}</span>
                                             <span>{formatMoney(deposit)}</span>
                                         </div>
                                         <div className="summary-row-item">
-                                            <span>Platform Service Fee</span>
+                                            <span>{t('tenantPayment.platformServiceFee')}</span>
                                             <span>{formatMoney(serviceFee)}</span>
                                         </div>
                                     </>
@@ -704,8 +707,8 @@ const TenantPayment: React.FC = () => {
 
                                 <div className="summary-total-display">
                                     <div className="total-label-col">
-                                        <span className="total-label">Total Amount</span>
-                                        <span className="total-subtext">VAT Included</span>
+                                        <span className="total-label">{t('tenantPayment.totalAmount')}</span>
+                                        <span className="total-subtext">{t('tenantPayment.vatIncluded')}</span>
                                     </div>
                                     <span className="total-value-big">{formatMoney(total)}</span>
                                 </div>
@@ -719,16 +722,16 @@ const TenantPayment: React.FC = () => {
                                 {isProcessingPayment ? (
                                     <>
                                         <Loader2 size={18} className="animate-spin" />
-                                        Processing...
+                                        {t('tenantPayment.processing')}
                                     </>
                                 ) : (
-                                    isMonthlyInstallment ? 'Pay Rent' : 'Pay & Execute Contract'
+                                    isMonthlyInstallment ? t('tenantPayment.payRent') : t('tenantPayment.payExecuteContract')
                                 )}
                             </button>
 
                             {walletBalance < total && (
                                 <div className="insufficient-funds-alert">
-                                    <p>Your wallet balance is insufficient for this payment.</p>
+                                    <p>{t('tenantPayment.insufficientFunds')}</p>
                                 </div>
                             )}
 
@@ -738,7 +741,7 @@ const TenantPayment: React.FC = () => {
 
                             <div className="checkout-security-badge">
                                 <ShieldCheck size={14} />
-                                Secure Encrypted Payment
+                                {t('tenantPayment.secureEncryptedPayment')}
                             </div>
                         </div>
                     </aside>
@@ -788,24 +791,24 @@ const TenantPayment: React.FC = () => {
                     {hasCurrentBalance && <div className="card-glass-overlay"></div>}
                     <div className="card-content">
                         <div className="icon-wrap-blur"><Wallet size={20} /></div>
-                        <span>Wallet Balance</span>
+                        <span>{t('tenantPayment.walletBalance')}</span>
                         <div className="amount-row">
-                            <h2>{formatMoney(walletBalance)}</h2>
-                            {hasCurrentBalance && <span className="mini-badge">Available</span>}
+                            <h2>{formatMoney(walletBalance, locale)}</h2>
+                            {hasCurrentBalance && <span className="mini-badge">{t('tenantPayment.available')}</span>}
                         </div>
                         <p className={`card-footer-text ${hasCurrentBalance ? '' : 'opacity-70'}`}>
-                            {hasCurrentBalance ? 'Available for pending payments' : 'Top up to pay pending contracts'}
+                            {hasCurrentBalance ? t('tenantPayment.availableForPayments') : t('tenantPayment.topUpToPay')}
                         </p>
                     </div>
                 </div>
 
                 <div className="stat-card-white">
                     <div className="card-header-row">
-                        <span>Next Rent</span>
+                        <span>{t('tenantPayment.nextRent')}</span>
                         <TrendingUp size={16} className={hasNextRent ? 'text-success' : 'text-muted'} />
                     </div>
                     <div className="flex-baseline">
-                        <h3 className={hasNextRent ? '' : 'text-muted'}>{formatMoney(hasNextRent ? nextRentAmount : 0)}</h3>
+                        <h3 className={hasNextRent ? '' : 'text-muted'}>{formatMoney(hasNextRent ? nextRentAmount : 0, locale)}</h3>
                         <span className="sub-label">/mo</span>
                     </div>
                     <div className="due-indicator">
@@ -818,11 +821,11 @@ const TenantPayment: React.FC = () => {
 
                 <div className="stat-card-white">
                     <div className="card-header-row">
-                        <span>Annual Spend</span>
+                        <span>{t('tenantPayment.annualSpend')}</span>
                         <Receipt size={16} className="text-slate" />
                     </div>
-                    <h3 className={hasAnnualSpend ? '' : 'text-muted'}>{formatMoney(hasAnnualSpend ? annualSpendAmount : 0)}</h3>
-                    <p className="sub-label-sm">{hasAnnualSpend ? successfulPaymentsLabel : 'No payments made yet'}</p>
+                    <h3 className={hasAnnualSpend ? '' : 'text-muted'}>{formatMoney(hasAnnualSpend ? annualSpendAmount : 0, locale)}</h3>
+                    <p className="sub-label-sm">{hasAnnualSpend ? successfulPaymentsLabel : t('tenantPayment.noPayments')}</p>
                 </div>
             </div>
 
@@ -832,12 +835,12 @@ const TenantPayment: React.FC = () => {
                         <ShieldCheck size={24} />
                     </div>
                     <div className="banner-copy">
-                        <h4>Pending contract payments are wallet-only</h4>
-                        <p>Top up your balance with Paymob, then pay instantly from your wallet without external redirect during payment.</p>
+                        <h4>{t('tenantPayment.pendingWalletOnly')}</h4>
+                        <p>{t('tenantPayment.topUpWithPaymob')}</p>
                     </div>
                 </div>
                 <button className="btn-vercel-black" onClick={() => setActiveTab('topup')}>
-                    Top Up Wallet <ArrowUpRight size={16} />
+                    {t('tenantPayment.topUpWallet')} <ArrowUpRight size={16} />
                 </button>
             </div>
         </div>
@@ -858,20 +861,20 @@ const TenantPayment: React.FC = () => {
                                     <h5>{item.title}</h5>
                                     <p>
                                         {item.propertyTitle} - {item.status === 'Active'
-                                            ? 'Awaiting wallet payment'
+                                            ? t('tenantPayment.awaitingWalletPayment')
                                             : item.canPay
                                                 ? item.outstandingInstallments > 1
-                                                    ? `${item.outstandingInstallments} months unpaid (arrears)`
-                                                    : 'Scheduled monthly rent'
-                                                : 'Current cycle already paid'}
-                                        {item.estimatedLateFee > 0 ? ` • Late fee est. ${formatMoney(item.estimatedLateFee)}` : ''}
+                                                    ? t('tenantPayment.monthsUnpaid', { count: item.outstandingInstallments })
+                                                    : t('tenantPayment.scheduledMonthlyRent')
+                                                : t('tenantPayment.currentCyclePaid')}
+                                        {item.estimatedLateFee > 0 ? ` • ${t('tenantPayment.lateFeeEst', { amount: formatMoney(item.estimatedLateFee, locale) })}` : ''}
                                     </p>
                                 </div>
                             </div>
                             <div className="row-actions">
                                 <span className="row-amount">{formatMoney(item.amount)}</span>
                                 <span className={`pill ${item.status === 'Ended' ? 'ended' : item.canPay ? 'scheduled' : 'success'}`}>
-                                    {item.status === 'Ended' ? 'Ended (Late)' : item.canPay ? 'Scheduled' : 'Paid'}
+                                    {item.status === 'Ended' ? t('tenantPayment.endedLate') : item.canPay ? t('tenantPayment.scheduled') : t('tenantPayment.paid')}
                                 </span>
                                 {item.canPay && item.status !== 'Active' && (
                                     <button
@@ -879,7 +882,7 @@ const TenantPayment: React.FC = () => {
                                         className="btn-pay-now"
                                         onClick={() => setInstallmentsTarget({ contractId: item.contractId, title: item.propertyTitle })}
                                     >
-                                        Pay Now
+                                        {t('tenantPayment.payNow')}
                                     </button>
                                 )}
                             </div>
@@ -889,8 +892,8 @@ const TenantPayment: React.FC = () => {
             ) : (
                 <div className="empty-state">
                     <div className="empty-icon"><CalendarX size={32} /></div>
-                    <h4>No Upcoming Payments</h4>
-                    <p>You don't have any upcoming rent or utility payments scheduled. Once your lease begins, they will appear here.</p>
+                    <h4>{t('tenantPayment.noUpcomingPayments')}</h4>
+                    <p>{t('tenantPayment.noUpcomingDesc')}</p>
                 </div>
             )}
         </div>
@@ -903,10 +906,10 @@ const TenantPayment: React.FC = () => {
                     <table className="modern-table">
                         <thead>
                             <tr>
-                                <th>Date</th>
-                                <th>Reference</th>
-                                <th>Amount</th>
-                                <th>Status</th>
+                                <th>{t('tenantPayment.date')}</th>
+                                <th>{t('tenantPayment.reference')}</th>
+                                <th>{t('tenantPayment.amount')}</th>
+                                <th>{t('tenantPayment.status')}</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -915,7 +918,7 @@ const TenantPayment: React.FC = () => {
                                 <tr key={`${row.ref}-${row.date}`}>
                                     <td>{row.date}</td>
                                     <td className="font-medium">{row.ref}</td>
-                                    <td>{row.direction === 'CREDIT' ? '+' : '-'} {formatMoney(row.amount)}</td>
+                                    <td>{row.direction === 'CREDIT' ? '+' : '-'} {formatMoney(row.amount, locale)}</td>
                                     <td><span className="pill success">{row.status}</span></td>
                                     <td className="text-right">
                                         <button className="icon-btn"><Download size={16} /></button>
@@ -928,8 +931,8 @@ const TenantPayment: React.FC = () => {
             ) : (
                 <div className="empty-state">
                     <div className="empty-icon"><History size={32} /></div>
-                    <h4>No Payment History</h4>
-                    <p>You haven't made any payments on the platform yet. Past invoices and receipts will be stored securely here.</p>
+                    <h4>{t('tenantPayment.noPaymentHistory')}</h4>
+                    <p>{t('tenantPayment.noPaymentHistoryDesc')}</p>
                 </div>
             )}
         </div>
@@ -955,26 +958,26 @@ const TenantPayment: React.FC = () => {
                                 </div>
                                 <div className="app-card-footer">
                                     <div className="price-group payment-breakdown">
-                                        <span className="payment-breakdown-title">Payment Details</span>
+                                        <span className="payment-breakdown-title">{t('tenantPayment.paymentDetails')}</span>
                                         <div className="payment-breakdown-row">
-                                            <span>Rent</span>
-                                            <span>{formatMoney(req.rent)}</span>
+                                            <span>{t('tenantPayment.rent')}</span>
+                                            <span>{formatMoney(req.rent, locale)}</span>
                                         </div>
                                         <div className="payment-breakdown-row">
-                                            <span>Security Deposit</span>
-                                            <span>{formatMoney(req.deposit)}</span>
+                                            <span>{t('tenantPayment.securityDeposit')}</span>
+                                            <span>{formatMoney(req.deposit, locale)}</span>
                                         </div>
                                         <div className="payment-breakdown-row">
-                                            <span>Service Fee</span>
-                                            <span>{formatMoney(req.serviceFee)}</span>
+                                            <span>{t('tenantPayment.serviceFee')}</span>
+                                            <span>{formatMoney(req.serviceFee, locale)}</span>
                                         </div>
                                         <div className="payment-breakdown-total">
-                                            <span>Total Due</span>
-                                            <span>{formatMoney(req.totalDue)}</span>
+                                            <span>{t('tenantPayment.totalDue')}</span>
+                                            <span>{formatMoney(req.totalDue, locale)}</span>
                                         </div>
                                         {req.paymentStatus === 'PAID' && (
                                             <span className="payment-receipt-tag">
-                                                Receipt Issued {req.paymentVerifiedAt ? `• ${formatLongDate(req.paymentVerifiedAt)}` : ''}
+                                                Receipt Issued {req.paymentVerifiedAt ? `• ${formatLongDate(req.paymentVerifiedAt, locale)}` : ''}
                                             </span>
                                         )}
                                     </div>
@@ -1023,8 +1026,8 @@ const TenantPayment: React.FC = () => {
             ) : (
                 <div className="empty-state">
                     <div className="empty-icon"><SearchX size={32} /></div>
-                    <h4>No Active Applications</h4>
-                    <p>You haven't submitted any rental offers. Pending offers and approved lease payments will appear here.</p>
+                    <h4>{t('tenantPayment.noActiveApplications')}</h4>
+                    <p>{t('tenantPayment.noActiveApplicationsDesc')}</p>
                 </div>
             )}
         </div>
@@ -1036,8 +1039,8 @@ const TenantPayment: React.FC = () => {
                 <div className="tab-viewport animate-fade-up">
                     <div className="empty-state">
                         <div className="empty-icon"><Lock size={32} /></div>
-                        <h4>No Security Deposits</h4>
-                        <p>Security deposits from your lease agreements will appear here, showing their current escrow status.</p>
+                        <h4>{t('tenantPayment.noSecurityDeposits')}</h4>
+                        <p>{t('tenantPayment.noSecurityDepositsDesc')}</p>
                     </div>
                 </div>
             );
@@ -1050,7 +1053,7 @@ const TenantPayment: React.FC = () => {
                         <Search size={18} />
                         <input
                             type="text"
-                            placeholder="Search property..."
+                            placeholder={t('tenantPayment.searchProperty')}
                             value={depositSearchTerm}
                             onChange={(e) => setDepositSearchTerm(e.target.value)}
                         />
@@ -1061,10 +1064,10 @@ const TenantPayment: React.FC = () => {
                     <table className="modern-table">
                         <thead>
                             <tr>
-                                <th>Property</th>
-                                <th>Deposit Amount</th>
-                                <th>Lease Start Date</th>
-                                <th>Escrow Status</th>
+                                <th>{t('tenantPayment.property')}</th>
+                                <th>{t('tenantPayment.depositAmount')}</th>
+                                <th>{t('tenantPayment.leaseStartDate')}</th>
+                                <th>{t('tenantPayment.escrowStatus')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1074,19 +1077,19 @@ const TenantPayment: React.FC = () => {
                                 let statusText = 'Awaiting Payment';
                                 if (item.status === 'HELD') {
                                     badgeStyle = { background: '#eff6ff', color: '#1d4ed8', borderRadius: '6px', padding: '3px 10px', fontSize: '12px', fontWeight: 700 };
-                                    statusText = 'Held in Escrow';
+                                    statusText = t('tenantPayment.heldInEscrow');
                                 } else if (item.status === 'REFUNDED') {
                                     badgeStyle = { background: '#e6fcf5', color: '#0ca678', borderRadius: '6px', padding: '3px 10px', fontSize: '12px', fontWeight: 700 };
-                                    statusText = 'Returned to You';
+                                    statusText = t('tenantPayment.returnedToYou');
                                 } else if (item.status === 'FORFEITED') {
                                     badgeStyle = { background: '#fef2f2', color: '#dc2626', borderRadius: '6px', padding: '3px 10px', fontSize: '12px', fontWeight: 700 };
-                                    statusText = 'Forfeited to Landlord';
+                                    statusText = t('tenantPayment.forfeitedToLandlord');
                                 } else if (item.status === 'SPLIT') {
                                     badgeStyle = { background: '#fef3c7', color: '#d97706', borderRadius: '6px', padding: '3px 10px', fontSize: '12px', fontWeight: 700 };
-                                    statusText = 'Split (Partial Refund)';
+                                    statusText = t('tenantPayment.splitPartialRefund');
                                 } else {
                                     badgeStyle = { background: '#fffbeb', color: '#92400e', borderRadius: '6px', padding: '3px 10px', fontSize: '12px', fontWeight: 700 };
-                                    statusText = 'Awaiting Payment';
+                                    statusText = t('tenantPayment.awaitingPayment');
                                 }
 
                                 return (
@@ -1097,8 +1100,8 @@ const TenantPayment: React.FC = () => {
                                                 <span>{item.propertyTitle}</span>
                                             </div>
                                         </td>
-                                        <td className="font-medium">{formatMoney(item.amount)}</td>
-                                        <td>{formatLongDate(item.date)}</td>
+                                        <td className="font-medium">{formatMoney(item.amount, locale)}</td>
+                                        <td>{formatLongDate(item.date, locale)}</td>
                                         <td><span className={badgeClass} style={badgeStyle}>{statusText}</span></td>
                                     </tr>
                                 );
@@ -1116,8 +1119,8 @@ const TenantPayment: React.FC = () => {
                 <div className="tab-viewport animate-fade-up">
                     <div className="empty-state">
                         <div className="empty-icon"><Wrench size={32} /></div>
-                        <h4>No Maintenance Payments</h4>
-                        <p>When you submit maintenance requests or pay for completed jobs, those records will appear here.</p>
+                        <h4>{t('tenantPayment.noMaintenancePayments')}</h4>
+                        <p>{t('tenantPayment.noMaintenancePaymentsDesc')}</p>
                     </div>
                 </div>
             );
@@ -1140,12 +1143,12 @@ const TenantPayment: React.FC = () => {
                     <table className="modern-table">
                         <thead>
                             <tr>
-                                <th>Job Title / Category</th>
-                                <th>Property</th>
-                                <th>Provider</th>
-                                <th>Amount</th>
-                                <th>Date</th>
-                                <th>Payment Status</th>
+                                <th>{t('tenantPayment.jobTitleCategory')}</th>
+                                <th>{t('tenantPayment.property')}</th>
+                                <th>{t('tenantPayment.provider')}</th>
+                                <th>{t('tenantPayment.amount')}</th>
+                                <th>{t('tenantPayment.date')}</th>
+                                <th>{t('tenantPayment.paymentStatus')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1190,8 +1193,8 @@ const TenantPayment: React.FC = () => {
                                                     <span>{item.providerName}</span>
                                                 </div>
                                             </td>
-                                            <td className="font-medium">{formatMoney(item.amount)}</td>
-                                            <td>{formatLongDate(item.date)}</td>
+                                            <td className="font-medium">{formatMoney(item.amount, locale)}</td>
+                                            <td>{formatLongDate(item.date, locale)}</td>
                                             <td>
                                                 <span className="pill" style={badgeStyle}>
                                                     {item.statusBadge}
@@ -1245,12 +1248,12 @@ const TenantPayment: React.FC = () => {
                         </div>
                     ) : (
                         <div className="empty-method-text" style={{ marginBottom: '20px', color: '#64748b' }}>
-                            <p>You haven't linked a payment method yet. Add a credit card or bank account to quickly manage future payment options.</p>
+                            <p>{t('tenantPayment.noPaymentMethodLinked')}</p>
                         </div>
                     )}
 
                     <button className="btn-add-method" onClick={() => setIsMethodModalOpen(true)}>
-                        <Plus size={18} /> Add New Payment Method
+                        <Plus size={18} /> {t('tenantPayment.addNewPaymentMethod')}
                     </button>
                 </div>
             </div>
@@ -1262,30 +1265,30 @@ const TenantPayment: React.FC = () => {
             <div className="wallet-topup-card">
                 <div className="wallet-topup-header">
                     <div>
-                        <h3>Wallet Balance</h3>
-                        <p>Top up with Paymob, then complete pending payments directly from wallet balance.</p>
+                        <h3>{t('tenantPayment.walletBalanceTitle')}</h3>
+                        <p>{t('tenantPayment.topUpDesc')}</p>
                     </div>
                     <div className="wallet-balance-pill">{formatMoney(walletBalance)}</div>
                 </div>
 
                 <div className="wallet-topup-actions">
                     <button className="btn-pay-now" onClick={() => setIsTopupModalOpen(true)}>
-                        <Plus size={16} /> Add Funds
+                        <Plus size={16} /> {t('tenantPayment.addFunds')}
                     </button>
                 </div>
 
                 {pendingPaymentContract && (
                     <div className="wallet-payment-hint">
-                        <span>Pending payment due: {formatMoney(pendingTotalDue)}</span>
+                        <span>{t('tenantPayment.pendingPaymentDue', { amount: formatMoney(pendingTotalDue, locale) })}</span>
                         <span className={canAffordPendingPayment ? 'text-success' : 'text-muted'}>
-                            {canAffordPendingPayment ? 'You can pay now from balance.' : 'Top up is needed before payment.'}
+                            {canAffordPendingPayment ? t('tenantPayment.canPayNow') : t('tenantPayment.topUpNeeded')}
                         </span>
                     </div>
                 )}
 
                 {(topupError || isTopupVerifying) && (
                     <div className="wallet-topup-message">
-                        {isTopupVerifying ? 'Verifying top-up transaction...' : topupError}
+                        {isTopupVerifying ? t('tenantPayment.verifyingTopup') : topupError}
                     </div>
                 )}
             </div>
@@ -1297,8 +1300,8 @@ const TenantPayment: React.FC = () => {
             return (
                 <div className="empty-state">
                     <div className="empty-icon"><Loader2 size={32} className="animate-spin" /></div>
-                    <h4>Loading payment data</h4>
-                    <p>Please wait while we fetch your latest payment records.</p>
+                    <h4>{t('tenantPayment.loadingPaymentData')}</h4>
+                    <p>{t('tenantPayment.loadingPaymentDataDesc')}</p>
                 </div>
             );
         }
@@ -1307,7 +1310,7 @@ const TenantPayment: React.FC = () => {
             return (
                 <div className="empty-state">
                     <div className="empty-icon"><X size={32} /></div>
-                    <h4>Could not load payments</h4>
+                    <h4>{t('tenantPayment.couldNotLoadPayments')}</h4>
                     <p>{dataError}</p>
                 </div>
             );
@@ -1336,21 +1339,21 @@ const TenantPayment: React.FC = () => {
                 <main className="payment-hub">
                     <header className="hub-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div className="header-text">
-                            <h1>Billing & Payments</h1>
+                            <h1>{t('tenantPayment.billingPayments')}</h1>
                         </div>
                     </header>
 
                     <div className="tabs-wrapper">
                         <nav className="modern-tabs">
                             {[
-                                { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={16} /> },
-                                { id: 'upcoming', label: 'Upcoming', icon: <CalendarClock size={16} /> },
-                                { id: 'history', label: 'History', icon: <History size={16} /> },
-                                { id: 'maintenance', label: 'Maintenance', icon: <Wrench size={16} /> },
-                                { id: 'deposits', label: 'Deposits', icon: <Lock size={16} /> },
-                                { id: 'topup', label: 'Top Up', icon: <Wallet size={16} /> },
-                                { id: 'methods', label: 'Methods', icon: <CreditCard size={16} /> },
-                                { id: 'pending', label: 'Requests', icon: <FileSearch size={16} /> },
+                                { id: 'overview', label: t('tenantPayment.overview'), icon: <LayoutDashboard size={16} /> },
+                                { id: 'upcoming', label: t('tenantPayment.upcoming'), icon: <CalendarClock size={16} /> },
+                                { id: 'history', label: t('tenantPayment.history'), icon: <History size={16} /> },
+                                { id: 'maintenance', label: t('tenantPayment.maintenance'), icon: <Wrench size={16} /> },
+                                { id: 'deposits', label: t('tenantPayment.deposits'), icon: <Lock size={16} /> },
+                                { id: 'topup', label: t('tenantPayment.topUp'), icon: <Wallet size={16} /> },
+                                { id: 'methods', label: t('tenantPayment.methods'), icon: <CreditCard size={16} /> },
+                                { id: 'pending', label: t('tenantPayment.requests'), icon: <FileSearch size={16} /> },
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
@@ -1375,7 +1378,7 @@ const TenantPayment: React.FC = () => {
                     <div className="toast-card">
                         <div className="toast-icon"><CheckCircle2 size={24} /></div>
                         <div className="toast-body">
-                            <h6>Success</h6>
+                            <h6>{t('tenantPayment.success')}</h6>
                             <p>{successMessage}</p>
                         </div>
                         <button className="toast-close" onClick={() => setShowSuccessToast(false)}>
@@ -1389,13 +1392,13 @@ const TenantPayment: React.FC = () => {
                 <div className="wallet-topup-modal-overlay">
                     <div className="wallet-topup-modal">
                         <div className="wallet-topup-modal-header">
-                            <h3>Add Funds to Wallet</h3>
+                            <h3>{t('tenantPayment.addFundsToWallet')}</h3>
                             <button className="icon-btn" onClick={() => setIsTopupModalOpen(false)}>
                                 <X size={18} />
                             </button>
                         </div>
-                        <p className="wallet-topup-modal-copy">Enter the amount you want to add. You will be redirected to Paymob to complete payment securely.</p>
-                        <label htmlFor="topup-method">Payment Method</label>
+                        <p className="wallet-topup-modal-copy">{t('tenantPayment.topupModalDesc')}</p>
+                        <label htmlFor="topup-method">{t('tenantPayment.paymentMethod')}</label>
                         <select
                             id="topup-method"
                             value={topupMethod}
@@ -1405,8 +1408,8 @@ const TenantPayment: React.FC = () => {
                                 if (selected !== 'CARD') setTopupSaveCard(false);
                             }}
                         >
-                            <option value="CARD">Card</option>
-                            <option value="WALLET">Mobile Wallet</option>
+                            <option value="CARD">{t('tenantPayment.card')}</option>
+                            <option value="WALLET">{t('tenantPayment.mobileWallet')}</option>
                         </select>
                         {topupMethod === 'CARD' && (
                             <label htmlFor="topup-save-card" className="topup-save-card-row">
@@ -1416,10 +1419,10 @@ const TenantPayment: React.FC = () => {
                                     checked={topupSaveCard}
                                     onChange={(e) => setTopupSaveCard(e.target.checked)}
                                 />{' '}
-                                Save this card for future use
+                                {t('tenantPayment.saveCardFuture')}
                             </label>
                         )}
-                        <label htmlFor="topup-amount">Amount (EGP)</label>
+                        <label htmlFor="topup-amount">{t('tenantPayment.amountEGP')}</label>
                         <input
                             id="topup-amount"
                             type="number"
@@ -1434,10 +1437,10 @@ const TenantPayment: React.FC = () => {
 
                         <div className="wallet-topup-modal-actions">
                             <button className="btn-manage-ghost" onClick={() => setIsTopupModalOpen(false)}>
-                                Cancel
+                                {t('common.cancel')}
                             </button>
                             <button className="btn-pay-now" onClick={handleStartTopup} disabled={isTopupStarting}>
-                                {isTopupStarting ? 'Starting...' : 'Continue to Paymob'}
+                                {isTopupStarting ? t('tenantPayment.starting') : t('tenantPayment.continueToPaymob')}
                             </button>
                         </div>
                     </div>

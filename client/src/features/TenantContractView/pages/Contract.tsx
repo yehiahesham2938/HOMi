@@ -61,6 +61,7 @@ export interface LeaseContract {
 }
 
 import { useTranslation } from 'react-i18next';
+import i18n from '../../../i18n/i18n';
 
 const Contract: React.FC = () => {
     const { t } = useTranslation();
@@ -68,9 +69,10 @@ const Contract: React.FC = () => {
     const [selectedContract, setSelectedContract] = useState<LeaseContract | null>(null);
     const [contracts, setContracts] = useState<LeaseContract[]>([]);
 
+    const locale = i18n.language === 'ar' ? 'ar-EG' : 'en-US';
     const formatDate = (dateStr?: string) => {
         if (!dateStr) return '—';
-        return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+        return new Date(dateStr).toLocaleDateString(locale, { month: 'short', day: '2-digit', year: 'numeric' });
     };
 
     const mapStatus = (status: ContractApi['status']): ContractStatus => {
@@ -84,16 +86,16 @@ const Contract: React.FC = () => {
     const mapContract = (contract: ContractApi): LeaseContract => ({
         id: contract.contractId,
         internalId: contract.id,
-        property: contract.property?.title || 'Property',
-        tenant: `${contract.tenant?.firstName || ''} ${contract.tenant?.lastName || ''}`.trim() || 'Tenant',
-        landlord: `${contract.landlord?.firstName || ''} ${contract.landlord?.lastName || ''}`.trim() || 'Landlord',
+        property: contract.property?.title || t('tenantHomeComponents.activeRental', 'Property'),
+        tenant: `${contract.tenant?.firstName || ''} ${contract.tenant?.lastName || ''}`.trim() || t('activeLease.tenant', 'Tenant'),
+        landlord: `${contract.landlord?.firstName || ''} ${contract.landlord?.lastName || ''}`.trim() || t('activeLease.landlord', 'Landlord'),
         landlordEmail: contract.landlord?.email || '',
         tenantEmail: contract.tenant?.email || '',
         amount: contract.rentAmount || 0,
         deposit: contract.securityDeposit || 0,
         status: mapStatus(contract.status),
         startDate: formatDate(contract.moveInDate),
-        duration: `${contract.leaseDurationMonths} Months`,
+        duration: t('tenantContract.monthsCount', { count: contract.leaseDurationMonths, defaultValue: `${contract.leaseDurationMonths} Months` }),
         createdAt: contract.createdAt,
         leaseId: contract.leaseId || '—',
         rentDueDate: contract.rentDueDate || '1ST_OF_MONTH',
@@ -109,11 +111,11 @@ const Contract: React.FC = () => {
         landlordSignature: normalizeSignatureUrl(contract.landlordSignatureUrl ?? contract.landlord?.signatureUrl),
         tenantSignature: normalizeSignatureUrl(contract.tenantSignatureUrl ?? contract.tenant?.signatureUrl),
         landlordNationalId: contract.landlordNationalId || '',
-        landlordAddress: 'Verified Legal Address on File',
+        landlordAddress: t('tenantContract.verifiedAddressOnFile', 'Verified Legal Address on File'),
         tenantAddress: contract.property?.address || '—',
-        permittedUse: 'Residential Only',
-        rightToEnter: 'With 24h Prior Notice',
-        noticePeriod: '30 Days',
+        permittedUse: t('tenantContract.permittedUseResidential', 'Residential Only'),
+        rightToEnter: t('tenantContract.rightToEnter24h', 'With 24h Prior Notice'),
+        noticePeriod: t('tenantContract.noticePeriod30', '30 Days'),
         terminationRequests: contract.terminationRequests || [],
     });
 
@@ -163,7 +165,7 @@ const Contract: React.FC = () => {
             PENDING_PAYMENT: { label: t('tenantContract.pendingPayment'), color: 'yellow' },
             ACTIVE: { label: t('tenantContract.activeLease'), color: 'green' },
             EXPIRED: { label: t('tenantContract.leaseEnded'), color: 'gray' },
-            TERMINATED: { label: 'Terminated', color: 'red' },
+            TERMINATED: { label: t('tenantContract.terminatedLease', 'Terminated'), color: 'red' },
         };
         return map[status];
     };
@@ -203,11 +205,11 @@ const Contract: React.FC = () => {
                                             <div className="tenant-footer-amounts">
                                                 <div className="price-info">
                                                     <span className="label">{t('tenantContract.monthlyRent')}</span>
-                                                    <span className="value">${contract.amount}</span>
+                                                    <span className="value">${contract.amount.toLocaleString(locale)}</span>
                                                 </div>
                                                 <div className="price-info">
-                                                    <span className="label">Security Deposit</span>
-                                                    <span className="value deposit-value">${contract.deposit}</span>
+                                                    <span className="label">{t('tenantContract.securityDeposit', 'Security Deposit')}</span>
+                                                    <span className="value deposit-value">${contract.deposit.toLocaleString(locale)}</span>
                                                 </div>
                                             </div>
                                             <button
@@ -225,7 +227,7 @@ const Contract: React.FC = () => {
                                                     : contract.status === 'EXPIRED'
                                                         ? t('tenantContract.settleDues')
                                                         : contract.status === 'TERMINATED'
-                                                            ? 'View Details'
+                                                            ? t('tenantContract.viewDetails', 'View Details')
                                                             : t('tenantContract.viewDetails')}
                                                 <ChevronRight size={16} />
                                             </button>

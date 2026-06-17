@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaBell, FaCheckDouble, FaCreditCard, FaTools, FaGift, FaChevronRight } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import notificationService, { type NotificationItem } from '../../../../services/notification.service';
 import './Notifications.css';
 
@@ -13,21 +14,21 @@ interface Alert {
   unread: boolean;
 }
 
-const getRelativeTime = (iso: string): string => {
+const getRelativeTime = (iso: string, t: any): string => {
   const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return 'Recently';
+  if (Number.isNaN(date.getTime())) return t('notifications.recently', 'Recently');
 
   const diffMs = Date.now() - date.getTime();
   const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 1) return 'Now';
-  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffMins < 1) return t('notifications.now', 'Now');
+  if (diffMins < 60) return t('notifications.mAgo', { count: diffMins, defaultValue: '{{count}}m ago' });
   const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffHours < 24) return t('notifications.hAgo', { count: diffHours, defaultValue: '{{count}}h ago' });
   const diffDays = Math.floor(diffHours / 24);
-  return `${diffDays}d ago`;
+  return t('notifications.dAgo', { count: diffDays, defaultValue: '{{count}}d ago' });
 };
 
-const mapNotificationToAlert = (item: NotificationItem): Alert => {
+const mapNotificationToAlert = (item: NotificationItem, t: any): Alert => {
   const normalizedType = String(item.type ?? '').toUpperCase();
   const related = String(item.relatedEntityType ?? '').toUpperCase();
   const title = String(item.title ?? '');
@@ -45,12 +46,13 @@ const mapNotificationToAlert = (item: NotificationItem): Alert => {
     type,
     title: item.title,
     desc: item.body,
-    time: getRelativeTime(item.createdAt),
+    time: getRelativeTime(item.createdAt, t),
     unread: !item.isRead,
   };
 };
 
 const Notifications: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [alerts, setAlerts] = useState<Alert[]>([]);
 
@@ -60,7 +62,7 @@ const Notifications: React.FC = () => {
       try {
         const result = await notificationService.list({ limit: 8 });
         if (cancelled) return;
-        const mapped = result.notifications.map(mapNotificationToAlert);
+        const mapped = result.notifications.map((item) => mapNotificationToAlert(item, t));
         setAlerts(mapped);
       } catch {
         if (!cancelled) setAlerts([]);
@@ -68,19 +70,19 @@ const Notifications: React.FC = () => {
     };
     void load();
     return () => { cancelled = true; };
-  }, []);
+  }, [t]);
 
   const visibleAlerts = useMemo<Alert[]>(() => {
     if (alerts.length > 0) return alerts;
     return [{
       id: 'empty-state',
       type: 'system',
-      title: 'No Recent Activity',
-      desc: 'Your latest notifications (payments, properties, requests, maintenance) will appear here.',
-      time: 'Now',
+      title: t('notifications.noRecentActivity', 'No Recent Activity'),
+      desc: t('notifications.emptyDesc', 'Your latest notifications (payments, properties, requests, maintenance) will appear here.'),
+      time: t('notifications.now', 'Now'),
       unread: false,
     }];
-  }, [alerts]);
+  }, [alerts, t]);
 
   const getIcon = (type: Alert['type']) => {
     if (type === 'payment') return <FaCreditCard />;
@@ -106,10 +108,10 @@ const Notifications: React.FC = () => {
             <FaBell />
             {visibleAlerts.some((alert) => alert.unread) && <span className="active-dot"></span>}
           </div>
-          <h3>Activity Feed</h3>
+          <h3>{t('tenantHomeComponents.activityFeed', 'Activity Feed')}</h3>
         </div>
         <button className="btn-mark-all" aria-label="Activity synced" disabled>
-          <FaCheckDouble /> <span>Synced</span>
+          <FaCheckDouble /> <span>{t('tenantHomeComponents.synced', 'Synced')}</span>
         </button>
       </header>
 

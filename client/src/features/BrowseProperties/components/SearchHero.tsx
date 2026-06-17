@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FaSearch, FaHome, FaDollarSign, FaSlidersH, FaCalendarAlt, FaUserFriends, FaCouch, FaMapMarkedAlt, FaCrosshairs } from 'react-icons/fa';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap, Circle } from 'react-leaflet';
 import L from 'leaflet';
@@ -25,6 +26,8 @@ const EGYPT_BOUNDS = L.latLngBounds(
 
 const SearchField = ({ onLocationSelect }: { onLocationSelect: (lat: number, lng: number) => void }) => {
     const map = useMap();
+    const { t } = useTranslation();
+
     useEffect(() => {
         // @ts-expect-error — leaflet-control-geocoder augments L.Control at runtime
         const geocoder = L.Control.Geocoder.nominatim();
@@ -32,7 +35,7 @@ const SearchField = ({ onLocationSelect }: { onLocationSelect: (lat: number, lng
         const control = L.Control.geocoder({
             geocoder,
             defaultMarkGeocode: false,
-            placeholder: "Search in Egypt...",
+            placeholder: t('browseProperties.searchInEgypt'),
         })
             .on('markgeocode', (e: { geocode: { center: L.LatLng } }) => {
                 const { center } = e.geocode;
@@ -40,12 +43,12 @@ const SearchField = ({ onLocationSelect }: { onLocationSelect: (lat: number, lng
                     map.setView(center, 12);
                     onLocationSelect(center.lat, center.lng);
                 } else {
-                    alert("Please select a location within Egypt.");
+                    alert(t('browseProperties.locationWithinEgypt'));
                 }
             })
             .addTo(map);
         return () => { map.removeControl(control); };
-    }, [map, onLocationSelect]);
+    }, [map, onLocationSelect, t]);
     return null;
 };
 
@@ -109,6 +112,7 @@ interface SearchHeroProps {
 }
 
 const SearchHero: React.FC<SearchHeroProps> = ({ onSearch }) => {
+    const { t } = useTranslation();
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [isMobileExpanded, setIsMobileExpanded] = useState(false);
     const [filters, setFilters] = useState<FilterParams>({
@@ -163,7 +167,7 @@ const SearchHero: React.FC<SearchHeroProps> = ({ onSearch }) => {
         setLocationError(null);
 
         if (!navigator.geolocation) {
-            setLocationError('Geolocation is not supported by your browser.');
+            setLocationError(t('browseProperties.locationDenied'));
             return;
         }
 
@@ -175,7 +179,7 @@ const SearchHero: React.FC<SearchHeroProps> = ({ onSearch }) => {
 
                 if (!EGYPT_BOUNDS.contains(candidate)) {
                     setIsLocating(false);
-                    setLocationError('Current location appears to be outside Egypt. Please pin manually.');
+                    setLocationError(t('browseProperties.locationWithinEgypt'));
                     return;
                 }
 
@@ -186,11 +190,11 @@ const SearchHero: React.FC<SearchHeroProps> = ({ onSearch }) => {
             (error) => {
                 setIsLocating(false);
                 if (error.code === error.PERMISSION_DENIED) {
-                    setLocationError('Location permission was denied. Please allow it and try again.');
+                    setLocationError(t('browseProperties.locationDenied'));
                     return;
                 }
 
-                setLocationError('Could not get your current location. Please try again.');
+                setLocationError(t('browseProperties.locationError'));
             },
             {
                 enableHighAccuracy: true,
@@ -203,7 +207,7 @@ const SearchHero: React.FC<SearchHeroProps> = ({ onSearch }) => {
     const handleCitySearch = async () => {
         const query = cityQuery.trim();
         if (!query) {
-            setLocationError('Please type a city name first.');
+            setLocationError(t('browseProperties.typeCityFirst'));
             return;
         }
 
@@ -218,7 +222,7 @@ const SearchHero: React.FC<SearchHeroProps> = ({ onSearch }) => {
             const results = await response.json();
 
             if (!Array.isArray(results) || results.length === 0) {
-                setLocationError('City not found. Try a more specific city name.');
+                setLocationError(t('browseProperties.cityNotFound'));
                 return;
             }
 
@@ -226,7 +230,7 @@ const SearchHero: React.FC<SearchHeroProps> = ({ onSearch }) => {
             const lng = Number(results[0].lon);
 
             if (Number.isNaN(lat) || Number.isNaN(lng) || !EGYPT_BOUNDS.contains(L.latLng(lat, lng))) {
-                setLocationError('Please search for a city within Egypt.');
+                setLocationError(t('browseProperties.citySearchWithinEgypt'));
                 return;
             }
 
@@ -234,7 +238,7 @@ const SearchHero: React.FC<SearchHeroProps> = ({ onSearch }) => {
             setIsMapActive(true);
         } catch (error) {
             console.error('City search failed', error);
-            setLocationError('Could not search that city right now. Please try again.');
+            setLocationError(t('browseProperties.citySearchFailed'));
         } finally {
             setIsCitySearching(false);
         }
@@ -257,13 +261,13 @@ const SearchHero: React.FC<SearchHeroProps> = ({ onSearch }) => {
     };
 
     return (
-        <div className="search-sidebar-container">
+        <div className="search-sidebar-container" dir="ltr">
             <button
                 type="button"
                 className="mobile-filter-toggle-btn"
                 onClick={() => setIsMobileExpanded(!isMobileExpanded)}
             >
-                <FaSearch /> {isMobileExpanded ? 'Hide Search & Filters' : 'Show Search & Filters'}
+                <FaSearch /> {isMobileExpanded ? t('browseProperties.hideSearchFilters') : t('browseProperties.showSearchFilters')}
             </button>
 
             <div className={`search-hero-content-body ${isMobileExpanded ? 'show' : ''}`}>
@@ -293,7 +297,7 @@ const SearchHero: React.FC<SearchHeroProps> = ({ onSearch }) => {
                 <div className="search-form-section">
                     {/* Location Search Toolbar */}
                     <div className="adv-map-section">
-                        <label><FaMapMarkedAlt /> Where do you want to live?</label>
+                        <label><FaMapMarkedAlt /> {t('browseProperties.whereToLive')}</label>
                         <div className="map-search-toolbar">
                             <button
                                 type="button"
@@ -301,12 +305,12 @@ const SearchHero: React.FC<SearchHeroProps> = ({ onSearch }) => {
                                 onClick={handleUseCurrentLocation}
                                 disabled={isLocating}
                             >
-                                <FaCrosshairs /> {isLocating ? 'Locating...' : 'Use Current Location'}
+                                <FaCrosshairs /> {isLocating ? t('browseProperties.locating') : t('browseProperties.useCurrentLocation')}
                             </button>
                             <div className="city-search-box">
                                 <input
                                     type="text"
-                                    placeholder="Type city name (e.g., Cairo)"
+                                    placeholder={t('browseProperties.cityPlaceholder')}
                                     value={cityQuery}
                                     onChange={(e) => setCityQuery(e.target.value)}
                                     onKeyDown={(e) => {
@@ -322,14 +326,14 @@ const SearchHero: React.FC<SearchHeroProps> = ({ onSearch }) => {
                                     onClick={() => void handleCitySearch()}
                                     disabled={isCitySearching}
                                 >
-                                    {isCitySearching ? 'Searching...' : 'Find'}
+                                    {isCitySearching ? t('browseProperties.searching') : t('browseProperties.find')}
                                 </button>
                             </div>
                         </div>
                         {locationError && <p className="map-location-error">{locationError}</p>}
                         <div className="map-radius-control">
                             <div className="radius-label">
-                                <span>Search Radius:</span>
+                                <span>{t('browseProperties.searchRadius')}</span>
                                 <strong>{radiusKm} km</strong>
                             </div>
                             <input
@@ -341,7 +345,7 @@ const SearchHero: React.FC<SearchHeroProps> = ({ onSearch }) => {
                         </div>
                         {position && (
                             <button className="clear-location-btn" onClick={() => { setPosition(null); setLocationError(null); }}>
-                                Clear Pin Location
+                                {t('browseProperties.clearPinLocation')}
                             </button>
                         )}
                     </div>
@@ -352,49 +356,49 @@ const SearchHero: React.FC<SearchHeroProps> = ({ onSearch }) => {
                     <div className="filters-stack">
                         <div className="price-inputs-row">
                             <div className="filter-group flex-1">
-                                <label className="filter-label"><FaHome /> Property Type</label>
+                                <label className="filter-label"><FaHome /> {t('browseProperties.propertyType')}</label>
                                 <select name="type" value={filters.type} onChange={handleChange}>
-                                    <option value="">Any Type</option>
-                                    <option value="APARTMENT">Apartment</option>
-                                    <option value="VILLA">Villa</option>
-                                    <option value="STUDIO">Studio</option>
-                                    <option value="CHALET">Chalet</option>
+                                    <option value="">{t('browseProperties.anyType')}</option>
+                                    <option value="APARTMENT">{t('browseProperties.apartment')}</option>
+                                    <option value="VILLA">{t('browseProperties.villa')}</option>
+                                    <option value="STUDIO">{t('browseProperties.studio')}</option>
+                                    <option value="CHALET">{t('browseProperties.chalet')}</option>
                                 </select>
                             </div>
                             <div className="filter-group flex-1">
-                                <label className="filter-label"><FaCouch /> Furnishing</label>
+                                <label className="filter-label"><FaCouch /> {t('browseProperties.furnishing')}</label>
                                 <select name="furnishing" value={filters.furnishing} onChange={handleChange}>
-                                    <option value="">Any Furnishing</option>
-                                    <option value="Fully">Fully Furnished</option>
-                                    <option value="Semi">Semi Furnished</option>
-                                    <option value="Unfurnished">Unfurnished</option>
+                                    <option value="">{t('browseProperties.anyFurnishing')}</option>
+                                    <option value="Fully">{t('browseProperties.fullyFurnished')}</option>
+                                    <option value="Semi">{t('browseProperties.semiFurnished')}</option>
+                                    <option value="Unfurnished">{t('browseProperties.unfurnished')}</option>
                                 </select>
                             </div>
                         </div>
 
                         <div className="price-inputs-row">
                             <div className="filter-group flex-1">
-                                <label className="filter-label"><FaDollarSign /> Min Price ($)</label>
-                                <input type="number" name="minPrice" placeholder="No min" value={filters.minPrice} onChange={handleChange} min={0} />
+                                <label className="filter-label"><FaDollarSign /> {t('browseProperties.minPrice')}</label>
+                                <input type="number" name="minPrice" placeholder={t('browseProperties.noMin')} value={filters.minPrice} onChange={handleChange} min={0} />
                             </div>
                             <div className="filter-group flex-1">
-                                <label className="filter-label"><FaDollarSign /> Max Price ($)</label>
-                                <input type="number" name="maxPrice" placeholder="No max" value={filters.maxPrice} onChange={handleChange} min={0} />
+                                <label className="filter-label"><FaDollarSign /> {t('browseProperties.maxPrice')}</label>
+                                <input type="number" name="maxPrice" placeholder={t('browseProperties.noMax')} value={filters.maxPrice} onChange={handleChange} min={0} />
                             </div>
                         </div>
 
                         <div className="price-inputs-row">
                             <div className="filter-group flex-1">
-                                <label className="filter-label"><FaUserFriends /> Target Tenant</label>
+                                <label className="filter-label"><FaUserFriends /> {t('browseProperties.targetTenant')}</label>
                                 <select name="target_tenant" value={filters.target_tenant} onChange={handleChange}>
-                                    <option value="">Any Tenant Type</option>
-                                    <option value="STUDENTS">Students</option>
-                                    <option value="FAMILIES">Families</option>
-                                    <option value="TOURISTS">Tourists</option>
+                                    <option value="">{t('browseProperties.anyTenantType')}</option>
+                                    <option value="STUDENTS">{t('browseProperties.students')}</option>
+                                    <option value="FAMILIES">{t('browseProperties.families')}</option>
+                                    <option value="TOURISTS">{t('browseProperties.tourists')}</option>
                                 </select>
                             </div>
                             <div className="filter-group flex-1">
-                                <label className="filter-label"><FaCalendarAlt /> Availability Month</label>
+                                <label className="filter-label"><FaCalendarAlt /> {t('browseProperties.availabilityMonth')}</label>
                                 <input type="month" name="availabilityDate" value={filters.availabilityDate} onChange={handleChange} />
                             </div>
                         </div>
@@ -402,10 +406,10 @@ const SearchHero: React.FC<SearchHeroProps> = ({ onSearch }) => {
 
                     <div className="search-buttons-group">
                         <button type="button" className="sidebar-search-btn" onClick={handleSearchClick}>
-                            <FaSearch /> Search Properties
+                            <FaSearch /> {t('browseProperties.searchProperties')}
                         </button>
                         <button type="button" className="sidebar-clear-btn" onClick={handleClearClick}>
-                            Clear Search
+                            {t('browseProperties.clearSearch')}
                         </button>
                     </div>
                 </div>
@@ -413,6 +417,5 @@ const SearchHero: React.FC<SearchHeroProps> = ({ onSearch }) => {
         </div>
     );
 };
-
 
 export default SearchHero;

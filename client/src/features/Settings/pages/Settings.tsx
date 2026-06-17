@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import './Settings.css';
 import Header from '../../../components/global/header';
 import LandlordSidebar from '../../../components/global/Landlord/sidebar';
@@ -24,6 +25,7 @@ import { AlertTriangle } from 'lucide-react';
 // ── Auth Guard Screen ──────────────────────────────────────────────────────────
 const SignInRequired: React.FC = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     return (
         <div style={{
             minHeight: '100vh',
@@ -57,13 +59,13 @@ const SignInRequired: React.FC = () => {
                     fontSize: 26, fontWeight: 800, color: '#131415ff',
                     marginBottom: 12, letterSpacing: '-0.02em',
                 }}>
-                    Sign in to access Settings
+                    {t('settings.signInRequiredTitle')}
                 </h2>
                 <p style={{
                     fontSize: 15, color: '#313234ff', lineHeight: 1.6,
                     marginBottom: 36,
                 }}>
-                    Your profile, billing, notifications, and security options are only visible to signed-in users.
+                    {t('settings.signInRequiredDesc')}
                 </p>
 
                 <button
@@ -78,7 +80,7 @@ const SignInRequired: React.FC = () => {
                     onMouseOver={e => (e.currentTarget.style.opacity = '0.9')}
                     onMouseOut={e => (e.currentTarget.style.opacity = '1')}
                 >
-                    Sign In
+                    {t('auth.signIn')}
                 </button>
                 <button
                     onClick={() => navigate('/auth')}
@@ -93,11 +95,11 @@ const SignInRequired: React.FC = () => {
                     onMouseOut={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#94a3b8'; }}
                 >
                     <FaUserCircle style={{ marginRight: 8, verticalAlign: 'middle' }} />
-                    Create a free account
+                    {t('settings.createAccount')}
                 </button>
 
                 <p style={{ marginTop: 24, fontSize: 12, color: '#475569' }}>
-                    Your data is private and secure.
+                    {t('settings.dataPrivateSecure')}
                 </p>
             </div>
         </div>
@@ -116,6 +118,7 @@ interface ProfileBannerProps {
 const IncompleteProfileBanner: React.FC<ProfileBannerProps> = ({
     userRole, isVerificationComplete, hasPreferences, onCompleteIdentity, onCompletePreferences,
 }) => {
+    const { t } = useTranslation();
     if (userRole !== 'TENANT' && userRole !== 'LANDLORD') return null;
 
     // Step 1 incomplete: identity/ID/gender/birthdate not verified yet
@@ -124,10 +127,9 @@ const IncompleteProfileBanner: React.FC<ProfileBannerProps> = ({
             <div className="settings-top-banner settings-banner settings-banner--identity">
                 <AlertTriangle size={20} className="settings-banner__icon settings-banner__icon--warn" />
                 <div className="settings-banner__body">
-                    <div className="settings-banner__title">Identity verification required</div>
+                    <div className="settings-banner__title">{t('settings.identityVerificationRequired')}</div>
                     <div className="settings-banner__text">
-                        You haven&apos;t completed your identity verification. HOMi features like submitting rental
-                        requests and listing properties are locked until your profile is fully verified.
+                        {t('settings.identityVerificationDesc')}
                     </div>
                 </div>
                 <button
@@ -135,7 +137,7 @@ const IncompleteProfileBanner: React.FC<ProfileBannerProps> = ({
                     onClick={onCompleteIdentity}
                     className="settings-banner__btn settings-banner__btn--identity"
                 >
-                    Complete Now
+                    {t('settings.completeNow')}
                 </button>
             </div>
         );
@@ -143,15 +145,15 @@ const IncompleteProfileBanner: React.FC<ProfileBannerProps> = ({
 
     // Step 3 incomplete: preferences / business profile was skipped
     if (!hasPreferences) {
-        const label = userRole === 'LANDLORD' ? 'Business Profile' : 'Rental Preferences';
+        const label = userRole === 'LANDLORD' ? t('settings.businessProfile') : t('settings.rentalPreferences');
         const hint = userRole === 'LANDLORD'
-            ? 'Add your business profile to unlock property listings and rental management features.'
-            : 'Add your rental preferences to submit requests and unlock matching features.';
+            ? t('settings.businessProfileHint')
+            : t('settings.rentalPreferencesHint');
         return (
             <div className="settings-top-banner settings-banner settings-banner--preferences">
                 <AlertTriangle size={20} className="settings-banner__icon settings-banner__icon--info" />
                 <div className="settings-banner__body">
-                    <div className="settings-banner__title">{label} not set up</div>
+                    <div className="settings-banner__title">{t('settings.notSetUp', { label })}</div>
                     <div className="settings-banner__text">{hint}</div>
                 </div>
                 <button
@@ -159,7 +161,7 @@ const IncompleteProfileBanner: React.FC<ProfileBannerProps> = ({
                     onClick={onCompletePreferences}
                     className="settings-banner__btn settings-banner__btn--preferences"
                 >
-                    Set Up Now
+                    {t('settings.setUpNow')}
                 </button>
             </div>
         );

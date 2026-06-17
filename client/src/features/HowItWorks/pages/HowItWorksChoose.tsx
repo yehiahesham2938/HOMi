@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Building2, Users, Wrench } from 'lucide-react';
 import GuestNavbar from '../../../components/guest/GuestNavbar';
 import '../../Guest/pages/GuestHome.css';
@@ -11,6 +12,7 @@ const guestFlowState = { fromGuestHome: true as const };
  */
 const HowItWorksChoose = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="guest-layout hiw-choose-layout">
@@ -18,10 +20,10 @@ const HowItWorksChoose = () => {
 
       <main className="hiw-choose-main">
         <div className="hiw-choose-inner">
-          <p className="hiw-choose-eyebrow">How it works</p>
-          <h1 className="hiw-choose-title">Who are you here for?</h1>
+          <p className="hiw-choose-eyebrow">{t('howItWorksChoose.eyebrow', 'How it works')}</p>
+          <h1 className="hiw-choose-title">{t('howItWorksChoose.title', 'Who are you here for?')}</h1>
           <p className="hiw-choose-lede">
-            Pick a path to see how HOMi fits your journey — renting a home, listing properties, or providing services.
+            {t('howItWorksChoose.subtitle', 'Pick a path to see how HOMi fits your journey — renting a home, listing properties, or providing services.')}
           </p>
 
           <div className="hiw-choose-grid">
@@ -33,9 +35,9 @@ const HowItWorksChoose = () => {
               <span className="hiw-choose-card-icon" aria-hidden>
                 <Users size={36} strokeWidth={1.75} />
               </span>
-              <h2>For tenants</h2>
-              <p>Browse verified homes, apply online, sign digitally, and pay rent securely.</p>
-              <span className="hiw-choose-card-cta">View tenant guide →</span>
+              <h2>{t('howItWorksChoose.forTenants', 'For tenants')}</h2>
+              <p>{t('howItWorksChoose.forTenantsDesc', 'Browse verified homes, apply online, sign digitally, and pay rent securely.')}</p>
+              <span className="hiw-choose-card-cta">{t('howItWorksChoose.viewTenantGuide', 'View tenant guide →')}</span>
             </button>
 
             <button
@@ -46,9 +48,9 @@ const HowItWorksChoose = () => {
               <span className="hiw-choose-card-icon" aria-hidden>
                 <Building2 size={36} strokeWidth={1.75} />
               </span>
-              <h2>For landlords</h2>
-              <p>List properties, review applicants, collect rent, and stay organized in one place.</p>
-              <span className="hiw-choose-card-cta">View landlord guide →</span>
+              <h2>{t('howItWorksChoose.forLandlords', 'For landlords')}</h2>
+              <p>{t('howItWorksChoose.forLandlordsDesc', 'List properties, review applicants, collect rent, and stay organized in one place.')}</p>
+              <span className="hiw-choose-card-cta">{t('howItWorksChoose.viewLandlordGuide', 'View landlord guide →')}</span>
             </button>
 
             <button
@@ -59,9 +61,9 @@ const HowItWorksChoose = () => {
               <span className="hiw-choose-card-icon" aria-hidden>
                 <Wrench size={36} strokeWidth={1.75} />
               </span>
-              <h2>For maintenance</h2>
-              <p>Register as a provider, view local job requests, track earnings, and coordinate with clients.</p>
-              <span className="hiw-choose-card-cta">View provider guide →</span>
+              <h2>{t('howItWorksChoose.forMaintenance', 'For maintenance')}</h2>
+              <p>{t('howItWorksChoose.forMaintenanceDesc', 'Register as a provider, view local job requests, track earnings, and coordinate with clients.')}</p>
+              <span className="hiw-choose-card-cta">{t('howItWorksChoose.viewProviderGuide', 'View provider guide →')}</span>
             </button>
           </div>
         </div>

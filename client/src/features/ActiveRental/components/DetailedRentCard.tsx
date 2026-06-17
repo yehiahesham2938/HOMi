@@ -192,7 +192,7 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
                             onClick={handleViewPropertyDetails}
                         >
                             <FaEye />
-                            View property details
+                            {t('activeRental.viewPropertyDetails')}
                         </button>
                     </div>
                     <h2>{rental.title}</h2>
@@ -202,17 +202,17 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
                 <div className="property-specs-chips">
                     {bedrooms > 0 && (
                         <div className="spec-chip">
-                            <FaBed /> <span>{bedrooms} {bedrooms === 1 ? 'Bed' : 'Beds'}</span>
+                            <FaBed /> <span>{bedrooms} {bedrooms === 1 ? t('activeRental.bed') : t('activeRental.beds')}</span>
                         </div>
                     )}
                     {bathrooms > 0 && (
                         <div className="spec-chip">
-                            <FaBath /> <span>{bathrooms} {bathrooms === 1 ? 'Bath' : 'Baths'}</span>
+                            <FaBath /> <span>{bathrooms} {bathrooms === 1 ? t('activeRental.bath') : t('activeRental.baths')}</span>
                         </div>
                     )}
                     {areaSqft > 0 && (
                         <div className="spec-chip">
-                            <FaRulerCombined /> <span>{areaSqft.toLocaleString()} sqft</span>
+                            <FaRulerCombined /> <span>{areaSqft.toLocaleString()} {t('activeRental.sqft')}</span>
                         </div>
                     )}
                 </div>
@@ -226,20 +226,20 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
                             <span className="landlord-label">{t('activeLease.landlord')}</span>
                             <span className="landlord-name">{rental.landlord}</span>
                         </div>
-                        <div className="landlord-contact-badge">Owner</div>
+                        <div className="landlord-contact-badge">{t('activeRental.owner')}</div>
                     </div>
 
                     <div className="lease-progress-container">
                         <div className="lease-progress-header">
-                            <span>Lease Progress</span>
-                            <strong>{paidMonths} / {leaseDuration} mo</strong>
+                            <span>{t('activeRental.leaseProgress')}</span>
+                            <strong>{paidMonths} / {leaseDuration} {t('activeRental.monthsShort')}</strong>
                         </div>
                         <div className="lease-progress-bar-outer">
                             <div className="lease-progress-bar-inner" style={{ width: `${progressPercent}%` }} />
                         </div>
                         <div className="lease-progress-labels">
-                            <span>Start ({rental.leaseStart})</span>
-                            <span>End ({rental.leaseEnd})</span>
+                            <span>{t('activeRental.leaseStart', { date: rental.leaseStart })}</span>
+                            <span>{t('activeRental.leaseEnd', { date: rental.leaseEnd })}</span>
                         </div>
                     </div>
                 </div>
@@ -247,7 +247,7 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
                 <div className="card-actions-row">
                     <div className="contract-actions-container">
                         <div className="contract-action-item">
-                            <span className="action-label">Agreement (PDF)</span>
+                            <span className="action-label">{t('activeRental.agreementPdf')}</span>
                             <div className="action-button-group">
                                 <button className="action-pill-btn" onClick={() => handleDownloadPDF('en')} title="Download English PDF">
                                     <FaFileDownload /> EN
@@ -258,7 +258,7 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
                             </div>
                         </div>
                         <div className="contract-action-item">
-                            <span className="action-label">Digital Lease</span>
+                            <span className="action-label">{t('activeRental.digitalLease')}</span>
                             <div className="action-button-group">
                                 <button className="action-pill-btn" onClick={() => setPreviewLang('en')} title="View English Lease">
                                     <FaEye /> EN
@@ -302,7 +302,11 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
                         <header className="preview-header">
                             <div className="header-left">
                                 <h3>{t('activeLease.contractPreview')} ({previewLang.toUpperCase()})</h3>
-                                <span className="page-indicator">Page {currentPreviewPage} of 2</span>
+                                <span className="page-indicator">
+                                    {previewLang === 'ar'
+                                        ? `صفحة ${toArNum(currentPreviewPage, true)} من ٢`
+                                        : `Page ${currentPreviewPage} of 2`}
+                                </span>
                             </div>
                             <div className="header-actions">
                                 <div className="pagination-controls">

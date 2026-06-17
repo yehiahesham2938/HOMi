@@ -7,11 +7,13 @@ import Footer from '../../../components/global/footer';
 import PropertyCard from '../../BrowseProperties/components/PropertyCard';
 import { mapPropertyToUI, type PropertyUI } from '../../../utils/propertyMapping';
 import savedPropertiesService from '../../../services/saved-properties.service';
-
 import './SavedProperties.css';
+import { useTranslation } from 'react-i18next';
 
 const SavedProperties: React.FC = () => {
     const navigate = useNavigate();
+    const { t, i18n } = useTranslation();
+    const locale = i18n.language === 'ar' ? 'ar-EG' : 'en-US';
     const [savedItems, setSavedItems] = useState<PropertyUI[]>([]);
     const [showClearConfirm, setShowClearConfirm] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -32,7 +34,7 @@ const SavedProperties: React.FC = () => {
                 const mapped = response.map(mapPropertyToUI);
                 setSavedItems(mapped);
             } catch {
-                setError('Failed to load saved properties.');
+                setError(t('savedProperties.failedLoad'));
                 setSavedItems([]);
             } finally {
                 setLoading(false);
@@ -88,8 +90,8 @@ const SavedProperties: React.FC = () => {
                     {/* ── Page Header ── */}
                     <header className="sp-header animate-fade-in">
                         <div>
-                            <h1>Saved Properties</h1>
-                            <p>Curated listings you've saved — compare options, track updates, and start applications.</p>
+                            <h1>{t('savedProperties.pageTitle')}</h1>
+                            <p>{t('savedProperties.pageSubtitle')}</p>
                         </div>
                     </header>
 
@@ -99,23 +101,23 @@ const SavedProperties: React.FC = () => {
                             {/* Stats Cards Row */}
                             <div className="sp-stats-grid">
                                 <div className="sp-stat-card">
-                                    <span className="sp-stat-label">Total Saved</span>
+                                    <span className="sp-stat-label">{t('savedProperties.totalSaved')}</span>
                                     <span className="sp-stat-value">{savedItems.length}</span>
-                                    <span className="sp-stat-desc">Properties in your wishlist</span>
+                                    <span className="sp-stat-desc">{t('savedProperties.wishlistDesc')}</span>
                                 </div>
                                 <div className="sp-stat-card">
-                                    <span className="sp-stat-label">Average Rent</span>
+                                    <span className="sp-stat-label">{t('savedProperties.avgRent')}</span>
                                     <span className="sp-stat-value">
-                                        {stats.avg.toLocaleString(undefined, { maximumFractionDigits: 0 })} EGP
+                                        {stats.avg.toLocaleString(locale, { maximumFractionDigits: 0 })}{t('savedProperties.egpCurrency')}
                                     </span>
-                                    <span className="sp-stat-desc">Mean cost per month</span>
+                                    <span className="sp-stat-desc">{t('savedProperties.meanCost')}</span>
                                 </div>
                                 <div className="sp-stat-card">
-                                    <span className="sp-stat-label">Price Range</span>
+                                    <span className="sp-stat-label">{t('savedProperties.priceRange')}</span>
                                     <span className="sp-stat-value">
-                                        {stats.min.toLocaleString()} - {stats.max.toLocaleString()}
+                                        {stats.min.toLocaleString(locale)} - {stats.max.toLocaleString(locale)}
                                     </span>
-                                    <span className="sp-stat-desc">EGP per month (min - max)</span>
+                                    <span className="sp-stat-desc">{t('savedProperties.priceRangeDesc')}</span>
                                 </div>
                             </div>
 
@@ -124,11 +126,11 @@ const SavedProperties: React.FC = () => {
                                 <div className="sp-insight-content">
                                     <span className="sp-insight-icon"><LineChart size={20} /></span>
                                     <div className="sp-insight-text">
-                                        <strong>Market Pulse:</strong> Properties in your list are seeing 30% higher engagement this week. We recommend applying early.
+                                        <strong>{t('savedProperties.marketPulse')}</strong> {t('savedProperties.insightText')}
                                     </div>
                                 </div>
                                 <button className="sp-insight-cta" onClick={() => navigate('/browse-properties')}>
-                                    Explore More <ArrowRight size={14} />
+                                    {t('savedProperties.exploreMore')} <ArrowRight size={14} />
                                 </button>
                             </div>
 
@@ -136,18 +138,18 @@ const SavedProperties: React.FC = () => {
                             <div className="sp-toolbar">
                                 {showClearConfirm ? (
                                     <div className="sp-confirm-inline">
-                                        <span>Remove all saved properties?</span>
-                                        <button className="sp-confirm-btn-yes" onClick={handleClearAll}>Yes, clear</button>
-                                        <button className="sp-confirm-btn-no" onClick={() => setShowClearConfirm(false)}>Cancel</button>
+                                        <span>{t('savedProperties.clearConfirm')}</span>
+                                        <button className="sp-confirm-btn-yes" onClick={handleClearAll}>{t('savedProperties.clearConfirmYes')}</button>
+                                        <button className="sp-confirm-btn-no" onClick={() => setShowClearConfirm(false)}>{t('savedProperties.clearConfirmNo')}</button>
                                     </div>
                                 ) : (
                                     <button
                                         className="sp-clear-btn"
                                         onClick={() => setShowClearConfirm(true)}
-                                        title="Clear All Saved Properties"
+                                        title={t('savedProperties.clearWishlist')}
                                     >
                                         <Trash2 size={16} />
-                                        <span>Clear Wishlist</span>
+                                        <span>{t('savedProperties.clearWishlist')}</span>
                                     </button>
                                 )}
                             </div>
@@ -176,20 +178,20 @@ const SavedProperties: React.FC = () => {
                     {loading && (
                         <div className="sp-loader-wrapper">
                             <div className="sp-spinner" />
-                            <p>Loading your saved properties...</p>
+                            <p>{t('savedProperties.loadingText')}</p>
                         </div>
                     )}
 
                     {/* ── Error State ── */}
                     {!loading && error && (
                         <div className="sp-empty-wrapper">
-                            <h2>Could not load saved properties</h2>
+                            <h2>{t('savedProperties.couldNotLoad')}</h2>
                             <p>{error}</p>
                             <button
                                 className="sp-browse-btn"
                                 onClick={() => navigate('/browse-properties')}
                             >
-                                Browse Properties <ArrowRight size={16} />
+                                {t('savedProperties.browseBtn')} <ArrowRight size={16} />
                             </button>
                         </div>
                     )}
@@ -209,16 +211,16 @@ const SavedProperties: React.FC = () => {
                                     playsInline
                                 />
                             </div>
-                            <h2>Your wishlist is empty</h2>
+                            <h2>{t('savedProperties.emptyWishlist')}</h2>
                             <p>
-                                Start browsing the market and tap the heart icon on properties you like. They will appear here for you to compare and apply.
+                                {t('savedProperties.emptyWishlistDesc')}
                             </p>
                             <button
                                 className="sp-browse-btn"
                                 onClick={() => navigate('/browse-properties')}
                             >
                                 <Heart size={16} fill="white" />
-                                <span>Browse Properties</span>
+                                <span>{t('savedProperties.browseBtn')}</span>
                             </button>
                         </div>
                     )}

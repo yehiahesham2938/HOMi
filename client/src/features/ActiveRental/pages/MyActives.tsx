@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import './MyActives.css';
 import Header from '../../../components/global/header';
 import Sidebar from '../../../components/global/Tenant/sidebar';
@@ -14,6 +15,7 @@ import { getEffectiveNow } from '../../../shared/utils/testingClock';
 const MyActives: React.FC = () => {
     // Hooks for routing and state
     const navigate = useNavigate();
+    const { t, i18n } = useTranslation();
 
     const [contracts, setContracts] = useState<LandlordContract[]>([]);
     const [propertyById, setPropertyById] = useState<Record<string, PropertyResponse>>({});
@@ -58,6 +60,7 @@ const MyActives: React.FC = () => {
                 setContracts(visibleContracts);
             } catch {
                 setContracts([]);
+                setPropertyById({});
                 setPaymentHistory([]);
             } finally {
                 setIsLoading(false);
@@ -112,7 +115,7 @@ const MyActives: React.FC = () => {
     }, [contracts]);
 
     const formatDate = (value: Date): string =>
-        value.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+        value.toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { month: 'short', day: '2-digit', year: 'numeric' });
 
     const formatLeaseEnd = (contract: LandlordContract): string => {
         const start = new Date(contract.moveInDate);
@@ -207,7 +210,7 @@ const MyActives: React.FC = () => {
     if (isLoading) {
         rentalsContent = (
             <div className="empty-state-container">
-                <h3 className="empty-state-title">Loading active rentals...</h3>
+                <h3 className="empty-state-title">{t('activeRental.loadingActiveRentals')}</h3>
             </div>
         );
     } else if (hasData) {
@@ -221,15 +224,16 @@ const MyActives: React.FC = () => {
     } else {
         rentalsContent = (
             <div className="empty-state-container">
-                <Home size={56} className="empty-state-icon" />                            <h3 className="empty-state-title">No Active Rentals</h3>
+                <Home size={56} className="empty-state-icon" />
+                <h3 className="empty-state-title">{t('activeRental.noActiveRentals')}</h3>
                 <p className="empty-state-text">
-                    You don't have any active leases at the moment. Check the status of your submitted applications to see if you've been approved!
+                    {t('activeRental.noActiveRentalsText')}
                 </p>
                 <button 
                     className="btn-empty-state"
                     onClick={() => navigate('/sent-requests')}
                 >
-                    View your rent requests
+                    {t('activeRental.viewRentRequests')}
                 </button>
             </div>
         );
@@ -243,12 +247,12 @@ const MyActives: React.FC = () => {
                 <div className="my-actives-container">
                     <div className="page-intro">
                         <div>
-                            <h1>My Active Rentals</h1>
-                            <p>Manage your current leases, payments, and maintenance requests.</p>
+                            <h1>{t('activeRental.myActiveRentals')}</h1>
+                            <p>{t('activeRental.myActiveRentalsSubtitle')}</p>
                         </div>
                         <div className="stats-mini-grid">
-                            <div className="stat-pill"><strong>{activeRentals.length}</strong> Properties</div>
-                            <div className="stat-pill"><strong>0</strong> Pending Maintenance</div>
+                            <div className="stat-pill"><strong>{activeRentals.length}</strong> {t('activeRental.propertiesCount')}</div>
+                            <div className="stat-pill"><strong>0</strong> {t('activeRental.pendingMaintenance')}</div>
                         </div>
                     </div>
 

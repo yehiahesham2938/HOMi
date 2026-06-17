@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaMapMarkerAlt, FaCalendarAlt, FaChevronRight, FaHome, FaHourglassHalf, FaExclamationCircle } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import './RentedPropertyCard.css';
 
 interface RentedPropertyProps {
@@ -24,6 +25,7 @@ interface RentedPropertyProps {
 
 const RentedPropertyCard: React.FC<RentedPropertyProps> = ({ property }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const isStartingSoon = property.status === 'Starting Soon';
   const isEnded       = property.status === 'Ended';
@@ -31,6 +33,16 @@ const RentedPropertyCard: React.FC<RentedPropertyProps> = ({ property }) => {
   const handleDetailsClick = () => {
     navigate(`/active-rental?contractId=${encodeURIComponent(property.id)}`);
   };
+
+  // Convert status to camelCase key for translations
+  const statusKey = (() => {
+    if (property.status === 'Starting Soon') return 'startingSoon';
+    if (property.status === 'Active') return 'active';
+    if (property.status === 'Expiring Soon') return 'expiringSoon';
+    if (property.status === 'Pending Renewal') return 'pendingRenewal';
+    if (property.status === 'Ended') return 'ended';
+    return 'active';
+  })();
 
   return (
     <button
@@ -42,20 +54,20 @@ const RentedPropertyCard: React.FC<RentedPropertyProps> = ({ property }) => {
         {property.image ? (
           <img src={property.image} alt={property.title} className="property-thumb" />
         ) : (
-          <div className="property-thumb property-thumb-placeholder" aria-label="Property image unavailable">
+          <div className="property-thumb property-thumb-placeholder" aria-label={t('activeRental.noImage')}>
             <FaHome />
-            <span>No image uploaded</span>
+            <span>{t('activeRental.noImage')}</span>
           </div>
         )}
 
         <span className={`status-badge ${property.status.toLowerCase().replaceAll(' ', '-')}`}>
           {isStartingSoon && <FaHourglassHalf className="badge-icon" aria-hidden="true" />}
-          {property.status}
+          {t(`activeRental.${statusKey}`)}
         </span>
 
         {/* Active lease with past-due installments */}
         {property.latePayments && !property.endedWithDebt && (
-          <span className="status-badge late-payments">Late Payments</span>
+          <span className="status-badge late-payments">{t('activeRental.latePayments')}</span>
         )}
 
         {/* Ended lease with outstanding rent balance */}
@@ -63,8 +75,8 @@ const RentedPropertyCard: React.FC<RentedPropertyProps> = ({ property }) => {
           <span className="status-badge ended-debt">
             <FaExclamationCircle aria-hidden="true" />
             {property.unpaidMonths === 1
-              ? '1 month unpaid'
-              : `${property.unpaidMonths ?? ''} months unpaid`}
+              ? t('activeRental.oneMonthUnpaid')
+              : t('activeRental.monthsUnpaid', { count: property.unpaidMonths })}
           </span>
         )}
       </div>
@@ -82,8 +94,7 @@ const RentedPropertyCard: React.FC<RentedPropertyProps> = ({ property }) => {
           <div className="ended-debt-notice">
             <FaExclamationCircle aria-hidden="true" />
             <span>
-              This lease has ended but you still have unpaid rent.
-              Open the lease to settle the outstanding balance.
+              {t('activeRental.endedWithDebtNotice')}
             </span>
           </div>
         ) : (
@@ -91,14 +102,14 @@ const RentedPropertyCard: React.FC<RentedPropertyProps> = ({ property }) => {
             <div className="lease-meta">
               <FaCalendarAlt className="icon-sm" />
               {isStartingSoon ? (
-                <span>From: <strong>{property.leaseStart ?? property.leaseEnd}</strong></span>
+                <span>{t('activeRental.leaseFrom')}<strong>{property.leaseStart ?? property.leaseEnd}</strong></span>
               ) : isEnded ? (
-                <span>Ended: <strong>{property.leaseEnd}</strong></span>
+                <span>{t('activeRental.leaseEnded')}<strong>{property.leaseEnd}</strong></span>
               ) : (
-                <span>Ends: <strong>{property.leaseEnd}</strong></span>
+                <span>{t('activeRental.leaseEnds')}<strong>{property.leaseEnd}</strong></span>
               )}
             </div>
-            <button className="view-details-arrow" aria-label="View Details">
+            <button className="view-details-arrow" aria-label={t('activeRental.viewDetails')}>
               <FaChevronRight />
             </button>
           </div>
@@ -108,9 +119,9 @@ const RentedPropertyCard: React.FC<RentedPropertyProps> = ({ property }) => {
           <div className="card-footer-meta">
             <div className="lease-meta">
               <FaCalendarAlt className="icon-sm" />
-              <span>Ended: <strong>{property.leaseEnd}</strong></span>
+              <span>{t('activeRental.leaseEnded')}<strong>{property.leaseEnd}</strong></span>
             </div>
-            <button className="view-details-arrow ended" aria-label="View Details">
+            <button className="view-details-arrow ended" aria-label={t('activeRental.viewDetails')}>
               <FaChevronRight />
             </button>
           </div>

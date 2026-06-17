@@ -1,5 +1,6 @@
 // client/src/features/Settings/components/MyProfile.tsx
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import './MyProfile.css';
 import { FaCamera, FaIdBadge, FaEnvelope, FaPhone, FaMapMarkerAlt, FaUserCircle, FaLock, FaIdCard } from 'react-icons/fa';
 import { authService } from '../../../services/auth.service';
@@ -12,6 +13,7 @@ interface MyProfileProps {
 }
 
 const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut }) => {
+    const { t } = useTranslation();
     const isMaintainer = role === 'MAINTENANCE_PROVIDER';
     const [user, setUser] = useState<UserResponse | null>(null);
     const [profile, setProfile] = useState<ProfileResponse | null>(null);
@@ -81,11 +83,11 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
         if (!file) return;
 
         if (!file.type.startsWith('image/')) {
-            setMessage({ type: 'error', text: 'Please select an image file.' });
+            setMessage({ type: 'error', text: t('settings.selectImageError', 'Please select an image file.') });
             return;
         }
         if (file.size > 10 * 1024 * 1024) {
-            setMessage({ type: 'error', text: 'Image must be smaller than 10 MB.' });
+            setMessage({ type: 'error', text: t('settings.imageSizeError', 'Image must be smaller than 10 MB.') });
             return;
         }
 
@@ -120,10 +122,10 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                 setUser(updated.user);
                 setProfile(updated.profile);
                 window.dispatchEvent(new Event('storage'));
-                setMessage({ type: 'success', text: 'Profile photo updated!' });
+                setMessage({ type: 'success', text: t('settings.photoUpdated') });
                 setTimeout(() => setMessage(null), 3000);
             } catch {
-                setMessage({ type: 'error', text: 'Failed to upload photo. Please try again.' });
+                setMessage({ type: 'error', text: t('settings.photoUploadFailed', 'Failed to upload photo. Please try again.') });
                 setAvatarSrc(profile?.avatarUrl || fallbackAvatar);
             } finally {
                 setUploadingAvatar(false);
@@ -138,12 +140,12 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
         setMessage(null);
         try {
             if (!isMaintainer && !firstName.trim()) {
-                setMessage({ type: 'error', text: 'First name cannot be empty.' });
+                setMessage({ type: 'error', text: t('settings.firstNameEmpty', 'First name cannot be empty.') });
                 setSaving(false);
                 return;
             }
             if (!isMaintainer && !lastName.trim()) {
-                setMessage({ type: 'error', text: 'Last name cannot be empty.' });
+                setMessage({ type: 'error', text: t('settings.lastNameEmpty', 'Last name cannot be empty.') });
                 setSaving(false);
                 return;
             }
@@ -166,7 +168,7 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
             }
 
             if (Object.keys(payload).length === 0) {
-                setMessage({ type: 'success', text: 'No changes to save.' });
+                setMessage({ type: 'success', text: t('settings.noChanges') });
                 setSaving(false);
                 setTimeout(() => setMessage(null), 3000);
                 return;
@@ -175,11 +177,11 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
             const updated = await authService.updateProfile(payload);
             setUser(updated.user);
             setProfile(updated.profile);
-            setMessage({ type: 'success', text: 'Profile updated successfully!' });
+            setMessage({ type: 'success', text: t('settings.profileUpdated') });
         } catch (err: unknown) {
             const msg =
                 (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-                'Failed to update profile. Please try again.';
+                t('settings.profileUpdateFailed', 'Failed to update profile. Please try again.');
             setMessage({ type: 'error', text: msg });
         } finally {
             setSaving(false);
@@ -188,8 +190,8 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
     };
 
     const getRoleLabel = (r?: string) => {
-        if (r === 'LANDLORD') return 'Landlord';
-        if (r === 'TENANT')   return 'Tenant';
+        if (r === 'LANDLORD') return t('settings.businessProfile');
+        if (r === 'TENANT')   return t('settings.rentalPreferences');
         return r ?? 'Member';
     };
 
@@ -218,7 +220,7 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
     }
 
     const updatePrefsLabel =
-        user?.role === 'LANDLORD' ? 'Update business profile' : 'Update rental preferences';
+        user?.role === 'LANDLORD' ? t('settings.businessProfile') : t('settings.rentalPreferences');
 
     // Read-only verified identity fields from DB
     const arabicName       = profile?.fullNameArabic   || null;
@@ -248,7 +250,7 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                             className="edit-btn-floating"
                             onClick={() => fileInputRef.current?.click()}
                             disabled={uploadingAvatar}
-                            title="Change profile photo"
+                            title={t('settings.changePhoto', 'Change profile photo')}
                             style={{ opacity: uploadingAvatar ? 0.6 : 1 }}
                         >
                             <FaCamera />
@@ -263,11 +265,11 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                     <div className="identity-stats-actions">
                         <div className="identity-stats">
                             <div className="stat">
-                                <span>Active Since</span>
+                                <span>{t('settings.activeSince')}</span>
                                 <strong>{formatDate(user?.createdAt)}</strong>
                             </div>
                             <div className="stat">
-                                <span>Points</span>
+                                <span>{t('settings.points')}</span>
                                 <strong>{profile?.gamificationPoints ?? 0}</strong>
                             </div>
                         </div>
@@ -285,7 +287,7 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
             </div>
 
             <div className="profile-edit-surface">
-                <div className="form-section-title">Personal Details</div>
+                <div className="form-section-title">{t('settings.personalDetails')}</div>
 
                 {message && (
                     <div
@@ -309,12 +311,12 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                     <div className="modern-field">
                         <FaIdBadge className="field-icon" />
                         <div className="field-content">
-                            <label>First Name</label>
+                            <label>{t('settings.firstName')}</label>
                             <input
                                 type="text"
                                 value={firstName}
                                 onChange={(e) => setFirstName(e.target.value)}
-                                placeholder="First name"
+                                placeholder={t('settings.firstName')}
                                 readOnly={isMaintainer}
                                 style={isMaintainer ? { opacity: 0.65, cursor: 'not-allowed' } : undefined}
                             />
@@ -325,12 +327,12 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                     <div className="modern-field">
                         <FaIdBadge className="field-icon" />
                         <div className="field-content">
-                            <label>Last Name</label>
+                            <label>{t('settings.lastName')}</label>
                             <input
                                 type="text"
                                 value={lastName}
                                 onChange={(e) => setLastName(e.target.value)}
-                                placeholder="Last name"
+                                placeholder={t('settings.lastName')}
                                 readOnly={isMaintainer}
                                 style={isMaintainer ? { opacity: 0.65, cursor: 'not-allowed' } : undefined}
                             />
@@ -341,7 +343,7 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                     <div className="modern-field">
                         <FaEnvelope className="field-icon" />
                         <div className="field-content">
-                            <label>Email Address</label>
+                            <label>{t('settings.emailAddress')}</label>
                             <input
                                 type="email"
                                 value={user?.email ?? ''}
@@ -356,7 +358,7 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                     <div className="modern-field">
                         <FaPhone className="field-icon" />
                         <div className="field-content">
-                            <label>Phone Number</label>
+                            <label>{t('settings.phoneNumber')}</label>
                             <input
                                 type="text"
                                 value={phone}
@@ -372,11 +374,11 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                     <div className="modern-field" style={{ gridColumn: '1 / -1' }}>
                         <FaUserCircle className="field-icon" />
                         <div className="field-content">
-                            <label>Bio</label>
+                            <label>{t('settings.bio')}</label>
                             <textarea
                                 value={bio}
                                 onChange={(e) => setBio(e.target.value)}
-                                placeholder="Tell others a bit about yourself"
+                                placeholder={t('settings.bioPlaceholder')}
                                 rows={3}
                                 style={{ resize: 'vertical', minHeight: 72, width: '100%', fontFamily: 'inherit' }}
                             />
@@ -388,12 +390,12 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                         <div className="modern-field">
                             <FaMapMarkerAlt className="field-icon" />
                             <div className="field-content">
-                                <label>Current Location</label>
+                                <label>{t('settings.currentLocation')}</label>
                                 <input
                                     type="text"
                                     value={currentLocation}
                                     onChange={(e) => setCurrentLocation(e.target.value)}
-                                    placeholder="City, Country"
+                                    placeholder={t('settings.cityCountryPlaceholder')}
                                 />
                             </div>
                         </div>
@@ -404,7 +406,7 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                 {!isMaintainer && isVerified && (maskedNid || arabicName) && (
                     <>
                         <div className="form-section-title" style={{ marginTop: 28 }}>
-                            Verified Identity
+                            {t('settings.verifiedIdentity')}
                             <span style={{
                                 marginLeft: 10,
                                 fontSize: '0.72rem',
@@ -417,11 +419,11 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                                 padding: '2px 8px',
                                 borderRadius: 20,
                             }}>
-                                ✓ Locked
+                                ✓ {t('settings.locked')}
                             </span>
                         </div>
                         <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginBottom: 16, marginTop: -4 }}>
-                            These fields are set by your National ID scan and cannot be changed here.
+                            {t('settings.nationalIdHint')}
                         </p>
                         <div className="input-group-modern">
                             {maskedNid && (
@@ -429,7 +431,7 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                                     <FaIdCard className="field-icon" style={{ color: '#2563eb' }} />
                                     <div className="field-content">
                                         <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                            National ID
+                                            {t('settings.nationalId')}
                                             <FaLock size={10} style={{ color: '#94a3b8' }} />
                                         </label>
                                         <input
@@ -454,7 +456,7 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                                 <FaIdBadge className="field-icon" style={{ color: '#2563eb' }} />
                                 <div className="field-content">
                                     <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                        Full Name (Arabic)
+                                        {t('settings.fullNameArabic')}
                                         <FaLock size={10} style={{ color: '#94a3b8' }} />
                                     </label>
                                     <input
@@ -486,7 +488,7 @@ const MyProfile: React.FC<MyProfileProps> = ({ role, onUpdatePreferencesShortcut
                     disabled={saving || !hasChanges}
                     style={{ opacity: saving || !hasChanges ? 0.65 : 1 }}
                 >
-                    {saving ? 'Saving…' : 'Save Changes'}
+                    {saving ? t('settings.saving') : t('settings.saveChanges')}
                 </button>
             </div>
         </div>

@@ -1,6 +1,7 @@
 // client/src/features/BrowseProperties/pages/BrowseProperties.tsx
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import './BrowseProperties.css';
 import Header from '../../../components/global/header';
 import Sidebar from '../../../components/global/Tenant/sidebar';
@@ -20,6 +21,7 @@ import type { PropertyUI as BrowsePropertyUI } from '../../../utils/propertyMapp
 
 
 const BrowseProperties: React.FC = () => {
+    const { t } = useTranslation();
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const listingFromUrl = searchParams.get('listing');
@@ -78,7 +80,7 @@ const BrowseProperties: React.FC = () => {
             setProperties(mapped);
         } catch (fetchError) {
             console.error('Failed to fetch properties:', fetchError);
-            setError('Failed to load properties. Please try again.');
+            setError(t('browseProperties.failedLoadProperties'));
         } finally {
             setLoading(false);
         }
@@ -112,15 +114,15 @@ const BrowseProperties: React.FC = () => {
     );
 
     const renderMainSections = () => {
-        const title = isSearching ? 'Search Results' : 'Available Properties';
+        const title = isSearching ? t('browseProperties.searchResults') : t('browseProperties.availableProperties');
         return (
-            <section className="property-vertical-section animate-fade-in">
+            <section className="property-vertical-section animate-fade-in" dir="ltr">
                 <div className="bp-section-header">
                     <div className="properties-title-area">
-                        <h2>.</h2>
+                        <h2>{title}</h2>
                     </div>
                     {isSearching && (
-                        <button className="view-all-btn" onClick={fetchDefaultProperties}>Clear Search</button>
+                        <button className="view-all-btn" onClick={fetchDefaultProperties}>{t('browseProperties.clearSearch')}</button>
                     )}
                 </div>
                 <div className="properties-vertical-grid">
@@ -131,7 +133,7 @@ const BrowseProperties: React.FC = () => {
     };
 
     return (
-        <div className="layout-wrapper">
+        <div className="layout-wrapper" dir="ltr">
             <Sidebar />
             <div className="main-content browse-main-content">
                 <Header />
@@ -141,7 +143,7 @@ const BrowseProperties: React.FC = () => {
                             <section className="property-vertical-section">
                                 <div className="bp-section-header">
                                     <div className="properties-title-area">
-                                        <h2>Loading properties...</h2>
+                                        <h2>{t('browseProperties.loadingProperties')}</h2>
                                     </div>
                                 </div>
                             </section>
@@ -161,7 +163,7 @@ const BrowseProperties: React.FC = () => {
                             <section className="property-vertical-section">
                                 <div className="bp-section-header">
                                     <div className="properties-title-area">
-                                        <h2>No properties available right now.</h2>
+                                        <h2>{t('browseProperties.noPropertiesAvailable')}</h2>
                                     </div>
                                 </div>
                             </section>
@@ -191,7 +193,7 @@ const BrowseProperties: React.FC = () => {
                                     setProperties(mapped);
                                 } catch (fetchError) {
                                     console.error('Failed to fetch properties:', fetchError);
-                                    setError('Failed to load properties. Please try again.');
+                                    setError(t('browseProperties.failedLoadProperties'));
                                 } finally {
                                     setLoading(false);
                                 }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Users, ArrowRight, Search, Home } from 'lucide-react';
 
 import { roommateMatchingService } from '../services/roommateMatchingService';
@@ -27,6 +28,7 @@ import './RoommateMatching.css';
 
 const RoommateMatching: React.FC = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [eligibility, setEligibility] = useState<EligibilityResponse | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -42,7 +44,7 @@ const RoommateMatching: React.FC = () => {
 
     const wish = useWish();
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const youName = `${currentUser.first_name || currentUser.firstName || 'You'}${currentUser.last_name ? ' ' + currentUser.last_name : ''}`;
+    const youName = `${currentUser.first_name || currentUser.firstName || t('roommate.youDefault', 'You')}${currentUser.last_name ? ' ' + currentUser.last_name : ''}`;
     const youAvatar = currentUser.avatar_url || currentUser.avatarUrl || null;
 
     const init = async () => {
@@ -91,7 +93,7 @@ const RoommateMatching: React.FC = () => {
             if (res.status === 'updated') setOverride((o) => ({ ...o, [cand.id]: 'mutual' }));
         } catch {
             setOverride((o) => ({ ...o, [cand.id]: 'none' }));
-            alert('Failed to send connection request');
+            alert(t('roommate.connectFailed', 'Failed to send connection request'));
         }
     };
 
@@ -136,12 +138,12 @@ const RoommateMatching: React.FC = () => {
                 <main className="content-area">
                     <div className="rmx">
                         <div className="page-head" style={{ marginBottom: 26 }}>
-                            <div className="crumb"><Users size={14} /> Matching <ArrowRight size={13} /> <b>Roommates</b></div>
+                            <div className="crumb"><Users size={14} /> {t('roommate.crumbMatching', 'Matching')} <ArrowRight size={13} /> <b>{t('roommate.crumbRoommates', 'Roommates')}</b></div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-                                <h1>Make a <span className="g">wish</span>. Meet your roommate.</h1>
+                                <h1>{t('roommate.makeWishText1', 'Make a')} <span className="g">{t('roommate.makeWishTextG', 'wish')}</span>{t('roommate.makeWishText2', '. Meet your roommate.')}</h1>
                                 <div className="subseg">
-                                    <button className={tab === 'B' ? 'on' : ''} onClick={() => setTab('B')}><Search size={16} />Find a place</button>
-                                    <button className={tab === 'A' ? 'on' : ''} onClick={() => setTab('A')}><Home size={16} />My lease</button>
+                                    <button className={tab === 'B' ? 'on' : ''} onClick={() => setTab('B')}><Search size={16} />{t('roommate.tabFindPlace', 'Find a place')}</button>
+                                    <button className={tab === 'A' ? 'on' : ''} onClick={() => setTab('A')}><Home size={16} />{t('roommate.tabMyLease', 'My lease')}</button>
                                 </div>
                             </div>
                         </div>
@@ -155,7 +157,7 @@ const RoommateMatching: React.FC = () => {
 
                                 <div className="or-divider">
                                     <div className="ln" />
-                                    <span>Or browse smart matches</span>
+                                    <span>{t('roommate.orBrowseSmartMatches', 'Or browse smart matches')}</span>
                                     <div className="ln" />
                                 </div>
 
@@ -163,10 +165,10 @@ const RoommateMatching: React.FC = () => {
                                 <Filters f={filters} setF={setFilters} />
                                 <div className="panel-head">
                                     <div>
-                                        <h2>Compatible roommates near you</h2>
-                                        <p>Habit-based matching, no AI — ranked by your combined lifestyle fit.</p>
+                                        <h2>{t('roommate.compatibleRoommatesHeading', 'Compatible roommates near you')}</h2>
+                                        <p>{t('roommate.compatibleRoommatesSub', 'Habit-based matching, no AI — ranked by your combined lifestyle fit.')}</p>
                                     </div>
-                                    <span className="count-pill">{smart.length} people</span>
+                                    <span className="count-pill">{t('roommate.peopleCount', { count: smart.length, defaultValue: `${smart.length} people` })}</span>
                                 </div>
                                 {smartLoading ? (
                                     <div style={{ display: 'grid', placeItems: 'center', padding: 50 }}><div className="rm-spinner" /></div>
@@ -196,3 +198,4 @@ const RoommateMatching: React.FC = () => {
 };
 
 export default RoommateMatching;
+

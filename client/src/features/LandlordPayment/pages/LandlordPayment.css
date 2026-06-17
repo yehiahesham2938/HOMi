@@ -582,16 +582,18 @@
 /* --- 5. METHODS (Apple Wallet / Stripe Style) --- */
 
 /* Re-using the flex layout from TenantPayment */
-.methods-viewport {
+.l-methods-viewport {
     display: flex;
     gap: 40px;
     align-items: flex-start;
     padding-top: 10px;
-    margin-left: 100px;
+    justify-content: center;
+    margin: 0 auto;
+    width: 100%;
 }
 
 /* The High-End Card Visual */
-.card-visual.bank-account {
+.l-card-visual.l-bank-account {
     width: 380px;
     height: 220px;
     border-radius: 20px;
@@ -606,7 +608,7 @@
     overflow: hidden;
 }
 
-.card-visual.wallet-account {
+.l-card-visual.l-wallet-account {
     width: 380px;
     height: 220px;
     border-radius: 20px;
@@ -621,7 +623,7 @@
     overflow: hidden;
 }
 
-.card-visual.wallet-account::after {
+.l-card-visual.l-wallet-account::after {
     content: '';
     position: absolute;
     top: 0;
@@ -631,7 +633,7 @@
     background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.16) 100%);
 }
 
-.card-visual.bank-account::after {
+.l-card-visual.l-bank-account::after {
     content: '';
     position: absolute;
     top: 0;
@@ -641,43 +643,43 @@
     background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.08) 100%);
 }
 
-.card-top-row {
+.l-card-top-row {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
 }
 
-.bank-logo {
+.l-bank-logo {
     opacity: 0.9;
     letter-spacing: -0.5px;
     font-weight: 800;
     font-size: 14px;
 }
 
-.chip-gold {
+.l-chip-gold {
     width: 44px;
     height: 32px;
     background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
     border-radius: 6px;
 }
 
-.card-mid-row {
+.l-card-mid-row {
     margin: 24px 0;
 }
 
-.iban-display {
+.l-iban-display {
     font-family: 'JetBrains Mono', monospace;
     font-size: 1.1rem;
     letter-spacing: 2px;
     word-spacing: 4px;
 }
 
-.card-bottom-row {
+.l-card-bottom-row {
     display: flex;
     flex-direction: column;
 }
 
-.card-holder-label {
+.l-card-holder-label {
     font-size: 10px;
     text-transform: uppercase;
     opacity: 0.5;
@@ -685,21 +687,22 @@
     margin-bottom: 4px;
 }
 
-.card-holder-name {
+.l-card-holder-name {
     font-weight: 600;
     font-size: 15px;
     letter-spacing: 0.5px;
 }
 
 /* Sidebar List (Right Side) */
-.methods-list-side {
+.l-methods-list-side {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 16px;
+    max-width: 600px;
 }
 
-.method-entry {
+.l-method-entry {
     display: flex;
     align-items: center;
     gap: 16px;
@@ -709,20 +712,21 @@
     border-radius: 16px;
     transition: all 0.2s ease;
     cursor: pointer;
+    width: 100%;
 }
 
-.method-entry:hover {
+.l-method-entry:hover {
     border-color: var(--accents-3);
     transform: translateX(4px);
 }
 
-.method-entry.active {
+.l-method-entry.active {
     border-color: var(--fg);
     border-width: 2px;
     box-shadow: var(--shadow);
 }
 
-.method-icon-wrap {
+.l-method-icon-wrap {
     width: 40px;
     height: 40px;
     background: var(--accents-1);
@@ -733,20 +737,20 @@
     color: var(--fg);
 }
 
-.method-info-text h5 {
+.l-method-info-text h5 {
     margin: 0;
     font-size: 14px;
     font-weight: 700;
 }
 
-.method-info-text p {
+.l-method-info-text p {
     margin: 2px 0 0;
     font-size: 12px;
     color: var(--accents-4);
 }
 
 /* Add Button */
-.btn-add-method {
+.l-btn-add-method {
     background: white;
     border: 1px dashed var(--accents-3);
     padding: 20px;
@@ -760,9 +764,10 @@
     justify-content: center;
     gap: 10px;
     transition: all 0.2s;
+    width: 100%;
 }
 
-.btn-add-method:hover {
+.l-btn-add-method:hover {
     border-color: var(--fg);
     color: var(--fg);
     background: var(--accents-1);
@@ -941,12 +946,12 @@
 
 /* Mobile Responsiveness */
 @media (max-width: 900px) {
-    .methods-viewport {
+    .l-methods-viewport {
         flex-direction: column;
         align-items: center;
     }
 
-    .card-visual.bank-account {
+    .l-card-visual.l-bank-account {
         width: 100%;
         max-width: 380px;
     }

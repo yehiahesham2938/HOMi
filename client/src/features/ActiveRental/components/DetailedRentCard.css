@@ -588,7 +588,7 @@
 
 .preview-container {
     width: 100%;
-    max-width: 900px;
+    max-width: 1000px;
     height: 95vh;
     background: white;
     border-radius: 16px;
@@ -689,6 +689,7 @@
 .preview-body {
     flex: 1;
     overflow-y: auto;
+    overflow-x: auto;
     padding: 40px;
     background: #525659; /* PDF viewer style background */
 }
@@ -696,6 +697,7 @@
 .preview-document {
     background: white;
     width: 210mm; /* A4 width */
+    max-width: 100%;
     min-height: 297mm; /* A4 height */
     margin: 0 auto;
     padding: 20mm;
@@ -748,6 +750,13 @@
 .pdf-data-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    font-size: 14px;
+}
+
+.pdf-data-grid-3col {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     font-size: 14px;
 }
@@ -837,9 +846,13 @@
     }
     .preview-document {
         width: 100%;
-        padding: 10px;
+        padding: 15px;
     }
     .pdf-data-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    .pdf-data-grid-3col {
         grid-template-columns: 1fr;
         gap: 10px;
     }
@@ -849,5 +862,14 @@
     }
     .pdf-sig-box {
         width: 100%;
+    }
+    .pdf-header-preview h1 {
+        font-size: 20px;
+    }
+    .pdf-section-title {
+        font-size: 15px;
+    }
+    .pdf-data-value {
+        font-size: 13px;
     }
 }

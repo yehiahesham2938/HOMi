@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   FaTwitter,
@@ -9,6 +10,7 @@ import {
   FaPhoneAlt
 } from 'react-icons/fa';
 import authService from '../../services/auth.service';
+import AuthModal from './AuthModal';
 import './footer.css';
 
 const Footer = () => {
@@ -18,6 +20,7 @@ const Footer = () => {
   const currentUser = authService.getCurrentUser();
   const role = currentUser?.user?.role?.toUpperCase();
   const isGuestPage = location.pathname === '/guest-home' || location.pathname === '/guest-search';
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const getHelpLink = '/get-help';
   const listPropertyLink = '/for-landlords';
@@ -74,11 +77,11 @@ const Footer = () => {
               </>
             ) : (
               <>
-                <Link to="/browse-properties">{t('footer.browseHomes')}</Link>
+                <button className="footer-auth-link" onClick={() => setShowAuthModal(true)}>{t('footer.browseHomes')}</button>
                 <Link to={listPropertyLink} state={isGuestPage ? { fromGuestHome: true } : undefined}>{t('footer.listProperty')}</Link>
-                <Link to="/homi-pro">{t('footer.homiPro')}</Link>
+                <button className="footer-auth-link" onClick={() => setShowAuthModal(true)}>{t('footer.homiPro')}</button>
                 <Link to="/pricing">{t('footer.pricingFees')}</Link>
-                <Link to="/roommate-matching">{t('footer.roommateMatching')}</Link>
+                <button className="footer-auth-link" onClick={() => setShowAuthModal(true)}>{t('footer.roommateMatching')}</button>
                 <Link to="/maintenance-providers">Maintenance Providers</Link>
               </>
             )}
@@ -101,7 +104,7 @@ const Footer = () => {
               <a href="tel:+18005550199"><FaPhoneAlt /> +1 (800) 555-0199</a>
             </div>
             <div className="footer-divider"></div>
-            <Link to={`/terms?hideSidebar=true${isGuestPage ? '&fromGuest=true' : ''}`}>{t('footer.terms')}</Link>
+            <Link to={role ? '/terms' : `/terms?hideSidebar=true${isGuestPage ? '&fromGuest=true' : ''}`}>{t('footer.terms')}</Link>
             {/* <Link to="/privacy">{t('footer.privacy')}</Link>
             <Link to="/trust">{t('footer.trust')}</Link> */}
           </div>
@@ -118,6 +121,7 @@ const Footer = () => {
           </div>
         </div>
       </div>
+      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
     </footer>
   );
 };

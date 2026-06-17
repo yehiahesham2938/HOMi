@@ -9,7 +9,7 @@ import AddPropertyCard from '../components/LandlordHomeComponents/AddPropertyCar
 import Notifications from '../components/LandlordHomeComponents/Notifications';
 import PaymentState from '../components/LandlordHomeComponents/PaymentState';
 import OptimizeListingModal from '../components/LandlordHomeComponents/optimizeListingModal';
-import { FiPlus, FiHome, FiCamera, FiBookOpen, FiCreditCard, FiStar, FiZap, FiMessageSquare } from 'react-icons/fi';
+import { FiPlus, FiHome, FiCamera, FiBookOpen, FiCreditCard, FiStar, FiZap, FiMessageSquare, FiUser, FiShield, FiFileText, FiDollarSign } from 'react-icons/fi';
 import authService from '../../../services/auth.service';
 import propertyService from '../../../services/property.service';
 import Loader from '../../../components/global/Loader';
@@ -25,6 +25,7 @@ const LandlordHome = () => {
   const [contracts, setContracts] = useState<LandlordContract[]>([]);
   const [landlordName, setLandlordName] = useState(t('sidebar.loading'));
   const [isLoading, setIsLoading] = useState(true);
+  const avatarUrl = authService.getCurrentUser()?.profile?.avatarUrl;
 
   const fetchProperties = useCallback(async () => {
     setIsLoading(true);
@@ -123,9 +124,42 @@ const LandlordHome = () => {
               <div className="dashboard-content-wrapper animate-fade-in">
 
                 <header className="welcome-section">
-                  <div className="welcome-text">
-                    <h1>{t('landlordHome.welcomeBack')}, <span className="highlight-gradient">{landlordName}!</span></h1>
-                    <p>{t('landlordHome.managePropertiesTrack')}</p>
+                  <div className="welcome-profile-orb">
+                    <div className="welcome-avatar-wrapper">
+                      {avatarUrl ? (
+                        <img src={avatarUrl} alt="Avatar" className="welcome-avatar" />
+                      ) : (
+                        <div className="welcome-avatar-fallback-container">
+                          <FiUser size={30} className="welcome-avatar-fallback-fi" />
+                        </div>
+                      )}
+                      <div className="welcome-badge">
+                        <FiShield size={12} />
+                        <span>{t('landlordHome.verifiedHost', 'Premium Host')}</span>
+                      </div>
+                    </div>
+                    <div className="welcome-text">
+                      <h1>{t('landlordHome.welcomeBack')}, <span className="highlight-gradient">{landlordName}!</span></h1>
+                      <p>{t('landlordHome.managePropertiesTrack')}</p>
+                    </div>
+                  </div>
+
+                  <div className="welcome-quick-actions">
+                    <div className="actions-title">{t('landlordHome.quickActions', 'Quick Actions')}</div>
+                    <div className="welcome-actions-container">
+                      <button className="welcome-quick-btn" onClick={() => navigate('/properties/add')}>
+                        <FiPlus size={18} />
+                        <span>{t('landlordHome.addPropertyShort', 'Add Property')}</span>
+                      </button>
+                      <button className="welcome-quick-btn" onClick={() => navigate('/landlord-contracts')}>
+                        <FiFileText size={18} />
+                        <span>{t('landlordHome.viewContracts', 'Contracts')}</span>
+                      </button>
+                      <button className="welcome-quick-btn" onClick={() => navigate('/landlord-payment')}>
+                        <FiDollarSign size={18} />
+                        <span>{t('landlordHome.walletPayouts', 'Payments')}</span>
+                      </button>
+                    </div>
                   </div>
                 </header>
 

@@ -1180,7 +1180,7 @@ const TenantPayment: React.FC = () => {
                                             </td>
                                             <td>
                                                 <div className="prop-cell" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                    <Building2 size={14} style={{ flexShrink: 0 }} /> 
+                                                    <Building2 size={14} style={{ flexShrink: 0 }} />
                                                     <span>{item.propertyTitle}</span>
                                                 </div>
                                             </td>
@@ -1212,35 +1212,35 @@ const TenantPayment: React.FC = () => {
 
     const renderMethods = () => (
         <div className="tab-viewport animate-fade-in">
-            <div className="methods-viewport">
+            <div className="t-methods-viewport">
                 {hasSavedMethods ? (
-                    <div className="card-visual bank-account">
-                        <div className="card-top-row">
-                            <span className="bank-logo">{primaryMethod?.brand?.toUpperCase() ?? 'CARD'}</span>
-                            <div className="chip-gold"></div>
+                    <div className="t-card-visual t-bank-account">
+                        <div className="t-card-top-row">
+                            <span className="t-bank-logo">{primaryMethod?.brand?.toUpperCase() ?? 'CARD'}</span>
+                            <div className="t-chip-gold"></div>
                         </div>
-                        <div className="card-mid-row">
-                            <div className="iban-display">•••• •••• •••• {primaryMethod?.last4 ?? '0000'}</div>
+                        <div className="t-card-mid-row">
+                            <div className="t-iban-display">•••• •••• •••• {primaryMethod?.last4 ?? '0000'}</div>
                         </div>
-                        <div className="card-bottom-row">
-                            <span className="card-holder-label">Account Holder</span>
-                            <span className="card-holder-name">{primaryMethod?.cardholderName ?? accountHolderName}</span>
+                        <div className="t-card-bottom-row">
+                            <span className="t-card-holder-label">Account Holder</span>
+                            <span className="t-card-holder-name">{primaryMethod?.cardholderName ?? accountHolderName}</span>
                         </div>
                     </div>
                 ) : (
-                    <div className="card-visual empty-card">
-                        <div className="empty-card-content">
-                            <CreditCard size={32} className="empty-card-icon" />
+                    <div className="t-card-visual t-empty-card">
+                        <div className="t-empty-card-content">
+                            <CreditCard size={32} className="t-empty-card-icon" />
                             <span>No Methods Added</span>
                         </div>
                     </div>
                 )}
 
-                <div className="methods-list-side">
+                <div className="t-methods-list-side">
                     {hasSavedMethods ? (
-                        <div className="method-entry active">
-                            <div className="method-icon-wrap"><Landmark size={20} /></div>
-                            <div className="method-info-text">
+                        <div className="t-method-entry active">
+                            <div className="t-method-icon-wrap"><Landmark size={20} /></div>
+                            <div className="t-method-info-text">
                                 <h5>{primaryMethod?.brand?.toUpperCase() ?? 'Card'} •••• {primaryMethod?.last4 ?? '0000'}</h5>
                                 <p>{primaryMethod?.isDefault ? 'Primary payment method' : 'Saved payment method'}</p>
                             </div>
@@ -1252,7 +1252,7 @@ const TenantPayment: React.FC = () => {
                         </div>
                     )}
 
-                    <button className="btn-add-method" onClick={() => setIsMethodModalOpen(true)}>
+                    <button className="t-btn-add-method" onClick={() => setIsMethodModalOpen(true)}>
                         <Plus size={18} /> {t('tenantPayment.addNewPaymentMethod')}
                     </button>
                 </div>

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import './DetailedRentCard.css';
@@ -296,9 +297,9 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
                 </div>
             </div>
 
-            {previewLang && (
-                <div className="contract-preview-overlay">
-                    <div className="preview-container animate-fade-in">
+            {previewLang && createPortal(
+                <div className="contract-preview-overlay" onClick={(e) => { e.stopPropagation(); setPreviewLang(null); }}>
+                    <div className="preview-container animate-fade-in" onClick={(e) => e.stopPropagation()}>
                         <header className="preview-header">
                             <div className="header-left">
                                 <h3>{t('activeLease.contractPreview')} ({previewLang.toUpperCase()})</h3>
@@ -355,7 +356,7 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
                                                 </div>
                                             </div>
                                         </div>
-
+ 
                                         {/* Section 2: Property & Terms */}
                                         <div className="pdf-section">
                                             <div className="pdf-section-title">{previewLang === 'en' ? '2. PROPERTY & TERMS' : '٢. بيانات العقار والمدة'}</div>
@@ -366,17 +367,17 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
                                                 <div className="pdf-data-item"><span className="pdf-data-label">{previewLang === 'en' ? 'Lease Duration' : 'مدة التعاقد'}</span><span className="pdf-data-value">{localizedPreview.duration}</span></div>
                                             </div>
                                         </div>
-
+ 
                                         {/* Section 3: Financials */}
                                         <div className="pdf-section">
                                             <div className="pdf-section-title">{previewLang === 'en' ? '3. FINANCIAL OBLIGATIONS' : '٣. الالتزامات المالية'}</div>
-                                            <div className="pdf-data-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+                                            <div className="pdf-data-grid-3col">
                                                 <div className="pdf-data-item"><span className="pdf-data-label">{previewLang === 'en' ? 'Monthly Rent Amount' : 'القيمة الإيجارية الشهرية'}</span><span className="pdf-data-value" style={{ color: '#27ae60', fontWeight: 'bold' }}>{previewLang === 'en' ? '$' : ''}{localizedPreview.amount}{previewLang === 'ar' ? ' جنية مصري' : ''}</span></div>
                                                 <div className="pdf-data-item"><span className="pdf-data-label">{previewLang === 'en' ? 'Security Deposit' : 'مبلغ التأمين'}</span><span className="pdf-data-value" style={{ color: '#2980b9', fontWeight: 'bold' }}>{previewLang === 'en' ? '$' : ''}{localizedPreview.deposit}{previewLang === 'ar' ? ' جنية مصري' : ''}</span></div>
                                                 <div className="pdf-data-item"><span className="pdf-data-label">{previewLang === 'en' ? 'Late Fee Penalty' : 'غرامة التأخير'}</span><span className="pdf-data-value" style={{ color: '#c0392b', fontWeight: 'bold' }}>{previewLang === 'en' ? '$' : ''}{localizedPreview.lateFee}{previewLang === 'ar' ? ' جنية مصري' : ''}</span></div>
                                             </div>
                                         </div>
-
+ 
                                         {/* Section 4: Rules */}
                                         <div className="pdf-section">
                                             <div className="pdf-section-title">{previewLang === 'en' ? '4. RULES & PERMISSIONS' : '٤. القواعد والأذونات'}</div>
@@ -577,7 +578,7 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
                                                 </div>
                                             </div>
                                         </div>
-
+ 
                                         {/* Section 6: Signatures */}
                                         <div className="pdf-signature-area">
                                             <div className="pdf-sig-box">
@@ -605,14 +606,15 @@ const DetailedRentCard: React.FC<RentalProps> = ({ rental, contract }) => {
                                         </div>
                                     </>
                                 )}
-
+ 
                                 <div className="pdf-footer-preview">
                                     {previewLang === 'en' ? 'Digitally Verified Agreement • HOMI Platform • Timestamped Security' : 'عقد موثق رقمياً • منصة هومي (HOMI) • حماية تقنية وتوقيع زمنى'}
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );

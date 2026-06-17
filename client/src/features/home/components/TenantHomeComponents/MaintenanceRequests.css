@@ -12,8 +12,7 @@
   gap: 1rem;
   border-radius: 24px !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  margin-left: 350px;
-  width: 767px;
+  width: 100%;
 }
 
 .maintenance-dashboard:hover {

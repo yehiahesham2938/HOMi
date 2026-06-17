@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { Inbox, Clock, CheckCircle, XCircle, RefreshCw, BedDouble, Bath, Ruler, Calendar } from 'lucide-react';
 import Header from '../../../components/global/header';
 import Sidebar from '../../../components/global/Tenant/sidebar';
-import Footer from '../../../components/global/footer';
 import { rentalRequestService, type MyRentalRequest, type RentalRequestStatus } from '../../../services/rental-request.service';
 import Loader from '../../../components/global/Loader';
 import './SentRequests.css';
@@ -270,8 +269,6 @@ const SentRequests: React.FC = () => {
                     )}
                 </div>
             </div>
-
-            <Footer />
         </div>
     );
 };

@@ -294,7 +294,7 @@ const ForTenants: React.FC = () => {
                       Explore properties
                     </button>
                   )}
-                  <Link to="/get-help" className="how-btn-secondary">
+                  <Link to="/get-help" state={{ fromGuestHome: true }} className="how-btn-secondary">
                     See tenant support
                   </Link>
                 </div>

@@ -1109,11 +1109,16 @@ export class AuthService {
                 !onboardingStep3WasAlreadyComplete &&
                 profile.onboarding_step3_completed === true
             ) {
-                try {
-                    await emailService.sendWelcomeEmail(user.email, profile.first_name ?? 'there');
-                } catch (e) {
-                    console.warn('Welcome email failed after first-time profile completion:', e);
-                }
+                // Fire-and-forget: the welcome email is best-effort and must never
+                // block (or fail) the profile-completion response. Awaiting it here
+                // stalled the HTTP reply when SMTP was slow/unreachable, causing the
+                // client to time out with "Could not save your profile" even though
+                // the transaction had already committed.
+                void emailService
+                    .sendWelcomeEmail(user.email, profile.first_name ?? 'there')
+                    .catch((e) => {
+                        console.warn('Welcome email failed after first-time profile completion:', e);
+                    });
             }
 
             const userResponse: UserResponse = {

@@ -30,9 +30,9 @@ vi.mock('../../../../src/shared/utils/encryption.util.js', () => ({
 
 vi.mock('../../../../src/shared/services/email.service.js', () => ({
     emailService: {
-        sendVerificationEmail: vi.fn(),
-        sendPasswordResetEmail: vi.fn(),
-        sendWelcomeEmail: vi.fn(),
+        sendVerificationEmail: vi.fn().mockResolvedValue(true),
+        sendPasswordResetEmail: vi.fn().mockResolvedValue(true),
+        sendWelcomeEmail: vi.fn().mockResolvedValue(true),
     },
 }));
 

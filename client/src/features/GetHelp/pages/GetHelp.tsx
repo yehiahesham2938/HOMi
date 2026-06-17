@@ -38,7 +38,8 @@ const GetHelp: React.FC = () => {
   const fromGuestHome = Boolean(
     (location.state as { fromGuestHome?: boolean } | null)?.fromGuestHome
   );
-  const user = authService.getCurrentUser()?.user;
+  const isAuthenticated = authService.isAuthenticated();
+  const user = isAuthenticated ? authService.getCurrentUser()?.user : null;
   const role = user?.role;
   /** Guest marketing chrome: no session, or explicit entry from guest pages (e.g. Help Center link). */
   const useGuestChrome = !user || fromGuestHome;

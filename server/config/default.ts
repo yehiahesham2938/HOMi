@@ -52,8 +52,9 @@ export const createDefaultConfig = (rawEnv: NodeJS.ProcessEnv = process.env) => 
         port: toNumber(rawEnv.SMTP_PORT, 587),
         user: rawEnv.SMTP_USER ?? '',
         pass: rawEnv.SMTP_PASS ?? '',
-        fromEmail: rawEnv.SMTP_FROM_EMAIL ?? 'noreply@homi.com',
+        fromEmail: rawEnv.SMTP_FROM_EMAIL ?? 'support@homi-platform.com',
         fromName: rawEnv.SMTP_FROM_NAME ?? 'HOMi',
+        resendApiKey: rawEnv.RESEND_API_KEY ?? '',
     },
     adminSeed: {
         email: rawEnv.ADMIN_SEED_EMAIL ?? 'Homi@admin.com',

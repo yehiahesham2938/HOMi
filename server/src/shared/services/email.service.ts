@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
+import { Resend } from 'resend';
 import env from '../../config/env.js';
 
 /**
@@ -8,8 +9,10 @@ import env from '../../config/env.js';
  */
 class EmailService {
     private transporter: Transporter | null = null;
+    private resendClient: Resend | null = null;
     private initialized = false;
     private isMockMode = false;
+    private useResend = false;
 
     /**
      * Initialize the email transporter
@@ -18,9 +21,24 @@ class EmailService {
     private async initialize(): Promise<void> {
         if (this.initialized) return;
 
+        // Check if Resend is configured
+        if (env.RESEND_API_KEY) {
+            try {
+                this.resendClient = new Resend(env.RESEND_API_KEY);
+                this.useResend = true;
+                this.isMockMode = false;
+                this.initialized = true;
+                console.log('✅ [EMAIL SERVICE] Resend integration initialized');
+                return;
+            } catch (error) {
+                console.error('❌ [EMAIL SERVICE] Failed to initialize Resend:', error);
+                // Fallback to SMTP
+            }
+        }
+
         // Check if SMTP credentials are configured
         if (!env.SMTP_USER || !env.SMTP_PASS || !env.SMTP_HOST) {
-            console.log('📧 [EMAIL SERVICE] SMTP not configured - emails will be mocked to console');
+            console.log('📧 [EMAIL SERVICE] Resend/SMTP not configured - emails will be mocked to console');
             this.isMockMode = true;
             this.initialized = true;
             return;
@@ -300,7 +318,7 @@ class EmailService {
         const html = this.generateEmailTemplate(content);
         const text = this.generatePlainTextEmail(content);
 
-        // If no transporter, mock the email
+        // If no transporter/resend, mock the email
         if (this.isMockMode) {
             console.log('\n📧 ═══════════════════════════════════════════════════════════');
             console.log('📧 [MOCK EMAIL] Sending email to:', to);
@@ -312,6 +330,33 @@ class EmailService {
             }
             console.log('📧 ═══════════════════════════════════════════════════════════\n');
             return true;
+        }
+
+        if (this.useResend && this.resendClient) {
+            try {
+                const fromEmail = env.SMTP_FROM_EMAIL || 'support@homi-platform.com';
+                const fromName = env.SMTP_FROM_NAME || 'HOMi';
+                const from = `"${fromName}" <${fromEmail}>`;
+
+                const result = await this.resendClient.emails.send({
+                    from,
+                    to: [to],
+                    subject,
+                    text,
+                    html,
+                });
+
+                if (result.error) {
+                    console.error('❌ [EMAIL SERVICE] Resend failed to send email:', result.error);
+                    return false;
+                }
+
+                console.log('✅ [EMAIL SERVICE] Email sent successfully via Resend:', result.data?.id);
+                return true;
+            } catch (error) {
+                console.error('❌ [EMAIL SERVICE] Failed to send email via Resend:', error);
+                return false;
+            }
         }
 
         if (!this.transporter) {

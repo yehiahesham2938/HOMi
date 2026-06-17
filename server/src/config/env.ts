@@ -65,6 +65,7 @@ const appConfigSchema = z.object({
         pass: z.string(),
         fromEmail: z.string().min(1),
         fromName: z.string().min(1),
+        resendApiKey: z.string().optional(),
     }),
     adminSeed: z.object({
         email: z.string().min(1),
@@ -178,6 +179,7 @@ export interface EnvConfig {
     SMTP_PASS: string;
     SMTP_FROM_EMAIL: string;
     SMTP_FROM_NAME: string;
+    RESEND_API_KEY: string | undefined;
 
     WEBAUTHN_RP_ID: string | undefined;
     WEBAUTHN_ORIGIN: string | undefined;
@@ -246,6 +248,7 @@ export const env: EnvConfig = {
     SMTP_PASS: appConfig.email.pass,
     SMTP_FROM_EMAIL: appConfig.email.fromEmail,
     SMTP_FROM_NAME: appConfig.email.fromName,
+    RESEND_API_KEY: appConfig.email.resendApiKey,
 
     WEBAUTHN_RP_ID: appConfig.auth.webauthn.rpId,
     WEBAUTHN_ORIGIN: appConfig.auth.webauthn.origin,

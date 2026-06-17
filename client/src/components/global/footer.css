@@ -179,6 +179,28 @@
   transform: translateX(4px); /* Modern slide effect */
 }
 
+.footer-auth-link {
+  display: flex;
+  color: #64748b;
+  text-decoration: none;
+  margin-bottom: 14px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  width: fit-content;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: start;
+}
+
+.footer-auth-link:hover {
+  color: #2563eb;
+  transform: translateX(4px);
+}
+
+
 /* --- Contact Info --- */
 .footer-contact-info {
   display:contents;

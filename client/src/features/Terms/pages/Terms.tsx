@@ -29,8 +29,8 @@ const Terms = () => {
         return null;
     };
 
-    // Sidebar is shown only when the user is logged in AND hideSidebar is not explicitly set
-    const hasSidebar = !!role && searchParams.get('hideSidebar') !== 'true';
+    // Sidebar is shown only when the user is logged in
+    const hasSidebar = !!role;
     const isGuestView = searchParams.get('fromGuest') === 'true';
 
     return (

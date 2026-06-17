@@ -1,5 +1,6 @@
 // Updated SettingsSidebar.tsx
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import './SettingsSidebar.css';
 import {
     FaUser, FaShieldAlt, FaCog, FaTrashAlt,
@@ -13,14 +14,15 @@ interface SettingsSidebarProps {
 }
 
 const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ activeTab, setActiveTab, role }) => {
+    const { t } = useTranslation();
     const isMaintainer = role === 'MAINTENANCE_PROVIDER';
     const menuItems = [
-        { id: 'profile', label: 'My Profile', icon: <FaUser /> },
-        { id: 'billing', label: 'Plan & Billing', icon: <FaCreditCard /> }, // NEW
-        { id: 'notifications', label: 'Notifications', icon: <FaBell /> }, // NEW
-        { id: 'security', label: 'Security', icon: <FaShieldAlt /> },
-        { id: 'lifestyle', label: 'Lifestyle Habits', icon: <FaMagic />, tenantOnly: true },
-        { id: 'preferences', label: 'Preferences', icon: <FaCog /> },
+        { id: 'profile', label: t('settings.tabProfile'), icon: <FaUser /> },
+        { id: 'billing', label: t('settings.tabBilling'), icon: <FaCreditCard /> }, // NEW
+        { id: 'notifications', label: t('settings.tabNotifications'), icon: <FaBell /> }, // NEW
+        { id: 'security', label: t('settings.tabSecurity'), icon: <FaShieldAlt /> },
+        { id: 'lifestyle', label: t('settings.tabLifestyle'), icon: <FaMagic />, tenantOnly: true },
+        { id: 'preferences', label: t('settings.tabPreferences'), icon: <FaCog /> },
     ];
     const visibleItems = menuItems.filter((item) => {
         if (isMaintainer && (item.id === 'billing' || item.id === 'privacy')) return false;
@@ -48,7 +50,7 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ activeTab, setActiveT
                 onClick={() => setActiveTab('delete')}
             >
                 <span className="nav-icon"><FaTrashAlt /></span>
-                Delete Account
+                {t('settings.tabDelete')}
             </button>
         </aside>
     );

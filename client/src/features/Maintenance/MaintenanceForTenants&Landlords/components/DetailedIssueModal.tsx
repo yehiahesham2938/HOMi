@@ -222,9 +222,9 @@ const DetailedIssueModal: React.FC<DetailedIssueModalProps> = ({
                         <div className="success-icon-wrapper">
                             <FaCheckCircle />
                         </div>
-                        <h2>Issue posted</h2>
-                        <p>Your maintenance request is now live. Approved providers will start sending applications with their final price.</p>
-                        <button className="done-btn" onClick={onClose}>Great, thanks!</button>
+                        <h2>{t('maintenance.issuePostedSuccess')}</h2>
+                        <p>{t('maintenance.issuePostedSub')}</p>
+                        <button className="done-btn" onClick={onClose}>{t('maintenance.greatThanks')}</button>
                     </div>
                 </div>
             </div>
@@ -240,8 +240,8 @@ const DetailedIssueModal: React.FC<DetailedIssueModalProps> = ({
                             <FaExclamationCircle />
                         </div>
                         <div>
-                            <h2>{isViewOnly ? 'Issue Details' : 'Report a New Issue'}</h2>
-                            <p>{isViewOnly ? 'View the status and details of your posted issue.' : 'Maintenance is paid from your HOMi wallet.'}</p>
+                            <h2>{isViewOnly ? t('maintenance.issueDetails') : t('maintenance.reportNewIssue')}</h2>
+                            <p>{isViewOnly ? t('maintenance.viewStatusSubtitle') : t('maintenance.walletSubtitle')}</p>
                         </div>
                     </div>
                     <button className="close-modal-btn" onClick={onClose}>
@@ -259,7 +259,7 @@ const DetailedIssueModal: React.FC<DetailedIssueModalProps> = ({
                                 marginBottom: '1.25rem', background: 'linear-gradient(180deg, #fafafe, #f4f6ff)',
                             }}>
                                 {loadingContext ? (
-                                    <div style={{ padding: '0.5rem' }}>Loading your active rental…</div>
+                                    <div style={{ padding: '0.5rem' }}>{t('maintenance.loadingActiveRental')}</div>
                                 ) : context ? (
                                     <>
                                         <div style={{
@@ -276,7 +276,7 @@ const DetailedIssueModal: React.FC<DetailedIssueModalProps> = ({
                                         </div>
                                         <div style={{ flex: 1 }}>
                                             <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: 1, color: '#6366f1', fontWeight: 700 }}>
-                                                Maintaining
+                                                {t('maintenance.maintaining')}
                                             </div>
                                             <h3 style={{ margin: '0.15rem 0 0.35rem', fontSize: '1.1rem' }}>{context.property.title}</h3>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#475569', fontSize: '0.9rem' }}>
@@ -288,20 +288,20 @@ const DetailedIssueModal: React.FC<DetailedIssueModalProps> = ({
                                                     fontSize: '0.85rem', color: '#0f172a', background: '#fff',
                                                     border: '1px solid #e5e7eb', padding: '4px 10px', borderRadius: 999,
                                                 }}>
-                                                    <FaWallet color="#16a34a" /> Wallet: <strong>EGP {Number(context.walletBalance).toFixed(2)}</strong>
+                                                    <FaWallet color="#16a34a" /> {t('maintenance.wallet')}: <strong>EGP {Number(context.walletBalance).toFixed(2)}</strong>
                                                 </span>
                                             </div>
                                         </div>
                                     </>
                                 ) : (
-                                    <div style={{ padding: '0.5rem', color: '#b91c1c' }}>{error ?? 'No active rental.'}</div>
+                                    <div style={{ padding: '0.5rem', color: '#b91c1c' }}>{error ?? t('myProperties.noActiveRental', 'No active rental.')}</div>
                                 )}
                             </div>
                         )}
 
                         {!isViewOnly && activeRentals && activeRentals.length > 1 && (
                             <div className="form-group" style={{ marginBottom: '1rem' }}>
-                                <label><FaHome /> Select Property to Maintain</label>
+                                <label><FaHome /> {t('maintenance.selectPropertyLabel')}</label>
                                 <select
                                     value={selectedContractId}
                                     onChange={(e) => {
@@ -337,21 +337,21 @@ const DetailedIssueModal: React.FC<DetailedIssueModalProps> = ({
 
                         <div className="form-grid">
                             <div className="form-group">
-                                <label><FaTag /> Category</label>
+                                <label><FaTag /> {t('maintenance.category')}</label>
                                 <select value={category} onChange={(e) => setCategory(e.target.value)} required disabled={isViewOnly}>
                                     {CATEGORIES.map((cat) => <option key={cat} value={cat}>{getCategoryLabelWithParty(cat)}</option>)}
                                 </select>
                             </div>
 
                             <div className="form-group">
-                                <label><FaExclamationCircle /> Urgency Level</label>
+                                <label><FaExclamationCircle /> {t('maintenance.urgencyLevel')}</label>
                                 <div className="urgency-pills">
                                     {URGENCY_OPTIONS.map((opt) => (
                                         <button key={opt.value} type="button"
                                             className={`urgency-pill ${urgency === opt.value ? 'active' : ''} ${opt.value.toLowerCase()}`}
                                             onClick={() => !isViewOnly && setUrgency(opt.value)}
                                             disabled={isViewOnly}>
-                                            {opt.label}
+                                            {t('maintenance.' + opt.value.toLowerCase())}
                                         </button>
                                     ))}
                                 </div>
@@ -359,16 +359,16 @@ const DetailedIssueModal: React.FC<DetailedIssueModalProps> = ({
                         </div>
 
                         <div className="form-group">
-                            <label><FaTag /> Title</label>
-                            <input type="text" placeholder="Brief title (e.g. Leaking kitchen pipe)"
+                            <label><FaTag /> {t('maintenance.titleLabel')}</label>
+                            <input type="text" placeholder={t('maintenance.titlePlaceholder')}
                                 value={title} onChange={(e) => setTitle(e.target.value)}
                                 required disabled={isViewOnly} />
                         </div>
 
                         <div className="form-group">
-                            <label><FaAlignLeft /> Description</label>
+                            <label><FaAlignLeft /> {t('maintenance.descriptionLabel')}</label>
                             <textarea
-                                placeholder="Describe the issue in detail so providers can quote accurately…"
+                                placeholder={t('maintenance.descriptionPlaceholder')}
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 required
@@ -377,47 +377,47 @@ const DetailedIssueModal: React.FC<DetailedIssueModalProps> = ({
                         </div>
 
                         <div className="form-group">
-                            <label><FaDollarSign /> Estimated Budget (Optional)</label>
+                            <label><FaDollarSign /> {t('maintenance.estimatedBudget')}</label>
                             <div className="budget-input-wrapper">
                                 <span className="currency-label">EGP</span>
                                 <input type="number" placeholder="0.00" value={budget}
                                     onChange={(e) => setBudget(e.target.value)} disabled={isViewOnly} />
                             </div>
-                            <small>The actual price will come from the maintainer's application after review.</small>
+                            <small>{t('maintenance.budgetString')}</small>
                         </div>
 
                         {!isViewOnly && (
                             <div className="form-group">
-                                <label><FaWallet /> Payment Method</label>
+                                <label><FaWallet /> {t('maintenance.paymentMethod')}</label>
                                 <div style={{
                                     padding: '0.85rem 1rem', border: '1px solid #d1d5db',
                                     borderRadius: 12, background: '#f0fdf4', color: '#166534',
                                     display: 'flex', alignItems: 'center', gap: 10, fontWeight: 600,
                                 }}>
-                                    <FaWallet /> HOMi Wallet (only payment method)
+                                    <FaWallet /> {t('maintenance.homiWalletOnly')}
                                 </div>
-                                <small>Once you accept a provider, their final price is held in escrow from your wallet and released only after you confirm the job is solved.</small>
+                                <small>{t('maintenance.escrowNotice')}</small>
                                 {balanceCheck && balanceCheck.tooLow && (
                                     <div style={{
                                         marginTop: 10, padding: '0.75rem 1rem', background: '#fef3c7',
                                         color: '#92400e', borderRadius: 12, fontSize: '0.9rem',
                                     }}>
-                                        Your wallet is empty. Please top up before approving any provider.
+                                        {t('maintenance.emptyWalletWarning')}
                                     </div>
                                 )}
                             </div>
                         )}
 
                         <div className="form-group">
-                            <label><FaImage /> Evidence Photos</label>
+                            <label><FaImage /> {t('maintenance.evidencePhotos')}</label>
                             {!isViewOnly && (
                                 <div className="upload-area" onClick={() => document.getElementById('image-upload')?.click()}>
                                     <input type="file" id="image-upload" multiple accept="image/*"
                                         onChange={handleImageChange} hidden />
                                     <div className="upload-placeholder">
                                         <FaUpload className="upload-icon" />
-                                        <p>Click to upload evidence</p>
-                                        <span>PNG, JPG up to 5MB each</span>
+                                        <p>{t('maintenance.clickToUpload')}</p>
+                                        <span>{t('maintenance.fileConstraints')}</span>
                                     </div>
                                 </div>
                             )}
@@ -438,18 +438,18 @@ const DetailedIssueModal: React.FC<DetailedIssueModalProps> = ({
                             ) : isViewOnly && (
                                 <div className="no-images-view">
                                     <FaImage />
-                                    <span>No evidence images provided</span>
+                                    <span>{t('maintenance.noImages')}</span>
                                 </div>
                             )}
                         </div>
                     </div>
 
                     <footer className="issue-modal-footer">
-                        <button type="button" className="cancel-btn" onClick={onClose}>{isViewOnly ? 'Close' : 'Cancel'}</button>
+                        <button type="button" className="cancel-btn" onClick={onClose}>{isViewOnly ? t('maintenance.close') : t('maintenance.cancel')}</button>
                         {!isViewOnly && (
                             <button type="submit" className="submit-btn"
                                 disabled={isSubmitting || !context || loadingContext}>
-                                {isSubmitting ? 'Posting…' : 'Post Issue'}
+                                {isSubmitting ? t('maintenance.posting') : t('maintenance.postIssue')}
                             </button>
                         )}
                     </footer>

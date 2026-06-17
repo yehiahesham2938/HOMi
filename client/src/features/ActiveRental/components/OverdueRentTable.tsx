@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FaExclamationTriangle, FaArrowRight, FaCalendarAlt } from 'react-icons/fa';
 import type { ContractInstallments, RentInstallmentItem } from '../../../services/contract.service';
 import './OverdueRentTable.css';
@@ -12,13 +13,16 @@ interface OverdueRentTableProps {
 const formatMoney = (amount: number): string =>
     `$${Number(amount ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-const formatDateLabel = (iso: string): string => {
+const formatDateLabel = (iso: string, lang: string): string => {
     const parsed = new Date(iso);
     if (Number.isNaN(parsed.getTime())) return 'N/A';
-    return parsed.toLocaleDateString(undefined, { month: 'short', day: '2-digit', year: 'numeric' });
+    return parsed.toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-US', { month: 'short', day: '2-digit', year: 'numeric' });
 };
 
 const OverdueRentTable = ({ installments, onPayNow, isPaying }: OverdueRentTableProps) => {
+    const { t, i18n } = useTranslation();
+    const currentLang = i18n.language;
+
     const unpaidItems = useMemo<RentInstallmentItem[]>(
         () => installments.items.filter((item) => item.status === 'OVERDUE' || item.status === 'DUE'),
         [installments.items]
@@ -34,29 +38,38 @@ const OverdueRentTable = ({ installments, onPayNow, isPaying }: OverdueRentTable
     const totalDue = Number(installments.nextPayableTotal ?? totalRent + totalLateFees);
 
     const headlineCount = unpaidItems.length;
-    const headline = overdueCount > 0
-        ? `${overdueCount} overdue rent payment${overdueCount === 1 ? '' : 's'}`
-        : `${headlineCount} unpaid rent installment${headlineCount === 1 ? '' : 's'}`;
+    
+    const headline = useMemo(() => {
+        if (overdueCount > 0) {
+            return overdueCount === 1
+                ? t('activeRental.overdueRentHeadline', { count: 1 })
+                : t('activeRental.overdueRentHeadlinePlural', { count: overdueCount });
+        } else {
+            return headlineCount === 1
+                ? t('activeRental.unpaidRentHeadline', { count: 1 })
+                : t('activeRental.unpaidRentHeadlinePlural', { count: headlineCount });
+        }
+    }, [overdueCount, headlineCount, t]);
 
     return (
-        <section className="overdue-rent-card" aria-live="polite">
+        <section className="overdue-rent-card" aria-live="polite" dir="ltr">
             <header className="overdue-rent-header">
                 <div className="overdue-rent-headline">
                     <span className="overdue-rent-icon">
                         <FaExclamationTriangle aria-hidden="true" />
                     </span>
                     <div>
-                        <span className="overdue-rent-eyebrow">Action Required</span>
+                        <span className="overdue-rent-eyebrow">{t('activeRental.actionRequired')}</span>
                         <h3>{headline}</h3>
                         <p>
                             {overdueCount > 0
-                                ? 'You have rent payments past their due date. Late fees have been added to the months below.'
-                                : 'You have multiple rent payments waiting to be settled. Clear them now to keep your lease in good standing.'}
+                                ? t('activeRental.overdueText')
+                                : t('activeRental.unpaidText')}
                         </p>
                     </div>
                 </div>
                 <div className="overdue-rent-total">
-                    <span>Total to pay</span>
+                    <span>{t('activeRental.totalToDebit')}</span>
                     <strong>{formatMoney(totalDue)}</strong>
                 </div>
             </header>
@@ -72,20 +85,20 @@ const OverdueRentTable = ({ installments, onPayNow, isPaying }: OverdueRentTable
                                 </div>
                                 <div className="installment-details">
                                     <span className="installment-label">{item.label}</span>
-                                    <span className="installment-deadline">Deadline: {formatDateLabel(item.dueDate)}</span>
+                                    <span className="installment-deadline">{t('activeRental.deadline', { date: formatDateLabel(item.dueDate, currentLang) })}</span>
                                 </div>
                             </div>
                             <div className="installment-card-right">
                                 <div className="installment-pricing">
-                                    <span className="pricing-rent">Rent: {formatMoney(item.rentAmount)}</span>
+                                    <span className="pricing-rent">{t('activeRental.rent')}: {formatMoney(item.rentAmount)}</span>
                                     {item.lateFeeAmount > 0 && (
-                                        <span className="pricing-late-fee">Late Fee: {formatMoney(item.lateFeeAmount)}</span>
+                                        <span className="pricing-late-fee">{t('activeRental.lateFee')}: {formatMoney(item.lateFeeAmount)}</span>
                                     )}
                                 </div>
                                 <div className="installment-totals-group">
                                     <strong>{formatMoney(item.totalAmount)}</strong>
                                     <span className={`overdue-row-pill ${isOverdue ? 'overdue' : 'due'}`}>
-                                        {isOverdue ? 'Overdue' : 'Due'}
+                                        {isOverdue ? t('activeRental.overdue') : t('activeRental.dueSoon')}
                                     </span>
                                 </div>
                             </div>
@@ -96,23 +109,23 @@ const OverdueRentTable = ({ installments, onPayNow, isPaying }: OverdueRentTable
 
             <div className="overdue-rent-summary">
                 <div className="overdue-rent-summary-row">
-                    <span><FaCalendarAlt aria-hidden="true" /> Outstanding rent ({headlineCount} month{headlineCount === 1 ? '' : 's'})</span>
+                    <span><FaCalendarAlt aria-hidden="true" /> {headlineCount === 1 ? t('activeRental.outstandingRentCount', { count: 1 }) : t('activeRental.outstandingRentCountPlural', { count: headlineCount })}</span>
                     <strong>{formatMoney(totalRent)}</strong>
                 </div>
                 {totalLateFees > 0 && (
                     <div className="overdue-rent-summary-row warn">
-                        <span>Late fees ({overdueCount} overdue)</span>
+                        <span>{t('activeRental.lateFeesOverdue', { count: overdueCount })}</span>
                         <strong>{formatMoney(totalLateFees)}</strong>
                     </div>
                 )}
                 {installments.pendingLandlordCredit > 0 && (
                     <div className="overdue-rent-summary-row credit">
-                        <span>Landlord maintenance credit</span>
+                        <span>{t('activeRental.landlordCredit')}</span>
                         <strong>−{formatMoney(installments.pendingLandlordCredit)}</strong>
                     </div>
                 )}
                 <div className="overdue-rent-summary-row total">
-                    <span>Total to debit</span>
+                    <span>{t('activeRental.totalToDebit')}</span>
                     <strong>{formatMoney(totalDue)}</strong>
                 </div>
             </div>
@@ -124,11 +137,11 @@ const OverdueRentTable = ({ installments, onPayNow, isPaying }: OverdueRentTable
                 disabled={isPaying || headlineCount <= 0}
             >
                 {isPaying
-                    ? 'Processing...'
-                    : (<>Pay {formatMoney(totalDue)} Now <FaArrowRight aria-hidden="true" /></>)}
+                    ? t('activeRental.processing')
+                    : (<>{t('activeRental.payNowWithArrow', { amount: formatMoney(totalDue) })} <FaArrowRight aria-hidden="true" /></>)}
             </button>
             <p className="overdue-rent-fineprint">
-                Payment is settled atomically from your wallet balance. If anything fails, no charge is applied.
+                {t('activeRental.fineprint')}
             </p>
         </section>
     );

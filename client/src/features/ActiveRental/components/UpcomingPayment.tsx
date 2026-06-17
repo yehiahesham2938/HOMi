@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import './UpcomingPayment.css';
 import { FaArrowRight, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 
@@ -23,6 +24,34 @@ interface UpcomingPaymentProps {
     isTerminationApproved?: boolean;
 }
 
+const getLocalizedDueInLabel = (label: string, lang: string): string => {
+    if (!label) return '';
+    if (label === 'today') return lang === 'ar' ? 'اليوم' : 'today';
+    const match = label.match(/^(\d+)\s+days?(?:\s+overdue)?$/i);
+    if (!match) return label;
+    const count = parseInt(match[1], 10);
+    const isOverdue = label.toLowerCase().includes('overdue');
+    if (lang === 'ar') {
+        if (isOverdue) {
+            if (count === 1) return 'متأخر يوم واحد';
+            if (count === 2) return 'متأخر يومين';
+            if (count <= 10) return `متأخر منذ ${count} أيام`;
+            return `متأخر منذ ${count} يوماً`;
+        } else {
+            if (count === 1) return 'خلال يوم';
+            if (count === 2) return 'خلال يومين';
+            if (count <= 10) return `خلال ${count} أيام`;
+            return `خلال ${count} يوماً`;
+        }
+    } else {
+        if (isOverdue) {
+            return `${count} day${count === 1 ? '' : 's'} overdue`;
+        } else {
+            return `Due in ${count} day${count === 1 ? '' : 's'}`;
+        }
+    }
+};
+
 /**
  * The Upcoming Payment card has three explicit visual states:
  *  • "Paid"   — current month already settled (green card, no action button)
@@ -47,6 +76,9 @@ const UpcomingPayment = ({
     isInArrears = false,
     isTerminationApproved = false,
 }: UpcomingPaymentProps) => {
+    const { t, i18n } = useTranslation();
+    const currentLang = i18n.language;
+
     const cardState: 'paid' | 'arrears' | 'due' = (() => {
         if (isCurrentCyclePaid) return 'paid';
         if (isInArrears) return 'arrears';
@@ -54,20 +86,18 @@ const UpcomingPayment = ({
     })();
 
     const tagLabel = (() => {
-        if (cardState === 'paid') return 'Paid';
-        if (cardState === 'arrears') return 'Arrears';
-        if (!dueInLabel) return 'Due Soon';
-        if (dueInLabel === 'today') return 'Due Today';
-        if (dueInLabel.includes('overdue')) return dueInLabel.charAt(0).toUpperCase() + dueInLabel.slice(1);
-        return `Due in ${dueInLabel}`;
+        if (cardState === 'paid') return t('activeRental.paid');
+        if (cardState === 'arrears') return t('activeRental.arrears');
+        if (!dueInLabel) return t('activeRental.dueSoon');
+        return getLocalizedDueInLabel(dueInLabel, currentLang);
     })();
 
     const tagTone = cardState === 'paid' ? 'safe' : cardState === 'arrears' ? 'danger' : dueTone;
 
     return (
-        <div className={`payment-card state-${cardState}`}>
+        <div className={`payment-card state-${cardState}`} dir="ltr">
             <div className="payment-header">
-                <h3>{cardState === 'paid' ? 'Rent Settled' : 'Upcoming Payment'}</h3>
+                <h3>{cardState === 'paid' ? t('activeRental.rentSettled') : t('activeRental.upcomingPayment')}</h3>
                 <span className={`due-tag ${tagTone}`}>{tagLabel}</span>
             </div>
             <div className="amount-display">
@@ -88,27 +118,29 @@ const UpcomingPayment = ({
                     textAlign: 'center',
                     fontWeight: 500
                 }}>
-                    (this is the last payment before termination, no upcoming payments)
+                    {currentLang === 'ar' 
+                        ? '(هذه هي الدفعة الأخيرة قبل إنهاء العقد، ولا توجد دفعات قادمة)' 
+                        : '(this is the last payment before termination, no upcoming payments)'}
                 </div>
             )}
             <div className="payment-details">
                 <div className="detail-row">
-                    <span>{cardState === 'paid' ? 'Next Due' : 'Due Date'}</span>
+                    <span>{cardState === 'paid' ? t('activeRental.nextDue') : t('activeRental.dueDate')}</span>
                     <strong>{dueDate}</strong>
                 </div>
                 <div className="detail-row">
-                    <span>Payment Method</span>
-                    <strong>Wallet Balance</strong>
+                    <span>{t('activeRental.paymentMethod')}</span>
+                    <strong>{t('activeRental.walletBalanceLabel')}</strong>
                 </div>
                 {cardState === 'arrears' && outstandingInstallments > 1 && (
                     <div className="detail-row arrears">
-                        <span>Outstanding Months</span>
-                        <strong>{outstandingInstallments} installments</strong>
+                        <span>{t('activeRental.outstandingMonths')}</span>
+                        <strong>{t('activeRental.installmentsCount', { count: outstandingInstallments })}</strong>
                     </div>
                 )}
                 {cardState === 'arrears' && estimatedLateFee > 0 && (
                     <div className="detail-row arrears">
-                        <span>Estimated Late Fees</span>
+                        <span>{t('activeRental.estimatedLateFees')}</span>
                         <strong>${estimatedLateFee.toLocaleString()}</strong>
                     </div>
                 )}
@@ -118,40 +150,38 @@ const UpcomingPayment = ({
                 <div className="paid-banner" role="status">
                     <FaCheckCircle aria-hidden="true" />
                     <div>
-                        <strong>You're all caught up</strong>
-                        <small>This month's rent has been settled. We'll show your next payment when the cycle rolls over.</small>
+                        <strong>{t('activeRental.caughtUpTitle')}</strong>
+                        <small>{t('activeRental.caughtUpSubtitle')}</small>
                     </div>
                 </div>
             )}
 
-
-
             {cardState === 'arrears' ? (
                 <button className="pay-now-btn arrears-btn" onClick={onPayNow} disabled={isPaying}>
                     <FaExclamationTriangle aria-hidden="true" />
-                    {isPaying ? 'Processing...' : 'Pay Now'}
+                    {isPaying ? t('activeRental.processing') : t('activeRental.payNow')}
                 </button>
             ) : (
                 <button className="pay-now-btn" onClick={onPayNow} disabled={isPaying || isCurrentCyclePaid}>
                     {cardState === 'paid'
-                        ? 'No Outstanding Dues'
+                        ? t('activeRental.noOutstandingDues')
                         : isPaying
-                            ? 'Processing...'
-                            : 'Pay Now'}
+                            ? t('activeRental.processing')
+                            : t('activeRental.payNow')}
                     {cardState === 'due' && !isPaying && <FaArrowRight aria-hidden="true" />}
                 </button>
             )}
 
             <button className="pay-now-btn secondary" onClick={onTopUp} disabled={isPaying}>
-                Top Up Wallet
+                {t('activeRental.topUpWallet')}
             </button>
 
             <p className="autopay-note">
                 {cardState === 'arrears'
-                    ? 'Scroll down to review every unpaid month, late fees, and the total before settling.'
+                    ? t('activeRental.arrearsNote')
                     : cardState === 'paid'
-                        ? 'Autopay is active for this lease — your wallet will keep covering rent automatically.'
-                        : 'Once this month\'s rent is paid, the next due date moves to the following monthly cycle.'}
+                        ? t('activeRental.autopayNote')
+                        : t('activeRental.dueNote')}
             </p>
         </div>
     );

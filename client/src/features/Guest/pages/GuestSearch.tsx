@@ -36,6 +36,7 @@ const EGYPT_BOUNDS = L.latLngBounds(
 // Map geocoder search field component
 const SearchField = ({ onLocationSelect }: { onLocationSelect: (lat: number, lng: number) => void }) => {
     const map = useMap();
+    const { t } = useTranslation();
     useEffect(() => {
         // @ts-expect-error — leaflet-control-geocoder augments L.Control at runtime
         const geocoder = L.Control.Geocoder.nominatim();
@@ -43,7 +44,7 @@ const SearchField = ({ onLocationSelect }: { onLocationSelect: (lat: number, lng
         const control = L.Control.geocoder({
             geocoder,
             defaultMarkGeocode: false,
-            placeholder: "Search in Egypt...",
+            placeholder: t('guestSearch.mapSearchPlaceholder', "Search in Egypt..."),
         })
             .on('markgeocode', (e: { geocode: { center: L.LatLng } }) => {
                 const { center } = e.geocode;
@@ -51,12 +52,12 @@ const SearchField = ({ onLocationSelect }: { onLocationSelect: (lat: number, lng
                     map.setView(center, 12);
                     onLocationSelect(center.lat, center.lng);
                 } else {
-                    alert("Please select a location within Egypt.");
+                    alert(t('landlordHomeComponents.egyptOnly', "Please select a location within Egypt."));
                 }
             })
             .addTo(map);
         return () => { map.removeControl(control); };
-    }, [map, onLocationSelect]);
+    }, [map, onLocationSelect, t]);
     return null;
 };
 
@@ -105,7 +106,7 @@ const MapCenterUpdater = ({ center }: { center: [number, number] }) => {
 
 const GuestSearch: React.FC = () => {
     const navigate = useNavigate();
-    useTranslation();
+    const { t } = useTranslation();
     const [properties, setProperties] = useState<Property[]>([]);
     const [loading, setLoading] = useState(true);
     const [showAuthModal, setShowAuthModal] = useState(false);
@@ -331,19 +332,19 @@ const GuestSearch: React.FC = () => {
                     {/* Left Panel: Intro & Filters */}
                     <div className="shb-left-panel">
                         <div className="shb-intro-text">
-                            <h1>Explore Premium Verified Rentals</h1>
-                            <p>Search compound villas, modern apartments, and cozy beach houses across Egypt with 100% direct pricing and secure digital leases.</p>
+                            <h1>{t('guestSearch.explorePremiumTitle', 'Explore Premium Verified Rentals')}</h1>
+                            <p>{t('guestSearch.explorePremiumSub', 'Search compound villas, modern apartments, and cozy beach houses across Egypt with 100% direct pricing and secure digital leases.')}</p>
                         </div>
 
                         <div className="shb-filter-card">
                             <div className="filter-grid-inputs basic-filters">
                                 <div className="filter-input-col">
-                                    <label>City / Location</label>
+                                    <label>{t('guestSearch.cityLocation', 'City / Location')}</label>
                                     <div className="input-with-icon">
                                         <span className="input-icon">📍</span>
                                         <input
                                             type="text"
-                                            placeholder="Zamalek, Maadi, Gouna..."
+                                            placeholder={t('guestSearch.cityLocationPlaceholder', 'Zamalek, Maadi, Gouna...')}
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
                                         />
@@ -351,23 +352,23 @@ const GuestSearch: React.FC = () => {
                                 </div>
 
                                 <div className="filter-input-col">
-                                    <label>Property Type</label>
+                                    <label>{t('guestHome.propertyType', 'Property Type')}</label>
                                     <div className="input-with-icon">
                                         <span className="input-icon">🏠</span>
                                         <select
                                             value={selectedType}
                                             onChange={(e) => setSelectedType(e.target.value)}
                                         >
-                                            <option value="">All Types</option>
-                                            <option value="APARTMENT">Apartment</option>
-                                            <option value="VILLA">Villa</option>
-                                            <option value="STUDIO">Studio</option>
+                                            <option value="">{t('guestSearch.anyType', 'All Types')}</option>
+                                            <option value="APARTMENT">{t('guestHome.apartment', 'Apartment')}</option>
+                                            <option value="VILLA">{t('guestHome.villa', 'Villa')}</option>
+                                            <option value="STUDIO">{t('guestHome.studio', 'Studio')}</option>
                                         </select>
                                     </div>
                                 </div>
 
                                 <div className="filter-input-col">
-                                    <label>Availability Date</label>
+                                    <label>{t('guestSearch.availabilityDate', 'Availability Date')}</label>
                                     <div className="input-with-icon">
                                         <span className="input-icon">📅</span>
                                         <input
@@ -387,35 +388,35 @@ const GuestSearch: React.FC = () => {
                                     onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
                                 >
                                     <SlidersHorizontal size={16} />
-                                    {showAdvancedFilters ? 'Hide Advanced Filters' : 'View Advanced Filters'}
+                                    {showAdvancedFilters ? t('guestSearch.hideAdvanced', 'Hide Advanced Filters') : t('guestSearch.viewAdvanced', 'View Advanced Filters')}
                                 </button>
                             </div>
 
                             {showAdvancedFilters && (
                                 <div className="filter-grid-inputs advanced-filters-panel animate-fade-down">
                                     <div className="filter-input-col">
-                                        <label>Furnishing</label>
+                                        <label>{t('guestHome.furnishing', 'Furnishing')}</label>
                                         <div className="input-with-icon">
                                             <span className="input-icon">🛋️</span>
                                             <select
                                                 value={selectedFurnishing}
                                                 onChange={(e) => setSelectedFurnishing(e.target.value)}
                                             >
-                                                <option value="">Any Furnishing</option>
-                                                <option value="fully">Fully Furnished</option>
-                                                <option value="semi">Semi-Furnished</option>
-                                                <option value="unfurnished">Unfurnished</option>
+                                                <option value="">{t('guestSearch.anyFurnishing', 'Any Furnishing')}</option>
+                                                <option value="fully">{t('guestSearch.fullyFurnished', 'Fully Furnished')}</option>
+                                                <option value="semi">{t('guestSearch.semiFurnished', 'Semi-Furnished')}</option>
+                                                <option value="unfurnished">{t('guestSearch.unfurnished', 'Unfurnished')}</option>
                                             </select>
                                         </div>
                                     </div>
 
                                     <div className="filter-input-col">
-                                        <label>Min Price / Month (EGP)</label>
+                                        <label>{t('guestSearch.minPrice', 'Min Price / Month (EGP)')}</label>
                                         <div className="input-with-icon">
                                             <span className="input-icon">💵</span>
                                             <input
                                                 type="number"
-                                                placeholder="Min price"
+                                                placeholder={t('guestSearch.minPricePlaceholder', 'Min price')}
                                                 value={minPrice}
                                                 onChange={(e) => setMinPrice(e.target.value)}
                                             />
@@ -423,12 +424,12 @@ const GuestSearch: React.FC = () => {
                                     </div>
 
                                     <div className="filter-input-col">
-                                        <label>Max Price / Month (EGP)</label>
+                                        <label>{t('guestSearch.maxPriceLabel', 'Max Price / Month (EGP)')}</label>
                                         <div className="input-with-icon">
                                             <span className="input-icon">💵</span>
                                             <input
                                                 type="number"
-                                                placeholder="Max price"
+                                                placeholder={t('guestSearch.maxPricePlaceholder', 'Max price')}
                                                 value={maxPrice}
                                                 onChange={(e) => setMaxPrice(e.target.value)}
                                             />
@@ -436,35 +437,35 @@ const GuestSearch: React.FC = () => {
                                     </div>
 
                                     <div className="filter-input-col">
-                                        <label>Target Tenant</label>
+                                        <label>{t('guestSearch.targetTenant', 'Target Tenant')}</label>
                                         <div className="input-with-icon">
                                             <span className="input-icon">👥</span>
                                             <select
                                                 value={selectedTargetTenant}
                                                 onChange={(e) => setSelectedTargetTenant(e.target.value)}
                                             >
-                                                <option value="">Any Tenant</option>
-                                                <option value="STUDENTS">Students</option>
-                                                <option value="FAMILIES">Families</option>
-                                                <option value="TOURISTS">Tourists</option>
-                                                <option value="ANY">Any</option>
+                                                <option value="">{t('guestSearch.anyTenant', 'Any Tenant')}</option>
+                                                <option value="STUDENTS">{t('guestSearch.students', 'Students')}</option>
+                                                <option value="FAMILIES">{t('guestSearch.families', 'Families')}</option>
+                                                <option value="TOURISTS">{t('guestSearch.tourists', 'Tourists')}</option>
+                                                <option value="ANY">{t('guestSearch.any', 'Any')}</option>
                                             </select>
                                         </div>
                                     </div>
 
                                     <div className="filter-input-col">
-                                        <label>Bedrooms</label>
+                                        <label>{t('guestHome.beds', 'Bedrooms')}</label>
                                         <div className="input-with-icon">
                                             <span className="input-icon">🛏️</span>
                                             <select
                                                 value={selectedBeds}
                                                 onChange={(e) => setSelectedBeds(e.target.value)}
                                             >
-                                                <option value="">Any Beds</option>
-                                                <option value="1">1 Bedroom</option>
-                                                <option value="2">2 Bedrooms</option>
-                                                <option value="3">3 Bedrooms</option>
-                                                <option value="4">4+ Bedrooms</option>
+                                                <option value="">{t('guestSearch.anyBeds', 'Any Beds')}</option>
+                                                <option value="1">{t('guestSearch.bedroomsCount', { count: 1, defaultValue: '1 Bedroom' })}</option>
+                                                <option value="2">{t('guestSearch.bedroomsCount_plural', { count: 2, defaultValue: '2 Bedrooms' })}</option>
+                                                <option value="3">{t('guestSearch.bedroomsCount_plural', { count: 3, defaultValue: '3 Bedrooms' })}</option>
+                                                <option value="4">{t('guestSearch.bedroomsCount_plural', { count: 4, defaultValue: '4+ Bedrooms' })}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -472,9 +473,9 @@ const GuestSearch: React.FC = () => {
                             )}
 
                             <div className="filter-actions-row">
-                                <button className="clear-filters-btn" onClick={clearFilters}>Reset Filters</button>
+                                <button className="clear-filters-btn" onClick={clearFilters}>{t('guestSearch.resetFilters', 'Reset Filters')}</button>
                                 <span className="results-indicator">
-                                    <strong>{sortedProperties.length}</strong> matching homes in Egypt
+                                    <strong>{sortedProperties.length}</strong> {t('guestSearch.matchingHomesEgypt', { count: sortedProperties.length, defaultValue: 'matching homes in Egypt' })}
                                 </span>
                             </div>
                         </div>
@@ -484,9 +485,9 @@ const GuestSearch: React.FC = () => {
                     <div className="shb-right-panel">
                         <div className="glass-explorer-card">
                             <div className="explorer-card-header">
-                                <span className="explorer-tag">Geographic Explorer</span>
-                                <h2>Egypt Map Search</h2>
-                                <p>Type in the map search bar, click anywhere to set coordinates, or adjust the search radius to filter matching listings.</p>
+                                <span className="explorer-tag">{t('guestSearch.geographicExplorer', 'Geographic Explorer')}</span>
+                                <h2>{t('guestSearch.egyptMapSearch', 'Egypt Map Search')}</h2>
+                                <p>{t('guestSearch.egyptMapSearchDesc', 'Type in the map search bar, click anywhere to set coordinates, or adjust the search radius to filter matching listings.')}</p>
                             </div>
 
                             {/* Leaflet Map Integration */}
@@ -546,7 +547,7 @@ const GuestSearch: React.FC = () => {
                                             color: 'var(--gray-700)'
                                         }}
                                     >
-                                        🌐 {isLocating ? 'Locating...' : 'Use Current Location'}
+                                        🌐 {isLocating ? t('guestSearch.locating', 'Locating...') : t('guestSearch.useCurrentLocation', 'Use Current Location')}
                                     </button>
 
                                     {position && (
@@ -564,7 +565,7 @@ const GuestSearch: React.FC = () => {
                                                 color: '#b91c1c'
                                             }}
                                         >
-                                            Reset Map Focus
+                                            {t('guestSearch.resetMapFocus', 'Reset Map Focus')}
                                         </button>
                                     )}
                                 </div>
@@ -573,7 +574,7 @@ const GuestSearch: React.FC = () => {
                                 {position && showAdvancedFilters && (
                                     <div className="map-radius-control" style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-muted)' }}>
-                                            <span>Search Radius:</span>
+                                            <span>{t('guestSearch.searchRadius', 'Search Radius:')}</span>
                                             <span style={{ color: 'var(--blue)' }}>{radiusKm} km</span>
                                         </div>
                                         <input
@@ -600,18 +601,18 @@ const GuestSearch: React.FC = () => {
                             className={`tab-toggle ${activeTab === 'all' ? 'active' : ''}`}
                             onClick={() => setActiveTab('all')}
                         >
-                            🔍 All Listings ({sortedProperties.length})
+                            🔍 {t('guestSearch.allListings', { count: sortedProperties.length, defaultValue: 'All Listings ({{count}})' })}
                         </button>
 
                     </div>
 
                     <div className="results-sort">
-                        <label>Sort by</label>
+                        <label>{t('guestSearch.sortBy', 'Sort by')}</label>
                         <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                            <option value="featured">Featured Listings</option>
-                            <option value="price-asc">Price: Low to High</option>
-                            <option value="price-desc">Price: High to Low</option>
-                            <option value="newest">Newly Listed</option>
+                            <option value="featured">{t('guestSearch.featuredListingsSort', 'Featured Listings')}</option>
+                            <option value="price-asc">{t('guestSearch.priceAscSort', 'Price: Low to High')}</option>
+                            <option value="price-desc">{t('guestSearch.priceDescSort', 'Price: High to Low')}</option>
+                            <option value="newest">{t('guestSearch.newestSort', 'Newly Listed')}</option>
                         </select>
                     </div>
                 </div>
@@ -619,14 +620,14 @@ const GuestSearch: React.FC = () => {
                 {loading ? (
                     <div className="search-loading">
                         <div className="loading-spinner"></div>
-                        <p>Finding perfect homes for you...</p>
+                        <p>{t('guestSearch.findingPerfectHomes', 'Finding perfect homes for you...')}</p>
                     </div>
                 ) : sortedProperties.length === 0 ? (
                     <div className="search-no-results">
                         <div className="no-results-icon">🏠</div>
-                        <h3>No properties found matching your search</h3>
-                        <p>Try clearing some filters or panning the map to see live listings.</p>
-                        <button className="btn-primary-pill" onClick={clearFilters}>Reset Filters</button>
+                        <h3>{t('guestSearch.noPropertiesFoundTitle', 'No properties found matching your search')}</h3>
+                        <p>{t('guestSearch.noPropertiesFoundDesc', 'Try clearing some filters or panning the map to see live listings.')}</p>
+                        <button className="btn-primary-pill" onClick={clearFilters}>{t('guestSearch.resetFilters', 'Reset Filters')}</button>
                     </div>
                 ) : activeTab === 'all' ? (
                     /* All Listings Grid View (Full Width) */
@@ -648,8 +649,8 @@ const GuestSearch: React.FC = () => {
                             <section className="curated-scroll-section">
                                 <div className="curated-section-header">
                                     <div className="curated-title">
-                                        <h2>🏆 Highest Rated Rentals</h2>
-                                        <p>Most loved homes based on tenant ratings and verification status</p>
+                                        <h2>🏆 {t('guestSearch.highestRatedRentals', 'Highest Rated Rentals')}</h2>
+                                        <p>{t('guestSearch.highestRatedRentalsDesc', 'Most loved homes based on tenant ratings and verification status')}</p>
                                     </div>
                                 </div>
                                 <div className="curated-scroller" ref={ratedRef}>
@@ -670,8 +671,8 @@ const GuestSearch: React.FC = () => {
                             <section className="curated-scroll-section">
                                 <div className="curated-section-header">
                                     <div className="curated-title">
-                                        <h2>🛋️ Curated Lifestyle Matches</h2>
-                                        <p>Fully furnished spaces with top amenities in prime locations</p>
+                                        <h2>🛋️ {t('guestSearch.curatedLifestyleMatches', 'Curated Lifestyle Matches')}</h2>
+                                        <p>{t('guestSearch.curatedLifestyleMatchesDesc', 'Fully furnished spaces with top amenities in prime locations')}</p>
                                     </div>
 
                                 </div>
@@ -693,8 +694,8 @@ const GuestSearch: React.FC = () => {
                             <section className="curated-scroll-section">
                                 <div className="curated-section-header">
                                     <div className="curated-title">
-                                        <h2>⚡ New Listings</h2>
-                                        <p>Fresh properties listed on the market within the last 48 hours</p>
+                                        <h2>⚡ {t('guestSearch.newListings', 'New Listings')}</h2>
+                                        <p>{t('guestSearch.newListingsDesc', 'Fresh properties listed on the market within the last 48 hours')}</p>
                                     </div>
 
                                 </div>

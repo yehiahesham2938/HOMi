@@ -1,5 +1,6 @@
 // client\src\features\BrowseProperties\components\PropertyCard.tsx
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import './PropertyCard.css';
 
 interface PropertyCardProps {
@@ -32,10 +33,19 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     isSaved = false,
     onToggleSave
 }) => {
+    const { t } = useTranslation();
     const isFeatured = property.tags && property.tags.some(t => t.toLowerCase() === 'featured' || t.toLowerCase() === '⭐ featured');
     const isRented = property.status?.toUpperCase() === 'RENTED';
     const isUnavailable = property.status?.toUpperCase() === 'UNAVAILABLE';
-    const badge = isUnavailable ? '✓ Unavailable' : isRented ? '✓ Rented' : isFeatured ? '⭐ Featured' : '✓ Available';
+    
+    const badge = isUnavailable 
+        ? `✓ ${t('browseProperties.unavailable')}` 
+        : isRented 
+            ? `✓ ${t('browseProperties.rented')}` 
+            : isFeatured 
+                ? `⭐ ${t('browseProperties.featured')}` 
+                : `✓ ${t('browseProperties.available')}`;
+                
     const badgeClass = isUnavailable ? 'unavailable' : isRented ? 'rented' : isFeatured ? 'featured' : 'available';
 
     const handleWishlistToggle = (e: React.MouseEvent) => {
@@ -49,21 +59,22 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         <div
             className="prop-card"
             onClick={onOpenDetails}
+            dir="ltr"
         >
             <div className="prop-img">
                 <img src={property.image} alt={property.title} loading="lazy" />
                 <button
                     className={`prop-save ${isSaved ? 'saved' : ''}`}
                     onClick={handleWishlistToggle}
-                    title={isSaved ? "Save" : "Save"}
+                    title={isSaved ? t('browseProperties.clearSearch') : t('browseProperties.searchProperties')}
                 >
                     {isSaved ? '❤️' : '🤍'}
                 </button>
-                <span className="prop-type-tag">{property.type || 'Apartment'}</span>
+                <span className="prop-type-tag">{property.type || t('browseProperties.apartment')}</span>
             </div>
             <div className="prop-body">
                 <div className="prop-price">
-                    {property.price.toLocaleString()} <em>EGP / month</em>
+                    {property.price.toLocaleString()} <em>{t('browseProperties.egpMonth')}</em>
                 </div>
                 <div className="prop-title">{property.title}</div>
                 <div className="prop-location">
@@ -72,18 +83,18 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                 </div>
                 {property.availableDate && (
                     <div className="prop-availability" style={{ fontSize: '0.8rem', color: '#2563eb', fontWeight: '700', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span>📅 Available: {property.availableDate}</span>
+                        <span>📅 {t('browseProperties.availableDate', { date: property.availableDate })}</span>
                     </div>
                 )}
                 <div className="prop-specs">
                     <div className="prop-spec">
-                        <strong>{property.beds}</strong>Beds
+                        <strong>{property.beds}</strong>{t('browseProperties.beds')}
                     </div>
                     <div className="prop-spec">
-                        <strong>{property.baths}</strong>Baths
+                        <strong>{property.baths}</strong>{t('browseProperties.baths')}
                     </div>
                     <div className="prop-spec">
-                        <strong>{property.sqft}</strong>m²
+                        <strong>{property.sqft}</strong>{t('browseProperties.sqft')}
                     </div>
                 </div>
                 <div className="prop-landlord">
@@ -93,7 +104,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                         alt="Landlord"
                     />
                     <div className="prop-landlord-name">
-                        <strong>{property.ownerName || 'Verified Landlord'}</strong>Verified Landlord
+                        <strong>{property.ownerName || t('browseProperties.verifiedLandlord')}</strong>{t('browseProperties.verifiedLandlord')}
                     </div>
                     <button
                         className="prop-apply-btn"
@@ -104,7 +115,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                         style={(isRented || isUnavailable) ? { backgroundColor: '#e2e8f0', color: '#64748b', borderColor: '#cbd5e1', cursor: 'default' } : undefined}
                         disabled={isRented || isUnavailable}
                     >
-                        {isUnavailable ? 'Unavailable' : isRented ? 'Rented' : 'Apply Now'}
+                        {isUnavailable 
+                            ? t('browseProperties.unavailable') 
+                            : isRented 
+                                ? t('browseProperties.rented') 
+                                : t('browseProperties.applyNow')}
                     </button>
                 </div>
             </div>

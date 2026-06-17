@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import { FaExclamationTriangle } from 'react-icons/fa';
 import authService from '../../../services/auth.service';
 
@@ -14,15 +15,15 @@ export type AccountDeleteBlockers = {
     contractCount: number;
 };
 
-function parseDeleteAccountError(err: unknown): { message: string; blockers?: AccountDeleteBlockers } {
+function parseDeleteAccountError(err: unknown, t: any): { message: string; blockers?: AccountDeleteBlockers } {
     if (!axios.isAxiosError(err)) {
-        return { message: 'Something went wrong. Please try again.' };
+        return { message: t('settings.errSomethingWentWrong', 'Something went wrong. Please try again.') };
     }
     const data = err.response?.data as
         | { message?: string; code?: string; details?: AccountDeleteBlockers }
         | undefined;
     if (!data?.message) {
-        return { message: 'Something went wrong. Please try again.' };
+        return { message: t('settings.errSomethingWentWrong', 'Something went wrong. Please try again.') };
     }
     if (data.code === 'ACCOUNT_HAS_DEPENDENCIES' && data.details) {
         return { message: data.message, blockers: data.details };
@@ -31,6 +32,7 @@ function parseDeleteAccountError(err: unknown): { message: string; blockers?: Ac
 }
 
 const DeleteAccountSection: React.FC<DeleteAccountSectionProps> = ({ onBackToProfile }) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [showConfirm, setShowConfirm] = useState(false);
     const [deleting, setDeleting] = useState(false);
@@ -44,7 +46,7 @@ const DeleteAccountSection: React.FC<DeleteAccountSectionProps> = ({ onBackToPro
             setShowConfirm(false);
             navigate('/auth', { replace: true });
         } catch (err) {
-            setError(parseDeleteAccountError(err));
+            setError(parseDeleteAccountError(err, t));
             setShowConfirm(false);
         } finally {
             setDeleting(false);
@@ -57,14 +59,12 @@ const DeleteAccountSection: React.FC<DeleteAccountSectionProps> = ({ onBackToPro
                 <div className="danger-icon-wrapper">
                     <FaExclamationTriangle />
                 </div>
-                <h2>Delete Account</h2>
+                <h2>{t('settings.deleteZoneTitle')}</h2>
                 <p>
-                    This action is <strong>irreversible</strong>. If your account has no property listings,
-                    rental applications, or contracts, we will permanently remove your profile and sign-in.
+                    {t('settings.deleteWarning1')}
                 </p>
                 <p style={{ marginTop: '0.75rem', fontSize: '0.9rem', color: '#64748b' }}>
-                    If you still have properties, rental requests, or contracts, deletion is blocked until
-                    those are resolved.
+                    {t('settings.deleteWarning2')}
                 </p>
 
                 {error && (
@@ -81,22 +81,22 @@ const DeleteAccountSection: React.FC<DeleteAccountSectionProps> = ({ onBackToPro
                             lineHeight: 1.5,
                         }}
                     >
-                        <div style={{ fontWeight: 600, marginBottom: error.blockers ? 8 : 0 }}>Cannot delete account</div>
+                        <div style={{ fontWeight: 600, marginBottom: error.blockers ? 8 : 0 }}>{t('settings.cannotDelete')}</div>
                         <div>{error.message}</div>
                         {error.blockers && (
                             <ul style={{ margin: '10px 0 0', paddingLeft: 20 }}>
                                 {error.blockers.propertyCount > 0 && (
                                     <li>
-                                        Properties (landlord): {error.blockers.propertyCount}
+                                        {t('settings.blockerProperties', { count: error.blockers.propertyCount })}
                                     </li>
                                 )}
                                 {error.blockers.rentalRequestCount > 0 && (
                                     <li>
-                                        Rental requests: {error.blockers.rentalRequestCount}
+                                        {t('settings.blockerRequests', { count: error.blockers.rentalRequestCount })}
                                     </li>
                                 )}
                                 {error.blockers.contractCount > 0 && (
-                                    <li>Contracts: {error.blockers.contractCount}</li>
+                                    <li>{t('settings.blockerContracts', { count: error.blockers.contractCount })}</li>
                                 )}
                             </ul>
                         )}
@@ -109,7 +109,7 @@ const DeleteAccountSection: React.FC<DeleteAccountSectionProps> = ({ onBackToPro
                         className="cancel-btn"
                         onClick={() => (onBackToProfile ? onBackToProfile() : navigate(-1))}
                     >
-                        Keep My Account
+                        {t('settings.keepAccount')}
                     </button>
                     <button
                         type="button"
@@ -120,7 +120,7 @@ const DeleteAccountSection: React.FC<DeleteAccountSectionProps> = ({ onBackToPro
                             setShowConfirm(true);
                         }}
                     >
-                        Permanently Delete
+                        {t('settings.deletePermanentlyBtn')}
                     </button>
                 </div>
             </div>
@@ -138,11 +138,10 @@ const DeleteAccountSection: React.FC<DeleteAccountSectionProps> = ({ onBackToPro
                         onClick={(e) => e.stopPropagation()}
                     >
                         <h3 id="delete-account-confirm-title" style={{ margin: '0 0 10px', fontSize: 18 }}>
-                            Delete your account?
+                            {t('settings.deleteConfirmTitle')}
                         </h3>
                         <p style={{ margin: 0, color: '#64748b', fontSize: 14, lineHeight: 1.55 }}>
-                            This cannot be undone. Your profile and account will be permanently removed if you
-                            have no active listings, rental requests, or contracts.
+                            {t('settings.deleteConfirmDesc')}
                         </p>
                         <div style={{ display: 'flex', gap: 10, marginTop: 20, justifyContent: 'flex-end' }}>
                             <button
@@ -151,7 +150,7 @@ const DeleteAccountSection: React.FC<DeleteAccountSectionProps> = ({ onBackToPro
                                 disabled={deleting}
                                 onClick={() => setShowConfirm(false)}
                             >
-                                No, keep my account
+                                {t('settings.noKeepMyAccount')}
                             </button>
                             <button
                                 type="button"
@@ -159,7 +158,7 @@ const DeleteAccountSection: React.FC<DeleteAccountSectionProps> = ({ onBackToPro
                                 disabled={deleting}
                                 onClick={handleConfirmDelete}
                             >
-                                {deleting ? 'Deleting…' : 'Yes, delete forever'}
+                                {deleting ? t('settings.deleting') : t('settings.yesDeleteForever')}
                             </button>
                         </div>
                     </div>

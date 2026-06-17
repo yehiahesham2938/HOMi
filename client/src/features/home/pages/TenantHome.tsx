@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Search, Home, ShieldCheck, UserCircle, Handshake, ArrowRight } from 'lucide-react';
+import { Search, Home, ShieldCheck, UserCircle, Handshake, ArrowRight, Compass, Users, HelpCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import './TenantHome.css';
@@ -27,7 +27,9 @@ const TenantHome: React.FC = () => {
   const [simulatedNow, setSimulatedNow] = useState<Date>(new Date());
   const [activePropertyDetails, setActivePropertyDetails] = useState<PropertyResponse | null>(null);
   const navigate = useNavigate();
-  const firstName = authService.getCurrentUser()?.profile?.firstName?.trim() || 'there';
+  const currentUser = authService.getCurrentUser();
+  const firstName = currentUser?.profile?.firstName?.trim() || 'there';
+  const avatarUrl = currentUser?.profile?.avatarUrl;
 
   const currentHour = new Date().getHours();
   let greetingKey = 'tenantHome.goodEvening';
@@ -170,13 +172,44 @@ const TenantHome: React.FC = () => {
 
         <main className="content-area">
           <header className="welcome-section">
-            <div className="welcome-text">
-              <h1>{t(greetingKey)}, <span className="highlight">{firstName}!</span></h1>
-              {hasActiveRentalsForView ? (
-                <p>{activeSummaryText}</p>
-              ) : (
-                <p>{t('tenantHome.welcomeDreamHome')}</p>
-              )}
+            <div className="welcome-profile-orb">
+              <div className="welcome-avatar-wrapper">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Avatar" className="welcome-avatar" />
+                ) : (
+                  <UserCircle size={60} className="welcome-avatar-fallback" />
+                )}
+                <div className="welcome-badge">
+                  <ShieldCheck size={14} />
+                  <span>{t('tenantHome.verifiedTenant', 'Verified Tenant')}</span>
+                </div>
+              </div>
+              <div className="welcome-text">
+                <h1>{t(greetingKey)}, <span className="highlight">{firstName}!</span></h1>
+                {hasActiveRentalsForView ? (
+                  <p>{activeSummaryText}</p>
+                ) : (
+                  <p>{t('tenantHome.welcomeDreamHome')}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="welcome-quick-actions">
+              <div className="actions-title">{t('tenantHome.quickActions', 'Quick Actions')}</div>
+              <div className="welcome-actions-container">
+                <button className="welcome-quick-btn" onClick={() => navigate('/browse-properties')}>
+                  <Compass size={18} />
+                  <span>{t('tenantHome.browseHomes', 'Browse Homes')}</span>
+                </button>
+                <button className="welcome-quick-btn" onClick={() => navigate('/roommate-matching')}>
+                  <Users size={18} />
+                  <span>{t('tenantHome.findRoommateShort', 'Find Roommates')}</span>
+                </button>
+                <button className="welcome-quick-btn" onClick={() => navigate('/get-help')}>
+                  <HelpCircle size={18} />
+                  <span>{t('tenantHome.getHelp', 'Get Support')}</span>
+                </button>
+              </div>
             </div>
           </header>
 
@@ -204,7 +237,7 @@ const TenantHome: React.FC = () => {
               <section className="grid-col-1 active-notifications-card-slot">
                 <Notifications />
               </section>
-              <section className="grid-col-1 active-maintenance-card-slot">
+              <section className="grid-col-2 active-maintenance-card-slot">
                 <MaintenanceRequests contract={activeContract} />
               </section>
             </div>

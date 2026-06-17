@@ -24,7 +24,7 @@ interface Props {
 
 const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccepted }) => {
     const navigate = useNavigate();
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [applications, setApplications] = useState<MaintenanceJobApplication[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -137,11 +137,11 @@ const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccept
                             <FaBolt />
                         </div>
                         <div>
-                            <h2>Provider Bids</h2>
-                            <p className="apps-header-sub">{request.title} — choose your pro. Payment held in escrow.</p>
+                            <h2>{t('maintenance.providerBids')}</h2>
+                            <p className="apps-header-sub">{t('maintenance.bidsSubtitle', { title: request.title })}</p>
                         </div>
                     </div>
-                    <button className="apps-close-btn" onClick={onClose} aria-label="Close">
+                    <button className="apps-close-btn" onClick={onClose} aria-label={t('maintenance.close')}>
                         <FaTimes />
                     </button>
                 </header>
@@ -160,10 +160,10 @@ const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccept
                         </div>
                         <div className="wallet-card-badge">
                             <FaShieldAlt />
-                            <span>Escrow Protected</span>
+                            <span>{t('maintenance.escrowTitle')}</span>
                         </div>
                         <button className="apps-topup-btn" onClick={() => navigate('/balance')}>
-                            Top Up <FaArrowRight />
+                            {t('activeRental.topUpWallet')} <FaArrowRight />
                         </button>
                     </div>
                 </div>
@@ -173,12 +173,12 @@ const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccept
                     <div className="apps-modal-error">
                         <FaInfoCircle />
                         <div>
-                            <strong>Action needed</strong>
+                            <strong>{t('activeRental.actionRequired')}</strong>
                             <p>{error}</p>
                         </div>
                         {error.includes('wallet') && (
                             <button className="error-topup-link" onClick={() => navigate('/balance')}>
-                                Top Up Now
+                                {t('activeRental.topUpWallet')}
                             </button>
                         )}
                     </div>
@@ -189,13 +189,13 @@ const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccept
                     {loading ? (
                         <div className="apps-loading">
                             <div className="apps-spinner" />
-                            <p>Loading bids…</p>
+                            <p>{t('maintenance.loading')}</p>
                         </div>
                     ) : sorted.length === 0 ? (
                         <div className="apps-modal-empty">
                             <div className="apps-empty-icon"><FaInfoCircle /></div>
-                            <h4>No bids yet</h4>
-                            <p>Maintenance pros will see your job and start sending offers shortly. We'll notify you the moment they apply.</p>
+                            <h4>{t('maintenance.noBidsTitle')}</h4>
+                            <p>{t('maintenance.noBidsText')}</p>
                         </div>
                     ) : (
                         sorted.map((app, idx) => {
@@ -207,11 +207,11 @@ const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccept
 
                             return (
                                 <div key={app.id} className={`app-card ${isTop ? 'app-card-top' : ''}`}>
-                                    {isTop && <div className="app-top-badge">⭐ Best Match</div>}
+                                    {isTop && <div className="app-top-badge">⭐ {t('maintenance.bestMatch')}</div>}
 
                                     <div className="app-card-main">
                                         {/* Avatar */}
-                                        <div className="app-avatar-wrap app-clickable" onClick={() => handleViewProfile(app)} title="View Profile">
+                                        <div className="app-avatar-wrap app-clickable" onClick={() => handleViewProfile(app)} title={t('maintenance.viewProfile')}>
                                             <div className="app-avatar">
                                                 {app.provider?.avatarUrl
                                                     ? <img src={app.provider.avatarUrl} alt={displayName} />
@@ -226,19 +226,19 @@ const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccept
                                             <div className="app-name-row">
                                                 <h4 className="app-clickable-name" onClick={() => handleViewProfile(app)}>{displayName}</h4>
                                                 <span className="app-type-pill">
-                                                    {app.provider?.providerType === 'CENTER' ? 'Center' : 'Individual'}
+                                                    {app.provider?.providerType === 'CENTER' ? t('maintenance.center') : t('maintenance.individual')}
                                                 </span>
                                             </div>
 
                                             <div className="app-rating-row">
                                                 <FaStar />
                                                 <span className="rating-val">{(app.provider?.rating ?? 0).toFixed(1)}</span>
-                                                <span className="rating-count">({app.provider?.ratingsCount ?? 0} reviews)</span>
+                                                <span className="rating-count">({t('maintenance.reviewsCount', { count: app.provider?.ratingsCount ?? 0 })})</span>
                                                 {app.provider?.category && (
-                                                    <span className="app-category-chip">{app.provider.category}</span>
+                                                    <span className="app-category-chip">{t('myProperties.maintenanceTypes.' + app.provider.category, app.provider.category)}</span>
                                                 )}
                                                 <button className="app-profile-link-btn" onClick={() => handleViewProfile(app)}>
-                                                    <FaEye /> View Profile
+                                                    <FaEye /> {t('maintenance.viewProfile')}
                                                 </button>
                                                 <button 
                                                     className="app-profile-link-btn app-chat-btn" 
@@ -254,7 +254,7 @@ const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccept
                                                     }}
                                                     style={{ marginLeft: '12px' }}
                                                 >
-                                                    <FaComments /> Message
+                                                    <FaComments /> {t('maintenance.message')}
                                                 </button>
                                             </div>
 
@@ -268,7 +268,7 @@ const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccept
                                                     </span>
                                                 )}
                                                 <span className="meta-pill pill-time">
-                                                    Submitted {new Date(app.createdAt).toLocaleDateString()}
+                                                    {t('maintenance.posted')} {new Date(app.createdAt).toLocaleDateString()}
                                                 </span>
                                             </div>
 
@@ -278,7 +278,7 @@ const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccept
                                                     className="app-breakdown-toggle"
                                                     onClick={() => setExpandedId(isExpanded ? null : app.id)}
                                                 >
-                                                    Price Breakdown {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
+                                                    {t('maintenance.priceBreakdown')} {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
                                                 </button>
                                             )}
                                             {isExpanded && app.priceBreakdown && (
@@ -291,7 +291,7 @@ const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccept
                                         {/* Price + CTA */}
                                         <div className="app-card-right">
                                             <div className="app-price-block">
-                                                <span className="price-label">Final Price</span>
+                                                <span className="price-label">{t('maintenance.finalPrice')}</span>
                                                 <strong className="price-value">
                                                     EGP {app.finalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                 </strong>
@@ -311,10 +311,10 @@ const ApplicationsModal: React.FC<Props> = ({ isOpen, onClose, request, onAccept
                                                             onClick={() => handleAccept(app)}
                                                         >
                                                             {acceptingId === app.id
-                                                                ? <><div className="btn-spinner" /> Approving…</>
+                                                                ? <><div className="btn-spinner" /> {t('maintenance.approving')}</>
                                                                 : insufficient
-                                                                    ? <><FaWallet /> Top Up First</>
-                                                                    : <><FaCheckCircle /> Approve &amp; Escrow</>
+                                                                    ? <><FaWallet /> {t('maintenance.topUpFirst')}</>
+                                                                    : <><FaCheckCircle /> {t('maintenance.approveAndEscrow')}</>
                                                             }
                                                         </button>
                                                     );

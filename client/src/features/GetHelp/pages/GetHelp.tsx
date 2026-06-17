@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Header from '../../../components/global/header';
 import GuestNavbar from '../../../components/guest/GuestNavbar';
 import TenantSidebar from '../../../components/global/Tenant/sidebar';
@@ -30,6 +31,7 @@ interface FAQItem {
 }
 
 const GetHelp: React.FC = () => {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [supportChatOpen, setSupportChatOpen] = useState(false);
@@ -58,27 +60,27 @@ const GetHelp: React.FC = () => {
   };
 
   const categories = [
-    { id: 'All', icon: <LifeBuoy size={18} /> },
-    { id: 'Payments', icon: <CreditCard size={18} /> },
-    { id: 'Security', icon: <ShieldCheck size={18} /> },
-    { id: 'Lease', icon: <FileText size={18} /> },
+    { id: 'All', label: t('getHelp.allCategory', 'All'), icon: <LifeBuoy size={18} /> },
+    { id: 'Payments', label: t('getHelp.paymentsCategory', 'Payments'), icon: <CreditCard size={18} /> },
+    { id: 'Security', label: t('getHelp.securityCategory', 'Security'), icon: <ShieldCheck size={18} /> },
+    { id: 'Lease', label: t('getHelp.leaseCategory', 'Lease'), icon: <FileText size={18} /> },
   ];
 
   const faqs: FAQItem[] = [
     {
       category: 'Payments',
-      question: 'How do I set up automatic rent payments?',
-      answer: 'Navigate to the Payments tab in your dashboard, select "Auto-Pay", and link your preferred bank account or card.'
+      question: t('getHelp.q1', 'How do I set up automatic rent payments?'),
+      answer: t('getHelp.a1', 'Navigate to the Payments tab in your dashboard, select "Auto-Pay", and link your preferred bank account or card.')
     },
     {
       category: 'Security',
-      question: 'Is my personal data encrypted?',
-      answer: 'Yes, we use AES-256 bank-level encryption to ensure all tenant and landlord documentation is fully secured.'
+      question: t('getHelp.q2', 'Is my personal data encrypted?'),
+      answer: t('getHelp.a2', 'Yes, we use AES-256 bank-level encryption to ensure all tenant and landlord documentation is fully secured.')
     },
     {
       category: 'Lease',
-      question: 'Can I sign my lease digitally?',
-      answer: 'Absolutely. RentBlue integrates with secure e-signature providers to allow full digital contract execution.'
+      question: t('getHelp.q3', 'Can I sign my lease digitally?'),
+      answer: t('getHelp.a3', 'Absolutely. HOMi integrates with secure e-signature providers to allow full digital contract execution.')
     }
   ];
 
@@ -98,17 +100,17 @@ const GetHelp: React.FC = () => {
         {/* Search Hero */}
         <section className="help-hero">
           <div className="help-hero-inner">
-            <h1>How can we <span>help you</span> today?</h1>
-            <p>Search our knowledge base or browse categories below</p>
+            <h1 dangerouslySetInnerHTML={{ __html: t('getHelp.title', 'How can we <span>help you</span> today?') }} />
+            <p>{t('getHelp.subtitle', 'Search our knowledge base or browse categories below')}</p>
             <div className="search-container">
               <Search className="search-icon" />
               <input 
                 type="text" 
-                placeholder="Search for articles, guides, and more..." 
+                placeholder={t('getHelp.searchPlaceholder', 'Search for articles, guides, and more...')} 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <button className="search-btn">Search</button>
+              <button className="search-btn">{t('getHelp.searchBtn', 'Search')}</button>
             </div>
           </div>
         </section>
@@ -118,24 +120,24 @@ const GetHelp: React.FC = () => {
           <div className="support-channels">
             <div className="channel-card">
               <div className="channel-icon chat"><MessageSquare /></div>
-              <h3>Live Chat</h3>
-              <p>Message our team — we typically respond within 24 hours</p>
+              <h3>{t('getHelp.liveChat', 'Live Chat')}</h3>
+              <p>{t('getHelp.liveChatDesc', 'Message our team — we typically respond within 24 hours')}</p>
               <button type="button" className="channel-link" onClick={openSupportChat}>
-                Start Chat <ChevronRight size={16} />
+                {t('getHelp.startChat', 'Start Chat')} <ChevronRight size={16} />
               </button>
             </div>
             <div className="channel-card">
               <div className="channel-icon documentation"><BookOpen /></div>
-              <h3>Documentation</h3>
-              <p>Step-by-step platform guides</p>
-              <button className="channel-link">Browse Docs <ChevronRight size={16} /></button>
+              <h3>{t('getHelp.documentation', 'Documentation')}</h3>
+              <p>{t('getHelp.documentationDesc', 'Step-by-step platform guides')}</p>
+              <button className="channel-link">{t('getHelp.browseDocs', 'Browse Docs')} <ChevronRight size={16} /></button>
             </div>
             <div className="channel-card">
               <div className="channel-icon contact"><Mail /></div>
-              <h3>Email Support</h3>
-              <p>Get a reply within 24 hours</p>
+              <h3>{t('getHelp.emailSupport', 'Email Support')}</h3>
+              <p>{t('getHelp.emailSupportDesc', 'Get a reply within 24 hours')}</p>
               <button type="button" className="channel-link" onClick={openSupportChat}>
-                Message support <ChevronRight size={16} />
+                {t('getHelp.messageSupport', 'Message support')} <ChevronRight size={16} />
               </button>
             </div>
           </div>
@@ -143,7 +145,7 @@ const GetHelp: React.FC = () => {
           {/* FAQ Section */}
           <section className="faq-section">
             <div className="faq-header">
-              <h2>Frequently Asked Questions</h2>
+              <h2>{t('getHelp.faqTitle', 'Frequently Asked Questions')}</h2>
               <div className="category-tabs">
                 {categories.map(cat => (
                   <button 
@@ -151,7 +153,7 @@ const GetHelp: React.FC = () => {
                     className={`tab-btn ${activeCategory === cat.id ? 'active' : ''}`}
                     onClick={() => setActiveCategory(cat.id)}
                   >
-                    {cat.icon} {cat.id}
+                    {cat.icon} {cat.label}
                   </button>
                 ))}
               </div>
@@ -173,11 +175,11 @@ const GetHelp: React.FC = () => {
               <div className="urgent-info">
                 <PhoneCall className="urgent-icon" />
                 <div>
-                  <h3>Emergency Maintenance?</h3>
-                  <p>For urgent property issues, please call our 24/7 hotline directly.</p>
+                  <h3>{t('getHelp.emergencyTitle', 'Emergency Maintenance?')}</h3>
+                  <p>{t('getHelp.emergencyDesc', 'For urgent property issues, please call our 24/7 hotline directly.')}</p>
                 </div>
               </div>
-              <a href="tel:+1800RENTBLUE" className="hotline-number">+1 (800) RENT-BLUE</a>
+              <a href={`tel:${t('getHelp.hotline', '+1800RENTBLUE')}`} className="hotline-number">{t('getHelp.hotline', '+1 (800) RENT-BLUE')}</a>
             </div>
           </section>
         </div>

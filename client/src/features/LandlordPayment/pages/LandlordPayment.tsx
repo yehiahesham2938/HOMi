@@ -314,7 +314,7 @@ const LandlordPayment: React.FC = () => {
                 setTopupError(null);
                 setSuccessMessage('Wallet top-up completed successfully.');
                 setShowSuccessToast(true);
-                
+
                 // Reload data
                 const [contractsResponse, walletRes, maintResponse] = await Promise.all([
                     contractService.getLandlordContracts({ page: 1, limit: 100 }),
@@ -361,9 +361,9 @@ const LandlordPayment: React.FC = () => {
     const receivedPayments = useMemo<ReceivedPaymentRow[]>(() => {
         const rows: ReceivedPaymentRow[] = [];
         contracts.forEach((contract) => {
-            const hasBeenPaid = getContractPaymentStatus(contract) === 'PAID' || 
-                                ['ACTIVE', 'EXPIRED', 'TERMINATED'].includes(contract.status);
-            
+            const hasBeenPaid = getContractPaymentStatus(contract) === 'PAID' ||
+                ['ACTIVE', 'EXPIRED', 'TERMINATED'].includes(contract.status);
+
             if (hasBeenPaid) {
                 const tenantName = `${contract.tenant?.firstName ?? ''} ${contract.tenant?.lastName ?? ''}`.trim() || 'Tenant';
                 const propertyTitle = contract.property?.title || 'Property';
@@ -458,7 +458,7 @@ const LandlordPayment: React.FC = () => {
             })
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }, [contracts]);
-    
+
     const maintenancePayments = useMemo(() => {
         return maintenanceRequests
             .filter((req) => req.chargeParty === 'LANDLORD' && req.agreedPrice !== null)
@@ -664,7 +664,7 @@ const LandlordPayment: React.FC = () => {
 
         try {
             await contractService.withdrawWalletBalance(amount);
-            
+
             // Create a payout record for history
             const record: TransferRecord = {
                 id: `TR-${Date.now().toString().slice(-6)}`,
@@ -679,7 +679,7 @@ const LandlordPayment: React.FC = () => {
             };
 
             persistPayouts([record, ...payouts]);
-            
+
             // Refresh wallet balance
             const wallet = await contractService.getWalletBalance().catch(() => null);
             if (wallet) {
@@ -780,7 +780,7 @@ const LandlordPayment: React.FC = () => {
                                     </td>
                                     <td>
                                         <div className="prop-cell">
-                                            <Building2 size={14} style={{ flexShrink: 0 }} /> 
+                                            <Building2 size={14} style={{ flexShrink: 0 }} />
                                             <div style={{ display: 'flex', flexDirection: 'column' }}>
                                                 <span>{item.propertyTitle}</span>
                                                 <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 600, marginTop: '2px' }}>{item.type || 'Rent Payment'}</span>
@@ -851,7 +851,7 @@ const LandlordPayment: React.FC = () => {
                         title="No payout methods added"
                         description="Add a bank account so you can transfer available balance from HOMi to your bank."
                         action={
-                            <button className="btn-add-method" onClick={() => setIsMethodModalOpen(true)} style={{ width: 'auto', marginTop: '16px' }}>
+                            <button className="l-btn-add-method" onClick={() => setIsMethodModalOpen(true)} style={{ width: 'auto', marginTop: '16px' }}>
                                 <Plus size={18} /> Add Payout Method
                             </button>
                         }
@@ -864,28 +864,28 @@ const LandlordPayment: React.FC = () => {
 
         return (
             <div className="tab-viewport animate-fade-in">
-                <div className="methods-viewport">
-                    <div className={`card-visual ${primaryMethod.methodType === 'BANK_ACCOUNT' ? 'bank-account' : 'wallet-account'}`}>
-                        <div className="card-top-row">
-                            <span className="bank-logo">
+                <div className="l-methods-viewport">
+                    <div className={`l-card-visual ${primaryMethod.methodType === 'BANK_ACCOUNT' ? 'l-bank-account' : 'l-wallet-account'}`}>
+                        <div className="l-card-top-row">
+                            <span className="l-bank-logo">
                                 {primaryMethod.methodType === 'BANK_ACCOUNT'
                                     ? (primaryMethod.bankName || 'BANK').toUpperCase()
                                     : (primaryMethod.walletProvider || 'WALLET').toUpperCase()}
                             </span>
-                            <div className="chip-gold"></div>
+                            <div className="l-chip-gold"></div>
                         </div>
-                        <div className="card-mid-row">
-                            <div className="iban-display">
+                        <div className="l-card-mid-row">
+                            <div className="l-iban-display">
                                 {primaryMethod.methodType === 'BANK_ACCOUNT'
                                     ? maskAccountNumber(primaryMethod.accountNumber || '')
                                     : maskPhoneNumber(primaryMethod.walletPhone || '')}
                             </div>
                         </div>
-                        <div className="card-bottom-row">
-                            <span className="card-holder-label">
+                        <div className="l-card-bottom-row">
+                            <span className="l-card-holder-label">
                                 {primaryMethod.methodType === 'BANK_ACCOUNT' ? 'Account Holder' : 'Method Name'}
                             </span>
-                            <span className="card-holder-name">
+                            <span className="l-card-holder-name">
                                 {primaryMethod.methodType === 'BANK_ACCOUNT'
                                     ? (primaryMethod.accountHolder || '').toUpperCase()
                                     : primaryMethod.methodDisplayName.toUpperCase()}
@@ -893,15 +893,15 @@ const LandlordPayment: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="methods-list-side">
+                    <div className="l-methods-list-side">
                         {payoutMethods.map((method) => (
                             <button
                                 key={method.id}
-                                className={`method-entry ${method.isPrimary ? 'active' : ''}`}
+                                className={`l-method-entry ${method.isPrimary ? 'active' : ''}`}
                                 onClick={() => setPrimaryMethod(method.id)}
                             >
-                                <div className="method-icon-wrap">{method.methodType === 'BANK_ACCOUNT' ? <Landmark size={20} /> : <CreditCard size={20} />}</div>
-                                <div className="method-info-text">
+                                <div className="l-method-icon-wrap">{method.methodType === 'BANK_ACCOUNT' ? <Landmark size={20} /> : <CreditCard size={20} />}</div>
+                                <div className="l-method-info-text">
                                     <h5>
                                         {method.methodType === 'BANK_ACCOUNT'
                                             ? `${method.bankName} ••••${method.accountLast4}`
@@ -913,7 +913,7 @@ const LandlordPayment: React.FC = () => {
                             </button>
                         ))}
 
-                        <button className="btn-add-method" onClick={() => setIsMethodModalOpen(true)}>
+                        <button className="l-btn-add-method" onClick={() => setIsMethodModalOpen(true)}>
                             <Plus size={18} /> Add New Payout Method
                         </button>
                     </div>
@@ -989,7 +989,7 @@ const LandlordPayment: React.FC = () => {
                                             </td>
                                             <td>
                                                 <div className="prop-cell">
-                                                    <Building2 size={14} style={{ flexShrink: 0 }} /> 
+                                                    <Building2 size={14} style={{ flexShrink: 0 }} />
                                                     <span>{item.propertyTitle}</span>
                                                 </div>
                                             </td>
@@ -1185,7 +1185,7 @@ const LandlordPayment: React.FC = () => {
                                         </td>
                                         <td>
                                             <div className="prop-cell">
-                                                <Building2 size={14} style={{ flexShrink: 0 }} /> 
+                                                <Building2 size={14} style={{ flexShrink: 0 }} />
                                                 <span>{item.propertyTitle}</span>
                                             </div>
                                         </td>
@@ -1401,7 +1401,7 @@ const LandlordPayment: React.FC = () => {
                     <div className="lp-modal">
                         <h3>Add Funds to Wallet</h3>
                         <p>Enter the amount you want to add. You will be redirected to Paymob to complete payment securely.</p>
-                        
+
                         <label htmlFor="topup-method">Payment Method</label>
                         <select
                             id="topup-method"

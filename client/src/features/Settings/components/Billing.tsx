@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import './Billing.css';
 import { FaHistory, FaBoxOpen, FaCheckCircle, FaWallet } from 'react-icons/fa';
 import authService from '../../../services/auth.service';
 
 const Billing: React.FC = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const currentUser = authService.getCurrentUser();
     
@@ -24,24 +26,24 @@ const Billing: React.FC = () => {
                         onChange={(e) => setIsSubscribed(e.target.checked)} 
                         style={{ marginRight: '10px' }}
                     />
-                    Toggle Subscribed State (For Demo)
+                    {t('settings.toggleSubscribedState', 'Toggle Subscribed State (For Demo)')}
                 </label>
             </div>
 
             <div className={`current-plan-card ${isFreePlan ? 'free-plan' : ''}`}>
                 <div className="plan-info">
                     <span className="plan-badge">
-                        {isFreePlan ? 'Basic Tier' : 'Premium Tier'}
+                        {isFreePlan ? t('settings.basicTier') : t('settings.premiumTier')}
                     </span>
                     <h2>
-                        {isFreePlan ? 'Free Plan' : 'HOMi Pro'}
+                        {isFreePlan ? t('settings.freePlan') : 'HOMi Pro'}
                         <span>{isFreePlan ? 'EGP 0/mo' : 'EGP 399/mo'}</span>
                     </h2>
-                    <p>{isFreePlan ? 'No subscription active.' : 'Your pro benefits are fully active.'}</p>
+                    <p>{isFreePlan ? t('settings.noSubscriptionActive') : t('settings.proBenefitsActive')}</p>
                 </div>
                 {isFreePlan && (
                     <button className="upgrade-btn pulse-btn" onClick={() => navigate('/homi-pro')}>
-                        Upgrade to Pro
+                        {t('settings.upgradeToPro')}
                     </button>
                 )}
             </div>
@@ -49,22 +51,22 @@ const Billing: React.FC = () => {
             <div className="billing-grid">
                 <section className="billing-section">
                     <header className="section-header">
-                        <h3><FaWallet className="icon-blue" /> Current Balance</h3>
+                        <h3><FaWallet className="icon-blue" /> {t('settings.currentBalance')}</h3>
                     </header>
                     <div className="balance-display" style={{ padding: '40px 20px', background: '#f8fafc', borderRadius: '12px', textAlign: 'center', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '250px' }}>
-                        <p style={{ fontSize: '1.1rem', color: '#64748b', marginBottom: '10px' }}>HOMi Wallet Balance</p>
+                        <p style={{ fontSize: '1.1rem', color: '#64748b', marginBottom: '10px' }}>{t('settings.walletBalanceLabel')}</p>
                         <h2 style={{ fontSize: '3rem', color: '#0f172a', margin: 0, fontWeight: 800 }}>EGP 0.00</h2>
                     </div>
                 </section>
 
                 <section className="billing-section">
                     <header className="section-header">
-                        <h3><FaHistory className="icon-blue" /> Plan Expiration</h3>
+                        <h3><FaHistory className="icon-blue" /> {t('settings.planExpiration')}</h3>
                     </header>
                     {isFreePlan ? (
                         <div className="billing-empty-state" style={{ height: '250px' }}>
                             <FaBoxOpen className="empty-icon" />
-                            <p style={{ marginBottom: '15px' }}>No plan is selected.</p>
+                            <p style={{ marginBottom: '15px' }}>{t('settings.noPlanSelected')}</p>
                             <button 
                                 onClick={() => navigate('/homi-pro')} 
                                 style={{ 
@@ -81,14 +83,14 @@ const Billing: React.FC = () => {
                                 onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
                                 onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                             >
-                                View HOMi Pro
+                                {t('settings.viewPro')}
                             </button>
                         </div>
                     ) : (
                         <div className="billing-empty-state" style={{ height: '250px', background: '#ecfdf5', borderColor: '#10b981' }}>
                             <FaCheckCircle className="empty-icon" style={{ color: '#10b981' }} />
-                            <p style={{ color: '#065f46', fontWeight: 700, fontSize: '1.3rem', marginTop: '10px' }}>Your Premium Plan is Active!</p>
-                            <p style={{ marginTop: '8px', fontSize: '1rem', color: '#047857' }}>Renews / Expires on: <strong>May 8, 2027</strong></p>
+                            <p style={{ color: '#065f46', fontWeight: 700, fontSize: '1.3rem', marginTop: '10px' }}>{t('settings.premiumPlanActive')}</p>
+                            <p style={{ marginTop: '8px', fontSize: '1rem', color: '#047857' }}>{t('settings.renewsExpires', { date: 'May 8, 2027' })}</p>
                         </div>
                     )}
                 </section>

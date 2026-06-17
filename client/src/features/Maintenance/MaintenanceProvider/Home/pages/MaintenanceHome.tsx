@@ -7,7 +7,7 @@ import MaintenanceSideBar from '../../SideBar/MaintenanceSideBar';
 import {
     FaTools, FaCheckCircle, FaDollarSign, FaSearch,
     FaMapMarkerAlt, FaWrench, FaChevronRight,
-    FaBell, FaStar, FaStarHalfAlt
+    FaBell, FaStar, FaStarHalfAlt, FaUser, FaShieldAlt, FaBriefcase
 } from 'react-icons/fa';
 import './MaintenanceHome.css';
 import maintenanceService, {
@@ -33,6 +33,7 @@ const MaintenanceHome: React.FC = () => {
     const navigate = useNavigate();
     const cached = authService.getCurrentUser?.();
     const firstName = cached?.user?.firstName ?? 'there';
+    const avatarUrl = cached?.profile?.avatarUrl;
 
     const [available, setAvailable] = useState<MaintenanceRequest[]>([]);
     const [activeJobs, setActiveJobs] = useState<MaintenanceRequest[]>([]);
@@ -91,9 +92,42 @@ const MaintenanceHome: React.FC = () => {
                 <div className="maintenance-content-scroll">
                     <div className="maintenance-dashboard-container">
                         <header className="welcome-section">
-                            <div className="welcome-text">
-                                <h1>Welcome back, <span className="highlight">{firstName}</span></h1>
-                                <p>{loading ? 'Fetching your dashboard…' : `${available.length} open jobs nearby — let's get you booked.`}</p>
+                            <div className="welcome-profile-orb">
+                                <div className="welcome-avatar-wrapper">
+                                    {avatarUrl ? (
+                                        <img src={avatarUrl} alt="Avatar" className="welcome-avatar" />
+                                    ) : (
+                                        <div className="welcome-avatar-fallback-container">
+                                            <FaUser size={30} className="welcome-avatar-fallback-fa" />
+                                        </div>
+                                    )}
+                                    <div className="welcome-badge">
+                                        <FaShieldAlt size={12} />
+                                        <span>{t('maintenanceHome.specialist', 'Pro Specialist')}</span>
+                                    </div>
+                                </div>
+                                <div className="welcome-text">
+                                    <h1>Welcome back, <span className="highlight">{firstName}</span></h1>
+                                    <p>{loading ? 'Fetching your dashboard…' : `${available.length} open jobs nearby — let's get you booked.`}</p>
+                                </div>
+                            </div>
+
+                            <div className="welcome-quick-actions">
+                                <div className="actions-title">{t('maintenanceHome.quickActions', 'Quick Actions')}</div>
+                                <div className="welcome-actions-container">
+                                    <button className="welcome-quick-btn" onClick={() => navigate('/available-jobs')}>
+                                        <FaSearch size={16} />
+                                        <span>{t('maintenanceHome.availableJobs', 'Available Jobs')}</span>
+                                    </button>
+                                    <button className="welcome-quick-btn" onClick={() => navigate('/my-jobs')}>
+                                        <FaBriefcase size={16} />
+                                        <span>{t('maintenanceHome.myJobs', 'My Jobs')}</span>
+                                    </button>
+                                    <button className="welcome-quick-btn" onClick={() => navigate('/maintenance-earnings')}>
+                                        <FaDollarSign size={16} />
+                                        <span>{t('maintenanceHome.wallet', 'Earnings Wallet')}</span>
+                                    </button>
+                                </div>
                             </div>
                         </header>
 

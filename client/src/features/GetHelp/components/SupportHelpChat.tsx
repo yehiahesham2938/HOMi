@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Send, Loader2 } from 'lucide-react';
 import { messageService, type MessageDto } from '../../../services/message.service';
 import authService from '../../../services/auth.service';
@@ -10,6 +11,7 @@ interface Props {
 }
 
 const SupportHelpChat: React.FC<Props> = ({ isOpen, onClose }) => {
+    const { t } = useTranslation();
     const [messages, setMessages] = useState<MessageDto[]>([]);
     const [conversationId, setConversationId] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -28,11 +30,11 @@ const SupportHelpChat: React.FC<Props> = ({ isOpen, onClose }) => {
             setMessages(thread.messages);
             await messageService.markConversationRead(thread.conversation.id);
         } catch {
-            setError('Could not load support chat. Please try again.');
+            setError(t('supportHelpChat.loadError', 'Could not load support chat. Please try again.'));
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [t]);
 
     useEffect(() => {
         if (isOpen) {
@@ -62,7 +64,7 @@ const SupportHelpChat: React.FC<Props> = ({ isOpen, onClose }) => {
                 await messageService.markConversationRead(conversationId);
             }
         } catch {
-            setError('Failed to send. Please try again.');
+            setError(t('supportHelpChat.sendError', 'Failed to send. Please try again.'));
         } finally {
             setSending(false);
         }
@@ -72,14 +74,14 @@ const SupportHelpChat: React.FC<Props> = ({ isOpen, onClose }) => {
 
     return (
         <div className="support-chat-overlay" role="dialog" aria-modal="true" aria-labelledby="support-chat-title">
-            <button type="button" className="support-chat-backdrop" aria-label="Close chat" onClick={onClose} />
+            <button type="button" className="support-chat-backdrop" aria-label={t('supportHelpChat.closeLabel', 'Close')} onClick={onClose} />
             <div className="support-chat-panel">
                 <header className="support-chat-header">
                     <div>
-                        <h2 id="support-chat-title">HOMi Support</h2>
-                        <p className="support-chat-sub">We typically reply within 24 hours</p>
+                        <h2 id="support-chat-title">{t('supportHelpChat.title', 'HOMi Support')}</h2>
+                        <p className="support-chat-sub">{t('supportHelpChat.subtitle', 'We typically reply within 24 hours')}</p>
                     </div>
-                    <button type="button" className="support-chat-close" onClick={onClose} aria-label="Close">
+                    <button type="button" className="support-chat-close" onClick={onClose} aria-label={t('supportHelpChat.closeLabel', 'Close')}>
                         <X size={22} />
                     </button>
                 </header>
@@ -88,7 +90,7 @@ const SupportHelpChat: React.FC<Props> = ({ isOpen, onClose }) => {
                     {loading ? (
                         <div className="support-chat-loading">
                             <Loader2 className="support-chat-spin" size={28} />
-                            <span>Loading conversation…</span>
+                            <span>{t('supportHelpChat.loading', 'Loading conversation…')}</span>
                         </div>
                     ) : (
                         messages.map((m) => {
@@ -119,7 +121,7 @@ const SupportHelpChat: React.FC<Props> = ({ isOpen, onClose }) => {
                     <textarea
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        placeholder="Type your message…"
+                        placeholder={t('supportHelpChat.placeholder', 'Type your message…')}
                         rows={2}
                         disabled={loading || sending}
                         onKeyDown={(e) => {
@@ -134,7 +136,7 @@ const SupportHelpChat: React.FC<Props> = ({ isOpen, onClose }) => {
                         className="support-chat-send"
                         disabled={loading || sending || !input.trim()}
                         onClick={() => void send()}
-                        aria-label="Send message"
+                        aria-label={t('supportHelpChat.sendLabel', 'Send message')}
                     >
                         {sending ? <Loader2 className="support-chat-spin" size={22} /> : <Send size={22} />}
                     </button>

@@ -353,7 +353,7 @@
 }
 
 /* Credit Card Visual */
-.card-visual {
+.t-card-visual {
     width: 340px;
     height: 200px;
     border-radius: 16px;
@@ -623,7 +623,7 @@
     align-items: flex-start;
 }
 
-.card-visual.visa {
+.t-card-visual.visa {
     background: linear-gradient(135deg, #1e1e1e 0%, #000000 100%);
     position: relative;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
@@ -1171,16 +1171,19 @@
 /* --- 5. METHODS (Apple Wallet / Stripe Style) --- */
 
 /* Re-using the flex layout from TenantPayment */
-.methods-viewport {
+.t-methods-viewport {
     display: flex;
     gap: 40px;
     align-items: flex-start;
     padding-top: 10px;
-    margin-left: -610px;
+    justify-content: center;
+    margin: 0 auto;
+    width: 100%;
+    margin-left: -710px;
 }
 
 /* The High-End Card Visual */
-.card-visual.bank-account {
+.t-card-visual.t-bank-account {
     width: 380px;
     height: 220px;
     border-radius: 20px;
@@ -1195,7 +1198,7 @@
     overflow: hidden;
 }
 
-.card-visual.bank-account::after {
+.t-card-visual.t-bank-account::after {
     content: '';
     position: absolute;
     top: 0;
@@ -1205,43 +1208,43 @@
     background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.08) 100%);
 }
 
-.card-top-row {
+.t-card-top-row {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
 }
 
-.bank-logo {
+.t-bank-logo {
     opacity: 0.9;
     letter-spacing: -0.5px;
     font-weight: 800;
     font-size: 14px;
 }
 
-.chip-gold {
+.t-chip-gold {
     width: 44px;
     height: 32px;
     background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
     border-radius: 6px;
 }
 
-.card-mid-row {
+.t-card-mid-row {
     margin: 24px 0;
 }
 
-.iban-display {
+.t-iban-display {
     font-family: 'JetBrains Mono', monospace;
     font-size: 1.1rem;
     letter-spacing: 2px;
     word-spacing: 4px;
 }
 
-.card-bottom-row {
+.t-card-bottom-row {
     display: flex;
     flex-direction: column;
 }
 
-.card-holder-label {
+.t-card-holder-label {
     font-size: 10px;
     text-transform: uppercase;
     opacity: 0.5;
@@ -1249,21 +1252,22 @@
     margin-bottom: 4px;
 }
 
-.card-holder-name {
+.t-card-holder-name {
     font-weight: 600;
     font-size: 15px;
     letter-spacing: 0.5px;
 }
 
 /* Sidebar List (Right Side) */
-.methods-list-side {
+.t-methods-list-side {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 16px;
+    max-width: 600px;
 }
 
-.method-entry {
+.t-method-entry {
     display: flex;
     align-items: center;
     gap: 16px;
@@ -1273,21 +1277,21 @@
     border-radius: 16px;
     transition: all 0.2s ease;
     cursor: pointer;
-    width: 600px;
+    width: 100%;
 }
 
-.method-entry:hover {
+.t-method-entry:hover {
     border-color: var(--accents-3);
     transform: translateX(4px);
 }
 
-.method-entry.active {
+.t-method-entry.active {
     border-color: var(--fg);
     border-width: 2px;
     box-shadow: var(--shadow);
 }
 
-.method-icon-wrap {
+.t-method-icon-wrap {
     width: 40px;
     height: 40px;
     background: var(--accents-1);
@@ -1298,20 +1302,20 @@
     color: var(--fg);
 }
 
-.method-info-text h5 {
+.t-method-info-text h5 {
     margin: 0;
     font-size: 14px;
     font-weight: 700;
 }
 
-.method-info-text p {
+.t-method-info-text p {
     margin: 2px 0 0;
     font-size: 12px;
     color: var(--accents-4);
 }
 
 /* Add Button */
-.btn-add-method {
+.t-btn-add-method {
     background: white;
     border: 1px dashed var(--accents-3);
     padding: 20px;
@@ -1325,10 +1329,10 @@
     justify-content: center;
     gap: 10px;
     transition: all 0.2s;
-    width: 600px;
+    width: 100%;
 }
 
-.btn-add-method:hover {
+.t-btn-add-method:hover {
     border-color: var(--fg);
     color: var(--fg);
     background: var(--accents-1);
@@ -1336,12 +1340,12 @@
 
 /* Mobile Responsiveness */
 @media (max-width: 900px) {
-    .methods-viewport {
+    .t-methods-viewport {
         flex-direction: column;
         align-items: center;
     }
 
-    .card-visual.bank-account {
+    .t-card-visual.t-bank-account {
         width: 100%;
         max-width: 380px;
     }

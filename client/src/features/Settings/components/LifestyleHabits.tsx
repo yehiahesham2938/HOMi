@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import './MyProfile.css'; // Reuse profile styles for consistency
 import { FaMagic } from 'react-icons/fa';
 import { authService } from '../../../services/auth.service';
@@ -11,6 +12,7 @@ interface LifestyleHabitsProps {
 type Habits = Record<string, number>;
 
 const LifestyleHabits: React.FC<LifestyleHabitsProps> = ({ role }) => {
+    const { t } = useTranslation();
     const [habits, setHabits] = useState<Habits>({});
     const [initial, setInitial] = useState<Habits>({});
     const [loading, setLoading] = useState(true);
@@ -45,9 +47,9 @@ const LifestyleHabits: React.FC<LifestyleHabitsProps> = ({ role }) => {
         try {
             await authService.setLifestyleHabits(habits);
             setInitial({ ...habits });
-            setMessage({ type: 'success', text: 'Lifestyle profile updated successfully!' });
+            setMessage({ type: 'success', text: t('settings.preferencesSaved', 'Lifestyle profile updated successfully!') });
         } catch {
-            setMessage({ type: 'error', text: 'Failed to update lifestyle profile. Please try again.' });
+            setMessage({ type: 'error', text: t('settings.errFailedSaveLifestyle', 'Failed to update lifestyle profile. Please try again.') });
         } finally {
             setSaving(false);
             setTimeout(() => setMessage(null), 4000);
@@ -65,8 +67,8 @@ const LifestyleHabits: React.FC<LifestyleHabitsProps> = ({ role }) => {
     return (
         <div className="profile-wrapper">
             <div className="profile-edit-surface">
-                <div className="form-section-title">Lifestyle Profile</div>
-                <p className="section-subtitle">Tell us about your lifestyle. HOMI uses these to match you with compatible roommates.</p>
+                <div className="form-section-title">{t('settings.lifestyleProfile')}</div>
+                <p className="section-subtitle">{t('settings.lifestyleSubtitle')}</p>
 
                 {message && (
                     <div style={{
@@ -86,7 +88,7 @@ const LifestyleHabits: React.FC<LifestyleHabitsProps> = ({ role }) => {
                         return (
                             <div key={h.key} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 14, color: '#1e293b' }}>
-                                    <Icon size={16} color="#197cf8" />{h.label}
+                                    <Icon size={16} color="#197cf8" />{t(`habits.${h.key}.label`, h.label)}
                                 </div>
                                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                                     {h.opts.map((opt, i) => {
@@ -104,7 +106,7 @@ const LifestyleHabits: React.FC<LifestyleHabitsProps> = ({ role }) => {
                                                     color: active ? '#fff' : '#475569',
                                                 }}
                                             >
-                                                {opt}
+                                                {t(`habits.${h.key}.opts.${i}`, opt)}
                                             </button>
                                         );
                                     })}
@@ -117,7 +119,7 @@ const LifestyleHabits: React.FC<LifestyleHabitsProps> = ({ role }) => {
                 {!allSet && (
                     <div className="habit-warning" style={{ marginTop: 16 }}>
                         <span className="warning-dot" />
-                        Answer all {HABITS.length} lifestyle questions to be eligible for Roommate Matching.
+                        {t('settings.answerAllWarning', { count: HABITS.length })}
                     </div>
                 )}
 
@@ -127,7 +129,7 @@ const LifestyleHabits: React.FC<LifestyleHabitsProps> = ({ role }) => {
                     disabled={saving || !hasChanges || !allSet}
                     style={{ opacity: saving || !hasChanges || !allSet ? 0.65 : 1, marginTop: '1rem' }}
                 >
-                    {saving ? 'Saving…' : 'Save Lifestyle Profile'}
+                    {saving ? t('settings.saving') : t('settings.saveLifestyle')}
                 </button>
 
                 <div style={{ marginTop: '2rem', background: '#f0f9ff', border: '1px solid #dbeafe', padding: '1.5rem', borderRadius: '1rem', display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
@@ -135,9 +137,9 @@ const LifestyleHabits: React.FC<LifestyleHabitsProps> = ({ role }) => {
                         <FaMagic style={{ color: '#197cf8' }} />
                     </div>
                     <div>
-                        <h4 style={{ color: '#0b4aaa', margin: 0, fontSize: '1rem' }}>AI Matching Ready</h4>
+                        <h4 style={{ color: '#0b4aaa', margin: 0, fontSize: '1rem' }}>{t('settings.aiMatchingReady')}</h4>
                         <p style={{ color: '#1d4ed8', fontSize: '0.875rem', margin: '0.25rem 0 0' }}>
-                            Once your lifestyle profile is complete, HOMI Wish and Smart Match analyze your compatibility with other roommates.
+                            {t('settings.aiMatchingDesc')}
                         </p>
                     </div>
                 </div>

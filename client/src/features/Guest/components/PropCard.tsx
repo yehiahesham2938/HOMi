@@ -15,8 +15,8 @@ const PropCard: React.FC<PropCardProps> = ({ property, onOpenDetails }) => {
   const { t } = useTranslation();
 
   // Normalize data between the two mock arrays
-  const location = property.address || 'Location unavailable';
-  const currency = 'EGP';
+  const location = property.address || t('guestHome.locationUnavailable', 'Location unavailable');
+  const currency = t('guestHome.currency', 'EGP');
   const displayBadge = property.tags && property.tags[0];
   const hostImage = property.ownerImage || `https://i.pravatar.cc/150?u=${property.id}`;
   const reviewsCount = 12; // Static or derived from ID if needed
@@ -31,7 +31,7 @@ const PropCard: React.FC<PropCardProps> = ({ property, onOpenDetails }) => {
 
   const handleHeartClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate('/auth', { state: { message: 'Please log in to save properties' } });
+    navigate('/auth', { state: { message: t('guestHome.loginMessage', 'Please log in to save properties') } });
   };
 
   return (
@@ -62,7 +62,7 @@ const PropCard: React.FC<PropCardProps> = ({ property, onOpenDetails }) => {
             <span className="price-val">{property.price.toLocaleString()} {currency}</span>
             <span className="price-period">/ {t('guestHome.perMonth')}</span>
           </div>
-          <img src={hostImage} alt="Host" className="host-mini-avatar" title="Verified Landlord" />
+          <img src={hostImage} alt="Host" className="host-mini-avatar" title={t('propertyDetailPage.ownerVerified', 'Verified Landlord')} />
         </div>
       </div>
     </div>

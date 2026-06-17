@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   CheckCircle2,
   ChevronDown,
@@ -29,6 +30,7 @@ type FaqItem = {
 };
 
 const ForTenants: React.FC = () => {
+  const { t } = useTranslation();
   const [openFaqId, setOpenFaqId] = useState<string | null>('apply');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const location = useLocation();
@@ -79,183 +81,179 @@ const ForTenants: React.FC = () => {
   const steps = useMemo(
     () => [
       {
-        label: 'Step One',
-        title: 'Create Your Tenant Account',
-        description: 'Start your journey by registering as a tenant on HOMI. Your profile becomes your trusted digital identity across the platform — landlords will review it when you apply.',
-        bullets: [
+        label: t('forTenants.step1Label', 'Step One'),
+        title: t('forTenants.step1Title', 'Create Your Tenant Account'),
+        description: t('forTenants.step1Desc', 'Start your journey by registering as a tenant on HOMI. Your profile becomes your trusted digital identity across the platform — landlords will review it when you apply.'),
+        bullets: t('forTenants.step1Bullets', { returnObjects: true }) as string[] || [
           'Enter your personal information and contact details',
           'Upload an ID for profile verification',
           'Set your rental preferences (area, budget, size)',
           'Receive a verified badge on your profile'
         ],
-        tags: ['Registration', 'Verification', 'Profile Setup'],
+        tags: t('forTenants.step1Tags', { returnObjects: true }) as string[] || ['Registration', 'Verification', 'Profile Setup'],
         image: 'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=800&q=80&fit=crop',
-        imageCaptionTitle: 'Account Registration',
-        imageCaptionSub: 'Quick sign-up — ready in under 2 minutes'
+        imageCaptionTitle: t('forTenants.step1CapTitle', 'Account Registration'),
+        imageCaptionSub: t('forTenants.step1CapSub', 'Quick sign-up — ready in under 2 minutes')
       },
       {
-        label: 'Step Two',
-        title: 'Search & Browse Properties',
-        description: 'Explore a wide marketplace of verified rental listings. Use powerful filters to narrow down properties by location, price range, number of rooms, amenities, and availability date.',
-        bullets: [
+        label: t('forTenants.step2Label', 'Step Two'),
+        title: t('forTenants.step2Title', 'Search & Browse Properties'),
+        description: t('forTenants.step2Desc', 'Explore a wide marketplace of verified rental listings. Use powerful filters to narrow down properties by location, price range, number of rooms, amenities, and availability date.'),
+        bullets: t('forTenants.step2Bullets', { returnObjects: true }) as string[] || [
           'Filter by area, price, size, and amenities',
           'View high-resolution photos of every property',
           'Read full property descriptions and landlord details',
           'Save favorites and compare multiple listings'
         ],
-        tags: ['Property Search', 'Smart Filters', 'Favorites'],
+        tags: t('forTenants.step2Tags', { returnObjects: true }) as string[] || ['Property Search', 'Smart Filters', 'Favorites'],
         image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80&fit=crop',
-        imageCaptionTitle: 'Browse Verified Listings',
-        imageCaptionSub: 'Hundreds of properties across all areas'
+        imageCaptionTitle: t('forTenants.step2CapTitle', 'Browse Verified Listings'),
+        imageCaptionSub: t('forTenants.step2CapSub', 'Hundreds of properties across all areas')
       },
       {
-        label: 'Step Three',
-        title: 'Find a Roommate (Optional)',
-        description: "Looking to share? Use HOMI's roommate matching system to connect with compatible people. Post your profile with your lifestyle preferences and let the platform surface suitable matches.",
-        bullets: [
+        label: t('forTenants.step3Label', 'Step Three'),
+        title: t('forTenants.step3Title', 'Find a Roommate (Optional)'),
+        description: t('forTenants.step3Desc', "Looking to share? Use HOMI's roommate matching system to connect with compatible people. Post your profile with your lifestyle preferences and let the platform surface suitable matches."),
+        bullets: t('forTenants.step3Bullets', { returnObjects: true }) as string[] || [
           'Create a roommate profile with your preferences',
           'Browse and filter compatible roommate profiles',
           'Contact matches directly through the platform',
           'Apply for a shared unit together'
         ],
-        tags: ['Roommate Matching', 'Shared Rentals', 'Messaging'],
+        tags: t('forTenants.step3Tags', { returnObjects: true }) as string[] || ['Roommate Matching', 'Shared Rentals', 'Messaging'],
         image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80&fit=crop',
-        imageCaptionTitle: 'Roommate Matching',
-        imageCaptionSub: 'Find someone compatible, not just available'
+        imageCaptionTitle: t('forTenants.step3CapTitle', 'Roommate Matching'),
+        imageCaptionSub: t('forTenants.step3CapSub', 'Find someone compatible, not just available')
       },
       {
-        label: 'Step Four',
-        title: 'Submit a Rental Application',
-        description: 'Found the right place? Apply with a single click. Your tenant profile is automatically attached so the landlord sees everything they need — no forms to fill, no documents to scan.',
-        bullets: [
+        label: t('forTenants.step4Label', 'Step Four'),
+        title: t('forTenants.step4Title', 'Submit a Rental Application'),
+        description: t('forTenants.step4Desc', 'Found the right place? Apply with a single click. Your tenant profile is automatically attached so the landlord sees everything they need — no forms to fill, no documents to scan.'),
+        bullets: t('forTenants.step4Bullets', { returnObjects: true }) as string[] || [
           'Submit your application directly from the listing',
           'Your verified profile is attached automatically',
           'Add a personal note or message to the landlord',
           'Track your application status in real time'
         ],
-        tags: ['Rental Application', 'One-Click Apply', 'Status Tracking'],
+        tags: t('forTenants.step4Tags', { returnObjects: true }) as string[] || ['Rental Application', 'One-Click Apply', 'Status Tracking'],
         image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80&fit=crop',
-        imageCaptionTitle: 'Apply Instantly',
-        imageCaptionSub: 'No paperwork — everything is digital'
+        imageCaptionTitle: t('forTenants.step4CapTitle', 'Apply Instantly'),
+        imageCaptionSub: t('forTenants.step4CapSub', 'No paperwork — everything is digital')
       },
       {
-        label: 'Step Five',
-        title: 'Review & Sign Your Lease',
-        description: "Once accepted, your lease contract is generated on the platform. Read every term in detail, ask questions, and sign digitally when you're ready — fully legal and secure.",
-        bullets: [
+        label: t('forTenants.step5Label', 'Step Five'),
+        title: t('forTenants.step5Title', 'Review & Sign Your Lease'),
+        description: t('forTenants.step5Desc', "Once accepted, your lease contract is generated on the platform. Read every term in detail, ask questions, and sign digitally when you're ready — fully legal and secure."),
+        bullets: t('forTenants.step5Bullets', { returnObjects: true }) as string[] || [
           'View the full contract with all terms and clauses',
           'Both tenant and landlord sign digitally',
           'Signed copy stored securely in your account',
           'Access your contract anytime from your dashboard'
         ],
-        tags: ['Lease Contract', 'Digital Signature', 'Secure Storage'],
+        tags: t('forTenants.step5Tags', { returnObjects: true }) as string[] || ['Lease Contract', 'Digital Signature', 'Secure Storage'],
         image: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&q=80&fit=crop',
-        imageCaptionTitle: 'Digital Lease Signing',
-        imageCaptionSub: 'Legally binding — no printing needed'
+        imageCaptionTitle: t('forTenants.step5CapTitle', 'Digital Lease Signing'),
+        imageCaptionSub: t('forTenants.step5CapSub', 'Legally binding — no printing needed')
       },
       {
-        label: 'Step Six',
-        title: 'Pay Rent Through Your Wallet',
-        description: 'Top up your HOMI wallet and pay monthly rent in just a few taps. No bank transfers, no cash — everything is tracked, timestamped, and confirmed automatically.',
-        bullets: [
+        label: t('forTenants.step6Label', 'Step Six'),
+        title: t('forTenants.step6Title', 'Pay Rent Through Your Wallet'),
+        description: t('forTenants.step6Desc', 'Top up your HOMI wallet and pay monthly rent in just a few taps. No bank transfers, no cash — everything is tracked, timestamped, and confirmed automatically.'),
+        bullets: t('forTenants.step6Bullets', { returnObjects: true }) as string[] || [
           'Add funds to your wallet with ease',
           'Pay your monthly rent directly to the landlord',
           'Receive payment confirmations and receipts',
           'Full transaction history always available'
         ],
-        tags: ['Wallet Rent Payment', 'Instant Payment', 'Receipts'],
+        tags: t('forTenants.step6Tags', { returnObjects: true }) as string[] || ['Wallet Rent Payment', 'Instant Payment', 'Receipts'],
         image: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80&fit=crop',
-        imageCaptionTitle: 'Wallet Rent Payment',
-        imageCaptionSub: 'Instant, trackable, and always confirmed'
+        imageCaptionTitle: t('forTenants.step6CapTitle', 'Wallet Rent Payment'),
+        imageCaptionSub: t('forTenants.step6CapSub', 'Instant, trackable, and always confirmed')
       },
       {
-        label: 'Step Seven',
-        title: 'Manage Your Active Rental',
-        description: "You're in! Your active rental dashboard gives you a complete view of your tenancy — lease dates, upcoming payments, landlord contact, and everything about your current home.",
-        bullets: [
+        label: t('forTenants.step7Label', 'Step Seven'),
+        title: t('forTenants.step7Title', 'Manage Your Active Rental'),
+        description: t('forTenants.step7Desc', "You're in! Your active rental dashboard gives you a complete view of your tenancy — lease dates, upcoming payments, landlord contact, and everything about your current home."),
+        bullets: t('forTenants.step7Bullets', { returnObjects: true }) as string[] || [
           'View lease start date, end date, and monthly rent',
           'See upcoming due dates and payment schedule',
           'Access landlord contact directly from the dashboard',
           'View full rental history and all past payments'
         ],
-        tags: ['Rental Dashboard', 'Lease Details', 'Payment History'],
+        tags: t('forTenants.step7Tags', { returnObjects: true }) as string[] || ['Rental Dashboard', 'Lease Details', 'Payment History'],
         image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80&fit=crop',
-        imageCaptionTitle: 'Your Home Dashboard',
-        imageCaptionSub: 'Everything about your tenancy, in one view'
+        imageCaptionTitle: t('forTenants.step7CapTitle', 'Your Home Dashboard'),
+        imageCaptionSub: t('forTenants.step7CapSub', 'Everything about your tenancy, in one view')
       },
       {
-        label: 'Step Eight',
-        title: 'Report Maintenance Issues',
-        description: 'Spot a problem in your unit? Submit a maintenance request instantly. Describe the issue, attach photos, and track the resolution in real time — with direct contact to the assigned provider.',
-        bullets: [
+        label: t('forTenants.step8Label', 'Step Eight'),
+        title: t('forTenants.step8Title', 'Report Maintenance Issues'),
+        description: t('forTenants.step8Desc', 'Spot a problem in your unit? Submit a maintenance request instantly. Describe the issue, attach photos, and track the resolution in real time — with direct contact to the assigned provider.'),
+        bullets: t('forTenants.step8Bullets', { returnObjects: true }) as string[] || [
           'Post a request with description and urgency level',
           'Attach photos to document the issue clearly',
           'Track the status from submitted to resolved',
           'Contact the assigned maintenance provider directly'
         ],
-        tags: ['Maintenance Request', 'Status Tracking', 'Provider Contact'],
+        tags: t('forTenants.step8Tags', { returnObjects: true }) as string[] || ['Maintenance Request', 'Status Tracking', 'Provider Contact'],
         image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&q=80&fit=crop',
-        imageCaptionTitle: 'Maintenance Reporting',
-        imageCaptionSub: 'Fast response, real-time updates'
+        imageCaptionTitle: t('forTenants.step8CapTitle', 'Maintenance Reporting'),
+        imageCaptionSub: t('forTenants.step8CapSub', 'Fast response, real-time updates')
       }
     ],
-    []
+    [t]
   );
 
   const benefits = useMemo(
     () => [
       {
-        title: 'Simple property discovery',
-        description: 'Find relevant listings quickly with structured filters and clearer listing details.',
+        title: t('forTenants.benefit1Title', 'Simple property discovery'),
+        description: t('forTenants.benefit1Desc', 'Find relevant listings quickly with structured filters and clearer listing details.'),
         icon: <Home size={20} />,
       },
       {
-        title: 'Clear payment visibility',
-        description: 'Track upcoming and completed rent activity with less confusion.',
+        title: t('forTenants.benefit2Title', 'Clear payment visibility'),
+        description: t('forTenants.benefit2Desc', 'Track upcoming and completed rent activity with less confusion.'),
         icon: <CreditCard size={20} />,
       },
       {
-        title: 'Faster communication',
-        description: 'Keep landlord conversations and updates in one place.',
+        title: t('forTenants.benefit3Title', 'Faster communication'),
+        description: t('forTenants.benefit3Desc', 'Keep landlord conversations and updates in one place.'),
         icon: <MessageSquare size={20} />,
       },
       {
-        title: 'Safer workflows',
-        description: 'Tenant data and rental workflows are handled with privacy-aware design.',
+        title: t('forTenants.benefit4Title', 'Safer workflows'),
+        description: t('forTenants.benefit4Desc', 'Tenant data and rental workflows are handled with privacy-aware design.'),
         icon: <GlobeLock size={20} />,
       },
     ],
-    []
+    [t]
   );
 
   const faqs: FaqItem[] = useMemo(
     () => [
       {
         id: 'apply',
-        question: 'How do I apply for a property?',
-        answer:
-          'Open a listing, review the details, and submit an application. You can follow the request status from your tenant dashboard.',
+        question: t('forTenants.faqQ1', 'How do I apply for a property?'),
+        answer: t('forTenants.faqA1', 'Open a listing, review the details, and submit an application. You can follow the request status from your tenant dashboard.'),
       },
       {
         id: 'payment',
-        question: 'Can I track rent payments on HOMi?',
-        answer:
-          'Yes. HOMi gives you visibility into payment activity so you always know what is due and what has already been processed.',
+        question: t('forTenants.faqQ2', 'Can I track rent payments on HOMi?'),
+        answer: t('forTenants.faqA2', 'Yes. HOMi gives you visibility into payment activity so you always know what is due and what has already been processed.'),
       },
       {
         id: 'maintenance',
-        question: 'How do maintenance requests work?',
-        answer:
-          'You can submit requests directly in the app and monitor updates until the issue is resolved.',
+        question: t('forTenants.faqQ3', 'How do maintenance requests work?'),
+        answer: t('forTenants.faqA3', 'You can submit requests directly in the app and monitor updates until the issue is resolved.'),
       },
       {
         id: 'contracts',
-        question: 'Where can I find my lease details?',
-        answer:
-          'Your lease-related information stays centralized so you can review terms and references whenever needed.',
+        question: t('forTenants.faqQ4', 'Where can I find my lease details?'),
+        answer: t('forTenants.faqA4', 'Your lease-related information stays centralized so you can review terms and references whenever needed.'),
       },
     ],
-    []
+    [t]
   );
 
   return (
@@ -265,25 +263,25 @@ const ForTenants: React.FC = () => {
       <div className="how-main-content">
         {hideSidebar ? <GuestNavbar /> : <Header />}
 
-        <main className="how-content" aria-label="How HOMi works for tenants">
+        <main className="how-content" aria-label={t('forTenants.stepsHeader', 'How HOMi works for tenants')}>
           <section className="how-hero">
             <div className="how-hero-bg" aria-hidden="true" />
 
             <div className="how-hero-container">
               <div className="how-hero-left">
-                <span className="how-badge">🏠 Tenant Journey</span>
+                <span className="how-badge">🏠 {t('forTenants.eyebrow', 'Tenant Journey')}</span>
                 <h1>
-                  Find, apply, and rent—<br />
-                  <span className="gradient-text">all in one place.</span>
+                  {t('forTenants.title', 'Find, apply, and rent—')}<br />
+                  <span className="gradient-text">{t('forTenants.titleAccent', 'all in one place.')}</span>
                 </h1>
                 <p className="how-hero-subtitle">
-                  HOMi helps you discover the right home, match with roommates, sign lease contracts online, pay rent securely, and report repairs instantly.
+                  {t('forTenants.subtitle', 'HOMi helps you discover the right home, match with roommates, sign lease contracts online, pay rent securely, and report repairs instantly.')}
                 </p>
 
                 <div className="how-cta-row">
                   {isSignedIn ? (
                     <Link to="/browse-properties" className="how-btn-primary">
-                      Explore properties
+                      {t('forTenants.exploreProperties', 'Explore properties')}
                     </Link>
                   ) : (
                     <button
@@ -291,26 +289,26 @@ const ForTenants: React.FC = () => {
                       className="how-btn-primary"
                       onClick={() => setShowAuthModal(true)}
                     >
-                      Explore properties
+                      {t('forTenants.exploreProperties', 'Explore properties')}
                     </button>
                   )}
                   <Link to="/get-help" state={{ fromGuestHome: true }} className="how-btn-secondary">
-                    See tenant support
+                    {t('forTenants.seeSupport', 'See tenant support')}
                   </Link>
                 </div>
 
                 <div className="how-hero-metrics" aria-label="Quick highlights">
                   <div className="metric-pill">
                     <CheckCircle2 size={16} />
-                    <span>Application visibility</span>
+                    <span>{t('forTenants.metricApplication', 'Application visibility')}</span>
                   </div>
                   <div className="metric-pill">
                     <CheckCircle2 size={16} />
-                    <span>Easy payment tracking</span>
+                    <span>{t('forTenants.metricPayments', 'Easy payment tracking')}</span>
                   </div>
                   <div className="metric-pill">
                     <CheckCircle2 size={16} />
-                    <span>Maintenance updates</span>
+                    <span>{t('forTenants.metricMaintenance', 'Maintenance updates')}</span>
                   </div>
                 </div>
               </div>
@@ -322,42 +320,42 @@ const ForTenants: React.FC = () => {
                       <div className="mock-avatar">👩‍💼</div>
                       <div>
                         <h4>Sarah Jenkins</h4>
-                        <span className="mock-badge-verified">✓ Verified Tenant</span>
+                        <span className="mock-badge-verified">✓ {t('forTenants.verifiedTenant', 'Verified Tenant')}</span>
                       </div>
                     </div>
-                    <span className="mock-status-pill success">Active Rental</span>
+                    <span className="mock-status-pill success">{t('forTenants.activeRental', 'Active Rental')}</span>
                   </div>
 
                   <div className="mock-card-body">
                     <div className="mock-rent-strip">
-                      <span className="label">Monthly Rent</span>
+                      <span className="label">{t('forTenants.monthlyRent', 'Monthly Rent')}</span>
                       <span className="value">12,000 EGP</span>
                     </div>
                     <div className="mock-due-strip">
-                      <span>Next Due: <strong>June 1, 2026</strong></span>
-                      <span className="status-label paid">✓ Auto-Paid</span>
+                      <span dangerouslySetInnerHTML={{ __html: t('forTenants.nextDue', 'Next Due: <strong>June 1, 2026</strong>') }} />
+                      <span className="status-label paid">{t('forTenants.autoPaid', '✓ Auto-Paid')}</span>
                     </div>
 
                     <div className="mock-divider" />
 
                     <div className="mock-stats-row">
                       <div className="mock-stat-col">
-                        <span className="stat-lbl">Active Lease</span>
-                        <span className="stat-val">12 Months</span>
+                        <span className="stat-lbl">{t('forTenants.activeLeaseLbl', 'Active Lease')}</span>
+                        <span className="stat-val">{t('forTenants.activeLeaseVal', '12 Months')}</span>
                       </div>
                       <div className="mock-stat-col">
-                        <span className="stat-lbl">Roommate Score</span>
-                        <span className="stat-val compatibility">98% Match</span>
+                        <span className="stat-lbl">{t('forTenants.roommateScoreLbl', 'Roommate Score')}</span>
+                        <span className="stat-val compatibility">{t('forTenants.roommateScoreVal', '98% Match')}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Floating Glass Chips */}
                   <div className="floating-glass-chip chip-1">
-                    <span>💳 Wallet: 25,800 EGP</span>
+                    <span>{t('forTenants.walletBalance', '💳 Wallet: 25,800 EGP')}</span>
                   </div>
                   <div className="floating-glass-chip chip-2">
-                    <span>🔧 AC Repair: Fixed</span>
+                    <span>{t('forTenants.acRepairFixed', '🔧 AC Repair: Fixed')}</span>
                   </div>
                 </div>
               </div>
@@ -367,8 +365,8 @@ const ForTenants: React.FC = () => {
           <section className="how-section how-steps" aria-label="Step by step">
             <div className="how-container">
               <div className="how-section-head">
-                <h2>8 steps for a smoother tenant journey</h2>
-                <p>From first search to move-in management, each step is designed to save time.</p>
+                <h2>{t('forTenants.stepsHeader', '8 steps for a smoother tenant journey')}</h2>
+                <p>{t('forTenants.stepsSub', 'From first search to move-in management, each step is designed to save time.')}</p>
               </div>
 
               <div className="how-steps-timeline">
@@ -416,8 +414,8 @@ const ForTenants: React.FC = () => {
           <section className="how-section how-benefits" aria-label="Key benefits">
             <div className="how-container">
               <div className="how-section-head how-section-head--tight">
-                <h2>Built for day-to-day tenant life</h2>
-                <p>Everything needed to stay organized before and after move-in.</p>
+                <h2>{t('forTenants.benefitsHeader', 'Built for day-to-day tenant life')}</h2>
+                <p>{t('forTenants.benefitsSub', 'Everything needed to stay organized before and after move-in.')}</p>
               </div>
 
               <div className="how-benefits-grid">
@@ -437,9 +435,9 @@ const ForTenants: React.FC = () => {
                   <div className="how-callout-icon" aria-hidden="true">
                     <ShieldCheck size={20} />
                   </div>
-                  <h3>Transparent from search to signature</h3>
+                  <h3>{t('forTenants.callout1Title', 'Transparent from search to signature')}</h3>
                   <p>
-                    Keep your rental process structured, with clearer updates and easier access to the details that matter.
+                    {t('forTenants.callout1Desc', 'Keep your rental process structured, with clearer updates and easier access to the details that matter.')}
                   </p>
                 </div>
 
@@ -447,9 +445,9 @@ const ForTenants: React.FC = () => {
                   <div className="how-callout-icon" aria-hidden="true">
                     <MessageSquare size={20} />
                   </div>
-                  <h3>Resolve issues faster</h3>
+                  <h3>{t('forTenants.callout2Title', 'Resolve issues faster')}</h3>
                   <p>
-                    Use centralized communication and request tracking to avoid missed updates and long follow-ups.
+                    {t('forTenants.callout2Desc', 'Use centralized communication and request tracking to avoid missed updates and long follow-ups.')}
                   </p>
                 </div>
               </div>
@@ -459,8 +457,8 @@ const ForTenants: React.FC = () => {
           <section className="how-section how-faq" aria-label="FAQ">
             <div className="how-container">
               <div className="how-section-head">
-                <h2>Tenant FAQ</h2>
-                <p>Quick answers before you get started.</p>
+                <h2>{t('forTenants.faqHeader', 'Tenant FAQ')}</h2>
+                <p>{t('forTenants.faqSub', 'Quick answers before you get started.')}</p>
               </div>
 
               <div className="how-faq-grid">
@@ -483,7 +481,7 @@ const ForTenants: React.FC = () => {
               </div>
 
               <div className="how-faq-note">
-                Not sure where to begin? Start by browsing properties, then apply to your best matches.
+                {t('forTenants.faqNote', 'Not sure where to begin? Start by browsing properties, then apply to your best matches.')}
               </div>
             </div>
           </section>
@@ -494,20 +492,20 @@ const ForTenants: React.FC = () => {
                 <div className="how-final-left">
                   <div className="how-final-badge">
                     <Sparkles size={18} />
-                    Quick start
+                    {t('forTenants.ctaEyebrow', 'Quick start')}
                   </div>
-                  <h2>Ready to rent with less stress?</h2>
+                  <h2>{t('forTenants.ctaTitle', 'Ready to rent with less stress?')}</h2>
                   <p>
-                    Create your tenant account to discover properties, apply confidently, track payments, and manage maintenance.
+                    {t('forTenants.ctaSubtitle', 'Create your tenant account to discover properties, apply confidently, track payments, and manage maintenance.')}
                   </p>
                 </div>
                 <div className="how-final-actions">
                   <Link to="/auth" className="how-btn-primary how-btn-primary--big">
-                    Create tenant account
+                    {t('forTenants.ctaBtn', 'Create tenant account')}
                   </Link>
                   {isSignedIn ? (
                     <Link to="/browse-properties" className="how-btn-secondary how-btn-secondary--big">
-                      Browse properties
+                      {t('forTenants.browseProperties', 'Browse properties')}
                     </Link>
                   ) : (
                     <button
@@ -515,7 +513,7 @@ const ForTenants: React.FC = () => {
                       className="how-btn-secondary how-btn-secondary--big"
                       onClick={() => setShowAuthModal(true)}
                     >
-                      Browse properties
+                      {t('forTenants.browseProperties', 'Browse properties')}
                     </button>
                   )}
                 </div>

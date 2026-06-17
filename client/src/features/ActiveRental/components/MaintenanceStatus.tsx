@@ -1,25 +1,21 @@
 import './MaintenanceStatus.css';
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { FaTools, FaChevronRight, FaWrench, FaCheckCircle, FaClock, FaTimesCircle, FaExclamationCircle } from 'react-icons/fa';
 import maintenanceService, { type MaintenanceRequest } from '../../../services/maintenance.service';
 import type { LandlordContract } from '../../../services/contract.service';
 
-const STATUS_CONFIG: Record<string, { label: string; className: string; icon: React.ReactNode }> = {
-    OPEN:                   { label: 'Open',               className: 'open',      icon: <FaClock /> },
-    ASSIGNED:               { label: 'Scheduled',          className: 'assigned',  icon: <FaClock /> },
-    EN_ROUTE:               { label: 'On the way',         className: 'en-route',  icon: <FaClock /> },
-    IN_PROGRESS:            { label: 'In Progress',        className: 'progress',  icon: <FaWrench /> },
-    AWAITING_CONFIRMATION:  { label: 'Awaiting Confirm',   className: 'awaiting',  icon: <FaExclamationCircle /> },
-    COMPLETED:              { label: 'Completed',          className: 'completed', icon: <FaCheckCircle /> },
-    DISPUTED:               { label: 'Disputed',           className: 'disputed',  icon: <FaExclamationCircle /> },
-    RESOLVED_BY_ADMIN:      { label: 'Resolved',           className: 'completed', icon: <FaCheckCircle /> },
-    CANCELLED:              { label: 'Cancelled',          className: 'cancelled', icon: <FaTimesCircle /> },
-};
-
-const getProviderName = (req: MaintenanceRequest): string => {
-    if (!req.provider) return 'Awaiting vendor matching';
-    return req.provider.businessName || `${req.provider.firstName} ${req.provider.lastName}`.trim();
+const STATUS_CONFIG: Record<string, { className: string; icon: React.ReactNode }> = {
+    OPEN:                   { className: 'open',      icon: <FaClock /> },
+    ASSIGNED:               { className: 'assigned',  icon: <FaClock /> },
+    EN_ROUTE:               { className: 'en-route',  icon: <FaClock /> },
+    IN_PROGRESS:            { className: 'progress',  icon: <FaWrench /> },
+    AWAITING_CONFIRMATION:  { className: 'awaiting',  icon: <FaExclamationCircle /> },
+    COMPLETED:              { className: 'completed', icon: <FaCheckCircle /> },
+    DISPUTED:               { className: 'disputed',  icon: <FaExclamationCircle /> },
+    RESOLVED_BY_ADMIN:      { className: 'completed', icon: <FaCheckCircle /> },
+    CANCELLED:              { className: 'cancelled', icon: <FaTimesCircle /> },
 };
 
 const getActiveStep = (status: string): number => {
@@ -32,6 +28,7 @@ const getActiveStep = (status: string): number => {
 
 const MaintenanceStatus = ({ contract }: { contract: LandlordContract | null }) => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -65,24 +62,49 @@ const MaintenanceStatus = ({ contract }: { contract: LandlordContract | null }) 
         return filteredRequests.slice(0, 2); // limit to 2 for cleaner layout with timeline spacing
     }, [filteredRequests]);
 
-    const steps = ["Posted", "Scheduled", "In Progress", "Completed"];
+    const steps = ["posted", "scheduled", "inProgress", "completed"];
+
+    const getProviderName = (req: MaintenanceRequest): string => {
+        if (!req.provider) return t('activeRental.awaitingVendor');
+        return req.provider.businessName || `${req.provider.firstName} ${req.provider.lastName}`.trim();
+    };
+
+    const getStatusLabel = (status: string): string => {
+        const keyMap: Record<string, string> = {
+            OPEN: 'open',
+            ASSIGNED: 'scheduled',
+            EN_ROUTE: 'onTheWay',
+            IN_PROGRESS: 'inProgress',
+            AWAITING_CONFIRMATION: 'awaitingConfirm',
+            COMPLETED: 'completed',
+            DISPUTED: 'disputed',
+            RESOLVED_BY_ADMIN: 'resolved',
+            CANCELLED: 'cancelled',
+        };
+        const key = keyMap[status] || 'open';
+        return t(`activeRental.${key}`);
+    };
 
     return (
-        <div className="mstatus-card">
+        <div className="mstatus-card" dir="ltr">
             <div className="mstatus-header">
                 <div className="mstatus-title-area">
                     <div className="mstatus-icon-ring">
                         <FaTools />
                     </div>
                     <div>
-                        <h3>Maintenance Issues</h3>
+                        <h3>{t('activeRental.maintenanceIssues')}</h3>
                         <span className="mstatus-subtitle">
-                            {loading ? 'Loading...' : `${activeRequests.length} active issue${activeRequests.length !== 1 ? 's' : ''}`}
+                            {loading 
+                                ? t('activeRental.loadingActiveRentals') 
+                                : activeRequests.length === 1
+                                    ? t('activeRental.activeIssuesCount', { count: 1 })
+                                    : t('activeRental.activeIssuesCountPlural', { count: activeRequests.length })}
                         </span>
                     </div>
                 </div>
                 <button className="mstatus-view-all-btn" onClick={() => navigate('/tenant-maintenance?tab=active')}>
-                    View All <FaChevronRight />
+                    {t('activeRental.viewAll')} <FaChevronRight />
                 </button>
             </div>
 
@@ -95,15 +117,15 @@ const MaintenanceStatus = ({ contract }: { contract: LandlordContract | null }) 
                 ) : recentRequests.length === 0 ? (
                     <div className="mstatus-empty">
                         <div className="mstatus-empty-icon"><FaTools /></div>
-                        <p>Your property maintenance feed is clear.</p>
+                        <p>{t('activeRental.maintenanceFeedClear')}</p>
                         <button className="mstatus-post-btn-wrap" onClick={() => navigate('/tenant-maintenance?tab=post')}>
-                            Report Repair
+                            {t('activeRental.reportRepair')}
                         </button>
                     </div>
                 ) : (
                     <div className="mstatus-list">
                         {recentRequests.map(req => {
-                            const sc = STATUS_CONFIG[req.status] ?? { label: req.status, className: 'open', icon: <FaClock /> };
+                            const sc = STATUS_CONFIG[req.status] ?? { className: 'open', icon: <FaClock /> };
                             const activeStep = getActiveStep(req.status);
                             return (
                                 <div
@@ -119,26 +141,26 @@ const MaintenanceStatus = ({ contract }: { contract: LandlordContract | null }) 
                                             <h4>{req.title}</h4>
                                         </div>
                                         <span className={`mstatus-badge ${sc.className}`}>
-                                            {sc.icon} {sc.label}
+                                            {sc.icon} {getStatusLabel(req.status)}
                                         </span>
                                     </div>
 
                                     <p className="timeline-provider-text">
-                                        Vendor: <strong>{getProviderName(req)}</strong>
+                                        {t('activeRental.vendor')}<strong>{getProviderName(req)}</strong>
                                     </p>
 
                                     <div className="timeline-progress-track">
-                                        {steps.map((step, idx) => {
+                                        {steps.map((stepKey, idx) => {
                                             const stepNum = idx + 1;
                                             const isCompleted = stepNum < activeStep || (activeStep === 4);
                                             const isActive = stepNum === activeStep && activeStep !== 4;
                                             return (
                                                 <div
                                                     className={`track-step ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}
-                                                    key={step}
+                                                    key={stepKey}
                                                 >
                                                     <div className="step-dot" />
-                                                    <span className="step-label">{step}</span>
+                                                    <span className="step-label">{t(`activeRental.${stepKey}`)}</span>
                                                 </div>
                                             );
                                         })}

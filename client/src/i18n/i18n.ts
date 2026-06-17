@@ -25,12 +25,12 @@ i18n
 
 // Handle RTL direction
 i18n.on('languageChanged', (lng) => {
-  document.documentElement.dir = lng === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.dir = 'ltr';
   document.documentElement.lang = lng;
 });
 
 // Set initial direction
-document.documentElement.dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
+document.documentElement.dir = 'ltr';
 document.documentElement.lang = i18n.language;
 
 export default i18n;

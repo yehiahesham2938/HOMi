@@ -19,7 +19,8 @@ import contractService, { type TenantPaymentHistoryItem } from '../../../service
 import { normalizeSignatureUrl } from '../../../shared/utils/signatureUrl';
 
 const ActiveLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const locale = i18n.language === 'ar' ? 'ar-EG' : 'en-US';
     const landlordNameAr = contract.landlordEmail ? (localStorage.getItem('arabicName_email_' + contract.landlordEmail) || undefined) : undefined;
     const tenantNameAr = contract.tenantEmail ? (localStorage.getItem('arabicName_email_' + contract.tenantEmail) || undefined) : undefined;
     const [previewLang, setPreviewLang] = React.useState<'en' | 'ar' | null>(null);
@@ -205,11 +206,11 @@ const ActiveLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
                             <div className="card-content">
                                 <div className="data-row">
                                     <span className="label">{t('activeLease.monthlyRent')}</span>
-                                    <span className="value highlight">${contract.amount}</span>
+                                    <span className="value highlight">${contract.amount.toLocaleString(locale)}</span>
                                 </div>
                                 <div className="data-row">
                                     <span className="label">{t('activeLease.securityDeposit')}</span>
-                                    <span className="value">${contract.deposit}</span>
+                                    <span className="value">${contract.deposit.toLocaleString(locale)}</span>
                                 </div>
                                 <div className="data-row">
                                     <span className="label">{t('activeLease.nextPayment')}</span>
@@ -271,13 +272,13 @@ const ActiveLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
                             </div>
                             <div className="card-content">
                                 {loadingReceipt ? (
-                                    <div className="loading-state">Loading receipt...</div>
+                                    <div className="loading-state">{t('auth.loading', 'Loading...')}</div>
                                 ) : recentPayment ? (
                                     <div className="receipt-display-box">
                                         <div className="receipt-main-info">
                                             <div className="receipt-col">
                                                 <span className="label">{t('activeLease.paymentDate')}</span>
-                                                <span className="value">{new Date(recentPayment.createdAt).toLocaleDateString()}</span>
+                                                <span className="value">{new Date(recentPayment.createdAt).toLocaleDateString(locale)}</span>
                                             </div>
                                             <div className="receipt-col">
                                                 <span className="label">{t('activeLease.reference')}</span>
@@ -285,18 +286,18 @@ const ActiveLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
                                             </div>
                                             <div className="receipt-col">
                                                 <span className="label">{t('activeLease.totalPaid')}</span>
-                                                <span className="value highlight">${recentPayment.amount}</span>
+                                                <span className="value highlight">${recentPayment.amount.toLocaleString(locale)}</span>
                                             </div>
                                         </div>
                                         <div className="receipt-breakdown">
                                             <div className="breakdown-row">
                                                 <span>{t('activeLease.monthlyRent')}</span>
-                                                <span>${contract.amount}</span>
+                                                <span>${contract.amount.toLocaleString(locale)}</span>
                                             </div>
                                             {recentPayment.type === 'CONTRACT_INITIAL' && (
                                                 <div className="breakdown-row">
                                                     <span>{t('activeLease.securityDeposit')}</span>
-                                                    <span>${contract.deposit}</span>
+                                                    <span>${contract.deposit.toLocaleString(locale)}</span>
                                                 </div>
                                             )}
                                             <div className="breakdown-row">

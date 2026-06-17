@@ -14,7 +14,8 @@ interface Props {
 }
 
 const ExpiredLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const locale = i18n.language === 'ar' ? 'ar-EG' : 'en-US';
     const [installments, setInstallments] = useState<ContractInstallments | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -41,7 +42,7 @@ const ExpiredLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
                 <header className="active-panel-header" style={{ borderBottomColor: '#e2e8f0' }}>
                     <div className="header-status-badge" style={{ background: '#f1f5f9', color: '#64748b', border: '1px solid rgba(100, 116, 139, 0.15)' }}>
                         <Clock size={16} />
-                        <span>Expired Lease</span>
+                        <span>{t('expiredLease.expiredLease')}</span>
                     </div>
                     <button className="close-btn" onClick={onClose} aria-label="Close panel">
                         <X size={20}/>
@@ -61,20 +62,20 @@ const ExpiredLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
                         <section className="info-card">
                             <div className="card-header">
                                 <Calendar size={18} className="icon-blue" />
-                                <h3>Lease Period</h3>
+                                <h3>{t('expiredLease.leasePeriod')}</h3>
                             </div>
                             <div className="card-content">
                                 <div className="data-row">
-                                    <span className="label">Start Date</span>
+                                    <span className="label">{t('expiredLease.startDate')}</span>
                                     <span className="value">{contract.startDate}</span>
                                 </div>
                                 <div className="data-row">
-                                    <span className="label">Duration</span>
+                                    <span className="label">{t('expiredLease.duration')}</span>
                                     <span className="value">{contract.duration}</span>
                                 </div>
                                 <div className="data-row">
-                                    <span className="label">Status</span>
-                                    <span className="value" style={{ color: '#64748b', fontWeight: 'bold' }}>EXPIRED</span>
+                                    <span className="label">{t('expiredLease.status')}</span>
+                                    <span className="value" style={{ color: '#64748b', fontWeight: 'bold' }}>{t('expiredLease.expiredLease').toUpperCase()}</span>
                                 </div>
                             </div>
                         </section>
@@ -83,20 +84,20 @@ const ExpiredLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
                         <section className="info-card">
                             <div className="card-header">
                                 <DollarSign size={18} className="icon-green" />
-                                <h3>Financials</h3>
+                                <h3>{t('expiredLease.financials')}</h3>
                             </div>
                             <div className="card-content">
                                 <div className="data-row">
-                                    <span className="label">Monthly Rent</span>
+                                    <span className="label">{t('expiredLease.monthlyRent')}</span>
                                     <span className="value">${contract.amount}</span>
                                 </div>
                                 <div className="data-row">
-                                    <span className="label">Security Deposit</span>
+                                    <span className="label">{t('expiredLease.securityDeposit')}</span>
                                     <span className="value">${contract.deposit}</span>
                                 </div>
                                 <div className="data-row">
-                                    <span className="label">Settled Rent</span>
-                                    <span className="value" style={{ color: '#10b981' }}>{totalPaidInstallments} / {totalInstallmentsCount} paid</span>
+                                    <span className="label">{t('expiredLease.settledRent')}</span>
+                                    <span className="value" style={{ color: '#10b981' }}>{t('expiredLease.paidCount', { paid: totalPaidInstallments, total: totalInstallmentsCount })}</span>
                                 </div>
                             </div>
                         </section>
@@ -107,9 +108,9 @@ const ExpiredLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
                                 <div className="card-content" style={{ flexDirection: 'row', alignItems: 'center', gap: '12px' }}>
                                     <AlertCircle size={24} style={{ color: '#d97706', flexShrink: 0 }} />
                                     <div>
-                                        <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#92400e', fontWeight: 700 }}>Outstanding Dues</h4>
+                                        <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#92400e', fontWeight: 700 }}>{t('expiredLease.outstandingDues')}</h4>
                                         <p style={{ margin: 0, fontSize: '13px', color: '#b45309' }}>
-                                            There are {installments.overdueInstallments} unpaid installment(s) remaining for this expired contract totaling <strong>${installments.nextPayableTotal}</strong>.
+                                            {t('expiredLease.outstandingText', { count: installments.overdueInstallments, total: installments.nextPayableTotal })}
                                         </p>
                                     </div>
                                 </div>
@@ -138,11 +139,11 @@ const ExpiredLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
                         <section className="info-card full-width">
                             <div className="card-header">
                                 <Receipt size={18} className="icon-green" />
-                                <h3>Rent Installments & Payment History</h3>
+                                <h3>{t('expiredLease.timelineTitle')}</h3>
                             </div>
                             <div className="card-content" style={{ gap: '16px' }}>
                                 {loading ? (
-                                    <div className="loading-state">Loading payment schedule...</div>
+                                    <div className="loading-state">{t('expiredLease.loadingSchedule')}</div>
                                 ) : installments && installments.items.length > 0 ? (
                                     <div className="installments-timeline" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                         {installments.items.map((item, idx) => (
@@ -158,11 +159,11 @@ const ExpiredLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                                     <span style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>{item.label}</span>
                                                     <span style={{ fontSize: '11px', color: '#64748b' }}>
-                                                        Due Date: {new Date(item.dueDate).toLocaleDateString()}
+                                                        {t('expiredLease.dueDate', { date: new Date(item.dueDate).toLocaleDateString(locale) })}
                                                     </span>
                                                     {item.isPaid && item.paidAt && (
                                                         <span style={{ fontSize: '11px', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                            <CheckCircle2 size={12} /> Paid on {new Date(item.paidAt).toLocaleDateString()}
+                                                            <CheckCircle2 size={12} /> {t('expiredLease.paidOn', { date: new Date(item.paidAt).toLocaleDateString(locale) })}
                                                         </span>
                                                     )}
                                                 </div>
@@ -178,14 +179,14 @@ const ExpiredLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
                                                         color: item.isPaid ? '#10b981' : item.status === 'OVERDUE' ? '#ef4444' : '#64748b',
                                                         border: `1px solid ${item.isPaid ? 'rgba(16,185,129,0.1)' : item.status === 'OVERDUE' ? 'rgba(239,68,68,0.1)' : 'rgba(100,116,139,0.1)'}`
                                                     }}>
-                                                        {item.isPaid ? 'PAID' : item.status}
+                                                        {item.isPaid ? t('expiredLease.statusPaid') : item.status}
                                                     </span>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="no-receipt-state">No payment schedule found.</div>
+                                    <div className="no-receipt-state">{t('expiredLease.noSchedule')}</div>
                                 )}
                             </div>
                         </section>
@@ -193,7 +194,7 @@ const ExpiredLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
 
                     <div className="execution-footer" style={{ background: '#f1f5f9', color: '#475569', border: '1px solid rgba(100, 116, 139, 0.1)' }}>
                         <Clock size={16} />
-                        <p>This lease has expired. Dues can still be settled from the payments dashboard.</p>
+                        <p>{t('expiredLease.executionNote')}</p>
                     </div>
                 </div>
             </div>

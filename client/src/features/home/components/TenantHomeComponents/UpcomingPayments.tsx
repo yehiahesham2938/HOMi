@@ -12,7 +12,8 @@ interface UpcomingPaymentsProps {
 }
 
 export const UpcomingPayments: React.FC<UpcomingPaymentsProps> = ({ contract, referenceDate }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'ar' ? 'ar-EG' : 'en-US';
   const navigate = useNavigate();
 
   const getDueDayFromContract = (rentDueDate: RentDueDate | null): number => {
@@ -40,17 +41,17 @@ export const UpcomingPayments: React.FC<UpcomingPaymentsProps> = ({ contract, re
     const start = cycle.periodStart;
     const end = cycle.periodEnd;
 
-    return `${start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
+    return `${start.toLocaleDateString(locale, { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString(locale, { month: 'short', day: 'numeric' })}`;
   };
 
   const amount = Number(contract?.rentAmount ?? contract?.property?.monthlyPrice ?? 0);
   const cycle = contract ? getRentCycleSummary(contract, referenceDate) : null;
   const dueDate = cycle
-    ? `Due ${formatDateLabel(cycle.dueDate)}`
+    ? t('tenantHomeComponents.due', { date: cycle.dueDate.toLocaleDateString(locale, { month: 'short', day: '2-digit', year: 'numeric' }) })
     : getDueInLabel(contract?.rentDueDate ?? null);
   const paymentState = cycle
-    ? (cycle.isPaidForCurrentCycle ? 'No outstanding dues' : `Due in ${cycle.daysUntilDue} day${cycle.daysUntilDue === 1 ? '' : 's'}`)
-    : 'No active lease';
+    ? (cycle.isPaidForCurrentCycle ? t('tenantHomeComponents.noOutstandingDues', 'No outstanding dues') : t('tenantHomeComponents.dueInDays', { count: cycle.daysUntilDue }))
+    : t('tenantHomeComponents.noActiveLease', 'No active lease');
   const isAutopay = false;
   const hasLinkedMethod = false;
 
@@ -68,7 +69,7 @@ export const UpcomingPayments: React.FC<UpcomingPaymentsProps> = ({ contract, re
         <div className="amount-display">
           <div className="amount-main">
             <span className="currency-symbol">$</span>
-            <span className="amount-value">{amount.toLocaleString()}</span>
+            <span className="amount-value">{amount.toLocaleString(locale)}</span>
             <span className="amount-fraction">.00</span>
           </div>
           <p className="billing-label">
@@ -101,7 +102,7 @@ export const UpcomingPayments: React.FC<UpcomingPaymentsProps> = ({ contract, re
             disabled={cycle?.isPaidForCurrentCycle}
           >
             <FaCreditCard className="pay-icon" />
-            <span>{cycle?.isPaidForCurrentCycle ? 'No Outstanding Dues' : t('tenantHomeComponents.payNow')}</span>
+            <span>{cycle?.isPaidForCurrentCycle ? t('tenantHomeComponents.noOutstandingDues', 'No Outstanding Dues') : t('tenantHomeComponents.payNow')}</span>
             {!cycle?.isPaidForCurrentCycle && <FaChevronRight className="arrow-icon" />}
           </button>
           <button
@@ -109,7 +110,7 @@ export const UpcomingPayments: React.FC<UpcomingPaymentsProps> = ({ contract, re
             aria-label="Open maintenance page"
             onClick={() => navigate('/tenant-maintenance')}
           >
-            <span>Maintenance</span>
+            <span>{t('tenantHomeComponents.maintenance', 'Maintenance')}</span>
             <FaChevronRight className="arrow-icon" />
           </button>
         </div>

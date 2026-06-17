@@ -11,7 +11,8 @@ interface MaintenanceRequestsProps {
 }
 
 const MaintenanceRequests: React.FC<MaintenanceRequestsProps> = ({ contract }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'ar' ? 'ar-EG' : 'en-US';
   const navigate = useNavigate();
 
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
@@ -54,7 +55,7 @@ const MaintenanceRequests: React.FC<MaintenanceRequestsProps> = ({ contract }) =
         {loading ? (
           <div className="request-body">
             <div className="issue-details">
-              <h4 className="issue-subject">Loading...</h4>
+              <h4 className="issue-subject">{t('auth.loading', 'Loading...')}</h4>
             </div>
           </div>
         ) : topRequest ? (
@@ -62,12 +63,12 @@ const MaintenanceRequests: React.FC<MaintenanceRequestsProps> = ({ contract }) =
             <div className="issue-details">
               <h4 className="issue-subject" style={{ marginBottom: '4px' }}>{topRequest.title}</h4>
               <p className="eta-text" style={{ color: '#64748b', fontSize: '0.85rem' }}>
-                {topRequest.category} • {new Date(topRequest.createdAt).toLocaleDateString()}
+                {t('myProperties.maintenanceTypes.' + topRequest.category, topRequest.category)} • {new Date(topRequest.createdAt).toLocaleDateString(locale)}
               </p>
             </div>
             <div className="request-timeline">
               <div className={`status-badge-premium status-${topRequest.status.toLowerCase()}`} style={{ textTransform: 'capitalize' }}>
-                {topRequest.status.replace(/_/g, ' ').toLowerCase()}
+                {t('maintenance.status.' + topRequest.status.toLowerCase(), topRequest.status.replace(/_/g, ' '))}
               </div>
             </div>
           </div>

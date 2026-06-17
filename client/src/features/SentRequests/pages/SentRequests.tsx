@@ -1,44 +1,15 @@
+
+
 // client/src/features/SentRequests/pages/SentRequests.tsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Inbox, Clock, CheckCircle, XCircle, RefreshCw, BedDouble, Bath, Ruler, Calendar } from 'lucide-react';
 import Header from '../../../components/global/header';
 import Sidebar from '../../../components/global/Tenant/sidebar';
 import { rentalRequestService, type MyRentalRequest, type RentalRequestStatus } from '../../../services/rental-request.service';
 import Loader from '../../../components/global/Loader';
 import './SentRequests.css';
-
-const STATUS_CONFIG: Record<RentalRequestStatus, {
-    label: string;
-    icon: React.ReactNode;
-    badgeClass: string;
-    cardClass: string;
-}> = {
-    PENDING: {
-        label: 'Pending',
-        icon: <Clock size={13} />,
-        badgeClass: 'badge-pending',
-        cardClass: 'card-pending',
-    },
-    APPROVED: {
-        label: 'Approved',
-        icon: <CheckCircle size={13} />,
-        badgeClass: 'badge-approved',
-        cardClass: 'card-approved',
-    },
-    DECLINED: {
-        label: 'Declined',
-        icon: <XCircle size={13} />,
-        badgeClass: 'badge-declined',
-        cardClass: 'card-declined',
-    },
-};
-
-const DURATION_LABELS: Record<string, string> = {
-    '6_MONTHS':  '6 months',
-    '12_MONTHS': '12 months',
-    '24_MONTHS': '24 months',
-};
 
 const formatDuration = (duration: string): string => {
     const match = /^(\d+)_MONTHS$/.exec(duration);
@@ -61,13 +32,6 @@ const formatDuration = (duration: string): string => {
     return yearsPart || monthsPart || duration;
 };
 
-const FILTERS: { label: string; value: RentalRequestStatus | 'ALL' }[] = [
-    { label: 'All',      value: 'ALL'      },
-    { label: 'Pending',  value: 'PENDING'  },
-    { label: 'Approved', value: 'APPROVED' },
-    { label: 'Declined', value: 'DECLINED' },
-];
-
 const getPropertyImage = (req: MyRentalRequest): string => {
     const images = req.property.images ?? [];
     const main = images.find(i => i.isMain)?.imageUrl;
@@ -76,11 +40,12 @@ const getPropertyImage = (req: MyRentalRequest): string => {
 };
 
 const SentRequests: React.FC = () => {
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
 
-    const [requests,     setRequests]     = useState<MyRentalRequest[]>([]);
-    const [loading,      setLoading]      = useState(true);
-    const [error,        setError]        = useState<string | null>(null);
+    const [requests, setRequests] = useState<MyRentalRequest[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [activeFilter, setActiveFilter] = useState<RentalRequestStatus | 'ALL'>('ALL');
 
     const fetchRequests = async (status?: RentalRequestStatus) => {
@@ -89,12 +54,12 @@ const SentRequests: React.FC = () => {
         try {
             const res = await rentalRequestService.getMyRequests({
                 status,
-                page:  1,
+                page: 1,
                 limit: 50,
             });
             setRequests(res.data);
         } catch {
-            setError('Failed to load your requests. Please try again.');
+            setError(t('sentRequests.errFailedToLoad', 'Failed to load your requests. Please try again.'));
         } finally {
             setLoading(false);
         }
@@ -111,8 +76,61 @@ const SentRequests: React.FC = () => {
     const landlordName = (req: MyRentalRequest) => {
         const l = req.property.landlord;
         const name = l ? `${l.firstName} ${l.lastName}`.trim() : '';
-        return name || 'Property Owner';
+        return name || t('sentRequests.propertyOwner', 'Property Owner');
     };
+
+    const getStatusConfig = (status: RentalRequestStatus) => {
+        const config = {
+            PENDING: {
+                label: t('sentRequests.statusPending', 'Pending'),
+                icon: <Clock size={13} />,
+                badgeClass: 'badge-pending',
+                cardClass: 'card-pending',
+            },
+            APPROVED: {
+                label: t('sentRequests.statusApproved', 'Approved'),
+                icon: <CheckCircle size={13} />,
+                badgeClass: 'badge-approved',
+                cardClass: 'card-approved',
+            },
+            DECLINED: {
+                label: t('sentRequests.statusDeclined', 'Declined'),
+                icon: <XCircle size={13} />,
+                badgeClass: 'badge-declined',
+                cardClass: 'card-declined',
+            },
+        };
+        return config[status];
+    };
+
+    const getStatusLabelText = (status: RentalRequestStatus | 'ALL', lowercase = false) => {
+        if (status === 'PENDING') {
+            return lowercase ? t('sentRequests.statusPendingLower', 'pending') : t('sentRequests.filterPending', 'Pending');
+        }
+        if (status === 'APPROVED') {
+            return lowercase ? t('sentRequests.statusApprovedLower', 'approved') : t('sentRequests.filterApproved', 'Approved');
+        }
+        if (status === 'DECLINED') {
+            return lowercase ? t('sentRequests.statusDeclinedLower', 'declined') : t('sentRequests.filterDeclined', 'Declined');
+        }
+        return '';
+    };
+
+    const durationLabel = (duration: string) => {
+        if (duration === '6_MONTHS') return t('sentRequests.duration6Months', '6 months');
+        if (duration === '12_MONTHS') return t('sentRequests.duration12Months', '12 months');
+        if (duration === '24_MONTHS') return t('sentRequests.duration24Months', '24 months');
+        return formatDuration(duration);
+    };
+
+    const filters = [
+        { label: t('sentRequests.filterAll', 'All'), value: 'ALL' as const },
+        { label: t('sentRequests.filterPending', 'Pending'), value: 'PENDING' as const },
+        { label: t('sentRequests.filterApproved', 'Approved'), value: 'APPROVED' as const },
+        { label: t('sentRequests.filterDeclined', 'Declined'), value: 'DECLINED' as const },
+    ];
+
+    const localeCode = i18n.language === 'ar' ? 'ar-EG' : 'en-US';
 
     return (
         <div className="sent-requests-layout">
@@ -125,8 +143,8 @@ const SentRequests: React.FC = () => {
                     {/* ── Page header ── */}
                     <div className="sent-requests-header">
                         <div>
-                            <h1>Sent Requests</h1>
-                            <p>Track and manage the status of your rental applications.</p>
+                            <h1>{t('sentRequests.title', 'Sent Requests')}</h1>
+                            <p>{t('sentRequests.subtitle', 'Track and manage the status of your rental applications.')}</p>
                         </div>
                         <button
                             className="btn-refresh"
@@ -139,7 +157,7 @@ const SentRequests: React.FC = () => {
 
                     {/* ── Filter tabs ── */}
                     <div className="filter-tabs">
-                        {FILTERS.map(f => (
+                        {filters.map(f => (
                             <button
                                 key={f.value}
                                 className={`filter-tab ${activeFilter === f.value ? 'active' : ''}`}
@@ -152,14 +170,14 @@ const SentRequests: React.FC = () => {
 
                     {/* 🔹 Loading 🔹 */}
                     {loading && (
-                        <Loader text="Loading your requests..." />
+                        <Loader text={t('sentRequests.loadingRequests', 'Loading your requests...')} />
                     )}
 
                     {/* ── Error ── */}
                     {!loading && error && (
                         <div className="sent-error">
                             <p>{error}</p>
-                            <button onClick={() => fetchRequests()}>Retry</button>
+                            <button onClick={() => fetchRequests()}>{t('sentRequests.retry', 'Retry')}</button>
                         </div>
                     )}
 
@@ -167,17 +185,17 @@ const SentRequests: React.FC = () => {
                     {!loading && !error && requests.length > 0 && (
                         <div className="requests-grid">
                             {requests.map(req => {
-                                const cfg     = STATUS_CONFIG[req.status];
-                                const img     = getPropertyImage(req);
-                                const beds    = req.property.specifications?.bedrooms  ?? '—';
-                                const baths   = req.property.specifications?.bathrooms ?? '—';
-                                const sqft    = req.property.specifications?.areaSqft  ?? '—';
+                                const cfg = getStatusConfig(req.status);
+                                const img = getPropertyImage(req);
+                                const beds = req.property.specifications?.bedrooms;
+                                const baths = req.property.specifications?.bathrooms;
+                                const sqft = req.property.specifications?.areaSqft;
                                 const movedIn = req.moveInDate
-                                    ? new Date(req.moveInDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                                    : 'TBD';
+                                    ? new Date(req.moveInDate).toLocaleDateString(localeCode, { month: 'short', day: 'numeric', year: 'numeric' })
+                                    : t('sentRequests.tbd', 'TBD');
                                 const submittedOn = req.createdAt
-                                    ? new Date(req.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                                    : 'Unknown';
+                                    ? new Date(req.createdAt).toLocaleDateString(localeCode, { month: 'short', day: 'numeric', year: 'numeric' })
+                                    : t('sentRequests.unknown', 'Unknown');
 
                                 return (
                                     <div
@@ -201,26 +219,26 @@ const SentRequests: React.FC = () => {
 
                                             {/* Specs row */}
                                             <div className="request-specs">
-                                                <span><BedDouble size={13} /> {beds} bed</span>
-                                                <span><Bath size={13} /> {baths} bath</span>
-                                                <span><Ruler size={13} /> {sqft} sqft</span>
+                                                <span><BedDouble size={13} /> {typeof beds === 'number' ? t('sentRequests.bedsCount', '{{count}} bed', { count: beds }) : '—'}</span>
+                                                <span><Bath size={13} /> {typeof baths === 'number' ? t('sentRequests.bathsCount', '{{count}} bath', { count: baths }) : '—'}</span>
+                                                <span><Ruler size={13} /> {typeof sqft === 'number' ? t('sentRequests.sqftCount', '{{count}} sqft', { count: sqft }) : '—'}</span>
                                             </div>
 
                                             {/* Meta info */}
                                             <div className="request-meta">
                                                 <div className="meta-row">
                                                     <Calendar size={13} />
-                                                    <span>Move-in: <strong>{movedIn}</strong></span>
+                                                    <span>{t('sentRequests.moveInLabel', 'Move-in:')} <strong>{movedIn}</strong></span>
                                                 </div>
                                                 <div className="meta-row">
                                                     <Clock size={13} />
-                                                    <span>Duration: <strong>{DURATION_LABELS[req.duration] ?? formatDuration(req.duration)}</strong></span>
+                                                    <span>{t('sentRequests.durationTitle', 'Duration:')} <strong>{durationLabel(req.duration)}</strong></span>
                                                 </div>
                                                 <div className="meta-row landlord-meta">
-                                                    <span>Landlord: <strong>{landlordName(req)}</strong></span>
+                                                    <span>{t('sentRequests.landlordTitle', 'Landlord:')} <strong>{landlordName(req)}</strong></span>
                                                 </div>
                                                 <div className="meta-row submitted-meta">
-                                                    <span>Submitted: <strong>{submittedOn}</strong></span>
+                                                    <span>{t('sentRequests.submittedTitle', 'Submitted:')} <strong>{submittedOn}</strong></span>
                                                 </div>
                                             </div>
 
@@ -228,11 +246,11 @@ const SentRequests: React.FC = () => {
                                             <div className="request-card-footer">
                                                 <span className="request-price">
                                                     ${(req.property.monthlyPrice ?? 0).toLocaleString()}
-                                                    <span>/mo</span>
+                                                    <span>{t('sentRequests.perMonth', '/mo')}</span>
                                                 </span>
                                                 {(req.property.securityDeposit ?? 0) > 0 && (
                                                     <span className="request-security-deposit" style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                                                        Dep: ${(req.property.securityDeposit ?? 0).toLocaleString()}
+                                                        {t('sentRequests.depositPrefix', 'Dep:')} ${(req.property.securityDeposit ?? 0).toLocaleString()}
                                                     </span>
                                                 )}
                                             </div>
@@ -250,25 +268,28 @@ const SentRequests: React.FC = () => {
                                 <Inbox size={56} className="sent-empty-icon" />
                             </div>
                             <h3 className="sent-empty-title">
-                                {activeFilter === 'ALL' ? 'No Requests Sent Yet' : `No ${activeFilter.charAt(0) + activeFilter.slice(1).toLowerCase()} Requests`}
+                                {activeFilter === 'ALL'
+                                    ? t('sentRequests.noRequestsYet')
+                                    : t('sentRequests.noFilteredRequests', { status: getStatusLabelText(activeFilter) })}
                             </h3>
                             <p className="sent-empty-text">
                                 {activeFilter === 'ALL'
-                                    ? "You haven't applied to any properties yet. Start exploring available rentals and find your perfect home!"
-                                    : `You have no ${activeFilter.toLowerCase()} rental requests.`}
+                                    ? t('sentRequests.noRequestsDesc')
+                                    : t('sentRequests.noFilteredRequestsDesc', { status: getStatusLabelText(activeFilter, true) })}
                             </p>
                             {activeFilter === 'ALL' && (
                                 <button
                                     className="btn-browse-action"
                                     onClick={() => navigate('/browse-properties')}
                                 >
-                                    Browse Properties
+                                    {t('sentRequests.browseProperties')}
                                 </button>
                             )}
                         </div>
                     )}
                 </div>
             </div>
+
         </div>
     );
 };

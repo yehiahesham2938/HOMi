@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     FaTimes, FaStar, FaMapMarkerAlt, FaCheckCircle, FaToolbox,
     FaUser, FaBriefcase, FaShieldAlt, FaCalendarCheck
@@ -29,6 +30,8 @@ interface ProviderProfileProps {
 }
 
 const ProviderProfile: React.FC<ProviderProfileProps> = ({ isOpen, onClose, provider }) => {
+    const { t } = useTranslation();
+
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose();
@@ -50,7 +53,7 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ isOpen, onClose, prov
 
     // Type Resolution
     const isCenter = provider.providerType === 'CENTER';
-    const typeLabel = isCenter ? 'Center / Agency' : 'Individual Professional';
+    const typeLabel = isCenter ? t('maintenance.centerAgency') : t('maintenance.individualProfessional');
 
     // Completed jobs fallback
     const jobsCompleted = provider.completedJobsCount ?? (provider.ratingsCount > 0 ? provider.ratingsCount + 2 : 1);
@@ -64,7 +67,7 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ isOpen, onClose, prov
                     <div className="profile-hero">
                         <div className="profile-hero-overlay" />
                         <img src={avatar} alt={displayName} className="profile-cover-img" />
-                        <button className="close-profile-btn" onClick={onClose} aria-label="Close Profile">
+                        <button className="close-profile-btn" onClick={onClose} aria-label={t('maintenance.closeProfile')}>
                             <FaTimes />
                         </button>
                     </div>
@@ -86,14 +89,14 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ isOpen, onClose, prov
 
                                 <p className="specialty-text">
                                     <FaToolbox className="toolbox-icon" />
-                                    {mainCategory}
+                                    {t('myProperties.maintenanceTypes.' + mainCategory, mainCategory)}
                                 </p>
 
                                 <div className="rating-location-row">
                                     <div className="p-rating">
                                         <FaStar />
                                         <span className="rating-val">{(provider.rating ?? 0).toFixed(1)}</span>
-                                        <span className="rating-count">({provider.ratingsCount ?? 0} reviews)</span>
+                                        <span className="rating-count">({t('maintenance.reviewsCount', { count: provider.ratingsCount ?? 0 })})</span>
                                     </div>
                                     {provider.companyLocation && (
                                         <div className="p-location">
@@ -107,36 +110,36 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ isOpen, onClose, prov
                         {/* Interactive Stats Grid */}
                         <div className="profile-grid-info">
                             <div className="info-card">
-                                <span className="info-label">Provider Type</span>
+                                <span className="info-label">{t('maintenance.providerType')}</span>
                                 <span className="info-value">
-                                    {isCenter ? <><FaBriefcase /> Center</> : <><FaUser /> Individual</>}
+                                    {isCenter ? <><FaBriefcase /> {t('maintenance.center')}</> : <><FaUser /> {t('maintenance.individual')}</>}
                                 </span>
                             </div>
                             <div className="info-card">
-                                <span className="info-label">Jobs Completed</span>
-                                <span className="info-value">{jobsCompleted}+ verified</span>
+                                <span className="info-label">{t('maintenance.jobsCompleted')}</span>
+                                <span className="info-value">{t('maintenance.jobsCompletedCount', { count: jobsCompleted })}</span>
                             </div>
                             <div className="info-card">
-                                <span className="info-label">Service Focus</span>
-                                <span className="info-value">{mainCategory.split(' ')[0]}</span>
+                                <span className="info-label">{t('maintenance.serviceFocus')}</span>
+                                <span className="info-value">{t('myProperties.maintenanceTypes.' + mainCategory, mainCategory).split(' ')[0]}</span>
                             </div>
                         </div>
 
                         {/* Bio / About */}
                         <div className="profile-bio-section">
-                            <h3>About {displayName.split(' ')[0]}</h3>
+                            <h3>{t('maintenance.aboutProvider', { name: displayName.split(' ')[0] })}</h3>
                             <p className="bio-text">
-                                {provider.bio || `A dedicated, verified maintenance professional specializing in ${mainCategory.toLowerCase()}. Committed to delivering prompt, premium repairs and customer satisfaction through HOMi.`}
+                                {provider.bio || t('maintenance.defaultBio', { category: t('myProperties.maintenanceTypes.' + mainCategory, mainCategory).toLowerCase() })}
                             </p>
                         </div>
 
                         {/* Skills / Categories Tags */}
                         {categoriesList.length > 0 && (
                             <div className="skills-section">
-                                <h3>Offered Services</h3>
+                                <h3>{t('maintenance.offeredServices')}</h3>
                                 <div className="skills-tags">
                                     {categoriesList.map((cat) => (
-                                        <span key={cat} className="skill-pill">{cat}</span>
+                                        <span key={cat} className="skill-pill">{t('myProperties.maintenanceTypes.' + cat, cat)}</span>
                                     ))}
                                 </div>
                             </div>
@@ -149,10 +152,9 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ isOpen, onClose, prov
                                     <FaShieldAlt />
                                 </div>
                                 <div className="escrow-text-wrap">
-                                    <h4>Escrow Protected Booking</h4>
+                                    <h4>{t('maintenance.escrowTitle')}</h4>
                                     <p>
-                                        When you book this professional, your money is safely escrowed from your HOMi wallet.
-                                        Payment is only released after you confirm the job has been completed to your satisfaction.
+                                        {t('maintenance.escrowBody')}
                                     </p>
                                 </div>
                             </div>
@@ -161,13 +163,13 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ isOpen, onClose, prov
                         {/* Verified Badges / Trust */}
                         <div className="trust-badges-row">
                             <div className="trust-badge">
-                                <FaCheckCircle className="badge-check-icon" /> ID Verified
+                                <FaCheckCircle className="badge-check-icon" /> {t('maintenance.idVerified')}
                             </div>
                             <div className="trust-badge">
-                                <FaCheckCircle className="badge-check-icon" /> Background Checked
+                                <FaCheckCircle className="badge-check-icon" /> {t('maintenance.backgroundChecked')}
                             </div>
                             <div className="trust-badge">
-                                <FaCheckCircle className="badge-check-icon" /> Quality Guaranteed
+                                <FaCheckCircle className="badge-check-icon" /> {t('maintenance.qualityGuaranteed')}
                             </div>
                         </div>
 
@@ -176,10 +178,10 @@ const ProviderProfile: React.FC<ProviderProfileProps> = ({ isOpen, onClose, prov
                     {/* Modal Bottom Footer Actions */}
                     <div className="profile-footer-sticky">
                         <div className="footer-price-info">
-                            <span>Provider Quality</span>
+                            <span>{t('maintenance.providerQuality')}</span>
                             <strong>⭐ {(provider.rating ?? 0).toFixed(1)} </strong>
                         </div>
-                        <button className="request-fix-btn" onClick={onClose}>Close Profile</button>
+                        <button className="request-fix-btn" onClick={onClose}>{t('maintenance.closeProfile')}</button>
                     </div>
 
                 </div>

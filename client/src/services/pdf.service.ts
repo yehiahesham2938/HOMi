@@ -380,7 +380,23 @@ class PDFService {
             <div class="section">
                 <div class="section-title">${t.sec5}</div>
                 <div class="clause-list">
-                    ${clauses.map(c => `<div class="clause-item">${c}</div>`).join('')}
+                    ${clauses.slice(0, 5).map(c => `<div class="clause-item">${c}</div>`).join('')}
+                </div>
+            </div>
+        `;
+
+        const page3Content = `
+            <div class="section">
+                <div class="clause-list">
+                    ${clauses.slice(5, 10).map(c => `<div class="clause-item">${c}</div>`).join('')}
+                </div>
+            </div>
+        `;
+
+        const page4Content = `
+            <div class="section">
+                <div class="clause-list">
+                    ${clauses.slice(10).map(c => `<div class="clause-item">${c}</div>`).join('')}
                 </div>
             </div>
 
@@ -402,7 +418,7 @@ class PDFService {
         container.style.position = 'fixed';
         container.style.left = '-9999px';
         container.style.top = '0';
-        container.innerHTML = renderPage(page1Content) + renderPage(page2Content);
+        container.innerHTML = renderPage(page1Content) + renderPage(page2Content) + renderPage(page3Content) + renderPage(page4Content);
         document.body.appendChild(container);
 
         try {

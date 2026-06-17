@@ -42,7 +42,8 @@ const getLeaseMetrics = (
 };
 
 const ActiveRentalsCard: React.FC<ActiveRentalsCardProps> = ({ contract, propertyDetails, referenceDate }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'ar' ? 'ar-EG' : 'en-US';
   const { leaseProgress, monthsLeft } = getLeaseMetrics(contract, referenceDate);
   const navigate = useNavigate();
 
@@ -54,7 +55,7 @@ const ActiveRentalsCard: React.FC<ActiveRentalsCardProps> = ({ contract, propert
   };
 
   const formatFurnishing = (furnishing: string | null | undefined): string => {
-    if (!furnishing) return 'Furnishing not set';
+    if (!furnishing) return t('tenantHomeComponents.furnishingNotSet', 'Furnishing not set');
     if (furnishing === 'Fully') return t('tenantHomeComponents.fullyFurnished');
     if (furnishing === 'Semi') return t('tenantHomeComponents.semiFurnished');
     return furnishing;
@@ -81,7 +82,7 @@ const ActiveRentalsCard: React.FC<ActiveRentalsCardProps> = ({ contract, propert
     detailSpecs.push({ label: petFriendly ? t('tenantHomeComponents.petsFriendly') : t('tenantHomeComponents.noPets'), icon: <FaPaw /> });
 
     const fallbackSpecs: RentalSpecs[] = [
-      { label: propertyDetails?.type ?? contract?.property?.type ?? 'Property', icon: <FaHome /> },
+      { label: propertyDetails?.type ?? contract?.property?.type ?? t('tenantHomeComponents.activeRental', 'Property'), icon: <FaHome /> },
       { label: furnishing, icon: <FaCouch /> },
     ];
 
@@ -92,8 +93,8 @@ const ActiveRentalsCard: React.FC<ActiveRentalsCardProps> = ({ contract, propert
   };
 
   const monthlyPrice = Number(contract?.rentAmount ?? propertyDetails?.monthlyPrice ?? contract?.property?.monthlyPrice ?? 0);
-  const propertyTitle = propertyDetails?.title || contract?.property?.title || 'Active rental';
-  const propertyAddress = propertyDetails?.address || contract?.property?.address || 'Address unavailable';
+  const propertyTitle = propertyDetails?.title || contract?.property?.title || t('tenantHomeComponents.activeRental', 'Active rental');
+  const propertyAddress = propertyDetails?.address || contract?.property?.address || t('tenantHomeComponents.addressUnavailable', 'Address unavailable');
   const propertyImage =
     propertyDetails?.images?.find((image) => image.isMain)?.imageUrl ||
     propertyDetails?.images?.[0]?.imageUrl ||
@@ -116,9 +117,9 @@ const ActiveRentalsCard: React.FC<ActiveRentalsCardProps> = ({ contract, propert
             alt={propertyTitle}
             className="rental-img"
           />
-          <div className="rental-price-tag" aria-label={`Rent ${monthlyPrice.toLocaleString()} per month`}>
-            <span className="price-amt">${monthlyPrice.toLocaleString()}</span>
-            <span className="price-unit">/mo</span>
+          <div className="rental-price-tag" aria-label={`Rent ${monthlyPrice.toLocaleString(locale)} per month`}>
+            <span className="price-amt">${monthlyPrice.toLocaleString(locale)}</span>
+            <span className="price-unit">{t('sentRequests.perMonth', '/mo')}</span>
           </div>
         </div>
 

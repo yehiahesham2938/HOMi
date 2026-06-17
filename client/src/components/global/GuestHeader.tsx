@@ -17,7 +17,7 @@ export const GuestHeader: React.FC<GuestHeaderProps> = ({ showBackToHome = false
   const toggleLanguage = () => {
     const newLang = i18n.language === 'en' ? 'ar' : 'en';
     void i18n.changeLanguage(newLang);
-    document.documentElement.dir = newLang === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.dir = 'ltr';
     document.documentElement.lang = newLang;
   };
 

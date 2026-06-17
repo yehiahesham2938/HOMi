@@ -248,6 +248,12 @@ export interface LandlordContract {
         damageDeduction?: number | null;
         mutualDepositOption?: string | null;
     }>;
+    landlordAddress?: string | null;
+    tenantAddress?: string | null;
+    permittedUse?: string | null;
+    rightToEnter?: string | null;
+    noticePeriod?: string | null;
+    deposit?: number | null;
 }
 
 export interface VerificationSummary {

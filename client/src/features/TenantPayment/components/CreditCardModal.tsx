@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, ShieldCheck, CreditCard, Lock, Info, CheckCircle } from 'lucide-react';
 import './CreditCardModal.css';
 import paymentMethodService, { type SavedPaymentMethod } from '../../../services/payment-method.service';
+import { useTranslation } from 'react-i18next';
 
 interface ModalProps {
     isOpen: boolean;
@@ -10,6 +11,7 @@ interface ModalProps {
 }
 
 const CreditCardModal: React.FC<ModalProps> = ({ isOpen, onClose, onSaved }) => {
+    const { t } = useTranslation();
     const [cardData, setCardData] = useState({
         number: '',
         holder: '',
@@ -20,9 +22,9 @@ const CreditCardModal: React.FC<ModalProps> = ({ isOpen, onClose, onSaved }) => 
     const [isSaving, setIsSaving] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    let saveButtonText = 'Save Payment Method';
-    if (isSaving) saveButtonText = 'Saving...';
-    if (isSuccess) saveButtonText = 'Saved';
+    let saveButtonText = t('creditCard.saveMethod');
+    if (isSaving) saveButtonText = t('creditCard.saving');
+    if (isSuccess) saveButtonText = t('creditCard.saved');
 
     if (!isOpen) return null;
 
@@ -65,12 +67,12 @@ const CreditCardModal: React.FC<ModalProps> = ({ isOpen, onClose, onSaved }) => 
         const expYear = expYearShort ? 2000 + expYearShort : 0;
 
         if (digits.length < 13 || digits.length > 19) {
-            setErrorMessage('Please enter a valid card number.');
+            setErrorMessage(t('creditCard.errCardNumber'));
             return;
         }
 
         if (!expMonth || expMonth < 1 || expMonth > 12 || !expYear) {
-            setErrorMessage('Please enter a valid expiry date.');
+            setErrorMessage(t('creditCard.errExpiry'));
             return;
         }
 
@@ -103,7 +105,7 @@ const CreditCardModal: React.FC<ModalProps> = ({ isOpen, onClose, onSaved }) => 
                 setCardData({ number: '', holder: '', expiry: '', cvv: '' });
             }, 1200);
         } catch {
-            setErrorMessage('Unable to save payment method right now. Please try again.');
+            setErrorMessage(t('creditCard.errUnableToSave'));
         } finally {
             setIsSaving(false);
         }
@@ -122,7 +124,7 @@ const CreditCardModal: React.FC<ModalProps> = ({ isOpen, onClose, onSaved }) => 
                 <header className="modal-header">
                     <div className="header-icon-title">
                         <div className="shield-icon-box"><ShieldCheck size={20} /></div>
-                        <h3>Add Payment Method</h3>
+                        <h3>{t('creditCard.addMethod')}</h3>
                     </div>
                     <button className="close-btn" onClick={onClose}><X size={20} /></button>
                 </header>
@@ -142,11 +144,11 @@ const CreditCardModal: React.FC<ModalProps> = ({ isOpen, onClose, onSaved }) => 
                         <div className="card-bottom-row">
                             <div className="card-holder-info">
                                 <span></span>
-                                <span>{cardData.holder || 'YOUR NAME'}</span>
+                                <span>{cardData.holder || t('creditCard.yourName')}</span>
                             </div>
                             <div className="card-expiry-info">
-                                <span>Expires </span>
-                                <span>{cardData.expiry || 'MM/YY'}</span>
+                                <span>{t('creditCard.expires')} </span>
+                                <span>{cardData.expiry || t('creditCard.mmyy')}</span>
                             </div>
                         </div>
                     </div>
@@ -155,7 +157,7 @@ const CreditCardModal: React.FC<ModalProps> = ({ isOpen, onClose, onSaved }) => 
                     {isSuccess && (
                         <div className="success-banner">
                             <CheckCircle size={18} />
-                            <span>Payment method added successfully!</span>
+                            <span>{t('creditCard.successAdded')}</span>
                         </div>
                     )}
 
@@ -168,12 +170,12 @@ const CreditCardModal: React.FC<ModalProps> = ({ isOpen, onClose, onSaved }) => 
                     {/* Input Form */}
                     <form className="card-form" onSubmit={handleSubmit}>
                         <div className="form-group">
-                            <span>Cardholder Name</span>
+                            <span>{t('creditCard.holderName')}</span>
                             <input 
                                 type="text" 
                                 name="holder"
                                 value={cardData.holder}
-                                placeholder="e.g. John Doe"
+                                placeholder={t('creditCard.holderPlaceholder')}
                                 onChange={handleInputChange}
                                 maxLength={26}
                                 required
@@ -181,7 +183,7 @@ const CreditCardModal: React.FC<ModalProps> = ({ isOpen, onClose, onSaved }) => 
                         </div>
 
                         <div className="form-group">
-                            <span>Card Number</span>
+                            <span>{t('creditCard.cardNumber')}</span>
                             <div className="input-with-icon">
                                 <Lock size={14} className="input-lock" />
                                 <input 
@@ -198,12 +200,12 @@ const CreditCardModal: React.FC<ModalProps> = ({ isOpen, onClose, onSaved }) => 
 
                         <div className="form-row-dual">
                             <div className="form-group">
-                                <span>Expiry Date</span>
+                                <span>{t('creditCard.expiryDate')}</span>
                                 <input 
                                     type="text" 
                                     name="expiry"
                                     value={cardData.expiry}
-                                    placeholder="MM / YY"
+                                    placeholder={t('creditCard.expiryPlaceholder')}
                                     onChange={handleInputChange}
                                     maxLength={7} // 4 digits + 3 spaces/slashes
                                     required
@@ -211,7 +213,7 @@ const CreditCardModal: React.FC<ModalProps> = ({ isOpen, onClose, onSaved }) => 
                             </div>
                             <div className="form-group">
                                 <span className="flex-align">
-                                    CVV <Info size={12} className="info-icon" />
+                                    {t('creditCard.cvv')} <Info size={12} className="info-icon" />
                                 </span>
                                 <input 
                                     type="password" 
@@ -227,7 +229,7 @@ const CreditCardModal: React.FC<ModalProps> = ({ isOpen, onClose, onSaved }) => 
 
                         <div className="security-notice">
                             <Lock size={12} />
-                            <p>Your payment information is processed securely and is never stored on our local servers.</p>
+                            <p>{t('creditCard.securityNotice')}</p>
                         </div>
 
                         <button type="submit" className="submit-card-btn" disabled={isSuccess || isSaving}>

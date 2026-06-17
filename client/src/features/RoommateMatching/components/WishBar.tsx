@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Sparkles, Wand2, Check } from 'lucide-react';
-import { WISH_EXAMPLES, WISH_STEPS } from '../constants/habits';
+import { getWishExamples, getWishSteps } from '../constants/habits';
 import type { WishState } from '../hooks/useWish';
 
 const Sparkle: React.FC<{ top: number; left: number; size: number; delay: number }> = ({ top, left, size, delay }) => (
@@ -26,6 +27,7 @@ interface WishBarProps {
 }
 
 const WishBar: React.FC<WishBarProps> = ({ state, hero = true }) => {
+    const { t } = useTranslation();
     const { wish, setWish, busy, step, run } = state;
     const taRef = useRef<HTMLTextAreaElement>(null);
 
@@ -42,17 +44,20 @@ const WishBar: React.FC<WishBarProps> = ({ state, hero = true }) => {
         return () => window.removeEventListener('resize', on);
     }, [wish]);
 
+    const wishExamples = getWishExamples();
+    const wishSteps = getWishSteps();
+
     return (
         <div className="wish">
             <div className="wish-inner">
                 <Sparkles2 n={hero ? 18 : 10} />
                 <div className="wish-eyebrow">
                     <Sparkles size={15} color="#c4b5fd" />
-                    <span className="logo">HOMI WISH</span>
-                    <span style={{ color: '#7e84b5', letterSpacing: '.06em' }}>· AI MATCHMAKER</span>
+                    <span className="logo">{t('roommate.wishLogo', 'HOMI WISH')}</span>
+                    <span style={{ color: '#7e84b5', letterSpacing: '.06em' }}>· {t('roommate.aiMatchmaker', 'AI MATCHMAKER')}</span>
                 </div>
-                {hero && <h2 className="wish-title">Describe your perfect roommate.<br /><span className="sh">Let the AI find them.</span></h2>}
-                {hero && <p className="wish-sub">Forget filters. Tell HOMI Wish exactly who — and where — you’re looking for, in your own words.</p>}
+                {hero && <h2 className="wish-title">{t('roommate.wishTitleText1', 'Describe your perfect roommate.')}<br /><span className="sh">{t('roommate.wishTitleText2', 'Let the AI find them.')}</span></h2>}
+                {hero && <p className="wish-sub">{t('roommate.wishSubtitleText', 'Forget filters. Tell HOMI Wish exactly who — and where — you’re looking for, in your own words.')}</p>}
                 <div className="wish-field">
                     <Wand2 size={20} className="star" />
                     <textarea
@@ -67,25 +72,25 @@ const WishBar: React.FC<WishBarProps> = ({ state, hero = true }) => {
                                 run();
                             }
                         }}
-                        placeholder="write your wish and HOMI AI will make it happen"
+                        placeholder={t('roommate.wishPlaceholder', 'write your wish and HOMI AI will make it happen')}
                         disabled={busy}
                     />
                     <button className="wish-go" onClick={() => run()} disabled={busy}>
-                        {busy ? <><span className="wish-orb" style={{ width: 18, height: 18 }} />Granting…</>
-                            : <><Sparkles size={17} />Make it happen</>}
+                        {busy ? <><span className="wish-orb" style={{ width: 18, height: 18 }} />{t('roommate.granting', 'Granting…’')}</>
+                            : <><Sparkles size={17} />{t('roommate.makeItHappen', 'Make it happen')}</>}
                     </button>
                 </div>
                 {!busy && (
                     <div className="wish-chips">
-                        <span>Try:</span>
-                        {WISH_EXAMPLES.slice(0, hero ? 4 : 2).map((ex, i) => (
+                        <span>{t('roommate.tryLabel', 'Try:')}</span>
+                        {wishExamples.slice(0, hero ? 4 : 2).map((ex, i) => (
                             <button key={i} className="wish-chip" onClick={() => setWish(ex)}>{ex}</button>
                         ))}
                     </div>
                 )}
                 {busy && (
                     <div className="wish-steps">
-                        {WISH_STEPS.map((s, i) => (
+                        {wishSteps.map((s, i) => (
                             <div key={i} className={'wstep' + (i <= step ? ' on' : '')}>
                                 <span className="wd">{i < step && <Check size={11} />}</span>{s}
                             </div>
@@ -98,3 +103,4 @@ const WishBar: React.FC<WishBarProps> = ({ state, hero = true }) => {
 };
 
 export default WishBar;
+

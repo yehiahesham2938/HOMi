@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Building2, MapPin, Check, Bed, Sparkles, Briefcase, Wallet, CheckCircle2, Search, X } from 'lucide-react';
 import Avatar from './Avatar';
 import { roommateMatchingService } from '../services/roommateMatchingService';
@@ -31,33 +32,37 @@ function incomingToCandidate(r: IncomingRequest): SmartCandidate {
     };
 }
 
-const LeasePicker: React.FC<{ leases: Lease[]; sel: string; setSel: (id: string) => void }> = ({ leases, sel, setSel }) => (
-    <div className="lease-pick">
-        <div className="panel-head" style={{ margin: '0 0 4px' }}>
-            <div><h2>Your leases</h2><p>Pick a home to list a room in</p></div>
-        </div>
-        {leases.map((l) => (
-            <div key={l.id} className={'lcard' + (sel === l.id ? ' on' : '')} onClick={() => setSel(l.id)}>
-                <div className="lcard-img">
-                    <div className="ph"><Building2 size={30} /></div>
-                    <span className="badge"><span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />Active lease</span>
-                    <span className="on-dot"><Check size={14} /></span>
-                </div>
-                <div className="lcard-b">
-                    <h3>{l.title}</h3>
-                    <div className="addr"><MapPin size={13} color="#197cf8" />{l.addr}</div>
-                    <div className="lcard-stats">
-                        <div className="lstat"><div className="v">{l.beds}</div><div className="l">Bedrooms</div></div>
-                        <div className="lstat"><div className="v">{l.beds - l.occupied}</div><div className="l">Available</div></div>
-                        <div className="lstat"><div className="v">{(l.totalRent / 1000).toFixed(1)}k</div><div className="l">Total / mo</div></div>
+const LeasePicker: React.FC<{ leases: Lease[]; sel: string; setSel: (id: string) => void }> = ({ leases, sel, setSel }) => {
+    const { t } = useTranslation();
+    return (
+        <div className="lease-pick">
+            <div className="panel-head" style={{ margin: '0 0 4px' }}>
+                <div><h2>{t('roommate.yourLeases', 'Your leases')}</h2><p>{t('roommate.pickHomeToList', 'Pick a home to list a room in')}</p></div>
+            </div>
+            {leases.map((l) => (
+                <div key={l.id} className={'lcard' + (sel === l.id ? ' on' : '')} onClick={() => setSel(l.id)}>
+                    <div className="lcard-img">
+                        <div className="ph"><Building2 size={30} /></div>
+                        <span className="badge"><span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />{t('roommate.activeLease', 'Active lease')}</span>
+                        <span className="on-dot"><Check size={14} /></span>
+                    </div>
+                    <div className="lcard-b">
+                        <h3>{l.title}</h3>
+                        <div className="addr"><MapPin size={13} color="#197cf8" />{l.addr}</div>
+                        <div className="lcard-stats">
+                            <div className="lstat"><div className="v">{l.beds}</div><div className="l">{t('roommate.bedrooms', 'Bedrooms')}</div></div>
+                            <div className="lstat"><div className="v">{l.beds - l.occupied}</div><div className="l">{t('roommate.available', 'Available')}</div></div>
+                            <div className="lstat"><div className="v">{(l.totalRent / 1000).toFixed(1)}k</div><div className="l">{t('roommate.totalMo', 'Total / mo')}</div></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        ))}
-    </div>
-);
+            ))}
+        </div>
+    );
+};
 
 const RoomConfigPanel: React.FC<{ lease: Lease; onSaved: () => void }> = ({ lease, onSaved }) => {
+    const { t } = useTranslation();
     const openable = lease.beds - lease.occupied;
     const [openCount, setOpenCount] = useState(lease.roommatesWanted);
     const [rooms, setRooms] = useState<RoomConfig[]>(lease.rooms);
@@ -80,7 +85,7 @@ const RoomConfigPanel: React.FC<{ lease: Lease; onSaved: () => void }> = ({ leas
             await roommateMatchingService.saveLeaseConfig(lease.id, { roommatesWanted: openCount, rooms: payload });
             onSaved();
         } catch {
-            alert('Failed to save lease configuration');
+            alert(t('roommate.saveConfigFailed', 'Failed to save lease configuration'));
         } finally {
             setSaving(false);
         }
@@ -89,9 +94,9 @@ const RoomConfigPanel: React.FC<{ lease: Lease; onSaved: () => void }> = ({ leas
     return (
         <div className="room-config">
             <div className="rc-head">
-                <h3>Rooms &amp; rent</h3>
+                <h3>{t('roommate.roomsRent', 'Rooms & rent')}</h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--rm-muted)' }}>Roommates wanted</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--rm-muted)' }}>{t('roommate.roommatesWanted', 'Roommates wanted')}</span>
                     <div className="stepper">
                         <button onClick={() => setOpenCount(Math.max(1, openCount - 1))}>−</button>
                         <span className="val">{openCount}</span>
@@ -107,15 +112,15 @@ const RoomConfigPanel: React.FC<{ lease: Lease; onSaved: () => void }> = ({ leas
                         <div className="room" key={i} style={!listed && !yours ? { opacity: 0.55 } : undefined}>
                             <div className="ri"><Bed size={18} /></div>
                             <div style={{ flex: 1, minWidth: 0 }}>
-                                <div className="rn">{r.name}{r.ensuite && <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--blue-500)', marginLeft: 7 }}>· en-suite</span>}</div>
-                                <div className="rs">{yours ? 'Occupied by you' : listed ? 'Listed for a roommate' : 'Not listed'}</div>
+                                <div className="rn">{r.name}{r.ensuite && <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--blue-500)', marginLeft: 7 }}>· {t('roommate.ensuite', 'en-suite')}</span>}</div>
+                                <div className="rs">{yours ? t('roommate.occupiedByYou', 'Occupied by you') : listed ? t('roommate.listedForRoommate', 'Listed for a roommate') : t('roommate.notListed', 'Not listed')}</div>
                             </div>
                             {yours ? (
-                                <span className="occ">Your room</span>
+                                <span className="occ">{t('roommate.yourRoom', 'Your room')}</span>
                             ) : (
                                 <div className="rent">
                                     <input type="number" value={r.rent} disabled={!listed} onChange={(e) => setRent(i, Number(e.target.value))} />
-                                    <span className="cur">EGP/mo</span>
+                                    <span className="cur">{t('roommate.egpMo', 'EGP/mo')}</span>
                                 </div>
                             )}
                         </div>
@@ -124,43 +129,47 @@ const RoomConfigPanel: React.FC<{ lease: Lease; onSaved: () => void }> = ({ leas
             </div>
             <div className="rc-note">
                 <Sparkles size={16} color="#197cf8" />
-                {`Listing ${openCount} room${openCount !== 1 ? 's' : ''} · HOMI surfaces your lease to compatible roommate seekers automatically.`}
+                {t('roommate.listingNote', { count: openCount, post: openCount !== 1 ? 's' : '', defaultValue: `Listing ${openCount} room${openCount !== 1 ? 's' : ''} · HOMI surfaces your lease to compatible roommate seekers automatically.` })}
             </div>
             <div className="rc-save">
                 <button className="btn btn-primary" onClick={save} disabled={saving}>
-                    <Check size={16} />{saving ? 'Saving…' : 'Save listing'}
+                    <Check size={16} />{saving ? t('roommate.savingBtn', 'Saving…') : t('roommate.saveListingBtn', 'Save listing')}
                 </button>
             </div>
         </div>
     );
 };
 
-const RequestRow: React.FC<{ req: IncomingRequest; status: string; onAct: (id: string, v: string) => void; onView: (c: SmartCandidate) => void }> = ({ req, status, onAct, onView }) => (
-    <div className="reqcard">
-        <Avatar name={req.name} avatar={req.avatar} size={54} radius={14} />
-        <div className="ri">
-            <h4>{req.name}{req.verified && <span style={{ color: 'var(--blue-500)', display: 'inline-grid' }}><CheckCircle2 size={15} /></span>}</h4>
-            <div className="sub">
-                {req.age != null && <span><Briefcase size={12} />{req.age} yrs</span>}
-                {req.note && <span style={{ maxWidth: 280, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><Wallet size={12} />{req.note}</span>}
+const RequestRow: React.FC<{ req: IncomingRequest; status: string; onAct: (id: string, v: string) => void; onView: (c: SmartCandidate) => void }> = ({ req, status, onAct, onView }) => {
+    const { t } = useTranslation();
+    return (
+        <div className="reqcard">
+            <Avatar name={req.name} avatar={req.avatar} size={54} radius={14} />
+            <div className="ri">
+                <h4>{req.name}{req.verified && <span style={{ color: 'var(--blue-500)', display: 'inline-grid' }}><CheckCircle2 size={15} /></span>}</h4>
+                <div className="sub">
+                    {req.age != null && <span><Briefcase size={12} />{t('roommate.yearsText', { count: req.age, defaultValue: `${req.age} yrs` })}</span>}
+                    {req.note && <span style={{ maxWidth: 280, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}><Wallet size={12} />{req.note}</span>}
+                </div>
             </div>
+            <div className="req-score"><div className="n">{req.score}%</div><div className="l">{t('roommate.matchPercent', 'Match')}</div></div>
+            {status === 'pending' ? (
+                <div className="req-act">
+                    <button className="icon-btn view" title={t('roommate.viewFullProfile', 'View full profile')} onClick={() => onView(incomingToCandidate(req))}><Search size={17} /></button>
+                    <button className="icon-btn no" title={t('roommate.rejectBtn', 'Reject')} onClick={() => onAct(req.matchId, 'declined')}><X size={18} /></button>
+                    <button className="icon-btn yes" title={t('roommate.approveBtn', 'Approve')} onClick={() => onAct(req.matchId, 'approved')}><Check size={18} /></button>
+                </div>
+            ) : status === 'approved' ? (
+                <span className="req-done ok"><Check size={14} />{t('roommate.approvedStatus', 'Approved')}</span>
+            ) : (
+                <span className="req-done dec"><X size={14} />{t('roommate.declinedStatus', 'Declined')}</span>
+            )}
         </div>
-        <div className="req-score"><div className="n">{req.score}%</div><div className="l">Match</div></div>
-        {status === 'pending' ? (
-            <div className="req-act">
-                <button className="icon-btn view" title="View full profile" onClick={() => onView(incomingToCandidate(req))}><Search size={17} /></button>
-                <button className="icon-btn no" title="Reject" onClick={() => onAct(req.matchId, 'declined')}><X size={18} /></button>
-                <button className="icon-btn yes" title="Approve" onClick={() => onAct(req.matchId, 'approved')}><Check size={18} /></button>
-            </div>
-        ) : status === 'approved' ? (
-            <span className="req-done ok"><Check size={14} />Approved</span>
-        ) : (
-            <span className="req-done dec"><X size={14} />Declined</span>
-        )}
-    </div>
-);
+    );
+};
 
 const LeaseSection: React.FC<LeaseSectionProps> = ({ onView }) => {
+    const { t } = useTranslation();
     const [leases, setLeases] = useState<Lease[]>([]);
     const [incoming, setIncoming] = useState<IncomingRequest[]>([]);
     const [sel, setSel] = useState<string>('');
@@ -192,7 +201,7 @@ const LeaseSection: React.FC<LeaseSectionProps> = ({ onView }) => {
             await roommateMatchingService.respondToRequest(matchId, v === 'approved' ? 'ACCEPTED' : 'DECLINED');
         } catch {
             setStatus((s) => ({ ...s, [matchId]: 'pending' }));
-            alert('Action failed');
+            alert(t('roommate.actionFailed', 'Action failed'));
         }
     };
 
@@ -204,8 +213,8 @@ const LeaseSection: React.FC<LeaseSectionProps> = ({ onView }) => {
         return (
             <div className="empty">
                 <div className="ei"><Building2 size={26} /></div>
-                <h3>No active leases to list</h3>
-                <p>Once you have an active contract, you can list rooms here and review roommate requests.</p>
+                <h3>{t('roommate.noActiveLeases', 'No active leases to list')}</h3>
+                <p>{t('roommate.noActiveLeasesDesc', 'Once you have an active contract, you can list rooms here and review roommate requests.')}</p>
             </div>
         );
     }
@@ -220,14 +229,14 @@ const LeaseSection: React.FC<LeaseSectionProps> = ({ onView }) => {
                 <RoomConfigPanel lease={lease} key={lease.id} onSaved={load} />
                 <div>
                     <div className="panel-head">
-                        <div><h2>Incoming roommate requests</h2><p>Tenants who want to share your place</p></div>
-                        <span className="count-pill">{pending} pending</span>
+                        <div><h2>{t('roommate.incomingRequestsTitle', 'Incoming roommate requests')}</h2><p>{t('roommate.incomingRequestsSub', 'Tenants who want to share your place')}</p></div>
+                        <span className="count-pill">{t('roommate.pendingCount', { count: pending, defaultValue: `${pending} pending` })}</span>
                     </div>
                     {incoming.length === 0 ? (
                         <div className="empty">
                             <div className="ei"><Search size={26} /></div>
-                            <h3>No requests yet</h3>
-                            <p>When seekers send you a connection request, they’ll appear here for you to approve or reject.</p>
+                            <h3>{t('roommate.noRequestsYet', 'No requests yet')}</h3>
+                            <p>{t('roommate.noRequestsYetDesc', 'When seekers send you a connection request, they’ll appear here for you to approve or reject.')}</p>
                         </div>
                     ) : (
                         <div className="req-list">
@@ -243,3 +252,4 @@ const LeaseSection: React.FC<LeaseSectionProps> = ({ onView }) => {
 };
 
 export default LeaseSection;
+

@@ -13,7 +13,8 @@ interface Props {
 }
 
 const TerminatedLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const locale = i18n.language === 'ar' ? 'ar-EG' : 'en-US';
     
     // Find if there is a termination request
     const latestRequest = contract.terminationRequests && contract.terminationRequests.length > 0
@@ -22,15 +23,15 @@ const TerminatedLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
 
     const terminationReason = latestRequest?.reason 
         ? latestRequest.reason 
-        : "Lease terminated automatically due to outstanding non-payment of rent.";
+        : t('terminatedLease.autoTerminatedReason', "Lease terminated automatically due to outstanding non-payment of rent.");
 
     const terminatedBy = latestRequest?.requesterId
-        ? (latestRequest.requesterId === contract.landlordNationalId ? "Landlord" : "Tenant")
-        : "System (Automated Cycle Sweep)";
+        ? (latestRequest.requesterId === contract.landlordNationalId ? t('activeLease.landlord', "Landlord") : t('activeLease.tenant', "Tenant"))
+        : t('terminatedLease.systemSweep', "System (Automated Cycle Sweep)");
 
     const terminationDate = latestRequest?.createdAt
-        ? new Date(latestRequest.createdAt).toLocaleDateString()
-        : new Date(contract.createdAt).toLocaleDateString(); // Fallback to creation/updated
+        ? new Date(latestRequest.createdAt).toLocaleDateString(locale)
+        : new Date(contract.createdAt).toLocaleDateString(locale); // Fallback to creation/updated
 
     return (
         <div className="active-contract-overlay" dir="ltr">
@@ -38,7 +39,7 @@ const TerminatedLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
                 <header className="active-panel-header" style={{ borderBottomColor: '#fee2e2' }}>
                     <div className="header-status-badge" style={{ background: '#fff1f2', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.15)' }}>
                         <ShieldX size={16} />
-                        <span>Terminated Lease</span>
+                        <span>{t('terminatedLease.terminatedLease', 'Terminated Lease')}</span>
                     </div>
                     <button className="close-btn" onClick={onClose} aria-label="Close panel">
                         <X size={20}/>
@@ -58,19 +59,19 @@ const TerminatedLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
                         <section className="info-card full-width" style={{ border: '1px solid #fca5a5', boxShadow: '0 4px 12px rgba(239, 68, 68, 0.05)' }}>
                             <div className="card-header" style={{ background: '#fff5f5', borderBottom: '1px solid #fee2e2' }}>
                                 <AlertOctagon size={18} style={{ color: '#ef4444' }} />
-                                <h3 style={{ color: '#991b1b' }}>Termination Breakdown</h3>
+                                <h3 style={{ color: '#991b1b' }}>{t('terminatedLease.terminationBreakdown')}</h3>
                             </div>
                             <div className="card-content">
                                 <div className="data-row">
-                                    <span className="label">Termination Date</span>
+                                    <span className="label">{t('terminatedLease.terminationDate')}</span>
                                     <span className="value" style={{ color: '#b91c1c' }}>{terminationDate}</span>
                                 </div>
                                 <div className="data-row">
-                                    <span className="label">Initiated By</span>
+                                    <span className="label">{t('terminatedLease.initiatedBy')}</span>
                                     <span className="value">{terminatedBy}</span>
                                 </div>
                                 <div className="data-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px', borderBottom: 'none', paddingBottom: 0 }}>
-                                    <span className="label">Termination Reason</span>
+                                    <span className="label">{t('terminatedLease.terminationReason')}</span>
                                     <p className="termination-reason-text" style={{ 
                                         margin: 0, 
                                         fontSize: '13px', 
@@ -92,7 +93,7 @@ const TerminatedLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
                         <section className="info-card">
                             <div className="card-header">
                                 <Building2 size={18} className="icon-blue" />
-                                <h3>Rent Details</h3>
+                                <h3>{t('terminatedLease.rentDetails')}</h3>
                             </div>
                             <div className="card-content">
                                 <div className="data-row">
@@ -100,7 +101,7 @@ const TerminatedLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
                                     <span className="value">${contract.amount}</span>
                                 </div>
                                 <div className="data-row">
-                                    <span className="label">Security Deposit</span>
+                                    <span className="label">{t('terminatedLease.securityDeposit')}</span>
                                     <span className="value">${contract.deposit}</span>
                                 </div>
                             </div>
@@ -110,15 +111,15 @@ const TerminatedLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
                         <section className="info-card">
                             <div className="card-header">
                                 <Calendar size={18} className="icon-orange" />
-                                <h3>Dates</h3>
+                                <h3>{t('terminatedLease.datesTitle')}</h3>
                             </div>
                             <div className="card-content">
                                 <div className="data-row">
-                                    <span className="label">Start Date</span>
+                                    <span className="label">{t('terminatedLease.startDate')}</span>
                                     <span className="value">{contract.startDate}</span>
                                 </div>
                                 <div className="data-row">
-                                    <span className="label">Lease Duration</span>
+                                    <span className="label">{t('terminatedLease.leaseDuration')}</span>
                                     <span className="value">{contract.duration}</span>
                                 </div>
                             </div>
@@ -145,7 +146,7 @@ const TerminatedLeaseContract: React.FC<Props> = ({ contract, onClose }) => {
 
                     <div className="execution-footer" style={{ background: '#fff1f2', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.1)' }}>
                         <ShieldX size={16} />
-                        <p>This lease is legally terminated. No further auto-debits will be drawn from the wallet balance.</p>
+                        <p>{t('terminatedLease.executionFooterText')}</p>
                     </div>
                 </div>
             </div>

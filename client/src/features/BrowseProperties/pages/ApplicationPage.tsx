@@ -1,6 +1,7 @@
 // client/src/features/BrowseProperties/pages/ApplicationPage.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
     FaCheckCircle, FaCalendarAlt, FaHourglassHalf, FaCommentDots,
     FaPaperPlane, FaUsers, FaUserFriends, FaUserTie, FaArrowLeft, FaPlus, FaChevronRight,
@@ -38,32 +39,32 @@ const parseDurationMonths = (duration: string | undefined): number => {
     return Number.isInteger(months) && months > 0 ? months : 0;
 };
 
-const formatDurationLabel = (duration: string | undefined): string => {
-    const totalMonths = parseDurationMonths(duration);
-    if (!totalMonths) return '—';
-
-    const years = Math.floor(totalMonths / 12);
-    const months = totalMonths % 12;
-    let yearsPart = '';
-    if (years > 0) {
-        yearsPart = `${years} year${years === 1 ? '' : 's'}`;
-    }
-
-    let monthsPart = '';
-    if (months > 0) {
-        monthsPart = `${months} month${months === 1 ? '' : 's'}`;
-    }
-
-    if (yearsPart && monthsPart) return `${yearsPart}, ${monthsPart}`;
-    return yearsPart || monthsPart;
+const getLocalizedHabit = (habit: string, lang: string): string => {
+    if (lang !== 'ar') return habit;
+    const habitsMap: Record<string, string> = {
+        "Early Riser": "نشيط صباحاً",
+        "Night Owl": "محب للسهر",
+        "Non-smoker": "غير مدخن",
+        "Very Clean": "نظيف جداً",
+        "Quiet Lifestyle": "نمط حياة هادئ",
+        "Social": "اجتماعي",
+        "Fitness Enthusiast": "مهتم باللياقة",
+        "Work from Home": "يعمل من المنزل",
+        "Student": "طالب",
+        "Pet Owner": "مربي حيوانات أليفة",
+        "Vegan": "نباتي",
+        "Musician": "موسيقي",
+        "Minimalist": "بسيط",
+        "Plant Parent": "محب للنباتات",
+        "Frequent Traveler": "كثير السفر",
+        "Gamer": "لاعب ألعاب",
+        "Chef at Home": "طاهٍ في المنزل",
+        "Organized": "منظم",
+        "Eco-friendly": "صديق للبيئة",
+        "Introverted": "انطوائي"
+    };
+    return habitsMap[habit] || habit;
 };
-
-const livingSituationOptions: { label: string; value: LivingSituation }[] = [
-    { label: 'Single', value: 'SINGLE' },
-    { label: 'Married', value: 'MARRIED' },
-    { label: 'Family', value: 'FAMILY' },
-    { label: 'Students', value: 'STUDENTS' },
-];
 
 export interface PrefillData {
     moveInDate: string;
@@ -74,6 +75,8 @@ export interface PrefillData {
 }
 
 const ApplicationPage = () => {
+    const { t, i18n } = useTranslation();
+    const currentLang = i18n.language;
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const location = useLocation();
@@ -130,6 +133,33 @@ const ApplicationPage = () => {
     const [selectedHabits, setSelectedHabits] = useState<string[]>([]);
     const [customHabit, setCustomHabit] = useState('');
 
+    const formatDurationLabel = (durationVal: string | undefined): string => {
+        const totalMonths = parseDurationMonths(durationVal);
+        if (!totalMonths) return '—';
+
+        const years = Math.floor(totalMonths / 12);
+        const months = totalMonths % 12;
+        let yearsPart = '';
+        if (years > 0) {
+            yearsPart = `${years} ${years === 1 ? t('browseProperties.year') : t('browseProperties.years')}`;
+        }
+
+        let monthsPart = '';
+        if (months > 0) {
+            monthsPart = `${months} ${months === 1 ? t('browseProperties.month') : t('browseProperties.months')}`;
+        }
+
+        if (yearsPart && monthsPart) return `${yearsPart}, ${monthsPart}`;
+        return yearsPart || monthsPart;
+    };
+
+    const livingSituationOptions: { label: string; value: LivingSituation }[] = [
+        { label: t('browseProperties.single'), value: 'SINGLE' },
+        { label: t('browseProperties.married'), value: 'MARRIED' },
+        { label: t('browseProperties.family'), value: 'FAMILY' },
+        { label: t('browseProperties.students'), value: 'STUDENTS' },
+    ];
+
     // Load property details if missing
     useEffect(() => {
         if (property || !id) return;
@@ -152,18 +182,18 @@ const ApplicationPage = () => {
                         ownerImage: landlord?.avatarUrl || undefined
                     });
                 } else {
-                    setPropertyError('Listing details not found.');
+                    setPropertyError(t('browseProperties.couldNotLocateListing'));
                 }
             } catch (err) {
                 console.error(err);
-                setPropertyError('Failed to fetch details for this property.');
+                setPropertyError(t('browseProperties.couldNotLocateListing'));
             } finally {
                 setLoadingProperty(false);
             }
         };
 
         void fetchProp();
-    }, [id, property]);
+    }, [id, property, t]);
 
     // Load habits
     useEffect(() => {
@@ -203,19 +233,19 @@ const ApplicationPage = () => {
 
     const validateForm = (): boolean => {
         if (!moveInDate) {
-            setSubmitError('Please specify a valid Move-in Date.');
+            setSubmitError(t('browseProperties.validMoveInDateError'));
             return false;
         }
         if (!duration) {
-            setSubmitError('Please select a lease duration.');
+            setSubmitError(t('browseProperties.selectLeaseDurationError'));
             return false;
         }
         if (!occupants || Number(occupants) <= 0) {
-            setSubmitError('Please specify a valid number of occupants (minimum 1).');
+            setSubmitError(t('browseProperties.validOccupantsError'));
             return false;
         }
         if (!livingSituation) {
-            setSubmitError('Please choose your living situation.');
+            setSubmitError(t('browseProperties.chooseLivingSituationError'));
             return false;
         }
         setSubmitError(null);
@@ -280,20 +310,20 @@ const ApplicationPage = () => {
             const apiMessage: string =
                 ax.response?.data?.message ||
                 ax.response?.data?.error ||
-                'Something went wrong. Please try again.';
+                t('browseProperties.bookVisitFailed');
             setSubmitError(apiMessage);
         } finally {
             setLoading(false);
         }
     };
 
-    const landlordName = property?.ownerName || 'Property Owner';
+    const landlordName = property?.ownerName || t('browseProperties.verifiedLandlord');
     const landlordAvatar = property?.ownerImage || null;
 
     const formatDate = (iso: string) => {
         if (!iso) return '—';
         try {
-            return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+            return new Date(iso).toLocaleDateString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { month: 'long', day: 'numeric', year: 'numeric' });
         } catch { return iso; }
     };
 
@@ -311,14 +341,14 @@ const ApplicationPage = () => {
                     {loadingProperty ? (
                         <div className="app-card-loading">
                             <div className="spinner"></div>
-                            <p>Loading application details…</p>
+                            <p>{t('browseProperties.loadingApplicationDetails')}</p>
                         </div>
                     ) : propertyError || !property ? (
                         <div className="app-card-error">
                             <FaExclamationTriangle size={36} color="#ef4444" />
-                            <h3>Application Error</h3>
-                            <p>{propertyError || 'Could not locate the requested listing.'}</p>
-                            <button onClick={() => navigate('/browse-properties')}>Back to listings</button>
+                            <h3>{t('browseProperties.applicationError')}</h3>
+                            <p>{propertyError}</p>
+                            <button onClick={() => navigate('/browse-properties')}>{t('browseProperties.backToListings')}</button>
                         </div>
                     ) : (
                         <div className={`app-card-container ${isSubmitted ? 'success-mode' : ''}`} dir="ltr">
@@ -327,7 +357,7 @@ const ApplicationPage = () => {
                                     {/* SIDEBAR PROPERTY SUMMARY */}
                                     <div className="app-summary-sidebar">
                                         <button className="back-link-btn" onClick={() => navigate(`/properties/${id}`)}>
-                                            <FaArrowLeft /> Back to details
+                                            <FaArrowLeft /> {t('browseProperties.backToDetails')}
                                         </button>
 
                                         <div className="property-glance-card">
@@ -335,13 +365,13 @@ const ApplicationPage = () => {
                                                 <img src={property.image} alt={property.title} />
                                                 <div className="property-image-overlay">
                                                     <span className="glance-badge">
-                                                        {isReadOnly ? 'Submitted' : `Step ${step} of 2`}
+                                                        {isReadOnly ? t('browseProperties.submitted') : t('browseProperties.stepOf', { step })}
                                                     </span>
                                                 </div>
                                             </div>
                                             <div className="glance-meta">
                                                 <h4>{property.title}</h4>
-                                                <p className="glance-rent">${property.price.toLocaleString()}<span>/mo</span></p>
+                                                <p className="glance-rent">${property.price.toLocaleString()}<span>/{t('activeRental.monthsShort')}</span></p>
                                             </div>
                                         </div>
 
@@ -353,7 +383,7 @@ const ApplicationPage = () => {
                                                     <div className="landlord-avatar-icon"><FaUserTie /></div>
                                                 )}
                                                 <div>
-                                                    <h5>Landlord</h5>
+                                                    <h5>{t('browseProperties.landlord')}</h5>
                                                     <p>{landlordName}</p>
                                                 </div>
                                             </div>
@@ -372,14 +402,14 @@ const ApplicationPage = () => {
                                                 <div className="step-circle">
                                                     {step > 1 ? <FaCheckCircle size={16} /> : '1'}
                                                 </div>
-                                                <span className="step-label">Rental Preferences</span>
+                                                <span className="step-label">{t('browseProperties.rentalPreferences')}</span>
                                             </button>
                                             <button 
                                                 className={`form-tab-btn ${step === 2 ? 'active' : ''}`}
                                                 onClick={() => handleTabChange(2)}
                                             >
                                                 <div className="step-circle">2</div>
-                                                <span className="step-label">Lifestyle Profile</span>
+                                                <span className="step-label">{t('browseProperties.lifestyleProfile')}</span>
                                             </button>
                                         </div>
 
@@ -394,10 +424,10 @@ const ApplicationPage = () => {
                                             {step === 1 ? (
                                                 <div className="app-form-tab-panel animate-fade-in">
                                                     <div className="form-title-header">
-                                                        <h1>{isReadOnly ? 'Your Application Details' : 'Rental Application'}</h1>
+                                                        <h1>{isReadOnly ? t('browseProperties.yourApplicationDetails') : t('browseProperties.rentalApplication')}</h1>
                                                         <p>{isReadOnly
-                                                            ? 'This is a read-only record of your sent request.'
-                                                            : 'Define lease durations and occupants preferences.'
+                                                            ? t('browseProperties.readOnlyRecord')
+                                                            : t('browseProperties.defineLeasePreferences')
                                                         }</p>
                                                     </div>
 
@@ -406,32 +436,32 @@ const ApplicationPage = () => {
                                                         <div className="app-readonly-grid-box">
                                                             <div className="readonly-row-fields">
                                                                 <div className="readonly-field-item">
-                                                                    <label><FaCalendarAlt /> Move-in date</label>
+                                                                    <label><FaCalendarAlt /> {t('browseProperties.moveInDateLabel')}</label>
                                                                     <div className="value-p">{formatDate(moveInDate)}</div>
                                                                 </div>
                                                                 <div className="readonly-field-item">
-                                                                    <label><FaHourglassHalf /> Rent duration</label>
+                                                                    <label><FaHourglassHalf /> {t('browseProperties.rentDuration')}</label>
                                                                     <div className="value-p">{durationLabel}</div>
                                                                 </div>
                                                                 <div className="readonly-field-item">
-                                                                    <label><FaUsers /> Occupants count</label>
+                                                                    <label><FaUsers /> {t('browseProperties.occupantsCount')}</label>
                                                                     <div className="value-p">{occupants || '—'}</div>
                                                                 </div>
                                                                 <div className="readonly-field-item">
-                                                                    <label><FaUserFriends /> Living situation</label>
+                                                                    <label><FaUserFriends /> {t('browseProperties.livingSituationLabel')}</label>
                                                                     <div className="value-p">{livSituationLabel}</div>
                                                                 </div>
                                                             </div>
 
                                                             <div className="readonly-msg-box">
-                                                                <label><FaCommentDots /> Personal message to landlord</label>
+                                                                <label><FaCommentDots /> {t('browseProperties.personalMessageToLandlord')}</label>
                                                                 <div className="message-content">
-                                                                    {message ? message : <em>No personal note was provided.</em>}
+                                                                    {message ? message : <em>{t('browseProperties.noPersonalNote')}</em>}
                                                                 </div>
                                                             </div>
 
                                                             <button className="app-primary-submit-btn" style={{ marginTop: '28px' }} onClick={() => setStep(2)}>
-                                                                View Lifestyle Habits <FaChevronRight />
+                                                                {t('browseProperties.viewLifestyleHabits')} <FaChevronRight />
                                                             </button>
                                                         </div>
                                                     ) : (
@@ -439,7 +469,7 @@ const ApplicationPage = () => {
                                                         <form onSubmit={handleNext} className="app-interactive-form">
                                                             <div className="form-fields-row">
                                                                 <div className="app-field-group">
-                                                                    <label><FaCalendarAlt /> Expected Move-in Date</label>
+                                                                    <label><FaCalendarAlt /> {t('browseProperties.expectedMoveInDate')}</label>
                                                                     <input
                                                                         type="date"
                                                                         required
@@ -449,7 +479,7 @@ const ApplicationPage = () => {
                                                                     />
                                                                 </div>
                                                                 <div className="app-field-group">
-                                                                    <label><FaHourglassHalf /> Rental Lease Duration</label>
+                                                                    <label><FaHourglassHalf /> {t('browseProperties.rentalLeaseDuration')}</label>
                                                                     <div className="rent-duration-split-select">
                                                                         <select
                                                                             required
@@ -458,7 +488,7 @@ const ApplicationPage = () => {
                                                                         >
                                                                             {YEAR_OPTIONS.map((years) => (
                                                                                 <option key={`years-${years}`} value={years}>
-                                                                                    {years} year{years === 1 ? '' : 's'}
+                                                                                    {years} {years === 1 ? t('browseProperties.year') : t('browseProperties.years')}
                                                                                 </option>
                                                                             ))}
                                                                         </select>
@@ -470,36 +500,36 @@ const ApplicationPage = () => {
                                                                         >
                                                                             {MONTH_OPTIONS.map((months) => (
                                                                                 <option key={`months-${months}`} value={months}>
-                                                                                    {months} month{months === 1 ? '' : 's'}
+                                                                                    {months} {months === 1 ? t('browseProperties.month') : t('browseProperties.months')}
                                                                                 </option>
                                                                             ))}
                                                                         </select>
                                                                     </div>
-                                                                    <small className="lease-sum-hint">Calculated duration: <strong>{durationLabel}</strong></small>
+                                                                    <small className="lease-sum-hint">{t('browseProperties.calculatedDuration', { duration: durationLabel })}</small>
                                                                 </div>
                                                             </div>
 
                                                             <div className="form-fields-row">
                                                                 <div className="app-field-group">
-                                                                    <label><FaUsers /> Number of Occupants</label>
+                                                                    <label><FaUsers /> {t('browseProperties.numberOfOccupants')}</label>
                                                                     <input
                                                                         type="number"
                                                                         min="1"
-                                                                        placeholder="Total people moving in"
+                                                                        placeholder={t('browseProperties.totalPeopleMovingIn')}
                                                                         required
                                                                         value={occupants}
                                                                         onChange={e => setOccupants(e.target.value === '' ? '' : Number(e.target.value))}
                                                                     />
                                                                 </div>
                                                                 <div className="app-field-group">
-                                                                    <label><FaUserFriends /> Living Situation</label>
+                                                                    <label><FaUserFriends /> {t('browseProperties.livingSituationLabel')}</label>
                                                                     <select
                                                                         required
                                                                         className="situation-select"
                                                                         value={livingSituation}
                                                                         onChange={e => setLivingSituation(e.target.value as LivingSituation)}
                                                                     >
-                                                                        <option value="">Select living structure</option>
+                                                                        <option value="">{t('browseProperties.selectLivingStructure')}</option>
                                                                         {livingSituationOptions.map(opt => (
                                                                             <option key={opt.value} value={opt.value}>{opt.label}</option>
                                                                         ))}
@@ -508,9 +538,9 @@ const ApplicationPage = () => {
                                                             </div>
 
                                                             <div className="app-field-group">
-                                                                <label><FaCommentDots /> Message to Landlord</label>
+                                                                <label><FaCommentDots /> {t('browseProperties.personalMessageToLandlord')}</label>
                                                                 <textarea
-                                                                    placeholder="Introduce yourself! Let the landlord know who is moving in and why you are a great fit..."
+                                                                    placeholder={t('browseProperties.messageToLandlordPlaceholder')}
                                                                     rows={4}
                                                                     value={message}
                                                                     onChange={e => setMessage(e.target.value)}
@@ -518,7 +548,7 @@ const ApplicationPage = () => {
                                                             </div>
 
                                                             <button type="submit" className="app-primary-submit-btn">
-                                                                Next: Lifestyle Profile <FaChevronRight />
+                                                                {t('browseProperties.nextLifestyleProfile')} <FaChevronRight />
                                                             </button>
                                                         </form>
                                                     )}
@@ -527,23 +557,23 @@ const ApplicationPage = () => {
                                                 /* TABS 2: HABITS selection */
                                                 <div className="app-form-tab-panel animate-fade-in">
                                                     <div className="form-title-header">
-                                                        <h1>Lifestyle Profile & Habits</h1>
+                                                        <h1>{t('browseProperties.lifestyleProfileAndHabits')}</h1>
                                                         <p>{isReadOnly
-                                                            ? 'Habits attached to your profile at submission.'
-                                                            : 'Check standard tags to display on your application request.'
+                                                            ? t('browseProperties.habitsAttachedAtSubmission')
+                                                            : t('browseProperties.checkStandardTags')
                                                         }</p>
                                                     </div>
 
                                                     {habitsLoading ? (
                                                         <div className="habits-preloader">
                                                             <div className="spinner-mini"></div>
-                                                            <p>Loading standard lifestyle profile…</p>
+                                                            <p>{t('browseProperties.loadingStandardLifestyle')}</p>
                                                         </div>
                                                     ) : (
                                                         <div className="habits-section-flex-content">
                                                             {isReadOnly && selectedHabits.length === 0 ? (
                                                                 <div className="empty-habits-log">
-                                                                    No custom habits were registered on your profile.
+                                                                    {t('browseProperties.noCustomHabits')}
                                                                 </div>
                                                             ) : (
                                                                 <div className="lifestyle-chips-grid">
@@ -555,7 +585,7 @@ const ApplicationPage = () => {
                                                                                 className={`lifestyle-habit-chip ${isSelected ? 'selected' : ''} ${isReadOnly ? 'readonly' : ''}`}
                                                                                 onClick={() => toggleHabit(habit)}
                                                                             >
-                                                                                {habit}
+                                                                                {getLocalizedHabit(habit, currentLang)}
                                                                             </div>
                                                                         );
                                                                     })}
@@ -579,7 +609,7 @@ const ApplicationPage = () => {
                                                                         value={customHabit}
                                                                         onChange={e => setCustomHabit(e.target.value)}
                                                                         onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addCustomHabit())}
-                                                                        placeholder="Specify other lifestyle traits (e.g. Vegetarians, Gym Goers)..."
+                                                                        placeholder={t('browseProperties.specifyOtherLifestyle')}
                                                                     />
                                                                     <button type="button" onClick={addCustomHabit}><FaPlus /></button>
                                                                 </div>
@@ -593,11 +623,11 @@ const ApplicationPage = () => {
                                                             className={`app-primary-submit-btn ${loading ? 'loading' : ''}`}
                                                             disabled={loading || habitsLoading}
                                                         >
-                                                            {loading ? <div className="spinner-mini"></div> : <><FaPaperPlane /> Submit Rental Application</>}
+                                                            {loading ? <div className="spinner-mini"></div> : <><FaPaperPlane /> {t('browseProperties.submitRentalApplication')}</>}
                                                         </button>
                                                     ) : (
                                                         <button onClick={() => navigate(`/properties/${id}`)} className="app-primary-submit-btn">
-                                                            Back to Property Details
+                                                            {t('browseProperties.backToPropertyDetails')}
                                                         </button>
                                                     )}
                                                 </div>
@@ -609,11 +639,11 @@ const ApplicationPage = () => {
                                 /* SUCCESS PANELS */
                                 <div className="app-submit-success-state animate-fade-in">
                                     <FaCheckCircle className="tick-bounce" />
-                                    <h2>Application Submitted!</h2>
-                                    <p>Your application is now on its way to <strong>{landlordName}</strong>. They will review your profile and specifications soon. You can follow this application status in your Sent Requests dashboard.</p>
+                                    <h2>{t('browseProperties.applicationSubmitted')}</h2>
+                                    <p>{t('browseProperties.applicationSubmittedText', { landlordName })}</p>
                                     <div className="success-footer-actions">
-                                        <button className="return-btn" onClick={() => navigate('/sent-requests')}>View My Applications</button>
-                                        <button className="return-btn outline" onClick={() => navigate('/browse-properties')}>Return to Browse</button>
+                                        <button className="return-btn" onClick={() => navigate('/sent-requests')}>{t('browseProperties.viewMyApplications')}</button>
+                                        <button className="return-btn outline" onClick={() => navigate('/browse-properties')}>{t('browseProperties.returnToBrowse')}</button>
                                     </div>
                                 </div>
                             )}

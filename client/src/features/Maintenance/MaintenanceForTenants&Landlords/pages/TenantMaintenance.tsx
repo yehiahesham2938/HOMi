@@ -158,21 +158,21 @@ const TenantMaintenance: React.FC = () => {
         <div className="tab-pane animate-in">
             <div className="tl-section-header">
                 <div>
-                    <h2>Your maintenance issues</h2>
-                    <p>Post a new issue from your active rental — pros will start applying with their final price.</p>
+                    <h2>{t('maintenance.yourMaintenanceIssues')}</h2>
+                    <p>{t('maintenance.postNewIssueSubtitle')}</p>
                 </div>
                 <button className="post-issue-btn" onClick={openPostModal}>
-                    <FaPlus /> Post New Issue
+                    <FaPlus /> {t('maintenance.postNewIssueBtn')}
                 </button>
             </div>
 
             {requestsLoading && requests.length === 0 ? (
-                <div className="empty-state-container"><h3>Loading…</h3></div>
+                <div className="empty-state-container"><h3>{t('maintenance.loading')}</h3></div>
             ) : activeRequests.length === 0 ? (
                 <div className="add-post-placeholder" onClick={openPostModal} style={{ minHeight: 220 }}>
                     <div className="placeholder-content">
                         <div className="plus-icon-box"><FaPlus /></div>
-                        <p>You have no active issues. Tap to post one.</p>
+                        <p>{t('maintenance.noActiveIssues')}</p>
                     </div>
                 </div>
             ) : (
@@ -201,7 +201,7 @@ const TenantMaintenance: React.FC = () => {
                     <FaSearch className="search-icon" />
                     <input
                         type="text"
-                        placeholder="Search maintainers, centers, locations…"
+                        placeholder={t('maintenance.searchPlaceholder')}
                         value={providerSearch}
                         onChange={(e) => setProviderSearch(e.target.value)}
                     />
@@ -212,7 +212,7 @@ const TenantMaintenance: React.FC = () => {
                         value={providerCategory}
                         onChange={(e) => setProviderCategory(e.target.value)}
                     >
-                        <option value="All">All Categories</option>
+                        <option value="All">{t('maintenance.allCategories')}</option>
                         {MAINTENANCE_CATEGORIES.map((c) => (
                             <option key={c} value={c}>{t('myProperties.maintenanceTypes.' + c, c)}</option>
                         ))}
@@ -224,20 +224,20 @@ const TenantMaintenance: React.FC = () => {
                         value={providerType}
                         onChange={(e) => setProviderType(e.target.value as 'ALL' | 'INDIVIDUAL' | 'CENTER')}
                     >
-                        <option value="ALL">Individuals + Centers</option>
-                        <option value="INDIVIDUAL">Individuals</option>
-                        <option value="CENTER">Centers</option>
+                        <option value="ALL">{t('maintenance.allTypes')}</option>
+                        <option value="INDIVIDUAL">{t('maintenance.individuals')}</option>
+                        <option value="CENTER">{t('maintenance.centers')}</option>
                     </select>
                 </div>
             </div>
 
             {providersLoading && providers.length === 0 ? (
-                <div className="empty-state-container"><h3>Loading providers…</h3></div>
+                <div className="empty-state-container"><h3>{t('maintenance.loadingProviders')}</h3></div>
             ) : providers.length === 0 ? (
                 <div className="empty-state-container">
                     <div className="empty-state-icon-box"><FaSearch /></div>
-                    <h3>No providers match your filters</h3>
-                    <p>Try a different category, type, or clear the search.</p>
+                    <h3>{t('maintenance.noProvidersFound')}</h3>
+                    <p>{t('maintenance.noProvidersSub')}</p>
                 </div>
             ) : (
                 <div className="providers-grid">
@@ -253,7 +253,7 @@ const TenantMaintenance: React.FC = () => {
                                 rating={p.rating}
                                 reviewCount={p.ratingsCount}
                                 location={p.companyLocation ?? '—'}
-                                priceRange="On request"
+                                priceRange={t('maintenance.onRequest')}
                                 imageUrl={p.avatarUrl ?? fallback}
                                 isVerified
                                 completedJobs={p.completedJobsCount}
@@ -272,19 +272,19 @@ const TenantMaintenance: React.FC = () => {
             <div className="tab-pane animate-in">
                 <div className="tl-section-header">
                     <div>
-                        <h2>Track maintenance</h2>
-                        <p>All your maintenance requests with live status updates.</p>
+                        <h2>{t('maintenance.trackMaintenance')}</h2>
+                        <p>{t('maintenance.trackSubtitle')}</p>
                     </div>
                 </div>
 
                 {list.length === 0 ? (
                     <div className="empty-state-container">
                         <div className="empty-state-icon-box"><FaTools /></div>
-                        <h3>No active requests</h3>
-                        <p>You haven't posted any issues yet.</p>
+                        <h3>{t('maintenance.noActiveRequests')}</h3>
+                        <p>{t('maintenance.noRequestsSub')}</p>
                         <div className="empty-state-actions">
-                            <button className="primary-empty-btn" onClick={() => setActiveTab('post')}>Post an Issue</button>
-                            <button className="secondary-empty-btn" onClick={() => setActiveTab('browse')}>Browse Providers</button>
+                            <button className="primary-empty-btn" onClick={() => setActiveTab('post')}>{t('maintenance.postAnIssue')}</button>
+                            <button className="secondary-empty-btn" onClick={() => setActiveTab('browse')}>{t('maintenance.browseProviders')}</button>
                         </div>
                     </div>
                 ) : (
@@ -305,17 +305,17 @@ const TenantMaintenance: React.FC = () => {
                                     </div>
 
                                     <div className="req-provider">
-                                        <span className="label">Provider</span>
+                                        <span className="label">{t('maintenance.provider')}</span>
                                         <span className="value">
                                             {req.provider
                                                 ? req.provider.businessName ??
                                                 `${req.provider.firstName} ${req.provider.lastName}`.trim()
-                                                : 'Awaiting bids'}
+                                                : t('maintenance.awaitingBids')}
                                         </span>
                                     </div>
 
                                     <div className="req-date">
-                                        <span className="label">Posted</span>
+                                        <span className="label">{t('maintenance.posted')}</span>
                                         <span className="value">{new Date(req.createdAt).toLocaleDateString()}</span>
                                     </div>
 
@@ -353,9 +353,9 @@ const TenantMaintenance: React.FC = () => {
                         <header className="maintenance-hero">
                             <div className="hero-glass-mesh"></div>
                             <div className="hero-text">
-                                <span className="pre-title">Home Care & Support</span>
-                                <h1>Maintenance Hub</h1>
-                                <p>Post issues, hire trusted pros, track every job — all paid via your HOMi wallet.</p>
+                                <span className="pre-title">{t('maintenance.heroPreTitle')}</span>
+                                <h1>{t('maintenance.heroTitle')}</h1>
+                                <p>{t('maintenance.heroSubtitle')}</p>
                             </div>
 
                             <div className="maintenance-quick-stats">
@@ -365,7 +365,7 @@ const TenantMaintenance: React.FC = () => {
                                     </div>
                                     <div className="stat-text-group">
                                         <span className="stat-num">{activeRequests.length}</span>
-                                        <span className="stat-desc">Active issues</span>
+                                        <span className="stat-desc">{t('maintenance.activeIssues')}</span>
                                     </div>
                                 </div>
                                 <div className="mini-stat accent">
@@ -374,7 +374,7 @@ const TenantMaintenance: React.FC = () => {
                                     </div>
                                     <div className="stat-text-group">
                                         <span className="stat-num">{providers.length}</span>
-                                        <span className="stat-desc">Pros nearby</span>
+                                        <span className="stat-desc">{t('maintenance.prosNearby')}</span>
                                     </div>
                                 </div>
                             </div>
@@ -397,21 +397,21 @@ const TenantMaintenance: React.FC = () => {
                                 onClick={() => setActiveTab('post')}
                             >
                                 <FaPlus className="tab-icon" />
-                                <span>Post an Issue</span>
+                                <span>{t('maintenance.postAnIssue')}</span>
                             </button>
                             <button
                                 className={`tab-btn ${activeTab === 'browse' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('browse')}
                             >
                                 <FaSearch className="tab-icon" />
-                                <span>Browse Providers</span>
+                                <span>{t('maintenance.browseProviders')}</span>
                             </button>
                             <button
                                 className={`tab-btn ${activeTab === 'active' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('active')}
                             >
                                 <FaTools className="tab-icon" />
-                                <span>Active Requests</span>
+                                <span>{t('maintenance.activeRequests')}</span>
                             </button>
                         </nav>
 
@@ -472,14 +472,14 @@ const TenantMaintenance: React.FC = () => {
                                 <div className="custom-confirm-modal-icon-box">
                                     <FaTrashAlt className="custom-confirm-modal-icon" />
                                 </div>
-                                <h3>Cancel Maintenance Request</h3>
-                                <p>Are you sure you want to cancel the request <strong>"{cancelTarget.title}"</strong>? This action cannot be undone.</p>
+                                <h3>{t('maintenance.cancelRequestTitle')}</h3>
+                                <p>{t('maintenance.cancelRequestConfirm', { title: cancelTarget.title })}</p>
                                 <div className="custom-confirm-modal-actions">
                                     <button 
                                         className="custom-confirm-btn btn-cancel" 
                                         onClick={() => setCancelTarget(null)}
                                     >
-                                        No, keep it
+                                        {t('maintenance.keepIt')}
                                     </button>
                                     <button 
                                         className="custom-confirm-btn btn-confirm-delete" 
@@ -494,7 +494,7 @@ const TenantMaintenance: React.FC = () => {
                                             }
                                         }}
                                     >
-                                        Yes, cancel request
+                                        {t('maintenance.yesCancel')}
                                     </button>
                                 </div>
                             </div>

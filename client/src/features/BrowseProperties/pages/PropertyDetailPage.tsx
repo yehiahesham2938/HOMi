@@ -64,11 +64,11 @@ function openGoogleMapsForProperty(property: {
     window.open(url, '_blank', 'noopener,noreferrer');
 }
 
-function availabilityRibbon(property: PropertyUI): { label: string; dateLine: string; tag: string } {
+function availabilityRibbon(property: PropertyUI, t: any): { label: string; dateLine: string; tag: string } {
     const iso = property.availabilityDateISO;
     const listedRaw = property.listedAtISO;
 
-    let dateLine = 'The landlord has not set a fixed date — message them to confirm.';
+    let dateLine = t('propertyDetailPage.availLandlordNotSet', 'The landlord has not set a fixed date — message them to confirm.');
     if (iso) {
         const d = new Date(iso);
         if (!Number.isNaN(d.getTime())) {
@@ -78,28 +78,28 @@ function availabilityRibbon(property: PropertyUI): { label: string; dateLine: st
         dateLine = String(property.availableDate);
     }
 
-    let tag = 'Active listing';
+    let tag = t('propertyDetailPage.activeListing', 'Active listing');
     if (iso) {
         const move = new Date(iso);
         move.setHours(0, 0, 0, 0);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const diff = Math.round((move.getTime() - today.getTime()) / 86400000);
-        if (diff < 0) tag = 'Available now';
-        else if (diff === 0) tag = 'Move-in from today';
-        else if (diff <= 14) tag = 'Move-in soon';
-        else if (diff <= 60) tag = 'Within two months';
-        else tag = 'Flexible timing';
+        if (diff < 0) tag = t('propertyDetailPage.availableNow', 'Available now');
+        else if (diff === 0) tag = t('propertyDetailPage.moveInToday', 'Move-in from today');
+        else if (diff <= 14) tag = t('propertyDetailPage.moveInSoon', 'Move-in soon');
+        else if (diff <= 60) tag = t('propertyDetailPage.withinTwoMonths', 'Within two months');
+        else tag = t('propertyDetailPage.flexibleTiming', 'Flexible timing');
     } else if (listedRaw) {
         const age = Math.floor((Date.now() - new Date(listedRaw).getTime()) / 86400000);
-        if (age <= 3) tag = 'Just listed';
-        else if (age <= 14) tag = 'New on HOMi';
+        if (age <= 3) tag = t('propertyDetailPage.justListed', 'Just listed');
+        else if (age <= 14) tag = t('propertyDetailPage.newOnHomi', 'New on HOMi');
     }
 
     const label =
         iso || (property.availableDate && String(property.availableDate) !== 'Not specified')
-            ? 'Move-in availability'
-            : 'Availability';
+            ? t('propertyDetailPage.moveInAvailability', 'Move-in availability')
+            : t('propertyDetailPage.availability', 'Availability');
 
     return { label, dateLine, tag };
 }
@@ -180,18 +180,18 @@ const PropertyDetailPage: React.FC = () => {
                         }
                     }
                 } else {
-                    setError('Property details not found.');
+                    setError(t('propertyDetailPage.errorRetrieving', 'The requested property could not be loaded.'));
                 }
             } catch (err) {
                 console.error('Failed to load property:', err);
-                setError('Could not retrieve property details. Please check the URL or connection.');
+                setError(t('propertyDetailPage.errorRetrieving', 'The requested property could not be loaded.'));
             } finally {
                 setLoading(false);
             }
         };
 
         void fetchPropertyDetails();
-    }, [id, isUserGuest]);
+    }, [id, isUserGuest, t]);
 
     // Fetch active rental request if not passed in routing state
     useEffect(() => {
@@ -235,8 +235,8 @@ const PropertyDetailPage: React.FC = () => {
 
     const ribbon = useMemo(() => {
         if (!property) return { label: '', dateLine: '', tag: '' };
-        return availabilityRibbon(property);
-    }, [property]);
+        return availabilityRibbon(property, t);
+    }, [property, t]);
 
     const isRented = property?.status?.toUpperCase() === 'RENTED';
     const isUnavailable = property?.status?.toUpperCase() === 'UNAVAILABLE';
@@ -252,12 +252,12 @@ const PropertyDetailPage: React.FC = () => {
     const houseRules = useMemo(() => {
         if (!property) return [];
         return [
-            { icon: <FaSmokingBan />, text: "No Smoking", active: true },
-            { icon: <FaPaw />, text: "Pet Friendly", active: property.petsAllowed ?? false },
-            { icon: <FaVolumeMute />, text: "Quiet Hours (10PM)", active: true },
-            { icon: <FaUsers />, text: property.targetTenant || 'Any Tenant', active: true },
+            { icon: <FaSmokingBan />, text: t('propertyDetailPage.noSmoking', 'No Smoking'), active: true },
+            { icon: <FaPaw />, text: t('propertyDetailPage.petFriendly', 'Pet Friendly'), active: property.petsAllowed ?? false },
+            { icon: <FaVolumeMute />, text: t('propertyDetailPage.quietHours', 'Quiet Hours (10PM)'), active: true },
+            { icon: <FaUsers />, text: property.targetTenant ? t('guestSearch.' + property.targetTenant.toLowerCase(), property.targetTenant) : t('guestSearch.any', 'Any Tenant'), active: true },
         ];
-    }, [property]);
+    }, [property, t]);
 
     const maintenanceResponsibilities = property?.maintenanceResponsibilities || [];
 
@@ -283,7 +283,7 @@ const PropertyDetailPage: React.FC = () => {
     const handleCancelYes = async () => {
         const requestId = rentalRequest?.id;
         if (!requestId) {
-            setCancelError('Could not find this request to cancel.');
+            setCancelError(t('propertyDetailPage.cancelErrorDefault', 'Could not cancel request. Please try again.'));
             return;
         }
 
@@ -295,7 +295,7 @@ const PropertyDetailPage: React.FC = () => {
             setRentalRequest(null);
         } catch (error: unknown) {
             const ex = error as { response?: { data?: { message?: string } }; message?: string };
-            const message = ex.response?.data?.message || ex.message || 'Could not cancel request. Please try again.';
+            const message = ex.response?.data?.message || ex.message || t('propertyDetailPage.cancelErrorDefault', 'Could not cancel request. Please try again.');
             setCancelError(message);
         }
     };
@@ -377,11 +377,11 @@ const PropertyDetailPage: React.FC = () => {
         if (!shareUrl) return;
         try {
             await navigator.clipboard.writeText(shareUrl);
-            setShareToast('Link copied to clipboard.');
+            setShareToast(t('propertyDetailPage.linkCopied', 'Link copied to clipboard.'));
             setShareMenuOpen(false);
             window.setTimeout(() => setShareToast(null), 3000);
         } catch {
-            setShareToast('Could not copy link.');
+            setShareToast(t('propertyDetailPage.copyLinkError', 'Could not copy link.'));
             window.setTimeout(() => setShareToast(null), 3000);
         }
     };
@@ -419,7 +419,7 @@ const PropertyDetailPage: React.FC = () => {
             window.open(inboxApp, '_blank', 'noopener,noreferrer');
         }
 
-        setShareToast(copied ? 'Direct link copied. Instagram DM opened.' : 'Instagram DM opened.');
+        setShareToast(copied ? t('propertyDetailPage.instagramDmCopied', 'Direct link copied. Instagram DM opened.') : t('propertyDetailPage.instagramDmOpened', 'Instagram DM opened.'));
         window.setTimeout(() => setShareToast(null), 5000);
     };
 
@@ -436,7 +436,7 @@ const PropertyDetailPage: React.FC = () => {
     const handleSubmitReport = async () => {
         const details = reportDetails.trim();
         if (details.length < 30) {
-            setReportError('Please include at least 30 characters so our moderation team has enough context.');
+            setReportError(t('propertyDetailPage.reportErrorMinLength', 'Please include at least 30 characters so our moderation team has enough context.'));
             return;
         }
 
@@ -447,11 +447,11 @@ const PropertyDetailPage: React.FC = () => {
                 reason: reportReason,
                 details,
             });
-            setReportSuccess(response.message || 'Report submitted successfully.');
+            setReportSuccess(response.message || t('propertyDetailPage.reportSuccess', 'Report submitted successfully. Thank you for keeping HOMI safe!'));
             setReportDetails('');
         } catch (error: unknown) {
             const ex = error as { response?: { data?: { message?: string } } };
-            setReportError(ex.response?.data?.message || 'Unable to submit report right now. Please try again.');
+            setReportError(ex.response?.data?.message || t('propertyDetailPage.reportErrorMinLength', 'Unable to submit report right now. Please try again.'));
         } finally {
             setIsSubmittingReport(false);
         }
@@ -468,28 +468,28 @@ const PropertyDetailPage: React.FC = () => {
                     <div className="detail-breadcrumb-bar">
                         {!openedFromGuest && (
                             <button className="back-to-search-btn" onClick={() => navigate('/browse-properties')}>
-                                Back to Search
+                                {t('propertyDetailPage.backToSearch', 'Back to Search')}
                             </button>
                         )}
                         <button className="breadcrumb-back-btn" onClick={() => navigate(-1)}>
-                            <FaArrowLeft /> Back
+                            <FaArrowLeft /> {t('propertyDetailPage.back', 'Back')}
                         </button>
                         <span className="breadcrumb-divider">/</span>
-                        <span className="breadcrumb-text">{property?.title || 'Listing Details'}</span>
+                        <span className="breadcrumb-text">{property?.title || t('propertyDetailPage.listingDetails', 'Listing Details')}</span>
                     </div>
 
                     {loading ? (
                         <div className="detail-loading-state">
                             <div className="spinner-large"></div>
-                            <p>Loading premium property details…</p>
+                            <p>{t('propertyDetailPage.loadingDetails', 'Loading premium property details…')}</p>
                         </div>
                     ) : error || !property ? (
                         <div className="detail-error-state">
                             <FaExclamationTriangle size={48} className="error-icon" />
-                            <h3>Details Not Found</h3>
-                            <p>{error || 'The requested property could not be loaded.'}</p>
+                            <h3>{t('propertyDetailPage.detailsNotFound', 'Details Not Found')}</h3>
+                            <p>{error || t('propertyDetailPage.errorRetrieving', 'The requested property could not be loaded.')}</p>
                             <button className="retry-btn" onClick={() => navigate('/browse-properties')}>
-                                Return to Browse
+                                {t('propertyDetailPage.returnToBrowse', 'Return to Browse')}
                             </button>
                         </div>
                     ) : (
@@ -510,7 +510,7 @@ const PropertyDetailPage: React.FC = () => {
                                                 <img src={images[2] || images[0]} alt="Interior View" />
                                                 {images.length > 3 && (
                                                     <div className="more-photos-overlay-box">
-                                                        <span>+ {images.length - 3} photos</span>
+                                                        <span>{t('propertyDetailPage.photosCount', '+ {{count}} photos', { count: images.length - 3 })}</span>
                                                     </div>
                                                 )}
                                             </div>
@@ -547,8 +547,8 @@ const PropertyDetailPage: React.FC = () => {
                                         {/* PROPERTY HEADER & LOCATION */}
                                         <header className="listing-main-header">
                                             <div className="header-badge-section">
-                                                <span className="ref-id-badge">REF: {property.id.slice(-6).toUpperCase()}</span>
-                                                <span className="active-pill"><span className="pulse-dot"></span> Active listing</span>
+                                                <span className="ref-id-badge">{t('propertyDetailPage.refBadge', 'REF: {{ref}}', { ref: property.id.slice(-6).toUpperCase() })}</span>
+                                                <span className="active-pill"><span className="pulse-dot"></span> {t('propertyDetailPage.activeListing', 'Active listing')}</span>
                                             </div>
                                             <h1>{property.title}</h1>
                                             <div className="address-link-row">
@@ -558,31 +558,31 @@ const PropertyDetailPage: React.FC = () => {
                                                     className="inline-maps-redirect"
                                                     onClick={() => openGoogleMapsForProperty(property)}
                                                 >
-                                                    Open Google Maps
+                                                    {t('propertyDetailPage.openGoogleMaps', 'Open Google Maps')}
                                                 </button>
                                             </div>
                                         </header>
 
                                         {/* SPECS ROW */}
                                         <div className="specifications-strip-row">
-                                            <div className="spec-tile"><FaBed /><div><span className="value">{property.beds}</span><span className="label">Bedrooms</span></div></div>
-                                            <div className="spec-tile"><FaBath /><div><span className="value">{property.baths}</span><span className="label">Bathrooms</span></div></div>
-                                            <div className="spec-tile"><FaRulerCombined /><div><span className="value">{property.sqft}</span><span className="label">Sq. Feet</span></div></div>
-                                            <div className="spec-tile"><FaChair /><div><span className="value">{property.furnishing}</span><span className="label">Interior</span></div></div>
+                                            <div className="spec-tile"><FaBed /><div><span className="value">{property.beds}</span><span className="label">{t('propertyDetailPage.bedrooms', 'Bedrooms')}</span></div></div>
+                                            <div className="spec-tile"><FaBath /><div><span className="value">{property.baths}</span><span className="label">{t('propertyDetailPage.bathrooms', 'Bathrooms')}</span></div></div>
+                                            <div className="spec-tile"><FaRulerCombined /><div><span className="value">{property.sqft}</span><span className="label">{t('propertyDetailPage.sqFeet', 'Sq. Feet')}</span></div></div>
+                                            <div className="spec-tile"><FaChair /><div><span className="value">{property.furnishing}</span><span className="label">{t('propertyDetailPage.interior', 'Interior')}</span></div></div>
                                         </div>
                                     </div>
 
                                     {/* PROPERTY OVERVIEW */}
                                     <section className="overview-block-section">
-                                        <h3 className="section-title-header"><FaInfoCircle /> Property Overview</h3>
+                                        <h3 className="section-title-header"><FaInfoCircle /> {t('propertyDetailPage.propertyOverview', 'Property Overview')}</h3>
                                         <p className="overview-p-text">
-                                            {property.description.trim() || `No overview description has been listed for ${property.title}.`}
+                                            {property.description.trim() || t('propertyDetailPage.noOverviewListed', 'No overview description has been listed for {{title}}.', { title: property.title })}
                                         </p>
                                     </section>
 
                                     {/* PREFERENCES / AMENITIES */}
                                     <section className="preferences-chips-section">
-                                        <h3 className="section-title-header">Lease Preferences</h3>
+                                        <h3 className="section-title-header">{t('propertyDetailPage.leasePreferences', 'Lease Preferences')}</h3>
                                         <div className="rules-flex-grid">
                                             {houseRules.map((rule, idx) => (
                                                 <div key={idx} className={`preference-badge-card ${!rule.active ? 'inactive' : ''}`}>
@@ -595,7 +595,7 @@ const PropertyDetailPage: React.FC = () => {
                                     {/* MAP PIN LOCATION OVERVIEW */}
                                     {property.locationLat && property.locationLng && (
                                         <section className="interactive-map-listing-section">
-                                            <h3 className="section-title-header">Listing Location</h3>
+                                            <h3 className="section-title-header">{t('propertyDetailPage.listingLocation', 'Listing Location')}</h3>
                                             <div className="interactive-map-card">
                                                 <MapContainer
                                                     center={[property.locationLat, property.locationLng]}
@@ -612,21 +612,21 @@ const PropertyDetailPage: React.FC = () => {
 
                                     {/* MAINTENANCE RESPONSIBILITIES */}
                                     <section className="maintenance-responsibilities-block">
-                                        <h3 className="section-title-header"><FaWrench /> Maintenance Responsibilities</h3>
+                                        <h3 className="section-title-header"><FaWrench /> {t('propertyDetailPage.maintenanceResponsibilities', 'Maintenance Responsibilities')}</h3>
                                         <div className="maintenance-grid-scroll">
                                             {maintenanceResponsibilities.length > 0 ? (
                                                 maintenanceResponsibilities.map((item, index) => (
                                                     <div className="resp-grid-row" key={index}>
                                                         <span className="area-title">{t('myProperties.maintenanceTypes.' + item.area, item.area)}</span>
                                                         <span className={`resp-badge ${item.responsible_party.toLowerCase()}`}>
-                                                            {item.responsible_party === 'LANDLORD' ? 'Landlord' : 'Tenant'}
+                                                            {item.responsible_party === 'LANDLORD' ? t('propertyDetailPage.landlord', 'Landlord') : t('propertyDetailPage.tenant', 'Tenant')}
                                                         </span>
                                                     </div>
                                                 ))
                                             ) : (
                                                 <div className="resp-grid-row">
-                                                    <span className="area-title">General Repairs & Upkeep</span>
-                                                    <span className="resp-badge tenant font-semibold">TBD</span>
+                                                    <span className="area-title">{t('propertyDetailPage.generalRepairs', 'General Repairs & Upkeep')}</span>
+                                                    <span className="resp-badge tenant font-semibold">{t('propertyDetailPage.tbd', 'TBD')}</span>
                                                 </div>
                                             )}
                                         </div>
@@ -641,10 +641,10 @@ const PropertyDetailPage: React.FC = () => {
                                         <div className="price-bold">
                                             <span className="currency">$</span>
                                             <span className="val">{property.price.toLocaleString()}</span>
-                                            <span className="freq">/mo</span>
+                                            <span className="freq">/{t('propertyDetailPage.pMonth', 'mo')}</span>
                                         </div>
                                         <div className="security-dep-box">
-                                            <FaShieldAlt /> ${property.securityDeposit?.toLocaleString() || '—'} Security Deposit
+                                            <FaShieldAlt /> ${property.securityDeposit?.toLocaleString() || '—'} {t('propertyDetailPage.securityDeposit', 'Security Deposit')}
                                         </div>
                                     </div>
 
@@ -652,15 +652,15 @@ const PropertyDetailPage: React.FC = () => {
                                     {rentalRequest ? (
                                         <div className="active-application-info-group">
                                             <button className="status-indicator-btn" disabled>
-                                                <FaCheckCircle /> {rentalRequest.status === 'PENDING' ? 'Application Sent' : 'Application Evaluated'}
+                                                <FaCheckCircle /> {rentalRequest.status === 'PENDING' ? t('propertyDetailPage.applicationSent', 'Application Sent') : t('propertyDetailPage.applicationEvaluated', 'Application Evaluated')}
                                             </button>
                                             <div className="quick-application-actions">
                                                 <button className="secondary-action-outline-btn" onClick={() => navigate(`/properties/${id}/apply`, { state: { prefillData: rentalRequest, isReadOnly: true } })}>
-                                                    Review Details
+                                                    {t('propertyDetailPage.reviewDetails', 'Review Details')}
                                                 </button>
                                                 {canCancelSentRequest && (
                                                     <button className="secondary-action-outline-btn cancel-btn" onClick={() => setShowCancelPrompt(true)}>
-                                                        Cancel Request
+                                                        {t('propertyDetailPage.cancelRequest', 'Cancel Request')}
                                                     </button>
                                                 )}
                                             </div>
@@ -670,19 +670,19 @@ const PropertyDetailPage: React.FC = () => {
                                         <div className="cta-application-block">
                                             {isRented ? (
                                                 <button className="primary-cta-action-btn disabled" disabled>
-                                                    Property Already Rented
+                                                    {t('propertyDetailPage.propertyRented', 'Property Already Rented')}
                                                 </button>
                                             ) : isUnavailable ? (
                                                 <button className="primary-cta-action-btn disabled" disabled>
-                                                    Temporarily Unavailable
+                                                    {t('propertyDetailPage.tempUnavailable', 'Temporarily Unavailable')}
                                                 </button>
                                             ) : (
                                                 <button className="primary-cta-action-btn" onClick={handleApplyClick}>
-                                                    {isUserGuest ? 'Register to Apply' : 'Apply Now'} <FaArrowRight />
+                                                    {isUserGuest ? t('propertyDetailPage.registerToApply', 'Register to Apply') : t('propertyDetailPage.applyNow', 'Apply Now')} <FaArrowRight />
                                                 </button>
                                             )}
                                             <p className="cta-lock-hint">
-                                                {isRented ? 'This property has been successfully rented' : isUnavailable ? 'This property is temporarily offline' : 'Verified Secure Application Process'}
+                                                {isRented ? t('propertyDetailPage.rentedSuccess', 'This property has been successfully rented') : isUnavailable ? t('propertyDetailPage.tempOffline', 'This property is temporarily offline') : t('propertyDetailPage.secureProcess', 'Verified Secure Application Process')}
                                             </p>
                                         </div>
                                     )}
@@ -710,7 +710,7 @@ const PropertyDetailPage: React.FC = () => {
                                             <div className="owner-meta-info">
                                                 <span className="owner-name-bold">{property.ownerName}</span>
                                                 <span className="owner-status">
-                                                    {property.ownerVerified ? '✓ Verified on HOMi' : 'Property Owner'}
+                                                    {property.ownerVerified ? t('propertyDetailPage.ownerVerified', '✓ Verified on HOMi') : t('propertyDetailPage.propertyOwner', 'Property Owner')}
                                                 </span>
                                             </div>
                                         </button>
@@ -728,10 +728,10 @@ const PropertyDetailPage: React.FC = () => {
                                     {/* ACTION LINKS */}
                                     <div className="secondary-cta-flex-row">
                                         <button className="secondary-action-outline-btn font-semibold" onClick={handleBookVisitClick}>
-                                            <FaCalendarAlt /> Book viewing
+                                            <FaCalendarAlt /> {t('propertyDetailPage.bookViewing', 'Book viewing')}
                                         </button>
                                         <button className="secondary-action-outline-btn font-semibold" onClick={handleOpenReport}>
-                                            <FaRegCompass /> Report listing
+                                            <FaRegCompass /> {t('propertyDetailPage.reportListing', 'Report listing')}
                                         </button>
                                     </div>
 
@@ -740,31 +740,31 @@ const PropertyDetailPage: React.FC = () => {
                                     {/* SHARE & SAVE ACTION GRID */}
                                     <div className="share-and-save-row">
                                         <button className={`social-like-action-btn ${isSaved ? 'liked' : ''}`} onClick={handleSaveClick}>
-                                            <FaHeart /> {isSaved ? 'Saved to Favorites' : 'Save to Favorites'}
+                                            <FaHeart /> {isSaved ? t('propertyDetailPage.savedFavorites', 'Saved to Favorites') : t('propertyDetailPage.saveFavorites', 'Save to Favorites')}
                                         </button>
                                         
                                         <div className="share-trigger-relative-box" ref={shareWrapRef}>
                                             <button className="social-share-action-btn" onClick={() => setShareMenuOpen(!shareMenuOpen)}>
-                                                <FaShareAlt /> Share Listing
+                                                <FaShareAlt /> {t('propertyDetailPage.shareListing', 'Share Listing')}
                                             </button>
                                             {shareMenuOpen && (
                                                 <div className="share-dropdown-card">
                                                     {typeof navigator !== 'undefined' && typeof navigator.share === 'function' ? (
                                                         <button className="share-opt-btn" onClick={() => void tryNativeShare()}>
-                                                            Share using device…
+                                                            {t('propertyDetailPage.shareDevice', 'Share using device…')}
                                                         </button>
                                                     ) : null}
                                                     <button className="share-opt-btn" onClick={() => void copyShareLink()}>
-                                                        Copy link
+                                                        {t('propertyDetailPage.copyLink', 'Copy link')}
                                                     </button>
                                                     <button className="share-opt-btn" onClick={shareWhatsApp}>
-                                                        WhatsApp
+                                                        {t('propertyDetailPage.whatsapp', 'WhatsApp')}
                                                     </button>
                                                     <button className="share-opt-btn" onClick={shareSms}>
-                                                        SMS
+                                                        {t('propertyDetailPage.sms', 'SMS')}
                                                     </button>
                                                     <button className="share-opt-btn" onClick={() => void shareInstagramDm()}>
-                                                        Instagram DM
+                                                        {t('propertyDetailPage.instagramDm', 'Instagram DM')}
                                                     </button>
                                                 </div>
                                             )}
@@ -787,11 +787,11 @@ const PropertyDetailPage: React.FC = () => {
             {showCancelPrompt && (
                 <div className="cancel-prompt-overlay" onClick={() => setShowCancelPrompt(false)}>
                     <div className="cancel-prompt-modal-box" onClick={e => e.stopPropagation()}>
-                        <h3>Cancel Rental Request</h3>
-                        <p>Are you sure you want to cancel your rental request for <strong>"{property?.title}"</strong>?</p>
+                        <h3>{t('propertyDetailPage.cancelTitle', 'Cancel Rental Request')}</h3>
+                        <p>{t('propertyDetailPage.cancelConfirmText', { title: property?.title })}</p>
                         <div className="cancel-prompt-btn-group">
-                            <button className="btn-confirm-cancel" onClick={handleCancelYes}>Yes, Cancel Request</button>
-                            <button className="btn-abort-cancel" onClick={() => setShowCancelPrompt(false)}>No, Keep Request</button>
+                            <button className="btn-confirm-cancel" onClick={handleCancelYes}>{t('propertyDetailPage.cancelYes', 'Yes, Cancel Request')}</button>
+                            <button className="btn-abort-cancel" onClick={() => setShowCancelPrompt(false)}>{t('propertyDetailPage.cancelNo', 'No, Keep Request')}</button>
                         </div>
                     </div>
                 </div>
@@ -802,9 +802,9 @@ const PropertyDetailPage: React.FC = () => {
                 <div className="cancel-prompt-overlay">
                     <div className="cancel-prompt-modal-box text-center">
                         <FaCheckCircle size={40} className="color-green-success" />
-                        <h3>Request Cancelled</h3>
-                        <p>Your rental application has been cancelled successfully.</p>
-                        <button className="btn-close-success" onClick={() => setShowCancelSuccess(false)}>OK</button>
+                        <h3>{t('propertyDetailPage.cancelSuccessTitle', 'Rental Request Cancelled')}</h3>
+                        <p>{t('propertyDetailPage.cancelSuccessText', 'Your rental application has been cancelled successfully.')}</p>
+                        <button className="btn-close-success" onClick={() => setShowCancelSuccess(false)}>{t('propertyDetailPage.cancelSuccessClose', 'Close')}</button>
                     </div>
                 </div>
             )}
@@ -814,32 +814,32 @@ const PropertyDetailPage: React.FC = () => {
                 <div className="cancel-prompt-overlay" onClick={() => setShowReportModal(false)}>
                     <div className="report-modal-box" onClick={e => e.stopPropagation()}>
                         <div className="report-header">
-                            <h3>Report Listing</h3>
+                            <h3>{t('propertyDetailPage.reportTitle', 'Report Listing')}</h3>
                             <button className="btn-close-report" onClick={() => setShowReportModal(false)}><FaTimes /></button>
                         </div>
-                        <p className="report-desc">Help us maintain verified rental experiences. Our moderation team reviews flagged listings within 24 hours.</p>
+                        <p className="report-desc">{t('propertyDetailPage.reportSubtitle', 'Help us maintain verified rental experiences. Our moderation team reviews flagged listings within 24 hours.')}</p>
                         <div className="report-form-group">
-                            <label>Reason for reporting</label>
+                            <label>{t('propertyDetailPage.reportLabelReason', 'Reason for reporting')}</label>
                             <select value={reportReason} onChange={e => setReportReason(e.target.value as ReportListingPayload['reason'])}>
-                                <option value="MISLEADING_INFORMATION">Misleading Information</option>
-                                <option value="SCAM_OR_FRAUD">Scam or Fraudulent Listing</option>
-                                <option value="FAKE_PHOTOS">Inaccurate / Fake Photos</option>
-                                <option value="DUPLICATE_LISTING">Duplicate Property Listing</option>
-                                <option value="UNAVAILABLE_OR_ALREADY_RENTED">Unavailable / Already Rented</option>
-                                <option value="OFFENSIVE_CONTENT">Offensive Listing Content</option>
-                                <option value="OTHER">Other Issue</option>
+                                <option value="MISLEADING_INFORMATION">{t('propertyDetailPage.reasonMisleading', 'Misleading Information')}</option>
+                                <option value="SCAM_OR_FRAUD">{t('propertyDetailPage.reasonFraudulent', 'Scam or Fraudulent Listing')}</option>
+                                <option value="FAKE_PHOTOS">{t('propertyDetailPage.reasonFakePhotos', 'Inaccurate / Fake Photos')}</option>
+                                <option value="DUPLICATE_LISTING">{t('propertyDetailPage.reasonDuplicate', 'Duplicate Property Listing')}</option>
+                                <option value="UNAVAILABLE_OR_ALREADY_RENTED">{t('propertyDetailPage.reasonUnavailable', 'Unavailable / Already Rented')}</option>
+                                <option value="OFFENSIVE_CONTENT">{t('propertyDetailPage.reasonOffensive', 'Offensive Listing Content')}</option>
+                                <option value="OTHER">{t('propertyDetailPage.reasonOther', 'Other Issue')}</option>
                             </select>
                         </div>
                         <div className="report-form-group">
-                            <label>Additional details</label>
+                            <label>{t('propertyDetailPage.reportDetailsLabel', 'Additional details')}</label>
                             <textarea
                                 value={reportDetails}
                                 onChange={e => setReportDetails(e.target.value)}
                                 rows={4}
-                                placeholder="Explain details clearly. (e.g. photos do not match description or landlord asked for down payment before viewing)"
+                                placeholder={t('propertyDetailPage.reportDetailsPlaceholder', 'Explain details clearly. (e.g. photos do not match description or landlord asked for down payment before viewing)')}
                             />
                             <span className={`details-length-hint ${reportDetails.trim().length < 30 ? 'insufficient' : ''}`}>
-                                {reportDetails.trim().length}/30 characters minimum
+                                {t('propertyDetailPage.reportCharCount', '{{count}}/30 characters minimum', { count: reportDetails.trim().length })}
                             </span>
                         </div>
 
@@ -847,9 +847,9 @@ const PropertyDetailPage: React.FC = () => {
                         {reportSuccess && <p className="report-success-msg">{reportSuccess}</p>}
 
                         <div className="report-footer-actions">
-                            <button className="btn-cancel-report" onClick={() => setShowReportModal(false)}>Cancel</button>
+                            <button className="btn-cancel-report" onClick={() => setShowReportModal(false)}>{t('propertyDetailPage.cancelReport', 'Cancel')}</button>
                             <button className="btn-submit-report" onClick={handleSubmitReport} disabled={isSubmittingReport}>
-                                {isSubmittingReport ? 'Submitting...' : 'Submit Report'}
+                                {isSubmittingReport ? t('propertyDetailPage.reportSubmitting', 'Submitting...') : t('propertyDetailPage.reportSubmitBtn', 'Submit Report')}
                             </button>
                         </div>
                     </div>
